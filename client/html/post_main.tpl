@@ -59,7 +59,7 @@
         <% } %>
 
         <% if (ctx.canCreateComments) { %>
-            <h2>Add comment</h2>
+            <a id='add-comment-button'><h3>Add comment</h3></a>
             <div class='comment-form-container'></div>
         <% } %>
     </div>

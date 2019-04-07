@@ -55,7 +55,8 @@ class PostMainView {
         }
 
         this._installSidebar(ctx);
-        this._installCommentForm();
+        const commentForm = this._installCommentForm();
+        this._installAddCommentButton(commentForm);
         this._installComments(ctx.post.comments);
 
         keyboard.bind('e', () => {
@@ -102,11 +103,20 @@ class PostMainView {
         const commentFormContainer = document.querySelector(
             '#content-holder .comment-form-container');
         if (!commentFormContainer) {
-            return;
+            return null;
         }
-
         this.commentControl = new CommentControl(
             commentFormContainer, null, true);
+        return commentFormContainer;
+    }
+
+    _installAddCommentButton(commentForm) {
+        const addCommentButton = document.querySelector('#add-comment-button');
+        if (!addCommentButton || !commentForm) {
+            return;
+        }
+        commentForm.hidden = true; // collapse by default
+        addCommentButton.addEventListener('click', () => {commentForm.hidden = !commentForm.hidden});
     }
 
     _installComments(comments) {
