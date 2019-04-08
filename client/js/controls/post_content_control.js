@@ -27,6 +27,9 @@ class PostContentControl {
 
         this._post.addEventListener(
             'changeContent', e => this._evtPostContentChange(e));
+
+        // Always disable overlay, because I'm not going to use notes
+        this.disableOverlay();
     }
 
     disableOverlay() {
