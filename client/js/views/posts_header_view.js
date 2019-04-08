@@ -120,6 +120,24 @@ class BulkTagEditor extends BulkEditor {
     }
 }
 
+class BulkAddRelationEditor extends BulkEditor {
+    constructor(hostNode) {
+        super(hostNode);
+    }
+
+    _evtOpenLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(true);
+        this.dispatchEvent(new CustomEvent('open', {detail: {}}));
+    }
+
+    _evtCloseLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(false);
+        this.dispatchEvent(new CustomEvent('close', {detail: {}}));
+    }
+}
+
 class PostsHeaderView extends events.EventTarget {
     constructor(ctx) {
         super();
@@ -159,6 +177,12 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkSafetyEditor);
         }
 
+        if (this._bulkAddRelationNode) {
+            this._bulkAddRelationEditor = new BulkAddRelationEditor(
+                this._bulkAddRelationNode);
+            this._bulkEditors.push(this._bulkAddRelationEditor);
+        }
+
         for (let editor of this._bulkEditors) {
             editor.addEventListener('submit', e => {
                 this._navigate();
@@ -177,6 +201,8 @@ class PostsHeaderView extends events.EventTarget {
             this._openBulkEditor(this._bulkTagEditor);
         } else if (ctx.parameters.safety && this._bulkSafetyEditor) {
             this._openBulkEditor(this._bulkSafetyEditor);
+        } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
+            this._openBulkEditor(this._bulkAddRelationEditor);
         }
     }
 
@@ -202,6 +228,10 @@ class PostsHeaderView extends events.EventTarget {
 
     get _bulkEditSafetyNode() {
         return this._hostNode.querySelector('.bulk-edit-safety');
+    }
+
+    get _bulkAddRelationNode() {
+        return this._hostNode.querySelector('.bulk-add-relation');
     }
 
     _openBulkEditor(editor) {
@@ -269,6 +299,9 @@ class PostsHeaderView extends events.EventTarget {
         parameters.safety = (
             this._bulkSafetyEditor &&
             this._bulkSafetyEditor.opened ? '1' : null);
+        parameters.relations = (
+            this._bulkAddRelationEditor &&
+            this._bulkAddRelationEditor.opened ? this._ctx.parameters.relations || ' ' : null);
         this.dispatchEvent(
             new CustomEvent('navigate', {detail: {parameters: parameters}}));
     }

@@ -36,7 +36,7 @@ class PostListController {
             canBulkEditTags: api.hasPrivilege('posts:bulk-edit:tags'),
             canBulkEditSafety: api.hasPrivilege('posts:bulk-edit:safety'),
             bulkEdit: {
-                tags: this._bulkEditTags
+                tags: this._bulkEditTags,
             },
         });
         this._headerView.addEventListener(
@@ -51,6 +51,10 @@ class PostListController {
 
     get _bulkEditTags() {
         return (this._ctx.parameters.tag || '').split(/\s+/).filter(s => s);
+    }
+
+    get _bulkEditRelationsIds() {
+        return (this._ctx.parameters.relations || '').split(/\s+/).filter(s => s).map(id => parseInt(id));
     }
 
     _evtNavigate(e) {
@@ -80,7 +84,38 @@ class PostListController {
         e.detail.post.save().catch(error => window.alert(error.message));
     }
 
+    _evtAddRelation(e) {
+        let addedPost = e.detail.post;
+        // If we're just starting to build this instance of relations, use the first post's list:
+        let relations = this._bulkEditRelationsIds || addedPost.relations;
+        for (let relationId of relations) {
+            addedPost.relations.push(relationId);
+        }
+        // Only save the updated post, the relationship will propagate to others automatically
+        addedPost.save().catch(error => window.alert(error.message));
+        relations.push(addedPost.id);
+        this._updateRelationsForBulkEdit(relations);
+
+    }
+
+    _evtRemoveRelation(e) {
+        let removedPost = e.detail.post;
+        let relations = this._bulkEditRelationsIds;
+        removedPost.relations = removedPost.relations
+            .filter(id => !relations.some(relationId => relationId == id));
+        // Only save the updated post, the relationship will propagate to others automatically
+        removedPost.save().catch(error => window.alert(error.message));
+        relations = relations.filter(id => id != removedPost.id);
+        this._updateRelationsForBulkEdit(relations);
+    }
+
+    _updateRelationsForBulkEdit(relations) {
+        //Whitespace instead of empty string so that it stays part of the query:
+        this._ctx.parameters.relations = relations.join(' ') || ' ';
+    }
+
     _syncPageController() {
+        console.log('Relations in post_list_controller: ' + this._ctx.parameters.relations);
         this._pageController.run({
             parameters: this._ctx.parameters,
             defaultLimit: parseInt(settings.get().postsPerPage),
@@ -101,6 +136,7 @@ class PostListController {
                         api.hasPrivilege('posts:bulk-edit:safety'),
                     bulkEdit: {
                         tags: this._bulkEditTags,
+                        relations: this._ctx.parameters.relations,
                     },
                 });
                 const view = new PostsPageView(pageCtx);
@@ -108,6 +144,10 @@ class PostListController {
                 view.addEventListener('untag', e => this._evtUntag(e));
                 view.addEventListener(
                     'changeSafety', e => this._evtChangeSafety(e));
+                view.addEventListener(
+                    'addRelation', e => this._evtAddRelation(e));
+                view.addEventListener(
+                    'removeRelation', e => this._evtRemoveRelation(e));
                 return view;
             },
         });

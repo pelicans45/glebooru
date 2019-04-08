@@ -30,6 +30,12 @@ class PostsPageView extends events.EventTarget {
                     'click', e => this._evtBulkEditTagsClick(e, post));
             }
 
+            const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
+            if (relationFlipperNode) {
+                relationFlipperNode.addEventListener(
+                    'click', e => this._evtBulkAddRelationClick(e, post));
+            }
+
             const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
             if (safetyFlipperNode) {
                 for (let linkNode of safetyFlipperNode.querySelectorAll('a')) {
@@ -54,6 +60,10 @@ class PostsPageView extends events.EventTarget {
         return listItemNode.querySelector('.safety-flipper');
     }
 
+    _getRelationFlipperNode(listItemNode) {
+        return listItemNode.querySelector('.relation-flipper');
+    }
+
     _evtPostChange(e) {
         const listItemNode = this._postIdToListItemNode[e.detail.post.id];
         for (let node of listItemNode.querySelectorAll('[data-disabled]')) {
@@ -72,6 +82,19 @@ class PostsPageView extends events.EventTarget {
         this.dispatchEvent(
             new CustomEvent(
                 linkNode.classList.contains('tagged') ? 'untag' : 'tag',
+                {detail: {post: post}}));
+    }
+
+    _evtBulkAddRelationClick(e, post) {
+        e.preventDefault();
+        const linkNode = e.target;
+        if (linkNode.getAttribute('data-disabled')) {
+            return;
+        }
+        linkNode.setAttribute('data-disabled', true);
+        this.dispatchEvent(
+            new CustomEvent(
+                linkNode.classList.contains('related') ? 'removeRelation' : 'addRelation',
                 {detail: {post: post}}));
     }
 
@@ -111,6 +134,12 @@ class PostsPageView extends events.EventTarget {
                     const safety = linkNode.getAttribute('data-safety');
                     linkNode.classList.toggle('active', post.safety == safety);
                 }
+            }
+
+            const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
+            if (relationFlipperNode) {
+                let related = this._ctx.parameters.relations.includes(post.id);
+                relationFlipperNode.classList.toggle('related', related);
             }
         }
     }

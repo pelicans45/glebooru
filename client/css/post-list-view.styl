@@ -84,6 +84,31 @@
                     &[data-disabled]
                         background: rgba(200, 200, 200, 0.7)
 
+                .relation-flipper
+                    display: inline-block
+                    padding: 0.5em
+                    box-sizing: border-box
+                    border: 0
+                    &:after
+                        display: inline-block
+                        width: 1em
+                        height: 1em
+                        text-align: center
+                        line-height: 1em
+                        font-size: 1.6em
+                    &.related
+                        background: rgba(0, 230, 0, 0.7)
+                        &:after
+                            color: white
+                            content: '☑'
+                    &:not(.related)
+                        background: rgba(245, 0, 0, 0.7)
+                        &:after
+                            color: white
+                            content: '☐'
+                    &[data-disabled]
+                        background: rgba(200, 200, 200, 0.7)
+
                 .safety-flipper a
                     display: inline-block
                     margin: 0.1em
@@ -195,6 +220,10 @@
         .hint
             margin-right: 1em
     .bulk-edit-safety
+        .append
+            @media (max-width: 1000px)
+                margin-left: 0
+    .bulk-add-relations
         .append
             @media (max-width: 1000px)
                 margin-left: 0

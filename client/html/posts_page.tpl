@@ -42,6 +42,10 @@
                             <a href class='tag-flipper'>
                             </a>
                         <% } %>
+                        <% if (ctx.parameters && ctx.parameters.relations) { %>
+                            <a href class='relation-flipper'>
+                            </a>
+                        <% } %>
                         <% if (ctx.canBulkEditSafety && ctx.parameters && ctx.parameters.safety) { %>
                             <span class='safety-flipper'>
                                 <% for (let safety of ['safe', 'sketchy', 'unsafe']) { %>

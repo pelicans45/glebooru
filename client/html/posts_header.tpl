@@ -31,4 +31,9 @@
             %><a href class='mousetrap button append close'>Stop editing safety</a><%
         %></form><%
     %><% } %><%
+    %><!--TODO: create permission--><%
+    %><form class='horizontal bulk-edit bulk-add-relation'><%
+        %><a href class='mousetrap button append open'>Mass add relation</a><%
+        %><a href class='mousetrap button append close'>Stop adding relation</a><%
+    %></form><%
 %></div>
