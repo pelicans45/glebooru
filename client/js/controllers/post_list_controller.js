@@ -115,7 +115,6 @@ class PostListController {
     }
 
     _syncPageController() {
-        console.log('Relations in post_list_controller: ' + this._ctx.parameters.relations);
         this._pageController.run({
             parameters: this._ctx.parameters,
             defaultLimit: parseInt(settings.get().postsPerPage),
@@ -126,7 +125,7 @@ class PostListController {
             },
             requestPage: (offset, limit) => {
                 return PostList.search(
-                    this._ctx.parameters.query, offset, limit, fields);
+                    this._ctx.parameters.query, offset, limit, fields, this._ctx.parameters.cachenumber);
             },
             pageRenderer: pageCtx => {
                 Object.assign(pageCtx, {

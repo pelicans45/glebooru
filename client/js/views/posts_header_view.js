@@ -163,7 +163,7 @@ class PostsHeaderView extends events.EventTarget {
                 'click', e => this._evtSafetyButtonClick(e));
         }
         this._formNode.addEventListener('submit', e => this._evtFormSubmit(e));
-        this._randomButtonNode.addEventListener('click', e => this._evtRandomButtonClick(e));
+        this._randomizeButtonNode.addEventListener('click', e => this._evtRandomizeButtonClick(e));
 
         this._bulkEditors = [];
         if (this._bulkEditTagsNode) {
@@ -218,8 +218,8 @@ class PostsHeaderView extends events.EventTarget {
         return this._hostNode.querySelector('form [name=search-text]');
     }
 
-    get _randomButtonNode() {
-        return this._hostNode.querySelector('#random-button');
+    get _randomizeButtonNode() {
+        return this._hostNode.querySelector('#randomize-button');
     }
 
     get _bulkEditTagsNode() {
@@ -277,17 +277,21 @@ class PostsHeaderView extends events.EventTarget {
         e.preventDefault();
         this._navigate();
     }
-    _evtRandomButtonClick(e) {
+    _evtRandomizeButtonClick(e) {
         e.preventDefault();
         if (!this._queryInputNode.value.includes('sort:random')) {
             this._queryInputNode.value += ' sort:random';
         }
+        this._ctx.parameters.cachenumber = Math.round(Math.random() * 1000);
         this._navigate();
     }
 
     _navigate() {
         this._autoCompleteControl.hide();
-        let parameters = {query: this._queryInputNode.value};
+        let parameters = {
+            query: this._queryInputNode.value,
+            cachenumber: this._ctx.parameters.cachenumber,
+        };
         parameters.offset = parameters.query === this._ctx.parameters.query ?
             this._ctx.parameters.offset : 0;
         if (this._bulkTagEditor && this._bulkTagEditor.opened) {

@@ -4,7 +4,7 @@
         %><wbr/><%
         %><input class='mousetrap' type='submit' value='Search'/><%
         %><wbr/><%
-        %><button id="random-button" style="padding:0.2em; margin-right:0.25em; margin-bottom:0.25em;"><%
+        %><button id="randomize-button" style="padding:0.2em; margin-right:0.25em; margin-bottom:0.25em;"><%
             %><i class="fa fa-random" style="vertical-align: middle"><%
                 %></button><%
         %><% if (ctx.enableSafety) { %><%
