@@ -37,7 +37,7 @@ class Executor:
     def get_around(
             self,
             query_text: str,
-            entity_id: int) -> Tuple[model.Base, model.Base]:
+            entity_id: int) -> Tuple[model.Base, model.Base, model.Base]:
         search_query = self.parser.parse(query_text)
         self.config.on_search_query_parsed(search_query)
         filter_query = (
@@ -58,9 +58,15 @@ class Executor:
             .order_by(None)
             .order_by(sa.func.abs(self.config.id_column - entity_id).asc())
             .limit(1))
+        # random post
+        if 'sort:random' not in query_text:
+            query_text = query_text + ' sort:random'
+        count, random_entities = self.execute(query_text, 0, 1)
         return (
             prev_filter_query.one_or_none(),
-            next_filter_query.one_or_none())
+            next_filter_query.one_or_none(),
+            random_entities[0] if random_entities else None
+        )
 
     def get_around_and_serialize(
         self,
@@ -73,6 +79,7 @@ class Executor:
         return {
             'prev': serializer(entities[0]),
             'next': serializer(entities[1]),
+            'random': serializer(entities[2]),
         }
 
     def execute(
