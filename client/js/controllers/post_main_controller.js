@@ -41,6 +41,7 @@ class PostMainController extends BasePostController {
                 editMode: editMode,
                 prevPostId: aroundResponse.prev ? aroundResponse.prev.id : null,
                 nextPostId: aroundResponse.next ? aroundResponse.next.id : null,
+                randomPostId: aroundResponse.random ? aroundResponse.random.id : null,
                 canEditPosts: api.hasPrivilege('posts:edit'),
                 canDeletePosts: api.hasPrivilege('posts:delete'),
                 canFeaturePosts: api.hasPrivilege('posts:feature'),

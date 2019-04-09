@@ -29,6 +29,20 @@
                     <span class='vim-nav-hint'>Next post &gt;</span>
                 </a>
             </article>
+            <article class='random-post'>
+                <% if (ctx.randomPostId) { %>
+                    <% if (ctx.editMode) { %>
+                        <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, ctx.parameters) %>'>
+                    <% } else { %>
+                        <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, ctx.parameters) %>'>
+                    <% } %>
+                <% } else { %>
+                    <a rel='next' class='inactive'>
+                <% } %>
+                    <i class='fa fa-random'></i>
+                    <span class='vim-nav-hint'>Random post</span>
+                </a>
+            </article>
             <article class='edit-post'>
                 <% if (ctx.editMode) { %>
                     <a href='<%= ctx.getPostUrl(ctx.post.id, ctx.parameters) %>'>
