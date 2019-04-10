@@ -185,48 +185,48 @@
         vertical-align: middle
         font-size: 0.95em
         color: $inactive-link-color
-    .bulk-edit
-        &:not(.opened)
-            .close
+    .bulk-edit-block
+        display: contents
+        @media (max-width: 1000px)
+            form
+                &:not(.opened)
+                    display: inline-block
+                &.opened
+                    display: block
+            input[type=submit]
+                margin-right: 1em
+            .append
+                margin-left: 0
+                margin-right: 1em
+        .bulk-edit
+            &:not(.opened)
+                .close
+                    display: none
+            &.opened
+                .open
+                    display: none
+            &.hidden
                 display: none
-        &.opened
-            .open
-                display: none
-        &.hidden
-            display: none
-    .bulk-edit-tags
-        &.opened
-            .hint
+        .bulk-edit-tags
+            &.opened
+                .hint
+                    @media (max-width: 1000px)
+                        display: block
+                        margin-bottom: 0.5em
+            &:not(.opened)
+                [type=text],
+                .start
+                    display: none
+                .hint
+                    display: none
+            input[name=tag]
+                width: 12em
                 @media (max-width: 1000px)
                     display: block
+                    width: 100%
                     margin-bottom: 0.5em
-        &:not(.opened)
-            [type=text],
-            .start
-                display: none
             .hint
-                display: none
-        input[name=tag]
-            width: 12em
-            @media (max-width: 1000px)
-                display: block
-                width: 100%
-                margin-bottom: 0.5em
-        .append
-            &.open,
-            &.hint
-                @media (max-width: 1000px)
-                    margin-left: 0
-        .hint
-            margin-right: 1em
-    .bulk-edit-safety
-        .append
-            @media (max-width: 1000px)
-                margin-left: 0
-    .bulk-add-relations
-        .append
-            @media (max-width: 1000px)
-                margin-left: 0
+                margin-right: 1em
 
     .safety
         margin-right: 0.25em
@@ -245,3 +245,10 @@
             border-color: @background-color
             &.disabled
                 background-color: alpha(@background-color, 0.15)
+
+    .icon-button
+        padding: 0.2em
+        margin-right: 0.25em
+        margin-bottom: 0.25em
+        i
+            vertical-align: middle
