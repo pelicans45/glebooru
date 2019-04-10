@@ -11,10 +11,10 @@ $cancel-button-color = tomato
         text-align: left
 
         &.inactive input[type=submit],
-        &.inactive .skip-duplicates,
+        &.inactive .control-checkbox,
         &.inactive #common-tags,
         &.uploading input[type=submit],
-        &.uploading .skip-duplicates,
+        &.uploading .control-checkbox,
         &:not(.uploading) .cancel
             display: none
 
@@ -39,7 +39,7 @@ $cancel-button-color = tomato
         &:focus
             border: 2px solid $text-color
 
-    .skip-duplicates
+    .control-checkbox
         margin-left: 1em
 
     form>.messages

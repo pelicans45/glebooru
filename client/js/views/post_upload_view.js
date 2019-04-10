@@ -171,6 +171,11 @@ class PostUploadView extends events.EventTarget {
         this._contentFileDropper.addEventListener(
             'urladd', e => this._evtUrlsAdded(e));
 
+        this._skipDuplicatesCheckboxNode.addEventListener(
+            'change', e => this._evtSkipDuplicatesCheck(e, this._skipDuplicatesCheckboxNode.checked)
+        );
+        this._copyTagsToOriginalsSpanNode.hidden = true;
+
         this._cancelButtonNode.addEventListener(
             'click', e => this._evtCancelButtonClick(e));
         this._formNode.addEventListener('submit', e => this._evtFormSubmit(e));
@@ -275,6 +280,15 @@ class PostUploadView extends events.EventTarget {
         this.addUploadables(e.detail.urls.map(url => new Url(url)));
     }
 
+    _evtSkipDuplicatesCheck(e, checked) {
+        if (checked) {
+            this._copyTagsToOriginalsSpanNode.hidden = false;
+        } else {
+            this._copyTagsToOriginalsCheckboxNode.checked = false;
+            this._copyTagsToOriginalsSpanNode.hidden = true;
+        }
+    }
+
     _evtCancelButtonClick(e) {
         e.preventDefault();
         this._emit('cancel');
@@ -309,8 +323,8 @@ class PostUploadView extends events.EventTarget {
 
         uploadable.tags = [];
         if (this._commonTagsInputNode) {
-            var tags = this._commonTagsInputNode.value.split(' ');
-            tags = tags.filter(t => t != "");
+            let tags = this._commonTagsInputNode.value.split(' ');
+            tags = tags.filter(t => t);
             uploadable.tags = uploadable.tags.concat(tags);
         }
         
@@ -318,10 +332,16 @@ class PostUploadView extends events.EventTarget {
         for (let [i, lookalike] of uploadable.lookalikes.entries()) {
             let lookalikeNode = rowNode.querySelector(
                 `.lookalikes li:nth-child(${i + 1})`);
-            if (lookalikeNode.querySelector('[name=copy-tags]').checked) {
-                uploadable.tags = uploadable.tags.concat(lookalike.post.tagNames);
+            if ((lookalikeNode.querySelector('[name=copy-tags]') || '').checked) {
+                if (lookalike.distance === 0.0) {
+                    // found exact match, copy tags to it instead
+                    uploadable.foundOriginal = lookalike.post;
+                } else {
+                    uploadable.tags = uploadable.tags.concat(lookalike.post.tagNames);
+                    uploadable.foundOriginal = undefined;
+                }
             }
-            if (lookalikeNode.querySelector('[name=add-relation]').checked) {
+            if ((lookalikeNode.querySelector('[name=add-relation]') || '').checked) {
                 uploadable.relations.push(lookalike.post.id);
             }
         }
@@ -363,6 +383,7 @@ class PostUploadView extends events.EventTarget {
                 {detail: {
                     uploadables: this._uploadables,
                     skipDuplicates: this._skipDuplicatesCheckboxNode.checked,
+                    copyTagsToOriginals: this._copyTagsToOriginalsCheckboxNode.checked,
                 }}));
     }
 
@@ -408,6 +429,14 @@ class PostUploadView extends events.EventTarget {
 
     get _skipDuplicatesCheckboxNode() {
         return this._hostNode.querySelector('form [name=skip-duplicates]');
+    }
+
+    get _copyTagsToOriginalsSpanNode() {
+        return this._hostNode.querySelector('.copy-tags-to-originals');
+    }
+
+    get _copyTagsToOriginalsCheckboxNode() {
+        return this._hostNode.querySelector('form [name=copy-tags-to-originals]');
     }
 
     get _submitButtonNode() {

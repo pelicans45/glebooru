@@ -59,7 +59,7 @@ class PostUploadController {
         e.detail.uploadables.reduce(
             (promise, uploadable) =>
                 promise.then(() => this._uploadSinglePost(
-                    uploadable, e.detail.skipDuplicates)),
+                    uploadable, e.detail.skipDuplicates, e.detail.copyTagsToOriginals)),
             Promise.resolve())
                 .then(() => {
                     this._view.clearMessages();
@@ -86,7 +86,7 @@ class PostUploadController {
                 });
     }
 
-    _uploadSinglePost(uploadable, skipDuplicates) {
+    _uploadSinglePost(uploadable, skipDuplicates, copyTagsToOriginals) {
         progress.start();
         let reverseSearchPromise = Promise.resolve();
         if (!uploadable.lookalikesConfirmed) {
@@ -99,13 +99,18 @@ class PostUploadController {
             if (searchResult) {
                 // notify about exact duplicate
                 if (searchResult.exactPost) {
-                    if (skipDuplicates) {
+                    if (copyTagsToOriginals) {
+                        return this._copyTagsToOriginalAndSave(uploadable, searchResult.exactPost);
+                    } else if (skipDuplicates) {
                         this._view.removeUploadable(uploadable);
                         return Promise.resolve();
                     } else {
                         let error = new Error('Post already uploaded ' +
                             `(@${searchResult.exactPost.id})`);
                         error.uploadable = uploadable;
+                        error.similarPosts = [
+                            {distance: 0, post: searchResult.exactPost}
+                        ];
                         return Promise.reject(error);
                     }
                 }
@@ -119,6 +124,8 @@ class PostUploadController {
                     error.similarPosts = searchResult.similarPosts;
                     return Promise.reject(error);
                 }
+            } else if (uploadable.foundOriginal) {
+                return this._copyTagsToOriginalAndSave(uploadable, uploadable.foundOriginal);
             }
 
             // no duplicates, proceed with saving
@@ -152,6 +159,17 @@ class PostUploadController {
         post.relations = uploadable.relations;
         post.newContent = uploadable.url || uploadable.file;
         return post;
+    }
+
+    _copyTagsToOriginalAndSave(uploadable, original) {
+        uploadable.tags.map(tag => original.tags.addByName(tag));
+        let savePromise = original.save()
+            .then(() => {
+                this._view.removeUploadable(uploadable);
+                return Promise.resolve();
+            });
+        this._lastCancellablePromise = savePromise;
+        return savePromise;
     }
 }
 

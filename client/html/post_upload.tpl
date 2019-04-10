@@ -5,10 +5,18 @@
         <div class='control-strip'>
             <input type='submit' value='Upload all' class='submit'/>
 
-            <span class='skip-duplicates'>
+            <span class='skip-duplicates control-checkbox'>
                 <%= ctx.makeCheckbox({
                     text: 'Skip duplicates',
                     name: 'skip-duplicates',
+                    checked: false,
+                }) %>
+            </span>
+
+            <span class='copy-tags-to-originals control-checkbox'>
+                <%= ctx.makeCheckbox({
+                    text: 'Copy tags to originals',
+                    name: 'copy-tags-to-originals',
                     checked: false,
                 }) %>
             </span>

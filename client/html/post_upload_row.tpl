@@ -92,9 +92,13 @@
                                 <%- Math.round((1-lookalike.distance) * 100) %>% match
                             </div>
                             <div class='controls'>
-                                <%= ctx.makeCheckbox({text: 'Copy tags', name: 'copy-tags'}) %>
-                                <br/>
-                                <%= ctx.makeCheckbox({text: 'Add relation', name: 'add-relation'}) %>
+                                <% if (lookalike.distance > 0) { %>
+                                    <%= ctx.makeCheckbox({text: 'Copy tags', name: 'copy-tags'}) %>
+                                    <br/>
+                                    <%= ctx.makeCheckbox({text: 'Add relation', name: 'add-relation'}) %>
+                                <% } else { %>
+                                    <%= ctx.makeCheckbox({text: 'Copy tags', name: 'copy-tags'}) %>
+                                <% } %>
                             </div>
                         </li>
                     <% } %>
