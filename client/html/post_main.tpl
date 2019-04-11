@@ -63,18 +63,32 @@
         </nav>
 
         <div class='sidebar-container'></div>
+
+        <% if (screen.width <= 1000) { %>
+            <div class='comments-panel'>
+                <% if (ctx.canListComments) { %>
+                    <div class='comments-container'></div>
+                <% } %>
+                <% if (ctx.canCreateComments) { %>
+                    <a id='add-comment-button'><h3>Add comment</h3></a>
+                    <div class='comment-form-container'></div>
+                <% } %>
+            </div>
+        <% } %>
     </aside>
 
     <div class='content'>
         <div class='post-container'></div>
 
-        <% if (ctx.canListComments) { %>
-            <div class='comments-container'></div>
-        <% } %>
+        <% if (screen.width > 1000) { %>
+            <% if (ctx.canListComments) { %>
+                <div class='comments-container'></div>
+            <% } %>
 
-        <% if (ctx.canCreateComments) { %>
-            <a id='add-comment-button'><h3>Add comment</h3></a>
-            <div class='comment-form-container'></div>
+            <% if (ctx.canCreateComments) { %>
+                <a id='add-comment-button'><h3>Add comment</h3></a>
+                <div class='comment-form-container'></div>
+            <% } %>
         <% } %>
     </div>
 </div>

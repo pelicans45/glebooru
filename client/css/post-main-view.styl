@@ -34,13 +34,14 @@
                     font-size: 140%
                 text-align: center
             @media (max-width: 800px)
-                margin-top: 2em
+                margin-top: 1em
 
     >.content
         width: 100%
 
     .post-container
-        margin-bottom: 2em
+        @media (min-width: 800px)
+            margin-bottom: 2em
 
         .post-content
             margin: 0
@@ -53,11 +54,16 @@
             min-width: 100%
             max-width: 0
             margin-right: 0
+            >.sidebar-container,
+            .comments-panel
+                padding: 1em
+                padding-top: 0
         >.content
             order: 1
 
 
 .post-view .readonly-sidebar
+    display: grid
     .details
         i
             margin-right: 0.6em
@@ -100,6 +106,10 @@
                 display: inline-block
                 width: 2em
 
+        @media (max-width: 800px)
+            order: 2
+            margin-top: 1em
+
     .relations
         margin-top: 2em
         h1
@@ -116,6 +126,10 @@
         margin-top: 2em
         h1
             margin-bottom: 0.5em
+        @media (max-width: 800px)
+            margin-top: 0
+            h1
+                display: none
 
 .post-view .edit-sidebar
     .expander-content
