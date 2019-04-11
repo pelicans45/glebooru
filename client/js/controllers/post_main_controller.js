@@ -156,6 +156,9 @@ class PostMainController extends BasePostController {
             .then(() => {
                 this._view.sidebarControl.showSuccess('Post saved.');
                 // now save the new tags with categories
+                if (!e.detail.newTags) {
+                    return Promise.resolve();
+                }
                 let tagPromises = [];
                 for (let newTag of e.detail.newTags) {
                     // load the tag that was created during updating the post

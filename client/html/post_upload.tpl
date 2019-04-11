@@ -21,7 +21,9 @@
                 }) %>
             </span>
 
-            <%= ctx.makeTextInput({placeholder: 'Common tags', id: 'common-tags', name: 'common-tags', style: 'margin-top:1em;'}) %>
+            <div class='tags'>
+                <%= ctx.makeTextInput({}) %>
+            </div>
 
             <input type='button' value='Cancel' class='cancel'/>
         </div>

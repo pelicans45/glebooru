@@ -55,6 +55,7 @@ class PostUploadController {
     _evtSubmit(e) {
         this._view.disableForm();
         this._view.clearMessages();
+        const tagErrors = []; // to be displayed after all uploads
 
         e.detail.uploadables.reduce(
             (promise, uploadable) =>
@@ -62,10 +63,36 @@ class PostUploadController {
                     uploadable, e.detail.skipDuplicates, e.detail.copyTagsToOriginals)),
             Promise.resolve())
                 .then(() => {
+                    // now save the new tags with categories
+                    //TODO: re-use this code in post_main_controller.js
+                    if (!e.detail.newTags) {
+                        return Promise.resolve();
+                    }
+                    let tagPromises = [];
+                    for (let newTag of e.detail.newTags) {
+                        // load the tag that was created during updating the post
+                        tagPromises.push(
+                            Tag.get(newTag.names[0]).then(tag => {
+                                    tag.category = newTag.category;
+                                    return tag.save();
+                                }
+                            ).then(() => {
+                                e.detail.newTags.removeByName(newTag.names[0]);
+                            }, error => {
+                                tagErrors.push(error.message);
+                            })
+                        );
+                    }
+                    return Promise.all(tagPromises);
+                })
+                .then(() => {
                     this._view.clearMessages();
                     misc.disableExitConfirmation();
                     const ctx = router.show(uri.formatClientLink('posts'));
                     ctx.controller.showSuccess('Posts uploaded.');
+                    for (let tagError of tagErrors) {
+                        ctx.controller.showError(tagError);
+                    }
                 }, error => {
                     if (error.uploadable) {
                         if (error.similarPosts) {

@@ -3,6 +3,8 @@
 const events = require('../events.js');
 const views = require('../util/views.js');
 const FileDropperControl = require('../controls/file_dropper_control.js');
+const TagList = require('../models/tag_list.js');
+const TagInputControl = require('../controls/tag_input_control.js');
 
 const template = views.getTemplate('post-upload');
 const rowTemplate = views.getTemplate('post-upload-row');
@@ -181,14 +183,9 @@ class PostUploadView extends events.EventTarget {
         this._formNode.addEventListener('submit', e => this._evtFormSubmit(e));
         this._formNode.classList.add('inactive');
 
-        if (this._commonTagsInputNode) {
-            this._autoCompleteControl = new TagAutoCompleteControl(
-                this._commonTagsInputNode,
-                {
-                    confirm: tag =>
-                        this._autoCompleteControl.replaceSelectedText(
-                            misc.escapeSearchTerm(tag.names[0]), true),
-                });
+        if (this._tagInputNode) {
+            this._tagControl = new TagInputControl(
+                this._tagInputNode, new TagList(), 'Type common tags…');
         }
     }
 
@@ -322,10 +319,8 @@ class PostUploadView extends events.EventTarget {
         }
 
         uploadable.tags = [];
-        if (this._commonTagsInputNode) {
-            let tags = this._commonTagsInputNode.value.split(' ');
-            tags = tags.filter(t => t);
-            uploadable.tags = uploadable.tags.concat(tags);
+        if (this._tagControl) {
+            uploadable.tags = this._tagControl.tags.map(tag => tag.names[0]);
         }
         
         uploadable.relations = [];
@@ -382,6 +377,7 @@ class PostUploadView extends events.EventTarget {
                 eventType,
                 {detail: {
                     uploadables: this._uploadables,
+                    newTags: this._tagInputNode ? this._tagControl.newTags : undefined,
                     skipDuplicates: this._skipDuplicatesCheckboxNode.checked,
                     copyTagsToOriginals: this._copyTagsToOriginalsCheckboxNode.checked,
                 }}));
@@ -451,8 +447,8 @@ class PostUploadView extends events.EventTarget {
         return this._formNode.querySelector('.dropper-container');
     }
 
-    get _commonTagsInputNode() {
-        return this._formNode.querySelector('form [name=common-tags');
+    get _tagInputNode() {
+        return this._formNode.querySelector('.tags input');
     }
 }
 

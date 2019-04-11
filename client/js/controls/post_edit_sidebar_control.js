@@ -37,7 +37,6 @@ class PostEditSidebarControl extends events.EventTarget {
             canEditPostFlags: api.hasPrivilege('posts:edit:flags'),
             canEditPostContent: api.hasPrivilege('posts:edit:content'),
             canEditPostThumbnail: api.hasPrivilege('posts:edit:thumbnail'),
-            canEditPostSource : api.hasPrivilege('posts:edit:source'),
             canCreateAnonymousPosts: api.hasPrivilege('posts:create:anonymous'),
             canDeletePosts: api.hasPrivilege('posts:delete'),
             canFeaturePosts: api.hasPrivilege('posts:feature'),
@@ -338,7 +337,9 @@ class PostEditSidebarControl extends events.EventTarget {
                     misc.splitByWhitespace(this._tagInputNode.value) :
                     undefined,
 
-                newTags: this._tagControl.newTags,
+                newTags: this._tagControl ?
+                    this._tagControl.newTags :
+                    undefined,
 
                 relations: this._relationsInputNode ?
                     misc.splitByWhitespace(this._relationsInputNode.value)

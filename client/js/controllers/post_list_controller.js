@@ -49,6 +49,10 @@ class PostListController {
         this._pageController.showSuccess(message);
     }
 
+    showError(message) {
+        this._pageController.showError(message);
+    }
+
     get _bulkEditTags() {
         return (this._ctx.parameters.tag || '').split(/\s+/).filter(s => s);
     }

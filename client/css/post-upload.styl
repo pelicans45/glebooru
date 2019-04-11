@@ -12,7 +12,7 @@ $cancel-button-color = tomato
 
         &.inactive input[type=submit],
         &.inactive .control-checkbox,
-        &.inactive #common-tags,
+        &.inactive .tags,
         &.uploading input[type=submit],
         &.uploading .control-checkbox,
         &:not(.uploading) .cancel
@@ -25,9 +25,18 @@ $cancel-button-color = tomato
             padding: 2em
             small
                 font-size: 60%
-    
-    label[for=common-tags]
-        display: none !important
+    // Make the inputs aligned:
+    .url-holder
+        input
+            flex: 8
+        button
+            flex: 1
+    .tags
+        margin-top: 1em
+        input
+            flex: 8
+        button
+            flex: 1
 
     input[type=submit]
         margin-top: 1em

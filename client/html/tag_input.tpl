@@ -1,6 +1,6 @@
 <div class='tag-input'>
     <div class='main-control'>
-        <input type='text' placeholder='type to add…'/>
+        <input type='text' placeholder='<%- ctx.tagsPlaceholder %>'/>
         <button>Add</button>
     </div>
 

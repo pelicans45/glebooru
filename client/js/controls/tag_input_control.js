@@ -82,7 +82,7 @@ class SuggestionList {
 }
 
 class TagInputControl extends events.EventTarget {
-    constructor(hostNode, tagList) {
+    constructor(hostNode, tagList, placeholder) {
         super();
         this.tags = tagList;
         this.newTags = new TagList();
@@ -91,7 +91,9 @@ class TagInputControl extends events.EventTarget {
         this._tagToListItemNode = new Map();
 
         // dom
-        const editAreaNode = template();
+        const editAreaNode = template({
+            tagsPlaceholder: placeholder || 'type to add…',
+        });
         this._editAreaNode = editAreaNode;
         this._tagInputNode = editAreaNode.querySelector('input');
         this._suggestionsNode = editAreaNode.querySelector('.tag-suggestions');
