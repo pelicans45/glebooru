@@ -72,6 +72,12 @@ class PostMainView {
             }
         };
 
+        const showRandomImage = () => {
+            if (ctx.randomPostId) {
+                router.show(ctx.getPostUrl(ctx.randomPostId, ctx.parameters));
+            }
+        };
+
         keyboard.bind('e', () => {
             if (ctx.editMode) {
                 router.show(uri.formatClientLink('post', ctx.post.id));
@@ -97,6 +103,12 @@ class PostMainView {
             () => {
                 if (!ctx.editMode) {
                     showPreviousImage()
+                }
+            },
+            () => {},
+            () => {
+                if (!ctx.editMode) {
+                    showRandomImage()
                 }
             }
         )

@@ -6,6 +6,9 @@ const direction = {
     UP: 'up'
 };
 
+const thresholdX = 0.15;
+const thresholdY = 0.1;
+
 function handleTouchStart(handler, evt) {
     const touchEvent = evt.touches[0];
     handler._xStart = touchEvent.clientX;
@@ -21,16 +24,22 @@ function handleTouchMove(handler, evt) {
     const yDirection = handler._yStart - evt.touches[0].clientY;
 
     if (Math.abs(xDirection) > Math.abs(yDirection)) {
-        if (xDirection > 0) {
+        let percentSwiped = Math.abs(xDirection) / screen.width;
+        if (percentSwiped < thresholdX) {
+            return;
+        } else if (xDirection > 0) {
             handler._direction = direction.LEFT;
         } else {
             handler._direction = direction.RIGHT;
         }
     } else {
-        if (yDirection > 0) {
-            handler._direction = direction.DOWN;
-        } else {
+        let percentSwiped = Math.abs(yDirection) / screen.height;
+        if (percentSwiped < thresholdY) {
+            return;
+        } else if (yDirection > 0) {
             handler._direction = direction.UP;
+        } else {
+            handler._direction = direction.DOWN;
         }
     }
 }
