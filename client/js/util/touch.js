@@ -6,8 +6,10 @@ const direction = {
     UP: 'up'
 };
 
-const thresholdX = 0.15;
-const thresholdY = 0.1;
+function getSwipeThresholdInPx() {
+    // how big is the movement in pixels to be registered as swipe
+    return Math.min(screen.width, screen.height) * 0.15;
+}
 
 function handleTouchStart(handler, evt) {
     const touchEvent = evt.touches[0];
@@ -22,10 +24,10 @@ function handleTouchMove(handler, evt) {
 
     const xDirection = handler._xStart - evt.touches[0].clientX;
     const yDirection = handler._yStart - evt.touches[0].clientY;
+    let threshold = getSwipeThresholdInPx();
 
     if (Math.abs(xDirection) > Math.abs(yDirection)) {
-        let percentSwiped = Math.abs(xDirection) / screen.width;
-        if (percentSwiped < thresholdX) {
+        if (Math.abs(xDirection) < threshold) {
             return;
         } else if (xDirection > 0) {
             handler._direction = direction.LEFT;
@@ -33,8 +35,7 @@ function handleTouchMove(handler, evt) {
             handler._direction = direction.RIGHT;
         }
     } else {
-        let percentSwiped = Math.abs(yDirection) / screen.height;
-        if (percentSwiped < thresholdY) {
+        if (Math.abs(yDirection) < threshold) {
             return;
         } else if (yDirection > 0) {
             handler._direction = direction.UP;
