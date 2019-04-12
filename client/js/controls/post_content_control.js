@@ -94,12 +94,21 @@ class PostContentControl {
     }
 
     _resize(width, height) {
-        const resizeListenerNodes = [this._postContentNode].concat(
-            ...this._postContentNode.querySelectorAll('.resize-listener'));
+        this._resizePostContainer(width, height);
+        const resizeListenerNodes = this._postContentNode.querySelectorAll('.resize-listener');
         for (let node of resizeListenerNodes) {
             node.style.width = width + 'px';
             node.style.height = height + 'px';
         }
+    }
+
+    _resizePostContainer(width, height) {
+        // on mobile don't make the image narrower than the screen, so that small images are centered
+        if (screen.width < 1000) {
+            width = Math.max(screen.width, width);
+        }
+        this._postContentNode.style.width = width + 'px';
+        this._postContentNode.style.height = height + 'px';
     }
 
     _refreshSize() {
