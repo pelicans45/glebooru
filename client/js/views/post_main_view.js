@@ -35,15 +35,11 @@ class PostMainView {
             postContainerNode,
             ctx.post,
             () => {
-                const margin = sidebarNode.getBoundingClientRect().left;
-
                 return [
                     window.innerWidth -
-                        postContainerNode.getBoundingClientRect().left -
-                        margin,
+                        postContainerNode.getBoundingClientRect().left,
                     iosCorrectedInnerHeight() -
-                        topNavigationNode.getBoundingClientRect().height -
-                        margin * 2,
+                        topNavigationNode.getBoundingClientRect().height,
                 ];
             });
 

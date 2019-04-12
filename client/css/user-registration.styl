@@ -2,9 +2,12 @@
 
 #user-registration
     padding-bottom: calc(2vw - 1em) !important
+    @media (max-with: 1000px)
+        display: inline-grid
     form
         float: left
-        margin-right: 3em
+        @media (min-with: 1000px)
+            margin-right: 3em
         margin-bottom: 1em
     .info
         float: left
