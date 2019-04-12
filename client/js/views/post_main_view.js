@@ -106,8 +106,8 @@ class PostMainView {
                 }
             },
             () => {},
-            () => {
-                if (!ctx.editMode) {
+            (e) => {
+                if (!ctx.editMode && e.startScrollY === 0) {
                     showRandomImage()
                 }
             }

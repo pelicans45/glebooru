@@ -15,6 +15,7 @@ function handleTouchStart(handler, evt) {
     const touchEvent = evt.touches[0];
     handler._xStart = touchEvent.clientX;
     handler._yStart = touchEvent.clientY;
+    handler._startScrollY = window.scrollY;
 }
 
 function handleTouchMove(handler, evt) {
@@ -45,21 +46,22 @@ function handleTouchMove(handler, evt) {
     }
 }
 
-function handleTouchEnd(handler) {
+function handleTouchEnd(handler, evt) {
+    evt.startScrollY = handler._startScrollY;
     switch (handler._direction) {
         case direction.NONE:
             return;
         case direction.LEFT:
-            handler._swipeLeftTask();
+            handler._swipeLeftTask(evt);
             break;
         case direction.RIGHT:
-            handler._swipeRightTask();
+            handler._swipeRightTask(evt);
             break;
         case direction.DOWN:
-            handler._swipeDownTask();
+            handler._swipeDownTask(evt);
             break;
         case direction.UP:
-            handler._swipeUpTask();
+            handler._swipeUpTask(evt);
     }
 
     handler._xStart = null;
@@ -88,7 +90,7 @@ class Touch {
         this._target.addEventListener('touchmove',
             (evt) => { handleTouchMove(this, evt); });
         this._target.addEventListener('touchend',
-            () => { handleTouchEnd(this); });
+            (evt) => { handleTouchEnd(this, evt); });
     }
 }
 
