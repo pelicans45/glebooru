@@ -105,7 +105,8 @@ class PostContentControl {
     _resizePostContainer(width, height) {
         // on mobile don't make the image narrower than the screen, so that small images are centered
         if (screen.width < 1000) {
-            width = Math.max(screen.width, width);
+            // use browser width to accommodate Android's on-screen buttons in landscape mode
+            width = Math.max(window.innerWidth, width);
         }
         this._postContentNode.style.width = width + 'px';
         this._postContentNode.style.height = height + 'px';
