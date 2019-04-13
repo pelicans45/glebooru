@@ -226,6 +226,7 @@ class PostUploadView extends events.EventTarget {
         this._formNode.classList.remove('inactive');
         let duplicatesFound = 0;
         for (let uploadable of uploadables) {
+            uploadable.safety = this._ctx.defaultSafety || uploadable.safety;
             if (this._uploadables.find(uploadable) !== -1) {
                 duplicatesFound++;
                 continue;

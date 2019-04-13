@@ -6,6 +6,7 @@ const uri = require('../util/uri.js');
 const misc = require('../util/misc.js');
 const progress = require('../util/progress.js');
 const topNavigation = require('../models/top_navigation.js');
+const settings = require('../models/settings.js');
 const Post = require('../models/post.js');
 const Tag = require('../models/tag.js');
 const PostUploadView = require('../views/post_upload_view.js');
@@ -31,6 +32,7 @@ class PostUploadController {
             canUploadAnonymously: api.hasPrivilege('posts:create:anonymous'),
             canViewPosts: api.hasPrivilege('posts:view'),
             enableSafety: api.safetyEnabled(),
+            defaultSafety: settings.get().uploadSafety
         });
         this._view.addEventListener('change', e => this._evtChange(e));
         this._view.addEventListener('submit', e => this._evtSubmit(e));

@@ -11,6 +11,30 @@
                 }) %>
             </li>
 
+            <li class='uploadSafety'>
+                <label>Safety</label>
+                <div class='radio-wrapper'>
+                    <%= ctx.makeRadio({
+                    name: 'safety',
+                    class: 'safety-safe',
+                    value: 'safe',
+                    selectedValue: ctx.browsingSettings.uploadSafety,
+                    text: 'Safe'}) %>
+                    <%= ctx.makeRadio({
+                    name: 'safety',
+                    class: 'safety-sketchy',
+                    value: 'sketchy',
+                    selectedValue: ctx.browsingSettings.uploadSafety,
+                    text: 'Sketchy'}) %>
+                    <%= ctx.makeRadio({
+                    name: 'safety',
+                    value: 'unsafe',
+                    selectedValue: ctx.browsingSettings.uploadSafety,
+                    class: 'safety-unsafe',
+                    text: 'Unsafe'}) %>
+                </div>
+            </li>
+
             <li>
                 <%= ctx.makeNumericInput({
                     text: 'Number of posts per page',

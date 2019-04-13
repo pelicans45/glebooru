@@ -37,12 +37,21 @@ class SettingsView extends events.EventTarget {
                 tagSuggestions: this._find('tag-suggestions').checked,
                 autoplayVideos: this._find('autoplay-videos').checked,
                 postsPerPage: this._find('posts-per-page').value,
+                uploadSafety: this._safetyButtonNodes.length ?
+                    Array.from(this._safetyButtonNodes)
+                        .filter(node => node.checked)[0]
+                        .value.toLowerCase() :
+                    undefined,
             },
         }));
     }
 
     get _formNode() {
         return this._hostNode.querySelector('form');
+    }
+
+    get _safetyButtonNodes() {
+        return this._formNode.querySelectorAll('.uploadSafety input');
     }
 
     _find(nodeName) {
