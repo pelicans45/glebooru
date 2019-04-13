@@ -87,8 +87,9 @@ class PostMainView {
                 this.sidebarControl._evtDeleteClick(e);
             }
         });
-        keyboard.bind('t', () => {
+        keyboard.bind('t', (e) => {
             if (ctx.editMode) {
+                e.preventDefault();
                 this.sidebarControl.focusTagInput();
             }
         });
