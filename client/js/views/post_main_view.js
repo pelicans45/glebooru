@@ -36,10 +36,8 @@ class PostMainView {
             ctx.post,
             () => {
                 return [
-                    window.innerWidth -
-                        postContainerNode.getBoundingClientRect().left,
-                    iosCorrectedInnerHeight() -
-                        topNavigationNode.getBoundingClientRect().height,
+                    postContainerNode.getBoundingClientRect().width,
+                    iosCorrectedInnerHeight() - postContainerNode.getBoundingClientRect().top,
                 ];
             });
 

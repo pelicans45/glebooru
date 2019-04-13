@@ -94,7 +94,7 @@ class PostContentControl {
     }
 
     _resize(width, height) {
-        this._resizePostContainer(width, height);
+        this._resizePostContent(width, height);
         const resizeListenerNodes = this._postContentNode.querySelectorAll('.resize-listener');
         for (let node of resizeListenerNodes) {
             node.style.width = width + 'px';
@@ -102,10 +102,10 @@ class PostContentControl {
         }
     }
 
-    _resizePostContainer(width, height) {
-        // on mobile don't make the image narrower than the screen, so that small images are centered
-        if (screen.width < 1000) {
-            // use browser width to accommodate Android's on-screen buttons in landscape mode
+    _resizePostContent(width, height) {
+        // on mobile don't make the content node narrower than the screen, so that small images are centered
+        // use browser width to accommodate Android's on-screen buttons in landscape mode
+        if (window.innerWidth < 1000) {
             width = Math.max(window.innerWidth, width);
         }
         this._postContentNode.style.width = width + 'px';
