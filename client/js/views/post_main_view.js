@@ -81,9 +81,20 @@ class PostMainView {
         });
         keyboard.bind(['a', 'left'], showPreviousImage);
         keyboard.bind(['d', 'right'], showNextImage);
+        keyboard.bind('r', showRandomImage);
         keyboard.bind('del', (e) => {
             if (ctx.editMode) {
                 this.sidebarControl._evtDeleteClick(e);
+            }
+        });
+        keyboard.bind('t', () => {
+            if (ctx.editMode) {
+                this.sidebarControl.focusTagInput();
+            }
+        });
+        keyboard.bind(['command+s', 'ctrl+s'], (e) => {
+            if (ctx.editMode) {
+                this.sidebarControl.submit(e);
             }
         });
 

@@ -15,8 +15,18 @@ shortcuts:</p>
         </tr>
 
         <tr>
+            <td><kbd>P</kbd></td>
+            <td>Focus first post in post list</td>
+        </tr>
+
+        <tr>
             <td><kbd>A</kbd> and <kbd>D</kbd>, <kbd>←</kbd> and <kbd>→</kbd></td>
             <td>Go to newer/older page or post</td>
+        </tr>
+
+        <tr>
+            <td><kbd>R</kbd></td>
+            <td>Go to random post</td>
         </tr>
 
         <tr>
@@ -30,13 +40,18 @@ shortcuts:</p>
         </tr>
 
         <tr>
-            <td><kbd>P</kbd></td>
-            <td>Focus first post in post list</td>
+            <td><kbd>T</kbd></td>
+            <td>(In edit mode) Focus tag input</td>
+        </tr>
+
+        <tr>
+            <td><kbd>Command/Ctrl+S</kbd></td>
+            <td>(In edit mode) Save post</td>
         </tr>
 
         <tr>
             <td><kbd>Delete</kbd></td>
-            <td>Delete post (while in edit mode)</td>
+            <td>(In edit mode) delete post</td>
         </tr>
     </tbody>
 </table>

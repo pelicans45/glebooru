@@ -67,7 +67,7 @@ class PostEditSidebarControl extends events.EventTarget {
         this._syncExpanderTitles();
 
         if (this._formNode) {
-            this._formNode.addEventListener('submit', e => this._evtSubmit(e));
+            this._formNode.addEventListener('submit', e => this.submit(e));
         }
 
         if (this._tagInputNode) {
@@ -319,7 +319,7 @@ class PostEditSidebarControl extends events.EventTarget {
         this._postNotesOverlayControl.switchToPassiveEdit();
     }
 
-    _evtSubmit(e) {
+    submit(e) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent('submit', {
             detail: {
@@ -464,6 +464,13 @@ class PostEditSidebarControl extends events.EventTarget {
 
     showError(message) {
         views.showError(this._hostNode, message);
+    }
+
+    focusTagInput() {
+        const realTagInput = this._formNode.querySelector('.tag-input input');
+        if (realTagInput) {
+            realTagInput.focus();
+        }
     }
 };
 
