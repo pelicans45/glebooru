@@ -7,7 +7,7 @@
                 --><li data-name='edit'><a href='<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'edit') %>'>Edit</a></li><!--
             --><% } %><!--
             --><% if (ctx.tag.metric || ctx.canCreateMetric) { %><!--
-                --><li data-name='merge'><a href='<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'metric') %>'>Metric</a></li><!--
+                --><li data-name='metric'><a href='<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'metric') %>'>Metric</a></li><!--
             --><% } %><!--
             --><% if (ctx.canMerge) { %><!--
                 --><li data-name='merge'><a href='<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'merge') %>'>Merge with&hellip;</a></li><!--
