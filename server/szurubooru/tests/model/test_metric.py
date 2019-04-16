@@ -15,6 +15,9 @@ def test_saving_metric(post_factory, tag_factory):
     assert post_metric.post_id is not None
     assert post_metric_range.tag_id is not None
     assert post_metric_range.post_id is not None
+    assert tag.metric.tag_id == tag.tag_id
+    assert tag.metric.min == 1.
+    assert tag.metric.max == 10.
 
     metric = (
         db.session
@@ -41,25 +44,105 @@ def test_saving_metric(post_factory, tag_factory):
     assert post_metric_range.low == 2.
     assert post_metric_range.high == 8.
 
-
-def test_cascade_delete_metric():
-    pass
-
-
-def test_cascade_delete_tag():
-    pass
-
-
-def test_cascade_delete_post():
-    pass
+    tag = (
+        db.session
+        .query(model.Tag)
+        .filter(model.Tag.tag_id == metric.tag_id)
+        .one())
+    assert tag.metric == metric
 
 
-def test_tag_without_metric():
-    pass
+def test_cascade_delete_metric(post_factory, tag_factory):
+    post1 = post_factory()
+    post2 = post_factory()
+    tag = tag_factory()
+    metric = model.Metric(tag=tag, min=1., max=10.)
+    post_metric1 = model.PostMetric(metric=metric, post=post1, value=2.3)
+    post_metric2 = model.PostMetric(metric=metric, post=post2, value=4.5)
+    db.session.add_all([post1, post2, tag, metric, post_metric1, post_metric2])
+    db.session.flush()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 2
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 2
+
+    db.session.delete(metric)
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 2
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 0
+    assert db.session.query(model.PostMetric).count() == 0
 
 
-def test_post_tag_without_metric():
-    pass
+def test_cascade_delete_tag(post_factory, tag_factory):
+    post = post_factory()
+    tag1 = tag_factory()
+    tag2 = tag_factory()
+    metric1 = model.Metric(tag=tag1, min=1., max=10.)
+    metric2 = model.Metric(tag=tag2, min=2., max=20.)
+    post_metric1 = model.PostMetric(metric=metric1, post=post, value=2.3)
+    post_metric2 = model.PostMetric(metric=metric2, post=post, value=4.5)
+    db.session.add_all([post, tag1, tag2, metric1, metric2, post_metric1, post_metric2])
+    db.session.flush()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 2
+    assert db.session.query(model.Metric).count() == 2
+    assert db.session.query(model.PostMetric).count() == 2
+
+    db.session.delete(tag2)
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 1
+
+
+def test_cascade_delete_post(post_factory, tag_factory):
+    post1 = post_factory()
+    post2 = post_factory()
+    tag = tag_factory()
+    metric = model.Metric(tag=tag, min=1., max=10.)
+    post_metric1 = model.PostMetric(metric=metric, post=post1, value=2.3)
+    post_metric2 = model.PostMetric(metric=metric, post=post2, value=4.5)
+    db.session.add_all([post1, post2, tag, metric, post_metric1, post_metric2])
+    db.session.flush()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 2
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 2
+
+    db.session.delete(post2)
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 1
+
+
+def test_tag_without_metric(tag_factory):
+    tag = tag_factory(names=['mytag'])
+    assert tag.metric is None
+    db.session.add(tag)
+    db.session.commit()
+    tag = (
+        db.session
+        .query(model.Tag)
+        .join(model.TagName)
+        .filter(model.TagName.name == 'mytag')
+        .one())
+    assert tag.metric is None
 
 
 def test_metric_counts():

@@ -197,6 +197,10 @@ class Post(Base):
     notes = sa.orm.relationship(
         'PostNote', cascade='all, delete-orphan', lazy='joined')
     comments = sa.orm.relationship('Comment', cascade='all, delete-orphan')
+    metrics = sa.orm.relationship(
+        'PostMetric', cascade='all, delete-orphan', lazy='joined')
+    metric_ranges = sa.orm.relationship(
+        'PostMetricRange', cascade='all, delete-orphan', lazy='joined')
 
     # dynamic columns
     tag_count = sa.orm.column_property(

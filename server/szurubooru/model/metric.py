@@ -80,6 +80,7 @@ class Metric(Base):
     min = sa.Column('min', sa.Float, nullable=False)
     max = sa.Column('max', sa.Float, nullable=False)
 
+    tag = sa.orm.relationship('Tag')
     post_metrics = sa.orm.relationship(
         'PostMetric', backref='metric', cascade='all, delete-orphan')
     post_metric_ranges = sa.orm.relationship(
