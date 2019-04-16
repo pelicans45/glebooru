@@ -51,10 +51,12 @@ def update_metric(tag: model.Tag, metric_data) -> Optional[model.Metric]:
             raise InvalidMetricError('Metric is missing %r field.' % field)
 
     min, max = metric_data['min'], metric_data['max']
-    if tag.metric is None:
+    if tag.metric is not None:
         tag.metric.min = min
         tag.metric.max = max
+        db.session.add(tag.metric)
         return None
     else:
         metric = model.Metric(tag=tag, min=min, max=max)
+        db.session.add(metric)
         return metric

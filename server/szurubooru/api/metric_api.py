@@ -20,6 +20,6 @@ def create_tag(ctx: rest.Context, params: Dict[str, str] = {}) -> rest.Response:
     metric = metrics.create_metric(tag, min, max)
     ctx.session.add(metric)
     ctx.session.flush()
-    snapshots.create(metric, ctx.user)
+    # snapshots.create(metric, ctx.user)
     ctx.session.commit()
     return _serialize(ctx, metric)

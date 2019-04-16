@@ -69,6 +69,9 @@ class Context:
     def has_param(self, name: str) -> bool:
         return name in self._params
 
+    def get_param(self, name: str) -> Any:
+        return self._params[name]
+
     def get_param_as_list(
             self,
             name: str,
