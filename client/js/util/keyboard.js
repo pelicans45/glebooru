@@ -20,6 +20,13 @@ function bind(hotkey, func) {
     }
     return false;
 }
+function bindElement(element, hotkey, func) {
+    if (settings.get().keyboardShortcuts) {
+        mousetrap(element).bind(hotkey, func);
+        return true;
+    }
+    return false;
+}
 
 function unbind(hotkey) {
     mousetrap.unbind(hotkey);
@@ -27,6 +34,7 @@ function unbind(hotkey) {
 
 module.exports = {
     bind: bind,
+    bindElement: bindElement,
     unbind: unbind,
     pause: () => { paused = true; },
     unpause: () => { paused = false; },

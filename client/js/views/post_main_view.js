@@ -87,17 +87,6 @@ class PostMainView {
                 this.sidebarControl._evtDeleteClick(e);
             }
         });
-        keyboard.bind('t', (e) => {
-            if (ctx.editMode) {
-                e.preventDefault();
-                this.sidebarControl.focusTagInput();
-            }
-        });
-        keyboard.bind(['command+s', 'ctrl+s'], (e) => {
-            if (ctx.editMode) {
-                this.sidebarControl.submit(e);
-            }
-        });
 
         new Touch(
             postContainerNode,

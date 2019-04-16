@@ -4,6 +4,7 @@ const api = require('../api.js');
 const events = require('../events.js');
 const misc = require('../util/misc.js');
 const views = require('../util/views.js');
+const keyboard = require('../util/keyboard.js');
 const Note = require('../models/note.js');
 const Point = require('../models/point.js');
 const TagInputControl = require('./tag_input_control.js');
@@ -67,7 +68,7 @@ class PostEditSidebarControl extends events.EventTarget {
         this._syncExpanderTitles();
 
         if (this._formNode) {
-            this._formNode.addEventListener('submit', e => this.submit(e));
+            this._formNode.addEventListener('submit', e => this._evtSubmit(e));
         }
 
         if (this._tagInputNode) {
@@ -180,6 +181,16 @@ class PostEditSidebarControl extends events.EventTarget {
         if (this._noteTextareaNode) {
             this._noteTextareaNode.addEventListener(
                 'change', e => this._evtNoteTextChangeRequest(e));
+        }
+
+        keyboard.bind(['command+s', 'ctrl+s'], (e) => this._evtSubmit(e));
+        if (this._tagInputNode) {
+            const realTagInput = this._formNode.querySelector('.tag-input input');
+            keyboard.bindElement(realTagInput, ['command+s', 'ctrl+s'], (e) => this._evtSubmit(e));
+            keyboard.bind('t', (e) => {
+                e.preventDefault();
+                realTagInput.focus();
+            });
         }
     }
 
@@ -319,7 +330,7 @@ class PostEditSidebarControl extends events.EventTarget {
         this._postNotesOverlayControl.switchToPassiveEdit();
     }
 
-    submit(e) {
+    _evtSubmit(e) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent('submit', {
             detail: {
@@ -464,13 +475,6 @@ class PostEditSidebarControl extends events.EventTarget {
 
     showError(message) {
         views.showError(this._hostNode, message);
-    }
-
-    focusTagInput() {
-        const realTagInput = this._formNode.querySelector('.tag-input input');
-        if (realTagInput) {
-            realTagInput.focus();
-        }
     }
 };
 
