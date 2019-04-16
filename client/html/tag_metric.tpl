@@ -5,14 +5,14 @@
                 text: 'Minimum',
                 name: 'metric-min',
                 value: ctx.metricMin,
-                steps: 'any',
+                step: 'any',
                 readonly: !ctx.canEditMetricBounds,
             }) %>
             <%= ctx.makeNumericInput({
                 text: 'Maximum',
                 name: 'metric-max',
                 value: ctx.metricMax,
-                steps: 'any',
+                step: 'any',
                 readonly: !ctx.canEditMetricBounds,
             }) %>
         </div>
