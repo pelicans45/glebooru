@@ -160,6 +160,32 @@ class Context:
         raise errors.InvalidParameterError(
             'Parameter %r must be an integer value.' % name)
 
+    def get_param_as_float(
+            self,
+            name: str,
+            default: Union[object, float] = MISSING,
+            min: Optional[float] = None,
+            max: Optional[float] = None) -> float:
+        if name not in self._params:
+            if default is not MISSING:
+                return cast(float, default)
+            raise errors.MissingRequiredParameterError(
+                'Required parameter %r is missing.' % name)
+        value = self._params[name]
+        try:
+            value = float(value)
+            if min is not None and value < min:
+                raise errors.InvalidParameterError(
+                    'Parameter %r must be at least %r.' % (name, min))
+            if max is not None and value > max:
+                raise errors.InvalidParameterError(
+                    'Parameter %r may not exceed %r.' % (name, max))
+            return value
+        except (ValueError, TypeError):
+            pass
+        raise errors.InvalidParameterError(
+            'Parameter %r must be a float value.' % name)
+
     def get_param_as_bool(
             self,
             name: str,
