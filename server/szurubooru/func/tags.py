@@ -95,6 +95,7 @@ class TagSerializer(serialization.BaseSerializer):
             'usages': self.serialize_usages,
             'suggestions': self.serialize_suggestions,
             'implications': self.serialize_implications,
+            'metric': self.serialize_metric,
         }
 
     def serialize_names(self) -> Any:
@@ -127,6 +128,15 @@ class TagSerializer(serialization.BaseSerializer):
         return [
             serialize_relation(relation)
             for relation in sort_tags(self.tag.implications)]
+
+    def serialize_metric(self) -> Any:
+        if not self.tag.metric:
+            return None
+        else:
+            return {
+                'min': self.tag.metric.min,
+                'max': self.tag.metric.max,
+            }
 
 
 def serialize_tag(
