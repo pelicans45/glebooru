@@ -57,7 +57,6 @@ class TagController {
             this._view.addEventListener('submit', e => this._evtUpdate(e));
             this._view.addEventListener('merge', e => this._evtMerge(e));
             this._view.addEventListener('delete', e => this._evtDelete(e));
-            this._view.addEventListener('metricCreate', e => this._evtMetricCreate(e));
             this._view.addEventListener('metricUpdate', e => this._evtMetricUpdate(e));
         }, error => {
             this._view = new EmptyView();
@@ -99,24 +98,21 @@ class TagController {
         });
     }
 
-    _evtMetricCreate(e) {
+    _evtMetricUpdate(e) {
         this._view.clearMessages();
         this._view.disableForm();
         const metric = new Metric();
         metric.min = e.detail.metricMin;
         metric.max = e.detail.metricMax;
-        //TODO create metrics via updating tags instead
-        metric.save().then(() => {
-            this._view.showSuccess('Metric created.');
+        e.detail.tag.metric = metric;
+
+        e.detail.tag.save().then(() => {
+            this._view.showSuccess('Metric updated.');
             this._view.enableForm();
         }, error => {
             this._view.showError(error.message);
             this._view.enableForm();
         });
-    }
-
-    _evtMetricUpdate(e) {
-        //TODO update metric
     }
 
     _evtMerge(e) {

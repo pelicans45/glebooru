@@ -56,8 +56,7 @@ class TagView extends events.EventTarget {
                     'You don\'t have privileges to create metrics.');
             } else {
                 this._view = new TagMetricView(ctx);
-                events.proxyEvent(this._view, this, 'submit',
-                    metricExists ? 'metricUpdate' : 'metricCreate');
+                events.proxyEvent(this._view, this, 'submit', 'metricUpdate');
             }
 
         } else if (ctx.section === 'merge') {

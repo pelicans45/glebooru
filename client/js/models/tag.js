@@ -69,6 +69,12 @@ class Tag extends events.EventTarget {
             detail.suggestions = this._suggestions.map(
                 relation => relation.names[0]);
         }
+        if (this._metric !== this._orig._metric) {
+            detail.metric = {
+                min: this._metric.min,
+                max: this._metric.max
+            };
+        }
 
         let promise = this._origName ?
             api.put(uri.formatApiLink('tag', this._origName), detail) :
