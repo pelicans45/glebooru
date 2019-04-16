@@ -155,6 +155,9 @@ module.exports = router => {
     router.enter(['tag', ':name', 'edit'], (ctx, next) => {
         ctx.controller = new TagController(ctx, 'edit');
     });
+    router.enter(['tag', ':name', 'metric'], (ctx, next) => {
+        ctx.controller = new TagController(ctx, 'metric');
+    });
     router.enter(['tag', ':name', 'merge'], (ctx, next) => {
         ctx.controller = new TagController(ctx, 'merge');
     });
