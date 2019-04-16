@@ -6,6 +6,7 @@ const misc = require('../util/misc.js');
 const uri = require('../util/uri.js');
 const Tag = require('../models/tag.js');
 const TagCategoryList = require('../models/tag_category_list.js');
+const Metric = require('../models/metric.js');
 const topNavigation = require('../models/top_navigation.js');
 const TagView = require('../views/tag_view.js');
 const EmptyView = require('../views/empty_view.js');
@@ -44,6 +45,8 @@ class TagController {
                 canEditImplications: api.hasPrivilege('tags:edit:implications'),
                 canEditSuggestions: api.hasPrivilege('tags:edit:suggestions'),
                 canEditDescription: api.hasPrivilege('tags:edit:description'),
+                canCreateMetric: api.hasPrivilege('metrics:create'),
+                canEditMetricBounds: api.hasPrivilege('metrics:edit:bounds'),
                 canMerge: api.hasPrivilege('tags:merge'),
                 canDelete: api.hasPrivilege('tags:delete'),
                 categories: categories,
@@ -54,6 +57,8 @@ class TagController {
             this._view.addEventListener('submit', e => this._evtUpdate(e));
             this._view.addEventListener('merge', e => this._evtMerge(e));
             this._view.addEventListener('delete', e => this._evtDelete(e));
+            this._view.addEventListener('metricCreate', e => this._evtMetricCreate(e));
+            this._view.addEventListener('metricUpdate', e => this._evtMetricUpdate(e));
         }, error => {
             this._view = new EmptyView();
             this._view.showError(error.message);
@@ -92,6 +97,26 @@ class TagController {
             this._view.showError(error.message);
             this._view.enableForm();
         });
+    }
+
+    _evtMetricCreate(e) {
+        this._view.clearMessages();
+        this._view.disableForm();
+        const metric = new Metric();
+        metric.min = e.detail.metricMin;
+        metric.max = e.detail.metricMax;
+        //TODO create metrics via updating tags instead
+        metric.save().then(() => {
+            this._view.showSuccess('Metric created.');
+            this._view.enableForm();
+        }, error => {
+            this._view.showError(error.message);
+            this._view.enableForm();
+        });
+    }
+
+    _evtMetricUpdate(e) {
+        //TODO update metric
     }
 
     _evtMerge(e) {

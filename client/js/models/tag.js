@@ -28,10 +28,12 @@ class Tag extends events.EventTarget {
     get postCount()         { return this._postCount; }
     get creationTime()      { return this._creationTime; }
     get lastEditTime()      { return this._lastEditTime; }
+    get metric()            { return this._metric; }
 
     set names(value)        { this._names = value; }
     set category(value)     { this._category = value; }
     set description(value)  { this._description = value; }
+    set metric(value)       { this._metric = value; }
 
     static fromResponse(response) {
         const ret = new Tag();
@@ -135,6 +137,7 @@ class Tag extends events.EventTarget {
             _creationTime: response.creationTime,
             _lastEditTime: response.lastEditTime,
             _postCount:    response.usages || 0,
+            _metric:       response.metric,
         };
 
         for (let obj of [this, this._orig]) {
