@@ -23,6 +23,8 @@ class TagMetricView extends events.EventTarget {
             ctx.metricMax = 10;
         }
 
+        views.replaceContent(this._hostNode, template(ctx));
+
         this._formNode.addEventListener('submit', e => this._evtSubmit(e));
     }
 
@@ -35,6 +37,26 @@ class TagMetricView extends events.EventTarget {
                 metricMax: this._maxFieldNode.value,
             },
         }));
+    }
+
+    clearMessages() {
+        views.clearMessages(this._hostNode);
+    }
+
+    enableForm() {
+        views.enableForm(this._formNode);
+    }
+
+    disableForm() {
+        views.disableForm(this._formNode);
+    }
+
+    showSuccess(message) {
+        views.showSuccess(this._hostNode, message);
+    }
+
+    showError(message) {
+        views.showError(this._hostNode, message);
     }
 
     get _formNode() {
