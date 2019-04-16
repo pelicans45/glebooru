@@ -22,12 +22,7 @@ class PostMetric(Base):
     version = sa.Column('version', sa.Integer, default=1, nullable=False)
     value = sa.Column('value', sa.Float, nullable=False, index=True)
 
-    metric = sa.orm.relationship(
-        'Metric',
-        backref=sa.orm.backref('post_metrics', cascade='all, delete-orphan'))
-
-    def __init__(self, value) -> None:
-        self.value = value
+    post = sa.orm.relationship('Post')
 
     __mapper_args__ = {
         'version_id_col': version,
@@ -60,14 +55,7 @@ class PostMetricRange(Base):
     low = sa.Column('low', sa.Float, nullable=False)
     high = sa.Column('low', sa.Float, nullable=False)
 
-    metric = sa.orm.relationship(
-        'Metric',
-        backref=sa.orm.backref('post_metric_ranges', cascade='all, delete-orphan'))
-
-    def __init__(self, tag_id: int, low: float, high: float) -> None:
-        self.tag_id = tag_id
-        self.low = low
-        self.high = high
+    post = sa.orm.relationship('Post')
 
     __mapper_args__ = {
         'version_id_col': version,
@@ -92,6 +80,11 @@ class Metric(Base):
     min = sa.Column('min', sa.Float, nullable=False)
     max = sa.Column('max', sa.Float, nullable=False)
 
+    post_metrics = sa.orm.relationship(
+        'PostMetric', backref='metric', cascade='all, delete-orphan')
+    post_metric_ranges = sa.orm.relationship(
+        'PostMetricRange', backref='metric', cascade='all, delete-orphan')
+
     post_metric_count = sa.orm.column_property(
         sa.sql.expression.select(
             [sa.sql.expression.func.count(PostMetric.post_id)])
@@ -103,11 +96,6 @@ class Metric(Base):
             [sa.sql.expression.func.count(PostMetricRange.post_id)])
         .where(PostMetricRange.tag_id == tag_id)
         .correlate_except(PostMetricRange))
-
-    def __init__(self, tag_id: int, min: float, max: float) -> None:
-        self.tag_id = tag_id
-        self.min = min
-        self.max = max
 
     __mapper_args__ = {
         'version_id_col': version,

@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from szurubooru.model.base import Base
 from szurubooru.model.post import PostTag
-from szurubooru.model.metric import Metric
 
 
 class TagSuggestion(Base):
@@ -101,6 +100,7 @@ class Tag(Base):
         primaryjoin=tag_id == TagImplication.parent_id,
         secondaryjoin=tag_id == TagImplication.child_id,
         lazy='joined')
+    metric = sa.orm.relationship('Metric', backref=sa.orm.backref('tag', uselist=False))
 
     post_count = sa.orm.column_property(
         sa.sql.expression.select(
@@ -133,13 +133,6 @@ class Tag(Base):
                 [sa.sql.expression.func.count(TagImplication.child_id)])
             .where(TagImplication.parent_id == tag_id)
             .as_scalar()
-        ),
-        deferred=True)
-
-    has_metric = sa.orm.column_property(
-        sa.sql.expression.exists(
-            sa.sql.expression.select([Metric.tag_id])
-            .where(Metric.tag_id == tag_id)
         ),
         deferred=True)
 
