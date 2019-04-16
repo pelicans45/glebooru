@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from szurubooru.model.base import Base
 from szurubooru.model.post import PostTag
+from szurubooru.model.metric import Metric
 
 
 class TagSuggestion(Base):
@@ -132,6 +133,13 @@ class Tag(Base):
                 [sa.sql.expression.func.count(TagImplication.child_id)])
             .where(TagImplication.parent_id == tag_id)
             .as_scalar()
+        ),
+        deferred=True)
+
+    has_metric = sa.orm.column_property(
+        sa.sql.expression.exists(
+            sa.sql.expression.select([Metric.tag_id])
+            .where(Metric.tag_id == tag_id)
         ),
         deferred=True)
 
