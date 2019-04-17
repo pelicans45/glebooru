@@ -253,10 +253,10 @@ def post_favorite_factory(user_factory, post_factory):
 
 @pytest.fixture
 def metric_factory(tag_factory):
-    def factory(tag=None):
+    def factory(tag=None, min=0, max=10):
         if tag is None:
             tag = tag_factory()
-        return model.Metric(tag=tag, min=0, max=10)
+        return model.Metric(tag=tag, min=min, max=max)
     return factory
 
 
