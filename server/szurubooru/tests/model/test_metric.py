@@ -131,6 +131,43 @@ def test_cascade_delete_post(post_factory, tag_factory):
     assert db.session.query(model.PostMetric).count() == 1
 
 
+def test_delete_post_metric_no_cascade(metric_factory, post_metric_factory):
+    metric = metric_factory()
+    post_metric = post_metric_factory(metric=metric)
+    db.session.add_all([metric, post_metric])
+    db.session.commit()
+    db.session.refresh(metric)
+    assert len(metric.post_metrics) == 1
+
+    db.session.delete(post_metric)
+    db.session.commit()
+    db.session.refresh(metric)
+    assert len(metric.post_metrics) == 0
+
+
+def test_cascade_delete_on_remove_metric_from_post(
+        post_factory, post_metric_factory):
+    post = post_factory()
+    post_metric = post_metric_factory(post=post)
+    db.session.add_all([post, post_metric])
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 1
+
+    post.metrics.clear()
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 0
+
+
 def test_tag_without_metric(tag_factory):
     tag = tag_factory(names=['mytag'])
     assert tag.metric is None
@@ -145,5 +182,14 @@ def test_tag_without_metric(tag_factory):
     assert tag.metric is None
 
 
-def test_metric_counts():
-    pass
+def test_metric_counts(post_factory, metric_factory):
+    post1 = post_factory()
+    post2 = post_factory()
+    metric = metric_factory()
+    post_metric1 = model.PostMetric(post=post1, metric=metric, value=1.2)
+    post_metric2 = model.PostMetric(post=post2, metric=metric, value=3.4)
+    post_metric_range = model.PostMetricRange(post=post1, metric=metric, low=5.6, high=7.8)
+    db.session.add_all([metric, post_metric1, post_metric2, post_metric_range])
+    db.session.flush()
+    assert metric.post_metric_count == 2
+    assert metric.post_metric_range_count == 1

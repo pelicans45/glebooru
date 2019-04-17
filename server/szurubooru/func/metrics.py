@@ -1,7 +1,10 @@
-from typing import Any, Optional, Tuple, List, Dict, Callable
-import sqlalchemy as sa
-from szurubooru import config, db, model, errors, rest
-from szurubooru.func import serialization
+from typing import Any, Optional, List, Dict, Callable
+from szurubooru import db, model, errors, rest
+from szurubooru.func import serialization, tags
+
+
+class MetricDoesNotExistsError(errors.ValidationError):
+    pass
 
 
 class MetricAlreadyExistsError(errors.ValidationError):
@@ -12,7 +15,15 @@ class InvalidMetricError(errors.ValidationError):
     pass
 
 
-class MetricSeralizer(serialization.BaseSerializer):
+class PostMissingTagError(errors.ValidationError):
+    pass
+
+
+class MetricValueOutOfRangeError(errors.ValidationError):
+    pass
+
+
+class MetricSerializer(serialization.BaseSerializer):
     def __init__(self, metric: model.Metric):
         self.metric = metric
 
@@ -29,16 +40,30 @@ class MetricSeralizer(serialization.BaseSerializer):
         return self.metric.max
 
 
-def serialize_metric(metric: model.Metric, options: List[str] = []) -> Optional[rest.Response]:
+def serialize_metric(
+        metric: model.Metric,
+        options: List[str] = []) -> Optional[rest.Response]:
     if not metric:
         return None
-    return MetricSeralizer(metric).serialize(options)
+    return MetricSerializer(metric).serialize(options)
+
+
+def try_get_post_metric(
+        post: model.Post,
+        metric: model.Metric) -> Optional[model.PostMetric]:
+    return (
+        db.session
+        .query(model.PostMetric)
+        .filter(model.PostMetric.metric == metric and
+                model.PostMetric.post == post)
+        .one_or_none())
 
 
 def create_metric(
         tag: model.Tag,
         min: float,
         max: float) -> model.Metric:
+    assert tag
     if tag.metric is not None:
         raise MetricAlreadyExistsError('Tag already has a metric.')
     if min >= max:
@@ -48,7 +73,8 @@ def create_metric(
     return metric
 
 
-def update_or_create_metric(tag: model.Tag, metric_data) -> Optional[model.Metric]:
+def update_or_create_metric(tag: model.Tag, metric_data: Any) -> Optional[model.Metric]:
+    assert tag
     for field in ('min', 'max'):
         if field not in metric_data:
             raise InvalidMetricError('Metric is missing %r field.' % field)
@@ -61,6 +87,42 @@ def update_or_create_metric(tag: model.Tag, metric_data) -> Optional[model.Metri
         tag.metric.max = max
         return None
     else:
-        metric = model.Metric(tag=tag, min=min, max=max)
-        db.session.add(metric)
-        return metric
+        return create_metric(tag=tag, min=min, max=max)
+
+
+def update_or_create_post_metric(
+        post: model.Post,
+        metric: model.Metric,
+        value: float) -> model.PostMetric:
+    assert post
+    assert metric
+    if metric.tag not in post.tags:
+        raise PostMissingTagError('Post doesn\'t have tag %r' % metric.tag.names[0])
+    if value < metric.min or value > metric.max:
+        raise MetricValueOutOfRangeError('Metric value %r out of range.' % value)
+    db.session.query(model.PostMetric)
+    post_metric = try_get_post_metric(post, metric)
+    if post_metric is None:
+        post_metric = model.PostMetric(post=post, metric=metric, value=value)
+        db.session.add(post_metric)
+    else:
+        post_metric.value = value
+    return post_metric
+
+
+def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
+    """
+    Overwrites any existing metric values, deletes other existing post metrics.
+    """
+    assert post
+    post.metrics = []
+    for metric_data in metrics_data:
+        for field in ('tag_name', 'value'):
+            if field not in metric_data:
+                raise InvalidMetricError('Metric is missing %r field.' % field)
+        value = float(metric_data['value'])
+        tag = tags.get_tag_by_name(metric_data['tag_name'])
+        if tag.metric is None:
+            raise MetricDoesNotExistsError('Tag %r has no metric.' % tag.names[0])
+        post_metric = update_or_create_post_metric(post, tag.metric, value)
+        post.metrics.append(post_metric)

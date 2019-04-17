@@ -23,6 +23,7 @@ class PostMetric(Base):
     value = sa.Column('value', sa.Float, nullable=False, index=True)
 
     post = sa.orm.relationship('Post')
+    metric = sa.orm.relationship('Metric', back_populates='post_metrics')
 
     __mapper_args__ = {
         'version_id_col': version,
@@ -56,6 +57,7 @@ class PostMetricRange(Base):
     high = sa.Column('low', sa.Float, nullable=False)
 
     post = sa.orm.relationship('Post')
+    metric = sa.orm.relationship('Metric', back_populates='post_metric_ranges')
 
     __mapper_args__ = {
         'version_id_col': version,
@@ -82,9 +84,9 @@ class Metric(Base):
 
     tag = sa.orm.relationship('Tag')
     post_metrics = sa.orm.relationship(
-        'PostMetric', backref='metric', cascade='all, delete-orphan')
+        'PostMetric', back_populates='metric', cascade='all, delete-orphan')
     post_metric_ranges = sa.orm.relationship(
-        'PostMetricRange', backref='metric', cascade='all, delete-orphan')
+        'PostMetricRange', back_populates='metric', cascade='all, delete-orphan')
 
     post_metric_count = sa.orm.column_property(
         sa.sql.expression.select(

@@ -117,8 +117,9 @@ privileges:
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
 
-    'metrics:create':               moderator
-    'metrics:edit:bounds':          moderator
+    'metrics:create':               power
+    'metrics:edit:bounds':          power
+    'metrics:edit:posts':           regular
 
     'comments:create':              regular
     'comments:delete:any':          moderator

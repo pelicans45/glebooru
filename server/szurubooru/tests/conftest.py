@@ -252,6 +252,28 @@ def post_favorite_factory(user_factory, post_factory):
 
 
 @pytest.fixture
+def metric_factory(tag_factory):
+    def factory(tag=None):
+        if tag is None:
+            tag = tag_factory()
+        return model.Metric(tag=tag, min=0, max=10)
+    return factory
+
+
+@pytest.fixture
+def post_metric_factory(post_factory, metric_factory):
+    def factory(post=None, metric=None, value=None):
+        if post is None:
+            post = post_factory()
+        if metric is None:
+            metric = metric_factory()
+        if value is None:
+            value = (metric.min + metric.max)/2
+        return model.PostMetric(post=post, metric=metric, value=value)
+    return factory
+
+
+@pytest.fixture
 def read_asset():
     def get(path):
         path = os.path.join(os.path.dirname(__file__), 'assets', path)
