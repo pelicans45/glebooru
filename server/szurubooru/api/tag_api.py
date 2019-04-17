@@ -92,7 +92,7 @@ def update_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         tags.update_tag_implications(tag, implications)
     if ctx.has_param('metric'):
         auth.verify_privilege(ctx.user, 'metrics:edit:bounds')
-        new_metric = metrics.update_metric(tag, ctx.get_param('metric'))
+        new_metric = metrics.update_or_create_metric(tag, ctx.get_param('metric'))
         if new_metric is not None:
             auth.verify_privilege(ctx.user, 'metrics:create')
             db.session.flush()
