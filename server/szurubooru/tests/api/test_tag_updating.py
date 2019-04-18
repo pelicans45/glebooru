@@ -14,6 +14,8 @@ def inject_config(config_injector):
             'tags:edit:description': model.User.RANK_REGULAR,
             'tags:edit:suggestions': model.User.RANK_REGULAR,
             'tags:edit:implications': model.User.RANK_REGULAR,
+            'metrics:create': model.User.RANK_POWER,
+            'metrics:edit:bounds': model.User.RANK_POWER,
         },
     })
 
@@ -104,6 +106,7 @@ def test_trying_to_update_non_existing(user_factory, context_factory):
     {'category': 'whatever'},
     {'suggestions': ['whatever']},
     {'implications': ['whatever']},
+    {'metric': ['whatever']},
 ])
 def test_trying_to_update_without_privileges(
         user_factory, tag_factory, context_factory, params):
@@ -113,6 +116,18 @@ def test_trying_to_update_without_privileges(
         api.tag_api.update_tag(
             context_factory(
                 params={**params, **{'version': 1}},
+                user=user_factory(rank=model.User.RANK_ANONYMOUS)),
+            {'tag_name': 'tag'})
+
+
+def test_trying_to_create_metric_without_privileges(
+        user_factory, tag_factory, context_factory):
+    db.session.add(tag_factory(names=['tag']))
+    db.session.commit()
+    with pytest.raises(errors.AuthError):
+        api.tag_api.update_tag(
+            context_factory(
+                params={'metric': {'min': 0, 'max': 10}, **{'version': 1}},
                 user=user_factory(rank=model.User.RANK_ANONYMOUS)),
             {'tag_name': 'tag'})
 

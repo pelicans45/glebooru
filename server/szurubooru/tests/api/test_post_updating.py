@@ -18,6 +18,7 @@ def inject_config(config_injector):
             'posts:edit:flags': model.User.RANK_REGULAR,
             'posts:edit:thumbnail': model.User.RANK_REGULAR,
             'tags:create': model.User.RANK_MODERATOR,
+            'metrics:edit:posts': model.User.RANK_REGULAR,
         },
     })
 
@@ -143,6 +144,8 @@ def test_trying_to_update_non_existing(context_factory, user_factory):
     ({}, {'flags': '...'}),
     ({'content': '...'}, {}),
     ({'thumbnail': '...'}, {}),
+    ({}, {'metrics': '...'}),
+    ({}, {'metricRanges': '...'}),
 ])
 def test_trying_to_update_field_without_privileges(
         context_factory, post_factory, user_factory, files, params):
