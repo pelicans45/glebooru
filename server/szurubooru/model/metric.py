@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from szurubooru.model.base import Base
+from szurubooru.model.tag import TagName
 
 
 class PostMetric(Base):
@@ -88,17 +89,32 @@ class Metric(Base):
     post_metric_ranges = sa.orm.relationship(
         'PostMetricRange', back_populates='metric', cascade='all, delete-orphan')
 
+    tag_name = sa.orm.column_property(
+        (
+            sa.sql.expression.select([TagName.name])
+            .where(TagName.tag_id == tag_id)
+            .order_by(TagName.order)
+            .limit(1)
+            .as_scalar()
+        ))
+
     post_metric_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.count(PostMetric.post_id)])
-        .where(PostMetric.tag_id == tag_id)
-        .correlate_except(PostMetric))
+        (
+            sa.sql.expression.select(
+                [sa.sql.expression.func.count(PostMetric.post_id)])
+            .where(PostMetric.tag_id == tag_id)
+            .correlate_except(PostMetric)
+        ),
+        deferred=True)
 
     post_metric_range_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.count(PostMetricRange.post_id)])
-        .where(PostMetricRange.tag_id == tag_id)
-        .correlate_except(PostMetricRange))
+        (
+            sa.sql.expression.select(
+                [sa.sql.expression.func.count(PostMetricRange.post_id)])
+            .where(PostMetricRange.tag_id == tag_id)
+            .correlate_except(PostMetricRange)
+        ),
+        deferred=True)
 
     __mapper_args__ = {
         'version_id_col': version,

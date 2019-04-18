@@ -111,7 +111,7 @@ def update_or_create_post_metric(
     assert metric
     if metric.tag not in post.tags:
         raise PostMissingTagError(
-            'Post doesn\'t have tag %r' % metric.tag.names[0])
+            'Post doesn\'t have this tag.')
     if value < metric.min or value > metric.max:
         raise MetricValueOutOfRangeError(
             'Metric value %r out of range.' % value)
@@ -135,10 +135,11 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
             if field not in metric_data:
                 raise InvalidMetricError('Metric is missing %r field.' % field)
         value = float(metric_data['value'])
-        tag = tags.get_tag_by_name(metric_data['tag_name'])
+        tag_name = metric_data['tag_name']
+        tag = tags.get_tag_by_name(tag_name)
         if tag.metric is None:
             raise MetricDoesNotExistsError(
-                'Tag %r has no metric.' % tag.names[0])
+                'Tag %r has no metric.' % tag_name)
         post_metric = update_or_create_post_metric(post, tag.metric, value)
         post.metrics.append(post_metric)
 
@@ -152,7 +153,7 @@ def update_or_create_post_metric_range(
     assert metric
     if metric.tag not in post.tags:
         raise PostMissingTagError(
-            'Post doesn\'t have tag %r' % metric.tag.names[0])
+            'Post doesn\'t have this tag.')
     for value in (low, high):
         if value < metric.min or value > metric.max:
             raise MetricValueOutOfRangeError(
@@ -186,10 +187,11 @@ def update_or_create_post_metric_ranges(
                     'Metric range is missing %r field.' % field)
         low = float(metric_data['low'])
         high = float(metric_data['high'])
-        tag = tags.get_tag_by_name(metric_data['tag_name'])
+        tag_name = metric_data['tag_name']
+        tag = tags.get_tag_by_name(tag_name)
         if tag.metric is None:
             raise MetricDoesNotExistsError(
-                'Tag %r has no metric.' % tag.names[0])
+                'Tag %r has no metric.' % tag_name)
         post_metric_range = update_or_create_post_metric_range(
             post, tag.metric, low, high)
         post.metric_ranges.append(post_metric_range)

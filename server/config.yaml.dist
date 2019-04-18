@@ -120,6 +120,7 @@ privileges:
     'metrics:create':               power
     'metrics:edit:bounds':          power
     'metrics:edit:posts':           regular
+    'metrics:list':                 regular
 
     'comments:create':              regular
     'comments:delete:any':          moderator
