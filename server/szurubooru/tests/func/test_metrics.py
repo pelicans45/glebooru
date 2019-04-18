@@ -13,6 +13,19 @@ def test_serialize_metric(tag_factory):
     }
 
 
+def test_serialize_post_metric(tag_factory, metric_factory):
+    tag = tag_factory(names=['mytag'])
+    metric = metric_factory(tag)
+    db.session.add_all([tag, metric])
+    db.session.flush()
+    post_metric = model.PostMetric(metric=metric, value=-12.3)
+    result = metrics.serialize_post_metric(post_metric)
+    assert result == {
+        'tag_name': 'mytag',
+        'value': -12.3,
+    }
+
+
 def test_try_get_post_metric(
         post_factory, metric_factory, post_metric_factory):
     post = post_factory()

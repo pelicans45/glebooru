@@ -40,12 +40,37 @@ class MetricSerializer(serialization.BaseSerializer):
         return self.metric.max
 
 
+class PostMetricSerializer(serialization.BaseSerializer):
+    def __init__(self, post_metric: model.PostMetric):
+        self.post_metric = post_metric
+
+    def _serializers(self) -> Dict[str, Callable[[], Any]]:
+        return {
+            'tag_name': self.serialize_tag_name,
+            'value': self.serialize_value,
+        }
+
+    def serialize_tag_name(self) -> Any:
+        return self.post_metric.metric.tag_name
+
+    def serialize_value(self) -> Any:
+        return self.post_metric.value
+
+
 def serialize_metric(
         metric: model.Metric,
         options: List[str] = []) -> Optional[rest.Response]:
     if not metric:
         return None
     return MetricSerializer(metric).serialize(options)
+
+
+def serialize_post_metric(
+        post_metric: model.PostMetric,
+        options: List[str] = []) -> Optional[rest.Response]:
+    if not post_metric:
+        return None
+    return PostMetricSerializer(post_metric).serialize(options)
 
 
 def try_get_post_metric(

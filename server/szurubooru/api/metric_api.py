@@ -3,13 +3,21 @@ from szurubooru import db, model, search, rest
 from szurubooru.func import auth, metrics, snapshots, serialization, tags
 
 
-_search_executor_config = search.configs.PostSearchConfig()
+_search_executor_config = search.configs.PostMetricSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
 
 
-def _serialize(ctx: rest.Context, metric: model.Metric) -> rest.Response:
+def _serialize_metric(
+        ctx: rest.Context, metric: model.Metric) -> rest.Response:
     return metrics.serialize_metric(
         metric, options=serialization.get_serialization_options(ctx)
+    )
+
+
+def _serialize_post_metric(
+        ctx: rest.Context, post_metric: model.PostMetric) -> rest.Response:
+    return metrics.serialize_post_metric(
+        post_metric, options=serialization.get_serialization_options(ctx)
     )
 
 
@@ -19,7 +27,7 @@ def get_post_metrics(
     auth.verify_privilege(ctx.user, 'metrics:list')
     _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(
-        ctx, lambda post_metric: _serialize(ctx, post_metric))
+        ctx, lambda post_metric: _serialize_post_metric(ctx, post_metric))
 
 
 @rest.routes.post('/metrics/?')
@@ -35,4 +43,4 @@ def create_metric(
     ctx.session.flush()
     # snapshots.create(metric, ctx.user)
     ctx.session.commit()
-    return _serialize(ctx, metric)
+    return _serialize_metric(ctx, metric)
