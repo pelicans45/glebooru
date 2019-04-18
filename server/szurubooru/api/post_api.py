@@ -137,7 +137,12 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         posts.update_post_thumbnail(post, ctx.get_file('thumbnail'))
     if ctx.has_file('metrics'):
         auth.verify_privilege(ctx.user, 'metrics:edit:posts')
-        metrics.update_or_create_post_metrics(post, ctx.get_param_as_list('metrics'))
+        metrics.update_or_create_post_metrics(
+            post, ctx.get_param_as_list('metrics'))
+    if ctx.has_file('metricRanges'):
+        auth.verify_privilege(ctx.user, 'metrics:edit:posts')
+        metrics.update_or_create_post_metric_ranges(
+            post, ctx.get_param_as_list('metricRanges'))
 
     post.last_edit_time = datetime.utcnow()
     ctx.session.flush()

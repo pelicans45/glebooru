@@ -274,6 +274,22 @@ def post_metric_factory(post_factory, metric_factory):
 
 
 @pytest.fixture
+def post_metric_range_factory(post_factory, metric_factory):
+    def factory(post=None, metric=None, low=None, high=None):
+        if post is None:
+            post = post_factory()
+        if metric is None:
+            metric = metric_factory()
+        if low is None:
+            low = metric.min
+        if high is None:
+            high = metric.max
+        return model.PostMetricRange(
+            post=post, metric=metric, low=low, high=high)
+    return factory
+
+
+@pytest.fixture
 def read_asset():
     def get(path):
         path = os.path.join(os.path.dirname(__file__), 'assets', path)

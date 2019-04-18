@@ -54,7 +54,7 @@ class PostMetricRange(Base):
         index=True)
     version = sa.Column('version', sa.Integer, default=1, nullable=False)
     low = sa.Column('low', sa.Float, nullable=False)
-    high = sa.Column('low', sa.Float, nullable=False)
+    high = sa.Column('high', sa.Float, nullable=False)
 
     post = sa.orm.relationship('Post')
     metric = sa.orm.relationship('Metric', back_populates='post_metric_ranges')
