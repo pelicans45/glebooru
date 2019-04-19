@@ -2,7 +2,7 @@ from datetime import datetime
 from unittest.mock import patch
 import pytest
 from szurubooru import api, db, model, errors
-from szurubooru.func import posts, tags, snapshots, net
+from szurubooru.func import posts, tags, metrics, snapshots, net
 
 
 @pytest.fixture(autouse=True)
@@ -41,6 +41,8 @@ def test_post_updating(
             patch('szurubooru.func.posts.update_post_flags'), \
             patch('szurubooru.func.posts.serialize_post'), \
             patch('szurubooru.func.snapshots.modify'), \
+            patch('szurubooru.func.metrics.update_or_create_post_metrics'), \
+            patch('szurubooru.func.metrics.update_or_create_post_metric_ranges'), \
             fake_datetime('1997-01-01'):
         posts.serialize_post.return_value = 'serialized post'
 
@@ -54,6 +56,8 @@ def test_post_updating(
                     'source': 'source',
                     'notes': ['note1', 'note2'],
                     'flags': ['flag1', 'flag2'],
+                    'metrics': [{'tag_name': 'tag1', 'value': 1.2}],
+                    'metricRanges': [{'tag_name': 'tag2', 'low': 1, 'high': 2}],
                 },
                 files={
                     'content': 'post-content',
@@ -78,6 +82,10 @@ def test_post_updating(
         posts.serialize_post.assert_called_once_with(
             post, auth_user, options=[])
         snapshots.modify.assert_called_once_with(post, auth_user)
+        metrics.update_or_create_post_metrics.assert_called_once_with(
+            post, [{'tag_name': 'tag1', 'value': 1.2}])
+        metrics.update_or_create_post_metric_ranges.assert_called_once_with(
+            post, [{'tag_name': 'tag2', 'low': 1, 'high': 2}])
         assert post.last_edit_time == datetime(1997, 1, 1)
 
 
