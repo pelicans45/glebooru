@@ -168,7 +168,7 @@ def tag_category_factory():
 
 @pytest.fixture
 def tag_factory():
-    def factory(names=None, category=None):
+    def factory(names=None, category=None, metric=None):
         if not category:
             category = model.TagCategory(get_unique_name())
             db.session.add(category)
@@ -178,6 +178,8 @@ def tag_factory():
             tag.names.append(model.TagName(name, i))
         tag.category = category
         tag.creation_time = datetime(1996, 1, 1)
+        if metric:
+            tag.metric = metric
         return tag
     return factory
 
@@ -254,35 +256,44 @@ def post_favorite_factory(user_factory, post_factory):
 @pytest.fixture
 def metric_factory(tag_factory):
     def factory(tag=None, min=0, max=10):
-        if tag is None:
+        if not tag:
             tag = tag_factory()
         return model.Metric(tag=tag, min=min, max=max)
     return factory
 
 
 @pytest.fixture
-def post_metric_factory(post_factory, metric_factory):
-    def factory(post=None, metric=None, value=None):
-        if post is None:
+def post_metric_factory(post_factory, tag_factory, metric_factory):
+    def factory(post=None, metric=None, value=None, tag=None, tag_name=None):
+        if not post:
             post = post_factory()
-        if metric is None:
+        if tag_name:
+            tag = tag_factory(names=[tag_name])
+        if tag:
+            metric = metric_factory(tag=tag)
+        elif not metric:
             metric = metric_factory()
-        if value is None:
+        if not value:
             value = (metric.min + metric.max)/2
         return model.PostMetric(post=post, metric=metric, value=value)
     return factory
 
 
 @pytest.fixture
-def post_metric_range_factory(post_factory, metric_factory):
-    def factory(post=None, metric=None, low=None, high=None):
-        if post is None:
+def post_metric_range_factory(post_factory, tag_factory, metric_factory):
+    def factory(post=None, metric=None, low=None, high=None, tag=None,
+                tag_name=None):
+        if not post:
             post = post_factory()
-        if metric is None:
+        if tag_name:
+            tag = tag_factory(names=[tag_name])
+        if tag:
+            metric = metric_factory(tag=tag)
+        elif not metric:
             metric = metric_factory()
-        if low is None:
+        if not low:
             low = metric.min
-        if high is None:
+        if not high:
             high = metric.max
         return model.PostMetricRange(
             post=post, metric=metric, low=low, high=high)

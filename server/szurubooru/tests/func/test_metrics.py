@@ -26,6 +26,20 @@ def test_serialize_post_metric(tag_factory, metric_factory):
     }
 
 
+def test_serialize_post_metric_range(tag_factory, metric_factory):
+    tag = tag_factory(names=['mytag'])
+    metric = metric_factory(tag)
+    db.session.add_all([tag, metric])
+    db.session.flush()
+    post_metric_range = model.PostMetricRange(metric=metric, low=-1.2, high=3.4)
+    result = metrics.serialize_post_metric_range(post_metric_range)
+    assert result == {
+        'tag_name': 'mytag',
+        'low': -1.2,
+        'high': 3.4
+    }
+
+
 def test_try_get_post_metric(
         post_factory, metric_factory, post_metric_factory):
     post = post_factory()

@@ -57,6 +57,27 @@ class PostMetricSerializer(serialization.BaseSerializer):
         return self.post_metric.value
 
 
+class PostMetricRangeSerializer(serialization.BaseSerializer):
+    def __init__(self, post_metric_range: model.PostMetricRange):
+        self.post_metric_range = post_metric_range
+
+    def _serializers(self) -> Dict[str, Callable[[], Any]]:
+        return {
+            'tag_name': self.serialize_tag_name,
+            'low': self.serialize_low,
+            'high': self.serialize_high,
+        }
+
+    def serialize_tag_name(self) -> Any:
+        return self.post_metric_range.metric.tag_name
+
+    def serialize_low(self) -> Any:
+        return self.post_metric_range.low
+
+    def serialize_high(self) -> Any:
+        return self.post_metric_range.high
+
+
 def serialize_metric(
         metric: model.Metric,
         options: List[str] = []) -> Optional[rest.Response]:
@@ -71,6 +92,14 @@ def serialize_post_metric(
     if not post_metric:
         return None
     return PostMetricSerializer(post_metric).serialize(options)
+
+
+def serialize_post_metric_range(
+        post_metric_range: model.PostMetricRange,
+        options: List[str] = []) -> Optional[rest.Response]:
+    if not post_metric_range:
+        return None
+    return PostMetricRangeSerializer(post_metric_range).serialize(options)
 
 
 def get_all_metrics() -> List[model.Metric]:
