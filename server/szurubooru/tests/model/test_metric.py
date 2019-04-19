@@ -2,11 +2,12 @@ from szurubooru import db, model
 
 
 def test_saving_metric(post_factory, tag_factory):
-    post = post_factory()
     tag = tag_factory()
+    post = post_factory(tags=[tag])
     metric = model.Metric(tag=tag, min=1., max=10.)
     post_metric = model.PostMetric(metric=metric, post=post, value=5.5)
-    post_metric_range = model.PostMetricRange(metric=metric, post=post, low=2., high=8.)
+    post_metric_range = model.PostMetricRange(metric=metric, post=post,
+                                              low=2., high=8.)
     db.session.add_all([post, tag, metric, post_metric, post_metric_range])
     db.session.commit()
 
@@ -53,9 +54,9 @@ def test_saving_metric(post_factory, tag_factory):
 
 
 def test_cascade_delete_metric(post_factory, tag_factory):
-    post1 = post_factory()
-    post2 = post_factory()
     tag = tag_factory()
+    post1 = post_factory(tags=[tag])
+    post2 = post_factory(tags=[tag])
     metric = model.Metric(tag=tag, min=1., max=10.)
     post_metric1 = model.PostMetric(metric=metric, post=post1, value=2.3)
     post_metric2 = model.PostMetric(metric=metric, post=post2, value=4.5)
@@ -84,9 +85,9 @@ def test_cascade_delete_metric(post_factory, tag_factory):
 
 
 def test_cascade_delete_tag(post_factory, tag_factory):
-    post = post_factory()
     tag1 = tag_factory()
     tag2 = tag_factory()
+    post = post_factory(tags=[tag1, tag2])
     metric1 = model.Metric(tag=tag1, min=1., max=10.)
     metric2 = model.Metric(tag=tag2, min=2., max=20.)
     post_metric1 = model.PostMetric(metric=metric1, post=post, value=2.3)
@@ -97,7 +98,7 @@ def test_cascade_delete_tag(post_factory, tag_factory):
         metric=metric2, post=post, low=2, high=8)
     db.session.add_all([post, tag1, tag2, metric1, metric2, post_metric1,
                         post_metric2, post_metric_range1, post_metric_range2])
-    db.session.flush()
+    db.session.commit()
 
     assert not db.session.dirty
     assert db.session.query(model.Post).count() == 1
@@ -118,9 +119,9 @@ def test_cascade_delete_tag(post_factory, tag_factory):
 
 
 def test_cascade_delete_post(post_factory, tag_factory):
-    post1 = post_factory()
-    post2 = post_factory()
     tag = tag_factory()
+    post1 = post_factory(tags=[tag])
+    post2 = post_factory(tags=[tag])
     metric = model.Metric(tag=tag, min=1., max=10.)
     post_metric1 = model.PostMetric(metric=metric, post=post1, value=2.3)
     post_metric2 = model.PostMetric(metric=metric, post=post2, value=4.5)
@@ -130,7 +131,7 @@ def test_cascade_delete_post(post_factory, tag_factory):
         metric=metric, post=post2, low=2, high=8)
     db.session.add_all([post1, post2, tag, metric, post_metric1, post_metric2,
                         post_metric_range1, post_metric_range2])
-    db.session.flush()
+    db.session.commit()
 
     assert not db.session.dirty
     assert db.session.query(model.Post).count() == 2
@@ -151,11 +152,14 @@ def test_cascade_delete_post(post_factory, tag_factory):
 
 
 def test_delete_post_metric_no_cascade(
-        metric_factory, post_metric_factory, post_metric_range_factory):
-    metric = metric_factory()
-    post_metric = post_metric_factory(metric=metric)
-    post_metric_range = post_metric_range_factory(metric=metric)
-    db.session.add_all([metric, post_metric, post_metric_range])
+        post_factory, tag_factory, metric_factory,
+        post_metric_factory, post_metric_range_factory):
+    tag = tag_factory()
+    post = post_factory(tags=[tag])
+    metric = metric_factory(tag=tag)
+    post_metric = post_metric_factory(post=post, metric=metric)
+    post_metric_range = post_metric_range_factory(post=post, metric=metric)
+    db.session.add(metric)
     db.session.commit()
     assert len(metric.post_metrics) == 1
 
@@ -164,33 +168,6 @@ def test_delete_post_metric_no_cascade(
     db.session.commit()
     assert len(metric.post_metrics) == 0
     assert len(metric.post_metric_ranges) == 0
-
-
-def test_cascade_delete_on_remove_metric_from_post(
-        post_factory, post_metric_factory, post_metric_range_factory):
-    post = post_factory()
-    post_metric = post_metric_factory(post=post)
-    post_metric_range = post_metric_range_factory(post=post)
-    db.session.add_all([post, post_metric, post_metric_range])
-    db.session.commit()
-
-    assert not db.session.dirty
-    assert db.session.query(model.Post).count() == 1
-    assert db.session.query(model.Tag).count() == 2
-    assert db.session.query(model.Metric).count() == 2
-    assert db.session.query(model.PostMetric).count() == 1
-    assert db.session.query(model.PostMetricRange).count() == 1
-
-    post.metrics.clear()
-    post.metric_ranges.clear()
-    db.session.commit()
-
-    assert not db.session.dirty
-    assert db.session.query(model.Post).count() == 1
-    assert db.session.query(model.Tag).count() == 2
-    assert db.session.query(model.Metric).count() == 2
-    assert db.session.query(model.PostMetric).count() == 0
-    assert db.session.query(model.PostMetricRange).count() == 0
 
 
 def test_tag_without_metric(tag_factory):
@@ -208,9 +185,9 @@ def test_tag_without_metric(tag_factory):
 
 
 def test_metric_counts(post_factory, metric_factory):
-    post1 = post_factory()
-    post2 = post_factory()
     metric = metric_factory()
+    post1 = post_factory(tags=[metric.tag])
+    post2 = post_factory(tags=[metric.tag])
     post_metric1 = model.PostMetric(post=post1, metric=metric, value=1.2)
     post_metric2 = model.PostMetric(post=post2, metric=metric, value=3.4)
     post_metric_range = model.PostMetricRange(post=post1, metric=metric, low=5.6, high=7.8)
@@ -218,3 +195,34 @@ def test_metric_counts(post_factory, metric_factory):
     db.session.flush()
     assert metric.post_metric_count == 2
     assert metric.post_metric_range_count == 1
+
+
+def test_cascade_on_remove_tag_from_post(
+        post_factory, tag_factory, metric_factory,
+        post_metric_factory, post_metric_range_factory):
+    tag = tag_factory()
+    post = post_factory(tags=[tag])
+    metric = metric_factory(tag=tag)
+    post_metric = post_metric_factory(post=post, metric=metric)
+    post_metric_range = post_metric_range_factory(post=post, metric=metric)
+    db.session.add_all([post, tag, metric, post_metric, post_metric_range])
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.PostTag).count() == 1
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 1
+    assert db.session.query(model.PostMetricRange).count() == 1
+
+    post.tags.clear()
+    db.session.commit()
+
+    assert not db.session.dirty
+    assert db.session.query(model.Post).count() == 1
+    assert db.session.query(model.Tag).count() == 1
+    assert db.session.query(model.PostTag).count() == 0
+    assert db.session.query(model.Metric).count() == 1
+    assert db.session.query(model.PostMetric).count() == 0
+    assert db.session.query(model.PostMetricRange).count() == 0

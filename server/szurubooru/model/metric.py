@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from szurubooru.model.base import Base
+from szurubooru.model.post import PostTag
 from szurubooru.model.tag import TagName
 
 
@@ -26,9 +27,18 @@ class PostMetric(Base):
     post = sa.orm.relationship('Post')
     metric = sa.orm.relationship('Metric', back_populates='post_metrics')
 
+    __table_args__ = (sa.ForeignKeyConstraint(
+        (post_id, tag_id),
+        (PostTag.post_id, PostTag.tag_id),
+        ondelete='cascade'),
+    )
     __mapper_args__ = {
         'version_id_col': version,
         'version_id_generator': False,
+        # when deleting tag or post, cascade will ensure this post metric is
+        # also deleted, but sqlalchemy will try to delete it twice because of
+        # the cascade on foreign key into PostTag. This silences the error:
+        'confirm_deleted_rows': False,
     }
 
 
@@ -60,9 +70,18 @@ class PostMetricRange(Base):
     post = sa.orm.relationship('Post')
     metric = sa.orm.relationship('Metric', back_populates='post_metric_ranges')
 
+    __table_args__ = (sa.ForeignKeyConstraint(
+        (post_id, tag_id),
+        (PostTag.post_id, PostTag.tag_id),
+        ondelete='cascade'),
+    )
     __mapper_args__ = {
         'version_id_col': version,
         'version_id_generator': False,
+        # when deleting tag or post, cascade will ensure this post metric is
+        # also deleted, but sqlalchemy will try to delete it twice because of
+        # the cascade on foreign key into PostTag. This silences the error:
+        'confirm_deleted_rows': False,
     }
 
 
@@ -92,18 +111,18 @@ class Metric(Base):
     tag_name = sa.orm.column_property(
         (
             sa.sql.expression.select([TagName.name])
-            .where(TagName.tag_id == tag_id)
-            .order_by(TagName.order)
-            .limit(1)
-            .as_scalar()
+                .where(TagName.tag_id == tag_id)
+                .order_by(TagName.order)
+                .limit(1)
+                .as_scalar()
         ))
 
     post_metric_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
                 [sa.sql.expression.func.count(PostMetric.post_id)])
-            .where(PostMetric.tag_id == tag_id)
-            .correlate_except(PostMetric)
+                .where(PostMetric.tag_id == tag_id)
+                .correlate_except(PostMetric)
         ),
         deferred=True)
 
@@ -111,8 +130,8 @@ class Metric(Base):
         (
             sa.sql.expression.select(
                 [sa.sql.expression.func.count(PostMetricRange.post_id)])
-            .where(PostMetricRange.tag_id == tag_id)
-            .correlate_except(PostMetricRange)
+                .where(PostMetricRange.tag_id == tag_id)
+                .correlate_except(PostMetricRange)
         ),
         deferred=True)
 

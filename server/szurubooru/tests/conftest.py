@@ -32,11 +32,18 @@ class QueryCounter:
         return self._statements
 
 
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.close()
+
+
 if not config.config['test_database']:
     raise RuntimeError('Test database not configured.')
 
 _query_counter = QueryCounter()
 _engine = sa.create_engine(config.config['test_database'])
+sa.event.listen(_engine, 'connect', _set_sqlite_pragma)
 model.Base.metadata.drop_all(bind=_engine)
 model.Base.metadata.create_all(bind=_engine)
 sa.event.listen(
@@ -198,7 +205,8 @@ def post_factory(skip_post_hashing):
             id=None,
             safety=model.Post.SAFETY_SAFE,
             type=model.Post.TYPE_IMAGE,
-            checksum='...'):
+            checksum='...',
+            tags=[]):
         post = model.Post()
         post.post_id = id
         post.safety = safety
@@ -207,6 +215,7 @@ def post_factory(skip_post_hashing):
         post.flags = []
         post.mime_type = 'application/octet-stream'
         post.creation_time = datetime(1996, 1, 1)
+        post.tags = tags
         return post
     return factory
 

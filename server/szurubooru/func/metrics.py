@@ -237,7 +237,7 @@ def update_or_create_post_metric_ranges(
     Overwrites any existing post metrics, deletes other existing post metrics.
     """
     assert post
-    post.metrics = []
+    post.metric_ranges = []
     for metric_data in metric_ranges_data:
         for field in ('tag_name', 'low', 'high'):
             if field not in metric_data:

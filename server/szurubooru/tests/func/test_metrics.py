@@ -42,26 +42,26 @@ def test_serialize_post_metric_range(tag_factory, metric_factory):
 
 def test_try_get_post_metric(
         post_factory, metric_factory, post_metric_factory):
-    post = post_factory()
-    metric = metric_factory()
+    metric1 = metric_factory()
     metric2 = metric_factory()
-    post_metric = post_metric_factory(post=post, metric=metric)
-    db.session.add_all([post, metric, metric2, post_metric])
+    post = post_factory(tags=[metric1.tag, metric2.tag])
+    post_metric = post_metric_factory(post=post, metric=metric1)
+    db.session.add_all([post, metric1, metric2, post_metric])
     db.session.flush()
     assert metrics.try_get_post_metric(post, metric2) is None
-    assert metrics.try_get_post_metric(post, metric) is post_metric
+    assert metrics.try_get_post_metric(post, metric1) is post_metric
 
 
 def test_try_get_post_metric_range(
         post_factory, metric_factory, post_metric_range_factory):
-    post = post_factory()
-    metric = metric_factory()
+    metric1 = metric_factory()
     metric2 = metric_factory()
-    post_metric_range = post_metric_range_factory(post=post, metric=metric)
-    db.session.add_all([post, metric, metric2, post_metric_range])
+    post = post_factory(tags=[metric1.tag, metric2.tag])
+    post_metric_range = post_metric_range_factory(post=post, metric=metric1)
+    db.session.add_all([post, metric1, metric2, post_metric_range])
     db.session.flush()
     assert metrics.try_get_post_metric_range(post, metric2) is None
-    assert metrics.try_get_post_metric_range(post, metric) is post_metric_range
+    assert metrics.try_get_post_metric_range(post, metric1) is post_metric_range
 
 
 def test_get_all_metrics(metric_factory):
@@ -137,33 +137,25 @@ def test_update_or_create_post_metric_without_tag(post_factory, metric_factory):
 
 
 def test_update_or_create_post_metric_with_value_out_of_range(
-        post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+        post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     with pytest.raises(metrics.MetricValueOutOfRangeError):
         metrics.update_or_create_post_metric(post, metric, -99)
 
 
-def test_update_or_create_post_metric_create(
-        post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+def test_update_or_create_post_metric_create(post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     db.session.add(metric)
     db.session.flush()
     post_metric = metrics.update_or_create_post_metric(post, metric, 1.5)
     assert post_metric.value == 1.5
 
 
-def test_update_or_create_post_metric_update(
-        post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+def test_update_or_create_post_metric_update(post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     post_metric = model.PostMetric(post=post, metric=metric, value=1.2)
     db.session.add(post_metric)
     db.session.flush()
@@ -200,9 +192,8 @@ def test_update_or_create_post_metrics_with_missing_fields(
 
 def test_update_or_create_post_metrics_with_invalid_tag(
         post_factory, tag_factory):
-    post = post_factory()
     tag = tag_factory(names=['tag1'])
-    post.tags = [tag]
+    post = post_factory(tags=[tag])
     db.session.add(tag)
     db.session.flush()
     data = [{'tag_name': 'tag1', 'value': 2}]
@@ -212,10 +203,9 @@ def test_update_or_create_post_metrics_with_invalid_tag(
 
 def test_update_or_create_post_metrics(
         post_factory, tag_factory, metric_factory):
-    post = post_factory()
     tag1 = tag_factory(names=['tag1'])
     tag2 = tag_factory(names=['tag2'])
-    post.tags = [tag1, tag2]
+    post = post_factory(tags=[tag1, tag2])
     metric1 = metric_factory(tag1)
     metric2 = metric_factory(tag2)
     db.session.add_all([metric1, metric2])
@@ -233,6 +223,31 @@ def test_update_or_create_post_metrics(
     assert post.metrics[1].value == 3.4
 
 
+def test_update_or_create_post_metrics_with_trim(
+        post_factory, tag_factory, metric_factory, post_metric_factory):
+    tag1 = tag_factory(names=['tag1'])
+    tag2 = tag_factory(names=['tag2'])
+    post = post_factory(tags=[tag1, tag2])
+    metric1 = metric_factory(tag1)
+    metric2 = metric_factory(tag2)
+    post_metric = post_metric_factory(post=post, metric=metric1, value=1.2)
+    db.session.add_all([post, tag1, tag2, metric1, metric2, post_metric])
+    db.session.flush()
+    assert len(post.metrics) == 1
+    assert post.metrics[0].metric == metric1
+    assert post.metrics[0].value == 1.2
+
+    data = [
+        {'tag_name': 'tag2', 'value': 3.4},
+    ]
+    metrics.update_or_create_post_metrics(post, data)
+    db.session.flush()
+
+    assert len(post.metrics) == 1
+    assert post.metrics[0].metric == metric2
+    assert post.metrics[0].value == 3.4
+
+
 # Post metric ranges
 
 def test_update_or_create_post_metric_range_without_tag(
@@ -247,21 +262,17 @@ def test_update_or_create_post_metric_range_without_tag(
     (-99, 1), (1, 99),
 ])
 def test_update_or_create_post_metric_range_with_values_out_of_range(
-        low, high, post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+        low, high, post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     with pytest.raises(metrics.MetricValueOutOfRangeError):
         metrics.update_or_create_post_metric_range(post, metric, low, high)
 
 
 def test_update_or_create_post_metric_range_create(
-        post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+        post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     db.session.add(metric)
     db.session.flush()
     post_metric_range = metrics.update_or_create_post_metric_range(
@@ -271,11 +282,9 @@ def test_update_or_create_post_metric_range_create(
 
 
 def test_update_or_create_post_metric_range_update(
-        post_factory, tag_factory, metric_factory):
-    post = post_factory()
-    tag = tag_factory()
-    post.tags = [tag]
-    metric = metric_factory(tag)
+        post_factory, metric_factory):
+    metric = metric_factory()
+    post = post_factory(tags=[metric.tag])
     post_metric_range = model.PostMetricRange(
         post=post, metric=metric, low=2, high=3)
     db.session.add(post_metric_range)
@@ -308,18 +317,16 @@ def test_update_or_create_post_metric_ranges_missing_tag(
 ])
 def test_update_or_create_post_metric_ranges_with_missing_fields(
         params, post_factory, tag_factory):
-    post = post_factory()
     tag = tag_factory(names=['tag'])
-    post.tags = [tag]
+    post = post_factory(tags=[tag])
     with pytest.raises(metrics.InvalidMetricError):
         metrics.update_or_create_post_metric_ranges(post, params)
 
 
 def test_update_or_create_post_metric_ranges_with_invalid_tag(
         post_factory, tag_factory):
-    post = post_factory()
     tag = tag_factory(names=['tag1'])
-    post.tags = [tag]
+    post = post_factory(tags=[tag])
     db.session.add(tag)
     db.session.flush()
     data = [{'tag_name': 'tag1', 'low': 2, 'high': 3}]
@@ -329,9 +336,8 @@ def test_update_or_create_post_metric_ranges_with_invalid_tag(
 
 def test_update_or_create_post_metric_ranges_with_invalid_values(
         post_factory, tag_factory, metric_factory):
-    post = post_factory()
     tag = tag_factory(names=['tag1'])
-    post.tags = [tag]
+    post = post_factory(tags=[tag])
     metric = metric_factory(tag=tag)
     db.session.add_all([metric, tag])
     db.session.flush()
@@ -344,10 +350,9 @@ def test_update_or_create_post_metric_ranges_with_invalid_values(
 
 def test_update_or_create_post_metric_ranges(
         post_factory, tag_factory, metric_factory):
-    post = post_factory()
     tag1 = tag_factory(names=['tag1'])
     tag2 = tag_factory(names=['tag2'])
-    post.tags = [tag1, tag2]
+    post = post_factory(tags=[tag1, tag2])
     metric1 = metric_factory(tag1)
     metric2 = metric_factory(tag2)
     db.session.add_all([metric1, metric2])
@@ -365,3 +370,31 @@ def test_update_or_create_post_metric_ranges(
     assert post.metric_ranges[0].high == 3
     assert post.metric_ranges[1].low == 4
     assert post.metric_ranges[1].high == 5
+
+
+def test_update_or_create_post_metric_ranges_with_trim(
+        post_factory, tag_factory, metric_factory, post_metric_range_factory):
+    tag1 = tag_factory(names=['tag1'])
+    tag2 = tag_factory(names=['tag2'])
+    post = post_factory(tags=[tag1, tag2])
+    metric1 = metric_factory(tag1)
+    metric2 = metric_factory(tag2)
+    post_metric_range = post_metric_range_factory(
+        post=post, metric=metric1, low=1, high=2)
+    db.session.add_all([post, tag1, tag2, metric1, metric2, post_metric_range])
+    db.session.flush()
+    assert len(post.metric_ranges) == 1
+    assert post.metric_ranges[0].metric == metric1
+    assert post.metric_ranges[0].low == 1
+    assert post.metric_ranges[0].high == 2
+
+    data = [
+        {'tag_name': 'tag2', 'low': 3, 'high': 4},
+    ]
+    metrics.update_or_create_post_metric_ranges(post, data)
+    db.session.flush()
+
+    assert len(post.metric_ranges) == 1
+    assert post.metric_ranges[0].metric == metric2
+    assert post.metric_ranges[0].low == 3
+    assert post.metric_ranges[0].high == 4
