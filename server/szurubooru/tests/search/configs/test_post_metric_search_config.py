@@ -37,8 +37,10 @@ def test_refresh_metrics(tag_factory, metric_factory):
 
 @pytest.mark.parametrize('input,expected_tag_names', [
     ('', ['t1:10', 't2:20.5', 't1:30', 't2:40']),
+    ('*', ['t1:10', 't2:20.5', 't1:30', 't2:40']),
     ('t1', ['t1:10', 't1:30']),
     ('t2', ['t2:20.5', 't2:40']),
+    ('t*', ['t1:10', 't2:20.5', 't1:30', 't2:40']),
     ('t1,t2', ['t1:10', 't2:20.5', 't1:30', 't2:40']),
     ('T1,T2', ['t1:10', 't2:20.5', 't1:30', 't2:40']),
 ])
@@ -55,6 +57,30 @@ def test_filter_anonymous(
     t2_40 = post_metric_factory(metric=metric2, value=40)
     db.session.add_all([tag1, tag2, metric1, metric2,
                         t1_10, t1_30, t2_20, t2_40])
+    db.session.flush()
+    verify_unpaged(input, expected_tag_names)
+
+
+@pytest.mark.parametrize('input,expected_tag_names', [
+    ('t:13', []),
+    ('t:10', ['t:10']),
+    ('t:20.5', ['t:20.5']),
+    ('t:18.6..', ['t:20.5', 't:30', 't:40']),
+    ('t-min:18.6', ['t:20.5', 't:30', 't:40']),
+    ('t:..21.4', ['t:10', 't:20.5']),
+    ('t-max:21.4', ['t:10', 't:20.5']),
+    ('t:17..33', ['t:20.5', 't:30']),
+])
+def test_filter_by_value(
+        verify_unpaged, tag_factory, metric_factory, post_metric_factory,
+        input, expected_tag_names):
+    tag = tag_factory(names=['t'])
+    metric = metric_factory(tag)
+    t1 = post_metric_factory(metric=metric, value=10)
+    t2 = post_metric_factory(metric=metric, value=30)
+    t3 = post_metric_factory(metric=metric, value=20.5)
+    t4 = post_metric_factory(metric=metric, value=40)
+    db.session.add_all([tag, metric, t1, t2, t3, t4])
     db.session.flush()
     verify_unpaged(input, expected_tag_names)
 

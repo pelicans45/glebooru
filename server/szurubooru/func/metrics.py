@@ -73,6 +73,10 @@ def serialize_post_metric(
     return PostMetricSerializer(post_metric).serialize(options)
 
 
+def get_all_metrics() -> List[model.Metric]:
+    return db.session.query(model.Metric).all()
+
+
 def try_get_post_metric(
         post: model.Post,
         metric: model.Metric) -> Optional[model.PostMetric]:

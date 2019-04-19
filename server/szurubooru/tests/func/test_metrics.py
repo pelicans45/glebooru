@@ -50,6 +50,19 @@ def test_try_get_post_metric_range(
     assert metrics.try_get_post_metric_range(post, metric) is post_metric_range
 
 
+def test_get_all_metrics(metric_factory):
+    metric1 = metric_factory()
+    metric2 = metric_factory()
+    metric3 = metric_factory()
+    db.session.add_all([metric1, metric2, metric3])
+    db.session.flush()
+    all_metrics = metrics.get_all_metrics()
+    assert len(all_metrics) == 3
+    assert metric1 in all_metrics
+    assert metric2 in all_metrics
+    assert metric3 in all_metrics
+
+
 def test_create_metric(tag_factory):
     tag = tag_factory()
     db.session.add(tag)

@@ -22,12 +22,13 @@ def _serialize_post_metric(
 
 
 @rest.routes.get('/metrics/?')
-def get_post_metrics(
+def get_metrics(
         ctx: rest.Context, params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, 'metrics:list')
-    _search_executor_config.user = ctx.user
-    return _search_executor.execute_and_serialize(
-        ctx, lambda post_metric: _serialize_post_metric(ctx, post_metric))
+    all_metrics = metrics.get_all_metrics()
+    return {
+        'results': [_serialize_metric(ctx, metric) for metric in all_metrics]
+    }
 
 
 @rest.routes.post('/metrics/?')
@@ -44,3 +45,12 @@ def create_metric(
     # snapshots.create(metric, ctx.user)
     ctx.session.commit()
     return _serialize_metric(ctx, metric)
+
+
+@rest.routes.get('/post-metrics/?')
+def get_post_metrics(
+        ctx: rest.Context, params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, 'metrics:list')
+    _search_executor_config.user = ctx.user
+    return _search_executor.execute_and_serialize(
+        ctx, lambda post_metric: _serialize_post_metric(ctx, post_metric))
