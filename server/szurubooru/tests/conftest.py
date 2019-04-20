@@ -38,12 +38,14 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-if not config.config['test_database']:
+_test_db_url = config.config['test_database']
+if not _test_db_url:
     raise RuntimeError('Test database not configured.')
 
 _query_counter = QueryCounter()
-_engine = sa.create_engine(config.config['test_database'])
-sa.event.listen(_engine, 'connect', _set_sqlite_pragma)
+_engine = sa.create_engine(_test_db_url)
+if _test_db_url.startswith('sqlite'):
+    sa.event.listen(_engine, 'connect', _set_sqlite_pragma)
 model.Base.metadata.drop_all(bind=_engine)
 model.Base.metadata.create_all(bind=_engine)
 sa.event.listen(
