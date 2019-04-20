@@ -77,6 +77,16 @@ def test_get_all_metrics(metric_factory):
     assert metric3 in all_metrics
 
 
+def test_get_all_metric_tag_names(tag_factory, metric_factory):
+    tag1 = tag_factory(names=['abc', 'def'])
+    tag2 = tag_factory(names=['ghi'])
+    metric1 = metric_factory(tag=tag1)
+    metric2 = metric_factory(tag=tag2)
+    db.session.add_all([metric1, metric2])
+    db.session.flush()
+    assert metrics.get_all_metric_tag_names() == ['abc', 'def', 'ghi']
+
+
 def test_create_metric(tag_factory):
     tag = tag_factory()
     db.session.add(tag)

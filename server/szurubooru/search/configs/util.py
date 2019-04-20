@@ -108,6 +108,10 @@ def create_num_filter(
     return wrapper
 
 
+def create_float_filter(column: Any) -> SaQuery:
+    return create_num_filter(column, float_transformer)
+
+
 def apply_str_criterion_to_column(
         column: SaColumn,
         criterion: criteria.BaseCriterion,

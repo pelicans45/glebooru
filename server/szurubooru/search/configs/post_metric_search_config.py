@@ -1,22 +1,21 @@
-from typing import Tuple, Dict, List
+from typing import Dict
+
 import sqlalchemy as sa
+
 from szurubooru import db, model
-from szurubooru.func import util
-from szurubooru.search.typing import SaColumn, SaQuery
+from szurubooru.func import metrics, util
 from szurubooru.search.configs import util as search_util
 from szurubooru.search.configs.base_search_config import (
     BaseSearchConfig, Filter)
+from szurubooru.search.typing import SaQuery
 
 
 class PostMetricSearchConfig(BaseSearchConfig):
     def __init__(self) -> None:
-        self.all_metrics = []
+        self.all_metric_names = []
 
     def refresh_metrics(self) -> None:
-        self.all_metrics = (
-            db.session.query(model.Metric)
-            .options(sa.orm.lazyload('*'))
-            .all())
+        self.all_metric_names = metrics.get_all_metric_tag_names()
 
     def create_filter_query(self, _disable_eager_loads: bool) -> SaQuery:
         self.refresh_metrics()
@@ -41,7 +40,5 @@ class PostMetricSearchConfig(BaseSearchConfig):
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
-        num_filter = search_util.create_num_filter(
-            model.PostMetric.value,
-            transformer=search_util.float_transformer)
-        return {metric.tag_name: num_filter for metric in self.all_metrics}
+        num_filter = search_util.create_float_filter(model.PostMetric.value)
+        return {tag_name: num_filter for tag_name in self.all_metric_names}

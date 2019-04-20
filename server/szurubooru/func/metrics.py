@@ -1,6 +1,7 @@
+import sqlalchemy as sa
 from typing import Any, Optional, List, Dict, Callable
 from szurubooru import db, model, errors, rest
-from szurubooru.func import serialization, tags
+from szurubooru.func import serialization, tags, util
 
 
 class MetricDoesNotExistsError(errors.ValidationError):
@@ -29,15 +30,9 @@ class MetricSerializer(serialization.BaseSerializer):
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
-            'min': self.serialize_min,
-            'max': self.serialize_max,
+            'min': lambda: self.metric.min,
+            'max': lambda: self.metric.max,
         }
-
-    def serialize_min(self) -> Any:
-        return self.metric.min
-
-    def serialize_max(self) -> Any:
-        return self.metric.max
 
 
 class PostMetricSerializer(serialization.BaseSerializer):
@@ -46,15 +41,9 @@ class PostMetricSerializer(serialization.BaseSerializer):
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
-            'tag_name': self.serialize_tag_name,
-            'value': self.serialize_value,
+            'tag_name': lambda: self.post_metric.metric.tag_name,
+            'value': lambda: self.post_metric.value,
         }
-
-    def serialize_tag_name(self) -> Any:
-        return self.post_metric.metric.tag_name
-
-    def serialize_value(self) -> Any:
-        return self.post_metric.value
 
 
 class PostMetricRangeSerializer(serialization.BaseSerializer):
@@ -63,19 +52,10 @@ class PostMetricRangeSerializer(serialization.BaseSerializer):
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
-            'tag_name': self.serialize_tag_name,
-            'low': self.serialize_low,
-            'high': self.serialize_high,
+            'tag_name': lambda: self.post_metric_range.metric.tag_name,
+            'low': lambda: self.post_metric_range.low,
+            'high': lambda: self.post_metric_range.high,
         }
-
-    def serialize_tag_name(self) -> Any:
-        return self.post_metric_range.metric.tag_name
-
-    def serialize_low(self) -> Any:
-        return self.post_metric_range.low
-
-    def serialize_high(self) -> Any:
-        return self.post_metric_range.high
 
 
 def serialize_metric(
@@ -104,6 +84,14 @@ def serialize_post_metric_range(
 
 def get_all_metrics() -> List[model.Metric]:
     return db.session.query(model.Metric).all()
+
+
+def get_all_metric_tag_names() -> List[str]:
+    return [
+        tag_name.name for tag_name in util.flatten_list(
+            [metric.tag.names for metric in get_all_metrics()]
+        )
+    ]
 
 
 def try_get_post_metric(
