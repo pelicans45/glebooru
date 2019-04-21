@@ -217,12 +217,14 @@ def test_serialize_post(
             'metrics': [
                 {
                     'tag_name': 'tag1',
+                    'post_id': 1,
                     'value': -1.2
                 }
             ],
             'metricRanges': [
                 {
                     'tag_name': 'tag1',
+                    'post_id': 1,
                     'low': 2,
                     'high': 3
                 }

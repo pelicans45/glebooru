@@ -42,6 +42,7 @@ class PostMetricSerializer(serialization.BaseSerializer):
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
             'tag_name': lambda: self.post_metric.metric.tag_name,
+            'post_id': lambda: self.post_metric.post_id,
             'value': lambda: self.post_metric.value,
         }
 
@@ -53,6 +54,7 @@ class PostMetricRangeSerializer(serialization.BaseSerializer):
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
             'tag_name': lambda: self.post_metric_range.metric.tag_name,
+            'post_id': lambda: self.post_metric_range.post_id,
             'low': lambda: self.post_metric_range.low,
             'high': lambda: self.post_metric_range.high,
         }

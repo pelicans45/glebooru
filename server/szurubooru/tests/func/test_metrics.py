@@ -13,28 +13,33 @@ def test_serialize_metric(tag_factory):
     }
 
 
-def test_serialize_post_metric(tag_factory, metric_factory):
+def test_serialize_post_metric(post_factory, tag_factory, metric_factory):
     tag = tag_factory(names=['mytag'])
+    post = post_factory(id=456, tags=[tag])
     metric = metric_factory(tag)
-    db.session.add_all([tag, metric])
+    post_metric = model.PostMetric(post=post, metric=metric, value=-12.3)
+    db.session.add_all([post, tag, metric, post_metric])
     db.session.flush()
-    post_metric = model.PostMetric(metric=metric, value=-12.3)
     result = metrics.serialize_post_metric(post_metric)
     assert result == {
         'tag_name': 'mytag',
+        'post_id': 456,
         'value': -12.3,
     }
 
 
-def test_serialize_post_metric_range(tag_factory, metric_factory):
+def test_serialize_post_metric_range(post_factory, tag_factory, metric_factory):
     tag = tag_factory(names=['mytag'])
+    post = post_factory(id=456, tags=[tag])
     metric = metric_factory(tag)
-    db.session.add_all([tag, metric])
+    post_metric_range = model.PostMetricRange(
+        post=post, metric=metric, low=-1.2, high=3.4)
+    db.session.add_all([post, tag, metric, post_metric_range])
     db.session.flush()
-    post_metric_range = model.PostMetricRange(metric=metric, low=-1.2, high=3.4)
     result = metrics.serialize_post_metric_range(post_metric_range)
     assert result == {
         'tag_name': 'mytag',
+        'post_id': 456,
         'low': -1.2,
         'high': 3.4
     }
