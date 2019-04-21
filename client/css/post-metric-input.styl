@@ -1,0 +1,33 @@
+@import colors
+
+.metric-controls
+    margin-left: 1.4em
+    display: inline-block
+    color: $inactive-link-color
+
+ul.compact-unset-metrics, ul.compact-post-metrics
+    width: 100%
+    margin: 0.5em 0 0 0
+    padding: 0
+    li
+        margin: 0
+        width: 100%
+        line-height: 140%
+        overflow: hidden
+        text-overflow: ellipsis
+        transition: background-color 0.5s linear
+        a
+            display: inline
+        a:focus
+            outline: 0
+            box-shadow: inset 0 0 0 2px $main-color
+    i
+        padding-right: 0.4em
+
+ul.compact-unset-metrics, ul.compact-post-metrics
+    .metric-bounds
+        color: $inactive-link-color
+        unselectable()
+    .metric-bounds
+        font-size: 90%
+        margin-left: 0.7em

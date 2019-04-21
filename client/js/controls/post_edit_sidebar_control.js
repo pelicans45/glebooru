@@ -3,11 +3,11 @@
 const api = require('../api.js');
 const events = require('../events.js');
 const misc = require('../util/misc.js');
-const uri = require('../util/uri.js');
 const views = require('../util/views.js');
 const Note = require('../models/note.js');
 const Point = require('../models/point.js');
 const TagInputControl = require('./tag_input_control.js');
+const MetricInputControl = require('./metric_input_control.js');
 const ExpanderControl = require('../controls/expander_control.js');
 const FileDropperControl = require('../controls/file_dropper_control.js');
 
@@ -43,7 +43,6 @@ class PostEditSidebarControl extends events.EventTarget {
             canDeletePosts: api.hasPrivilege('posts:delete'),
             canFeaturePosts: api.hasPrivilege('posts:feature'),
             canMergePosts: api.hasPrivilege('posts:merge'),
-            escapeColons: uri.escapeColons,
         }));
 
         new ExpanderControl(
@@ -80,6 +79,11 @@ class PostEditSidebarControl extends events.EventTarget {
         if (this._tagInputNode) {
             this._tagControl = new TagInputControl(
                 this._tagInputNode, post.tags);
+        }
+
+        if (this._metricInputNode) {
+            this._metricControl = new MetricInputControl(
+                this._metricInputNode, post.tags, post.metrics);
         }
 
         if (this._contentInputNode) {
@@ -452,6 +456,10 @@ class PostEditSidebarControl extends events.EventTarget {
 
     get _noteTextareaNode() {
         return this._formNode.querySelector('.notes textarea');
+    }
+
+    get _metricInputNode() {
+        return this._formNode.querySelector('.metrics input');
     }
 
     enableForm() {
