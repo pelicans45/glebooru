@@ -109,23 +109,25 @@ def _create_metric_filter(name: str):
                 criterion: Optional[criteria.BaseCriterion],
                 negated: bool) -> SaQuery:
         assert criterion
-        tag_name_alias = sa.orm.aliased(model.TagName)
-        post_metric_alias = sa.orm.aliased(model.PostMetric)
-        expr = tag_name_alias.name == name
+        t = sa.orm.aliased(model.TagName)
+        pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + name)
+        expr = t.name == name
         expr = expr & search_util.apply_num_criterion_to_column(
-            post_metric_alias.value, criterion, search_util.float_transformer)
+            pm.value, criterion, search_util.float_transformer)
         if negated:
             expr = ~expr
         ret = (
             query
-            .join(post_metric_alias,
-                  post_metric_alias.post_id == model.Post.post_id)
-            .join(tag_name_alias,
-                  tag_name_alias.tag_id == post_metric_alias.tag_id)
+            .join(pm, pm.post_id == model.Post.post_id)
+            .join(t, t.tag_id == pm.tag_id)
             .filter(expr))
         return ret
-
     return wrapper
+
+
+def _create_metric_sort_column(metric_name: str):
+    pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + metric_name)
+    return pm.value
 
 
 class PostSearchConfig(BaseSearchConfig):
@@ -387,9 +389,10 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def sort_columns(self) -> Dict[str, Tuple[SaColumn, str]]:
-        # filters = {name: _create_metric_filter(name)
-        #            for name in self.all_metric_names}
-        {}.update(util.unalias_dict([
+        filters = {'metric-' + name:
+                   (_create_metric_sort_column(name), self.SORT_ASC)
+                   for name in self.all_metric_names}
+        filters.update(util.unalias_dict([
             (
                 ['random'],
                 (sa.sql.expression.func.random(), self.SORT_NONE)

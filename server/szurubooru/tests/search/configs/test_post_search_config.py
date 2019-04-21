@@ -750,12 +750,17 @@ def test_tumbleweed(
 
 
 @pytest.mark.parametrize('input,expected_post_ids', [
-    ('metric-a:1..3', [1, 2, 3]),
-    ('metric-a-min:2', [2, 3]),
-    ('metric-a:1.5..', [2, 3]),
-    ('c metric-a:3..', [3]),
-    ('metric-b:..2', [1, 2]),
-    ('metric-b:..1.9', [1]),
+    ('sort:id,asc metric-a:1..3', [1, 2, 3]),
+    ('sort:id,asc metric-a-min:2', [2, 3]),
+    ('sort:id,asc metric-a:1.5..', [2, 3]),
+    ('sort:id,asc metric-a:1..3 metric-b:2..', [2]),
+    ('sort:id,asc c metric-a:3..', [3]),
+    ('sort:id,asc metric-b:..2', [1, 2]),
+    ('sort:id,asc metric-b:..1.9', [1]),
+    ('metric-a:1..3 sort:metric-a', [1, 2, 3]),
+    ('metric-a:1..3 sort:metric-a,desc', [3, 2, 1]),
+    ('metric-a:1..3 metric-b:1..3 sort:metric-b,desc', [2, 1]),
+    ('metric-a:2..3 metric-b:1..3 sort:metric-b,desc', [2]),
 ])
 def test_metrics(
         input,
@@ -786,4 +791,4 @@ def test_metrics(
                         metric_a, metric_b, metric_c,
                         a1, b1, c1, a2, b2, a3, c3])
     db.session.flush()
-    verify_unpaged(input, expected_post_ids)
+    verify_unpaged(input, expected_post_ids, True)
