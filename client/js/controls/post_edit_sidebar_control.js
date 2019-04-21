@@ -7,7 +7,7 @@ const views = require('../util/views.js');
 const Note = require('../models/note.js');
 const Point = require('../models/point.js');
 const TagInputControl = require('./tag_input_control.js');
-const MetricInputControl = require('./metric_input_control.js');
+const PostMetricInputControl = require('./post_metric_input_control.js');
 const ExpanderControl = require('../controls/expander_control.js');
 const FileDropperControl = require('../controls/file_dropper_control.js');
 
@@ -82,8 +82,8 @@ class PostEditSidebarControl extends events.EventTarget {
         }
 
         if (this._metricInputNode) {
-            this._metricControl = new MetricInputControl(
-                this._metricInputNode, post.tags, post.metrics);
+            this._metricControl = new PostMetricInputControl(
+                this._metricInputNode, post);
         }
 
         if (this._contentInputNode) {

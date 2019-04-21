@@ -406,7 +406,8 @@ function getTemplate(templatePath) {
             makeElement:       makeElement,
             makeCssName:       misc.makeCssName,
             makeNumericInput:  makeNumericInput,
-            formatClientLink:  uri.formatClientLink
+            formatClientLink:  uri.formatClientLink,
+            escapeColons:      uri.escapeColons,
         });
         return htmlToDom(templateFactory(ctx));
     };

@@ -8,9 +8,11 @@ class PostMetric extends events.EventTarget {
         this._updateFromResponse({});
     }
 
-    static create(postId) {
+    static create(postId, tag) {
         const metric = new PostMetric();
         metric._postId = postId;
+        metric._tagName = tag.names[0];
+        metric._value = tag.metric.min;
         return metric;
     }
 
