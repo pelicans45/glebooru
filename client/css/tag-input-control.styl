@@ -86,7 +86,7 @@ div.tag-input
             font-size: 90%
             unselectable()
 
-ul.compact-tags
+ul.compact-tags, ul.compact-unset-metrics, ul.compact-post-metrics
     width: 100%
     margin: 0.5em 0 0 0
     padding: 0
@@ -115,13 +115,13 @@ ul.compact-tags
     i
         padding-right: 0.4em
 
-div.tag-input, ul.compact-tags
-    .tag-usages, .tag-weight, .remove-tag
+div.tag-input, ul.compact-tags, ul.compact-unset-metrics, ul.compact-post-metrics
+    .tag-usages, .tag-weight, .remove-tag, .metric-bounds
         color: $inactive-link-color
         unselectable()
-    .tag-usages, .tag-weight
+    .tag-usages, .tag-weight, .metric-bounds
         font-size: 90%
-    .tag-usages, .tag-weight
+    .tag-usages, .tag-weight, .metric-bounds
         margin-left: 0.7em
     .remove-tag
         margin-right: 0.5em

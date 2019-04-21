@@ -3,6 +3,7 @@
 const api = require('../api.js');
 const events = require('../events.js');
 const misc = require('../util/misc.js');
+const uri = require('../util/uri.js');
 const views = require('../util/views.js');
 const Note = require('../models/note.js');
 const Point = require('../models/point.js');
@@ -30,6 +31,7 @@ class PostEditSidebarControl extends events.EventTarget {
             canEditPostSafety: api.hasPrivilege('posts:edit:safety'),
             canEditPostSource: api.hasPrivilege('posts:edit:source'),
             canEditPostTags: api.hasPrivilege('posts:edit:tags'),
+            canEditPostMetrics: api.hasPrivilege('metrics:edit:posts'),
             canEditPostRelations: api.hasPrivilege('posts:edit:relations'),
             canEditPostNotes: api.hasPrivilege('posts:edit:notes') &&
                 post.type !== 'video' &&
@@ -41,6 +43,7 @@ class PostEditSidebarControl extends events.EventTarget {
             canDeletePosts: api.hasPrivilege('posts:delete'),
             canFeaturePosts: api.hasPrivilege('posts:feature'),
             canMergePosts: api.hasPrivilege('posts:merge'),
+            escapeColons: uri.escapeColons,
         }));
 
         new ExpanderControl(
@@ -51,6 +54,10 @@ class PostEditSidebarControl extends events.EventTarget {
             'post-tags',
             `Tags (${this._post.tags.length})`,
             this._hostNode.querySelectorAll('.tags'));
+        this._metricsExpander = new ExpanderControl(
+            'post-metrics',
+            `Metrics (${this._post.tags.filterMetrics().length})`,
+            this._hostNode.querySelectorAll('.metrics'));
         this._notesExpander = new ExpanderControl(
             'post-notes',
             'Notes',
@@ -186,6 +193,7 @@ class PostEditSidebarControl extends events.EventTarget {
     _syncExpanderTitles() {
         this._notesExpander.title = `Notes (${this._post.notes.length})`;
         this._tagsExpander.title = `Tags (${this._post.tags.length})`;
+        this._metricsExpander.title = `Metrics (${this._post.tags.filterMetrics().length})`;
     }
 
     _evtPostContentChange(e) {
