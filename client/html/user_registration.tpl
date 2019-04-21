@@ -47,8 +47,8 @@
         <ul>
             <li><i class='fa fa-upload'></i> upload new posts</li>
             <li><i class='fa fa-heart'></i> mark them as favorite</li>
-            <li><i class='fa fa-commenting-o'></i> add comments</li>
-            <li><i class='fa fa-star-half-o'></i> vote up/down on posts and comments</li>
+            <li><i class='far fa-comment-dots'></i> add comments</li>
+            <li><i class='fa fa-star-half-alt'></i> vote up/down on posts and comments</li>
         </ul>
         <hr/>
         <p>By creating an account, you are agreeing to the <a href='<%- ctx.formatClientLink('help', 'tos') %>'>Terms of Service</a>.</p>

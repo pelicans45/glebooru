@@ -137,7 +137,7 @@ function bundleCss() {
     }
 
     fs.copyFileSync(
-        './node_modules/font-awesome/css/font-awesome.min.css',
+        './node_modules/@fortawesome/fontawesome-free/css/all.min.css',
         './public/css/vendor.min.css');
     if (process.argv.includes('--gzip')) {
         gzipFile('./public/css/vendor.min.css');
@@ -228,15 +228,15 @@ function bundleBinaryAssets() {
     fs.copyFileSync('./img/transparency_grid.png', './public/img/transparency_grid.png');
     console.info('Copied images');
 
-    fs.copyFileSync('./fonts/open_sans.woff2', './public/fonts/open_sans.woff2')
-    for (let file of glob.sync('./node_modules/font-awesome/fonts/*.*')) {
+    fs.copyFileSync('./fonts/open_sans.woff2', './public/webfonts/open_sans.woff2')
+    for (let file of glob.sync('./node_modules/@fortawesome/fontawesome-free/webfonts/*.*')) {
         if (fs.lstatSync(file).isDirectory()) {
             continue;
         }
-        fs.copyFileSync(file, path.join('./public/fonts/', path.basename(file)));
+        fs.copyFileSync(file, path.join('./public/webfonts/', path.basename(file)));
     }
     if (process.argv.includes('--gzip')) {
-        for (let file of glob.sync('./public/fonts/*.*')) {
+        for (let file of glob.sync('./public/webfonts/*.*')) {
             if (file.endsWith('woff2')) {
                 continue;
             }
@@ -285,7 +285,7 @@ function makeOutputDirs() {
     const dirs = [
         './public',
         './public/css',
-        './public/fonts',
+        './public/webfonts',
         './public/img',
         './public/js'
     ];
