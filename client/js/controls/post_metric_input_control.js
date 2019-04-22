@@ -90,6 +90,7 @@ class PostMetricInputControl extends events.EventTarget {
         });
         node.querySelector('input[name=value]')
             .addEventListener('change', e => {
+                pm.value = e.target.value;
                 this.dispatchEvent(new CustomEvent('change'));
             });
         return node;
@@ -104,10 +105,12 @@ class PostMetricInputControl extends events.EventTarget {
         });
         node.querySelector('input[name=low]')
             .addEventListener('change', e => {
+                pmr.low = e.target.value;
                 this.dispatchEvent(new CustomEvent('change'));
             });
         node.querySelector('input[name=high]')
             .addEventListener('change', e => {
+                pmr.high = e.target.value;
                 this.dispatchEvent(new CustomEvent('change'));
             });
         return node;
