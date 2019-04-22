@@ -7,6 +7,8 @@ const events = require('../events.js');
 const TagList = require('./tag_list.js');
 const NoteList = require('./note_list.js');
 const CommentList = require('./comment_list.js');
+const PostMetricList = require('./post_metric_list.js');
+const PostMetricRangeList = require('./post_metric_range_list.js');
 const misc = require('../util/misc.js');
 
 class Post extends events.EventTarget {
@@ -18,6 +20,8 @@ class Post extends events.EventTarget {
             obj._tags = new TagList();
             obj._notes = new NoteList();
             obj._comments = new CommentList();
+            obj._metrics = new PostMetricList();
+            obj._metricRanges = new PostMetricRangeList();
         }
 
         this._updateFromResponse({});
@@ -45,6 +49,8 @@ class Post extends events.EventTarget {
     get notes()              { return this._notes; }
     get comments()           { return this._comments; }
     get relations()          { return this._relations; }
+    get metrics()            { return this._metrics; }
+    get metricRanges()       { return this._metricRanges; }
 
     get score()              { return this._score; }
     get commentCount()       { return this._commentCount; }
@@ -116,6 +122,19 @@ class Post extends events.EventTarget {
             detail.notes = this._notes.map(note => ({
                 polygon: note.polygon.map(point => [point.x, point.y]),
                 text: note.text,
+            }));
+        }
+        if (misc.arraysDiffer(this._metrics, this._orig._metrics)) {
+            detail.metrics = this._metrics.map(metric => ({
+                tag_name: metric.tagName,
+                value: metric.value,
+            }));
+        }
+        if (misc.arraysDiffer(this._metricRanges, this._orig._metricRanges)) {
+            detail.metricRanges = this._metricRanges.map(metricRange => ({
+                tag_name: metricRange.tagName,
+                low: metricRange.low,
+                high: metricRange.high,
             }));
         }
         if (this._newContent) {
@@ -307,6 +326,8 @@ class Post extends events.EventTarget {
             obj._tags.sync(response.tags);
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
+            obj._metrics.sync(response.metrics);
+            obj._metricRanges.sync(response.metricRanges);
         }
 
         Object.assign(this, map());

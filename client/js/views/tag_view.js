@@ -4,6 +4,7 @@ const events = require('../events.js');
 const views = require('../util/views.js');
 const TagSummaryView = require('./tag_summary_view.js');
 const TagEditView = require('./tag_edit_view.js');
+const TagMetricView = require('./tag_metric_view.js');
 const TagMergeView = require('./tag_merge_view.js');
 const TagDeleteView = require('./tag_delete_view.js');
 const EmptyView = require('../views/empty_view.js');
@@ -45,6 +46,18 @@ class TagView extends events.EventTarget {
             } else {
                 this._view = new TagEditView(ctx);
                 events.proxyEvent(this._view, this, 'submit');
+            }
+
+        } else if (ctx.section === 'metric') {
+            const metricExists = this._ctx.tag.metric;
+            if (!metricExists && !this._ctx.canCreateMetric) {
+                this._view = new EmptyView();
+                this._view.showError(
+                    'You don\'t have privileges to create metrics.');
+            } else {
+                this._view = new TagMetricView(ctx);
+                events.proxyEvent(this._view, this, 'submit', 'metricUpdate');
+                events.proxyEvent(this._view, this, 'delete', 'metricDelete');
             }
 
         } else if (ctx.section === 'merge') {

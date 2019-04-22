@@ -1,7 +1,7 @@
 from typing import Any, Optional, Tuple, Dict
 import sqlalchemy as sa
 from szurubooru import db, model, errors
-from szurubooru.func import util
+from szurubooru.func import util, metrics
 from szurubooru.search import criteria, tokens
 from szurubooru.search.typing import SaColumn, SaQuery
 from szurubooru.search.query import SearchQuery
@@ -104,9 +104,39 @@ def _note_filter(
         search_util.create_str_filter)(query, criterion, negated)
 
 
+def _create_metric_filter(name: str):
+    def wrapper(query: SaQuery,
+                criterion: Optional[criteria.BaseCriterion],
+                negated: bool) -> SaQuery:
+        assert criterion
+        t = sa.orm.aliased(model.TagName)
+        pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + name)
+        expr = t.name == name
+        expr = expr & search_util.apply_num_criterion_to_column(
+            pm.value, criterion, search_util.float_transformer)
+        if negated:
+            expr = ~expr
+        ret = (
+            query
+            .join(pm, pm.post_id == model.Post.post_id)
+            .join(t, t.tag_id == pm.tag_id)
+            .filter(expr))
+        return ret
+    return wrapper
+
+
+def _create_metric_sort_column(metric_name: str):
+    pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + metric_name)
+    return pm.value
+
+
 class PostSearchConfig(BaseSearchConfig):
     def __init__(self) -> None:
         self.user = None  # type: Optional[model.User]
+        self.all_metric_names = []
+
+    def refresh_metrics(self) -> None:
+        self.all_metric_names = metrics.get_all_metric_tag_names()
 
     def on_search_query_parsed(self, search_query: SearchQuery) -> SaQuery:
         new_special_tokens = []
@@ -130,9 +160,11 @@ class PostSearchConfig(BaseSearchConfig):
         search_query.special_tokens = new_special_tokens
 
     def create_around_query(self) -> SaQuery:
+        self.refresh_metrics()
         return db.session.query(model.Post).options(sa.orm.lazyload('*'))
 
     def create_filter_query(self, disable_eager_loads: bool) -> SaQuery:
+        self.refresh_metrics()
         strategy = (
             sa.orm.lazyload
             if disable_eager_loads
@@ -178,7 +210,9 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
-        return util.unalias_dict([
+        filters = {'metric-' + name: _create_metric_filter(name)
+                   for name in self.all_metric_names}
+        filters.update(util.unalias_dict([
             (
                 ['id'],
                 search_util.create_num_filter(model.Post.post_id)
@@ -350,11 +384,15 @@ class PostSearchConfig(BaseSearchConfig):
                 search_util.create_str_filter(
                     model.Post.flags, _flag_transformer)
             ),
-        ])
+        ]))
+        return filters
 
     @property
     def sort_columns(self) -> Dict[str, Tuple[SaColumn, str]]:
-        return util.unalias_dict([
+        filters = {'metric-' + name:
+                   (_create_metric_sort_column(name), self.SORT_ASC)
+                   for name in self.all_metric_names}
+        filters.update(util.unalias_dict([
             (
                 ['random'],
                 (sa.sql.expression.func.random(), self.SORT_NONE)
@@ -444,7 +482,8 @@ class PostSearchConfig(BaseSearchConfig):
                 ['feature-date', 'feature-time'],
                 (model.Post.last_feature_time, self.SORT_DESC)
             ),
-        ])
+        ]))
+        return filters
 
     @property
     def special_filters(self) -> Dict[str, Filter]:

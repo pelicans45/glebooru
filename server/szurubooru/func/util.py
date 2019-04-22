@@ -59,6 +59,10 @@ def unalias_dict(source: List[Tuple[List[str], T]]) -> Dict[str, T]:
     return output_dict
 
 
+def flatten_list(source: List[List[T]]) -> List[T]:
+    return [item for sublist in source for item in sublist]
+
+
 def get_md5(source: Union[str, bytes]) -> str:
     if not isinstance(source, bytes):
         source = source.encode('utf-8')

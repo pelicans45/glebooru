@@ -55,7 +55,7 @@
                     <% } else { %>
                         <a class='inactive'>
                     <% } %>
-                        <i class='fa fa-pencil'></i>
+                        <i class='fa fa-pencil-alt'></i>
                         <span class='vim-nav-hint'>Edit post</span>
                     </a>
                 <% } %>

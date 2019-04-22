@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict
 from datetime import datetime
 from szurubooru import db, model, search, rest
-from szurubooru.func import auth, tags, snapshots, serialization, versions
+from szurubooru.func import auth, tags, metrics, snapshots, serialization, versions
 
 
 _search_executor = search.Executor(search.configs.TagSearchConfig())
@@ -90,6 +90,14 @@ def update_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         implications = ctx.get_param_as_string_list('implications')
         _create_if_needed(implications, ctx.user)
         tags.update_tag_implications(tag, implications)
+    if ctx.has_param('metric'):
+        auth.verify_privilege(ctx.user, 'metrics:edit:bounds')
+        new_metric = metrics.update_or_create_metric(tag, ctx.get_param('metric'))
+        if new_metric is not None:
+            auth.verify_privilege(ctx.user, 'metrics:create')
+            db.session.flush()
+            # snapshots.create(new_metric, ctx.user)
+
     tag.last_edit_time = datetime.utcnow()
     ctx.session.flush()
     snapshots.modify(tag, ctx.user)

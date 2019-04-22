@@ -23,15 +23,19 @@ class TagList extends AbstractList {
             });
     }
 
-    isTaggedWith(testName) {
+    findByName(testName) {
         for (let tag of this._list) {
             for (let tagName of tag.names) {
                 if (tagName.toLowerCase() === testName.toLowerCase()) {
-                    return true;
+                    return tag;
                 }
             }
         }
-        return false;
+        return null;
+    }
+
+    isTaggedWith(testName) {
+        return !!this.findByName(testName);
     }
 
     addByName(tagName, addImplications) {
@@ -66,6 +70,10 @@ class TagList extends AbstractList {
                 }
             }
         }
+    }
+
+    filterMetrics() {
+        return this.filter(tag => tag.metric)
     }
 }
 

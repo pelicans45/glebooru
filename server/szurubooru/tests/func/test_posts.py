@@ -79,6 +79,9 @@ def test_serialize_post(
         comment_factory,
         tag_factory,
         tag_category_factory,
+        metric_factory,
+        post_metric_factory,
+        post_metric_range_factory,
         config_injector):
     config_injector({'data_url': 'http://example.com/', 'secret': 'test'})
     with patch('szurubooru.func.comments.serialize_comment'), \
@@ -95,13 +98,20 @@ def test_serialize_post(
         post.post_id = 1
         post.creation_time = datetime(1997, 1, 1)
         post.last_edit_time = datetime(1998, 1, 1)
-        post.tags = [
-            tag_factory(
-                names=['tag1', 'tag2'],
-                category=tag_category_factory('test-cat1')),
-            tag_factory(
-                names=['tag3'],
-                category=tag_category_factory('test-cat2'))
+        tag1 = tag_factory(
+            names=['tag1', 'tag2'],
+            category=tag_category_factory('test-cat1'))
+        tag1.metric = metric_factory(tag=tag1, min=-2.5, max=2.5)
+        tag3 = tag_factory(
+            names=['tag3'],
+            category=tag_category_factory('test-cat2'))
+        post.tags = [tag1, tag3]
+        post.metrics = [
+            post_metric_factory(post=post, metric=tag1.metric, value=-1.2)
+        ]
+        post.metric_ranges = [
+            post_metric_range_factory(post=post, metric=tag1.metric,
+                                      low=2, high=3)
         ]
         post.safety = model.Post.SAFETY_SAFE
         post.source = '4gag'
@@ -173,12 +183,18 @@ def test_serialize_post(
             'tags': [
                 {
                     'names': ['tag1', 'tag2'],
-                    'category': 'test-cat1', 'usages': 1,
+                    'category': 'test-cat1',
+                    'usages': 1,
+                    'metric': {
+                        'min': -2.5,
+                        'max': 2.5
+                    }
                 },
                 {
                     'names': ['tag3'],
                     'category': 'test-cat2',
                     'usages': 1,
+                    'metric': None
                 },
             ],
             'relations': [],
@@ -198,6 +214,21 @@ def test_serialize_post(
             'hasCustomThumbnail': True,
             'mimeType': 'image/jpeg',
             'comments': ['commenter1', 'commenter2'],
+            'metrics': [
+                {
+                    'tag_name': 'tag1',
+                    'post_id': 1,
+                    'value': -1.2
+                }
+            ],
+            'metricRanges': [
+                {
+                    'tag_name': 'tag1',
+                    'post_id': 1,
+                    'low': 2,
+                    'high': 3
+                }
+            ]
         }
 
 

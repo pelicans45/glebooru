@@ -32,11 +32,20 @@ class QueryCounter:
         return self._statements
 
 
-if not config.config['test_database']:
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.close()
+
+
+_test_db_url = config.config['test_database']
+if not _test_db_url:
     raise RuntimeError('Test database not configured.')
 
 _query_counter = QueryCounter()
-_engine = sa.create_engine(config.config['test_database'])
+_engine = sa.create_engine(_test_db_url)
+if _test_db_url.startswith('sqlite'):
+    sa.event.listen(_engine, 'connect', _set_sqlite_pragma)
 model.Base.metadata.drop_all(bind=_engine)
 model.Base.metadata.create_all(bind=_engine)
 sa.event.listen(
@@ -168,7 +177,7 @@ def tag_category_factory():
 
 @pytest.fixture
 def tag_factory():
-    def factory(names=None, category=None):
+    def factory(names=None, category=None, metric=None):
         if not category:
             category = model.TagCategory(get_unique_name())
             db.session.add(category)
@@ -178,6 +187,8 @@ def tag_factory():
             tag.names.append(model.TagName(name, i))
         tag.category = category
         tag.creation_time = datetime(1996, 1, 1)
+        if metric:
+            tag.metric = metric
         return tag
     return factory
 
@@ -196,7 +207,8 @@ def post_factory(skip_post_hashing):
             id=None,
             safety=model.Post.SAFETY_SAFE,
             type=model.Post.TYPE_IMAGE,
-            checksum='...'):
+            checksum='...',
+            tags=[]):
         post = model.Post()
         post.post_id = id
         post.safety = safety
@@ -205,6 +217,7 @@ def post_factory(skip_post_hashing):
         post.flags = []
         post.mime_type = 'application/octet-stream'
         post.creation_time = datetime(1996, 1, 1)
+        post.tags = tags
         return post
     return factory
 
@@ -248,6 +261,53 @@ def post_favorite_factory(user_factory, post_factory):
             post = post_factory()
         return model.PostFavorite(
             post=post, user=user, time=datetime(1999, 1, 1))
+    return factory
+
+
+@pytest.fixture
+def metric_factory(tag_factory):
+    def factory(tag=None, min=0, max=10):
+        if not tag:
+            tag = tag_factory()
+        return model.Metric(tag=tag, min=min, max=max)
+    return factory
+
+
+@pytest.fixture
+def post_metric_factory(post_factory, tag_factory, metric_factory):
+    def factory(post=None, metric=None, value=None, tag=None, tag_name=None):
+        if not post:
+            post = post_factory()
+        if tag_name:
+            tag = tag_factory(names=[tag_name])
+        if tag:
+            metric = metric_factory(tag=tag)
+        elif not metric:
+            metric = metric_factory()
+        if not value:
+            value = (metric.min + metric.max)/2
+        return model.PostMetric(post=post, metric=metric, value=value)
+    return factory
+
+
+@pytest.fixture
+def post_metric_range_factory(post_factory, tag_factory, metric_factory):
+    def factory(post=None, metric=None, low=None, high=None, tag=None,
+                tag_name=None):
+        if not post:
+            post = post_factory()
+        if tag_name:
+            tag = tag_factory(names=[tag_name])
+        if tag:
+            metric = metric_factory(tag=tag)
+        elif not metric:
+            metric = metric_factory()
+        if not low:
+            low = metric.min
+        if not high:
+            high = metric.max
+        return model.PostMetricRange(
+            post=post, metric=metric, low=low, high=high)
     return factory
 
 

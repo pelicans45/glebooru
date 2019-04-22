@@ -45,13 +45,13 @@
                     %><span class='action-container'><%
                         %><% if (ctx.canEditComment) { %><%
                             %><a href class='edit'><%
-                                %><i class='fa fa-pencil'></i>&nbsp;edit<%
+                                %><i class='fa fa-edit'></i>&nbsp;edit<%
                             %></a><%
                         %><% } %><%
 
                         %><% if (ctx.canDeleteComment) { %><%
                             %><a href class='delete'><%
-                                %><i class='fa fa-remove'></i>&nbsp;delete<%
+                                %><i class='fa fa-times'></i>&nbsp;delete<%
                             %></a><%
                         %><% } %><%
                     %></span><%

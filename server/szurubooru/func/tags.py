@@ -95,6 +95,7 @@ class TagSerializer(serialization.BaseSerializer):
             'usages': self.serialize_usages,
             'suggestions': self.serialize_suggestions,
             'implications': self.serialize_implications,
+            'metric': self.serialize_metric,
         }
 
     def serialize_names(self) -> Any:
@@ -127,6 +128,16 @@ class TagSerializer(serialization.BaseSerializer):
         return [
             serialize_relation(relation)
             for relation in sort_tags(self.tag.implications)]
+
+    def serialize_metric(self) -> Any:
+        if not self.tag.metric:
+            return None
+        else:
+            return {
+                'version': self.tag.metric.version,
+                'min': self.tag.metric.min,
+                'max': self.tag.metric.max,
+            }
 
 
 def serialize_tag(
@@ -225,6 +236,8 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
     assert target_tag
     if source_tag.tag_id == target_tag.tag_id:
         raise InvalidTagRelationError('Cannot merge tag with itself.')
+    if source_tag.metric or target_tag.metric:
+        raise InvalidTagRelationError('Cannot merge tags with metrics.')
 
     def merge_posts(source_tag_id: int, target_tag_id: int) -> None:
         alias1 = model.PostTag

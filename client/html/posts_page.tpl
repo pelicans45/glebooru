@@ -30,7 +30,7 @@
                                 <% } %>
                                 <% if (post.commentCount) { %>
                                     <span class='icon'>
-                                        <i class='fa fa-commenting'></i>
+                                        <i class='far fa-comment-dots'></i>
                                         <%- post.commentCount %>
                                     </span>
                                 <% } %>

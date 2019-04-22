@@ -4,7 +4,7 @@ from datetime import datetime
 import sqlalchemy as sa
 from szurubooru import config, db, model, errors, rest
 from szurubooru.func import (
-    users, scores, comments, tags, util,
+    users, scores, comments, tags, metrics, util,
     mime, images, files, image_hash, serialization, snapshots)
 
 
@@ -177,6 +177,8 @@ class PostSerializer(serialization.BaseSerializer):
             'hasCustomThumbnail': self.serialize_has_custom_thumbnail,
             'notes': self.serialize_notes,
             'comments': self.serialize_comments,
+            'metrics': self.serialize_metrics,
+            'metricRanges': self.serialize_metric_ranges,
         }
 
     def serialize_id(self) -> Any:
@@ -230,6 +232,10 @@ class PostSerializer(serialization.BaseSerializer):
                 'names': [name.name for name in tag.names],
                 'category': tag.category.name,
                 'usages': tag.post_count,
+                'metric': {
+                    'min': tag.metric.min,
+                    'max': tag.metric.max
+                } if tag.metric else None,
             }
             for tag in tags.sort_tags(self.post.tags)]
 
@@ -299,6 +305,20 @@ class PostSerializer(serialization.BaseSerializer):
             for comment in sorted(
                 self.post.comments,
                 key=lambda comment: comment.creation_time)]
+
+    def serialize_metrics(self) -> Any:
+        return [
+            metrics.serialize_post_metric(metric)
+            for metric in sorted(
+                self.post.metrics,
+                key=lambda metric: metric.metric.tag_name)]
+
+    def serialize_metric_ranges(self) -> Any:
+        return [
+            metrics.serialize_post_metric_range(metric_range)
+            for metric_range in sorted(
+                self.post.metric_ranges,
+                key=lambda metric_range: metric_range.metric.tag_name)]
 
 
 def serialize_post(

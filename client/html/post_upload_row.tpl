@@ -33,7 +33,7 @@
             </nav>
             <nav>
                 <ul>
-                    <li><a href class='remove'><i class='fa fa-remove'></i></a></li>
+                    <li><a href class='remove'><i class='fa fa-times'></i></a></li>
                 </ul>
             </nav>
 

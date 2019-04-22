@@ -2,7 +2,7 @@ from typing import Optional, Dict, List
 from datetime import datetime
 from szurubooru import db, model, errors, rest, search
 from szurubooru.func import (
-    auth, tags, posts, snapshots, favorites, scores, serialization, versions)
+    auth, tags, posts, snapshots, favorites, scores, serialization, versions, metrics)
 
 
 _search_executor_config = search.configs.PostSearchConfig()
@@ -135,6 +135,15 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if ctx.has_file('thumbnail'):
         auth.verify_privilege(ctx.user, 'posts:edit:thumbnail')
         posts.update_post_thumbnail(post, ctx.get_file('thumbnail'))
+    if ctx.has_param('metrics'):
+        auth.verify_privilege(ctx.user, 'metrics:edit:posts')
+        metrics.update_or_create_post_metrics(
+            post, ctx.get_param_as_list('metrics'))
+    if ctx.has_param('metricRanges'):
+        auth.verify_privilege(ctx.user, 'metrics:edit:posts')
+        metrics.update_or_create_post_metric_ranges(
+            post, ctx.get_param_as_list('metricRanges'))
+
     post.last_edit_time = datetime.utcnow()
     ctx.session.flush()
     snapshots.modify(post, ctx.user)

@@ -6,6 +6,7 @@ const misc = require('../util/misc.js');
 const uri = require('../util/uri.js');
 const Tag = require('../models/tag.js');
 const TagCategoryList = require('../models/tag_category_list.js');
+const Metric = require('../models/metric.js');
 const topNavigation = require('../models/top_navigation.js');
 const TagView = require('../views/tag_view.js');
 const EmptyView = require('../views/empty_view.js');
@@ -44,6 +45,9 @@ class TagController {
                 canEditImplications: api.hasPrivilege('tags:edit:implications'),
                 canEditSuggestions: api.hasPrivilege('tags:edit:suggestions'),
                 canEditDescription: api.hasPrivilege('tags:edit:description'),
+                canCreateMetric: api.hasPrivilege('metrics:create'),
+                canDeleteMetric: api.hasPrivilege('metrics:delete'),
+                canEditMetricBounds: api.hasPrivilege('metrics:edit:bounds'),
                 canMerge: api.hasPrivilege('tags:merge'),
                 canDelete: api.hasPrivilege('tags:delete'),
                 categories: categories,
@@ -54,6 +58,8 @@ class TagController {
             this._view.addEventListener('submit', e => this._evtUpdate(e));
             this._view.addEventListener('merge', e => this._evtMerge(e));
             this._view.addEventListener('delete', e => this._evtDelete(e));
+            this._view.addEventListener('metricUpdate', e => this._evtMetricUpdate(e));
+            this._view.addEventListener('metricDelete', e => this._evtMetricDelete(e));
         }, error => {
             this._view = new EmptyView();
             this._view.showError(error.message);
@@ -87,6 +93,35 @@ class TagController {
         }
         e.detail.tag.save().then(() => {
             this._view.showSuccess('Tag saved.');
+            this._view.enableForm();
+        }, error => {
+            this._view.showError(error.message);
+            this._view.enableForm();
+        });
+    }
+
+    _evtMetricUpdate(e) {
+        this._view.clearMessages();
+        this._view.disableForm();
+        const metric = new Metric();
+        metric.min = e.detail.metricMin;
+        metric.max = e.detail.metricMax;
+        e.detail.tag.metric = metric;
+
+        e.detail.tag.save().then(() => {
+            this._view.showSuccess('Metric updated.');
+            this._view.enableForm();
+        }, error => {
+            this._view.showError(error.message);
+            this._view.enableForm();
+        });
+    }
+
+    _evtMetricDelete(e) {
+        this._view.clearMessages();
+        this._view.disableForm();
+        e.detail.tag.deleteMetric().then(() => {
+            this._view.showSuccess('Metric deleted.');
             this._view.enableForm();
         }, error => {
             this._view.showError(error.message);
@@ -129,6 +164,9 @@ class TagController {
 module.exports = router => {
     router.enter(['tag', ':name', 'edit'], (ctx, next) => {
         ctx.controller = new TagController(ctx, 'edit');
+    });
+    router.enter(['tag', ':name', 'metric'], (ctx, next) => {
+        ctx.controller = new TagController(ctx, 'metric');
     });
     router.enter(['tag', ':name', 'merge'], (ctx, next) => {
         ctx.controller = new TagController(ctx, 'merge');

@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import pytest
 from szurubooru import api, db, model, errors
-from szurubooru.func import tags, snapshots
+from szurubooru.func import tags, snapshots, metrics
 
 
 @pytest.fixture(autouse=True)
@@ -14,6 +14,8 @@ def inject_config(config_injector):
             'tags:edit:description': model.User.RANK_REGULAR,
             'tags:edit:suggestions': model.User.RANK_REGULAR,
             'tags:edit:implications': model.User.RANK_REGULAR,
+            'metrics:create': model.User.RANK_REGULAR,
+            'metrics:edit:bounds': model.User.RANK_REGULAR,
         },
     })
 
@@ -31,6 +33,7 @@ def test_simple_updating(user_factory, tag_factory, context_factory):
             patch('szurubooru.func.tags.update_tag_suggestions'), \
             patch('szurubooru.func.tags.update_tag_implications'), \
             patch('szurubooru.func.tags.serialize_tag'), \
+            patch('szurubooru.func.metrics.update_or_create_metric'), \
             patch('szurubooru.func.snapshots.modify'):
         tags.get_or_create_tags_by_names.return_value = ([], [])
         tags.serialize_tag.return_value = 'serialized tag'
@@ -43,6 +46,7 @@ def test_simple_updating(user_factory, tag_factory, context_factory):
                     'description': 'desc',
                     'suggestions': ['sug1', 'sug2'],
                     'implications': ['imp1', 'imp2'],
+                    'metric': {'min': -1, 'max': 1},
                 },
                 user=auth_user),
             {'tag_name': 'tag1'})
@@ -56,6 +60,8 @@ def test_simple_updating(user_factory, tag_factory, context_factory):
         tags.update_tag_implications.assert_called_once_with(
             tag, ['imp1', 'imp2'])
         tags.serialize_tag.assert_called_once_with(tag, options=[])
+        metrics.update_or_create_metric.assert_called_once_with(
+            tag, {'min': -1, 'max': 1})
         snapshots.modify.assert_called_once_with(tag, auth_user)
 
 
@@ -104,6 +110,7 @@ def test_trying_to_update_non_existing(user_factory, context_factory):
     {'category': 'whatever'},
     {'suggestions': ['whatever']},
     {'implications': ['whatever']},
+    {'metric': ['whatever']},
 ])
 def test_trying_to_update_without_privileges(
         user_factory, tag_factory, context_factory, params):
@@ -113,6 +120,18 @@ def test_trying_to_update_without_privileges(
         api.tag_api.update_tag(
             context_factory(
                 params={**params, **{'version': 1}},
+                user=user_factory(rank=model.User.RANK_ANONYMOUS)),
+            {'tag_name': 'tag'})
+
+
+def test_trying_to_create_metric_without_privileges(
+        user_factory, tag_factory, context_factory):
+    db.session.add(tag_factory(names=['tag']))
+    db.session.commit()
+    with pytest.raises(errors.AuthError):
+        api.tag_api.update_tag(
+            context_factory(
+                params={'metric': {'min': 0, 'max': 10}, **{'version': 1}},
                 user=user_factory(rank=model.User.RANK_ANONYMOUS)),
             {'tag_name': 'tag'})
 

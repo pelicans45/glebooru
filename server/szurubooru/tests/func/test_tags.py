@@ -44,7 +44,8 @@ def test_serialize_tag_when_empty():
     assert tags.serialize_tag(None, None) is None
 
 
-def test_serialize_tag(post_factory, tag_factory, tag_category_factory):
+def test_serialize_tag(
+        post_factory, tag_factory, tag_category_factory, metric_factory):
     cat = tag_category_factory(name='cat')
     tag = tag_factory(names=['tag1', 'tag2'], category=cat)
     tag.tag_id = 1
@@ -58,6 +59,7 @@ def test_serialize_tag(post_factory, tag_factory, tag_category_factory):
         tag_factory(names=['impl2'], category=cat),
     ]
     tag.last_edit_time = datetime(1998, 1, 1)
+    tag.metric = metric_factory(tag, min=1.5, max=10)
     post1 = post_factory()
     post2 = post_factory()
     post1.tags = [tag]
@@ -82,6 +84,11 @@ def test_serialize_tag(post_factory, tag_factory, tag_category_factory):
             {'names': ['impl1'], 'category': 'cat', 'usages': 0},
             {'names': ['impl2'], 'category': 'cat', 'usages': 0},
         ],
+        'metric': {
+            'version': 1,
+            'min': 1.5,
+            'max': 10
+        },
         'usages': 2,
     }
 
@@ -280,6 +287,22 @@ def test_merge_tags_with_itself(tag_factory):
     db.session.flush()
     with pytest.raises(tags.InvalidTagRelationError):
         tags.merge_tags(source_tag, source_tag)
+
+
+def test_merge_tags_with_metrics(tag_factory, metric_factory):
+    tag_with_metric1 = tag_factory()
+    tag_with_metric2 = tag_factory()
+    tag_no_metric = tag_factory()
+    tag_with_metric1.metric = metric_factory()
+    tag_with_metric2.metric = metric_factory()
+    db.session.add_all([tag_no_metric, tag_with_metric1, tag_with_metric2])
+    db.session.flush()
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_no_metric, tag_with_metric2)
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_with_metric1, tag_no_metric)
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_with_metric1, tag_with_metric2)
 
 
 def test_merge_tags_moves_usages(tag_factory, post_factory):

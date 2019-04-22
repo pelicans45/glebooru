@@ -4,6 +4,7 @@ const api = require('../api.js');
 const events = require('../events.js');
 const views = require('../util/views.js');
 const uri = require('../util/uri.js');
+const PostMetricListControl = require('./post_metric_list_control.js');
 
 const template = views.getTemplate('post-readonly-sidebar');
 const scoreTemplate = views.getTemplate('score');
@@ -32,6 +33,9 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._installScore();
         this._installFitButtons();
         this._syncFitButton();
+        if (this._metricsListNode) {
+            this._metricsControl = new PostMetricListControl(this._metricsListNode, this._post);
+        }
     }
 
     get _scoreContainerNode() {
@@ -72,6 +76,10 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     get _fitHeightButtonNode() {
         return this._hostNode.querySelector('.fit-height');
+    }
+
+    get _metricsListNode() {
+        return this._hostNode.querySelector('ul.compact-post-metrics');
     }
 
     _installFitButtons() {
