@@ -235,6 +235,8 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
     assert target_tag
     if source_tag.tag_id == target_tag.tag_id:
         raise InvalidTagRelationError('Cannot merge tag with itself.')
+    if source_tag.metric or target_tag.metric:
+        raise InvalidTagRelationError('Cannot merge tags with metrics.')
 
     def merge_posts(source_tag_id: int, target_tag_id: int) -> None:
         alias1 = model.PostTag

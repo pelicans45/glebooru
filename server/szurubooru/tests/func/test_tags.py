@@ -288,6 +288,22 @@ def test_merge_tags_with_itself(tag_factory):
         tags.merge_tags(source_tag, source_tag)
 
 
+def test_merge_tags_with_metrics(tag_factory, metric_factory):
+    tag_with_metric1 = tag_factory()
+    tag_with_metric2 = tag_factory()
+    tag_no_metric = tag_factory()
+    tag_with_metric1.metric = metric_factory()
+    tag_with_metric2.metric = metric_factory()
+    db.session.add_all([tag_no_metric, tag_with_metric1, tag_with_metric2])
+    db.session.flush()
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_no_metric, tag_with_metric2)
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_with_metric1, tag_no_metric)
+    with pytest.raises(tags.InvalidTagRelationError):
+        tags.merge_tags(tag_with_metric1, tag_with_metric2)
+
+
 def test_merge_tags_moves_usages(tag_factory, post_factory):
     source_tag = tag_factory(names=['source'])
     target_tag = tag_factory(names=['target'])
