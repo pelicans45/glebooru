@@ -88,6 +88,10 @@ class PostMetricInputControl extends events.EventTarget {
             postMetric: pm,
             tag: tag,
         });
+        node.querySelector('input[name=value]')
+            .addEventListener('change', e => {
+                this.dispatchEvent(new CustomEvent('change'));
+            });
         return node;
     }
 
@@ -98,6 +102,14 @@ class PostMetricInputControl extends events.EventTarget {
             postMetricRange: pmr,
             tag: tag,
         });
+        node.querySelector('input[name=low]')
+            .addEventListener('change', e => {
+                this.dispatchEvent(new CustomEvent('change'));
+            });
+        node.querySelector('input[name=high]')
+            .addEventListener('change', e => {
+                this.dispatchEvent(new CustomEvent('change'));
+            });
         return node;
     }
 
@@ -108,6 +120,7 @@ class PostMetricInputControl extends events.EventTarget {
         }
         this._post.metrics.add(PostMetric.create(this._post.id, tag));
         this._refreshContent();
+        this.dispatchEvent(new CustomEvent('change'));
     }
 
     createPostMetricRange(tag) {
@@ -117,6 +130,7 @@ class PostMetricInputControl extends events.EventTarget {
         }
         this._post.metricRanges.add(PostMetricRange.create(this._post.id, tag));
         this._refreshContent();
+        this.dispatchEvent(new CustomEvent('change'));
     }
 }
 
