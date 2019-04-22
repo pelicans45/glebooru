@@ -84,6 +84,21 @@ def serialize_post_metric_range(
     return PostMetricRangeSerializer(post_metric_range).serialize(options)
 
 
+def try_get_metric_by_tag_name(tag_name: str) -> Optional[model.Metric]:
+    return (
+        db.session
+        .query(model.Metric)
+        .filter(sa.func.lower(model.Metric.tag_name) == tag_name.lower())
+        .one_or_none())
+
+
+def get_metric_by_tag_name(tag_name: str) -> model.Metric:
+    metric = try_get_metric_by_tag_name(tag_name)
+    if not metric:
+        raise MetricDoesNotExistsError('Metric %r not found.' % tag_name)
+    return metric
+
+
 def get_all_metrics() -> List[model.Metric]:
     return db.session.query(model.Metric).all()
 
@@ -246,3 +261,8 @@ def update_or_create_post_metric_ranges(
         post_metric_range = update_or_create_post_metric_range(
             post, tag.metric, low, high)
         post.metric_ranges.append(post_metric_range)
+
+
+def delete_metric(metric: model.Metric) -> None:
+    assert metric
+    db.session.delete(metric)

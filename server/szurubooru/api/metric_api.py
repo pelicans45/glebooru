@@ -1,6 +1,8 @@
 from typing import Optional, List, Dict
 from szurubooru import db, model, search, rest
-from szurubooru.func import auth, metrics, snapshots, serialization, tags
+from szurubooru.func import (
+    auth, metrics, snapshots, serialization, tags, versions
+)
 
 
 _search_executor_config = search.configs.PostMetricSearchConfig()
@@ -19,6 +21,10 @@ def _serialize_post_metric(
     return metrics.serialize_post_metric(
         post_metric, options=serialization.get_serialization_options(ctx)
     )
+
+
+def _get_metric(params: Dict[str, str]) -> model.Tag:
+    return metrics.get_metric_by_tag_name(params['tag_name'])
 
 
 @rest.routes.get('/metrics/?')
@@ -45,6 +51,17 @@ def create_metric(
     # snapshots.create(metric, ctx.user)
     ctx.session.commit()
     return _serialize_metric(ctx, metric)
+
+
+@rest.routes.delete('/metric/(?P<tag_name>.+)')
+def delete_metric(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
+    metric = _get_metric(params)
+    versions.verify_version(metric, ctx)
+    auth.verify_privilege(ctx.user, 'metrics:delete')
+    # snapshots.delete(metric, ctx.user)
+    metrics.delete_metric(metric)
+    ctx.session.commit()
+    return {}
 
 
 @rest.routes.get('/post-metrics/?')

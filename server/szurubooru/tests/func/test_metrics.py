@@ -45,6 +45,15 @@ def test_serialize_post_metric_range(post_factory, tag_factory, metric_factory):
     }
 
 
+def test_try_get_metric_by_tag_name(tag_factory, metric_factory):
+    tag = tag_factory(names=['mytag'])
+    metric = metric_factory(tag)
+    db.session.add_all([tag, metric])
+    db.session.flush()
+    assert metrics.try_get_metric_by_tag_name('unknown') is None
+    assert metrics.try_get_metric_by_tag_name('mytag') is metric
+
+
 def test_try_get_post_metric(
         post_factory, metric_factory, post_metric_factory):
     metric1 = metric_factory()
@@ -419,3 +428,14 @@ def test_update_or_create_post_metric_ranges_with_trim(
     assert post.metric_ranges[0].metric == metric2
     assert post.metric_ranges[0].low == 3
     assert post.metric_ranges[0].high == 4
+
+
+def test_delete_metric(metric_factory):
+    metric1 = metric_factory()
+    metric2 = metric_factory()
+    db.session.add_all([metric1, metric2])
+    db.session.flush()
+    assert db.session.query(model.Metric).count() == 2
+    metrics.delete_metric(metric2)
+    db.session.flush()
+    assert db.session.query(model.Metric).count() == 1
