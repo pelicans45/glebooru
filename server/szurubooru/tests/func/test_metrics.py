@@ -6,8 +6,11 @@ from szurubooru.func import metrics
 def test_serialize_metric(tag_factory):
     tag = tag_factory()
     metric = model.Metric(tag=tag, min=1, max=2)
+    db.session.add(metric)
+    db.session.flush()
     result = metrics.serialize_metric(metric)
     assert result == {
+        'version': 1,
         'min': 1,
         'max': 2,
     }

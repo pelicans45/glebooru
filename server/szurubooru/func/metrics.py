@@ -30,6 +30,7 @@ class MetricSerializer(serialization.BaseSerializer):
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
+            'version': lambda: self.metric.version,
             'min': lambda: self.metric.min,
             'max': lambda: self.metric.max,
         }

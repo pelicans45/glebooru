@@ -85,6 +85,7 @@ def test_serialize_tag(
             {'names': ['impl2'], 'category': 'cat', 'usages': 0},
         ],
         'metric': {
+            'version': 1,
             'min': 1.5,
             'max': 10
         },

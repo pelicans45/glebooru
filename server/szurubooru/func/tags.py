@@ -134,6 +134,7 @@ class TagSerializer(serialization.BaseSerializer):
             return None
         else:
             return {
+                'version': self.tag.metric.version,
                 'min': self.tag.metric.min,
                 'max': self.tag.metric.max,
             }
