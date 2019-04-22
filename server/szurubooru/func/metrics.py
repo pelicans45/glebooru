@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from typing import Any, Optional, List, Dict, Callable
 from szurubooru import db, model, errors, rest
-from szurubooru.func import serialization, tags, util
+from szurubooru.func import serialization, tags, util, versions
 
 
 class MetricDoesNotExistsError(errors.ValidationError):
@@ -146,6 +146,7 @@ def update_or_create_metric(
     if tag.metric is not None:
         tag.metric.min = min
         tag.metric.max = max
+        versions.bump_version(tag.metric)
         return None
     else:
         return create_metric(tag=tag, min=min, max=max)
@@ -164,11 +165,12 @@ def update_or_create_post_metric(
         raise MetricValueOutOfRangeError(
             'Metric value %r out of range.' % value)
     post_metric = try_get_post_metric(post, metric)
-    if post_metric is None:
+    if not post_metric:
         post_metric = model.PostMetric(post=post, metric=metric, value=value)
         db.session.add(post_metric)
     else:
         post_metric.value = value
+        versions.bump_version(post_metric)
     return post_metric
 
 
@@ -210,13 +212,14 @@ def update_or_create_post_metric_range(
         raise InvalidMetricError(
             'Metric range low(%r) >= high(%r)' % (low, high))
     post_metric_range = try_get_post_metric_range(post, metric)
-    if post_metric_range is None:
+    if not post_metric_range:
         post_metric_range = model.PostMetricRange(
             post=post, metric=metric, low=low, high=high)
         db.session.add(post_metric_range)
     else:
         post_metric_range.low = low
         post_metric_range.high = high
+        versions.bump_version(post_metric_range)
     return post_metric_range
 
 

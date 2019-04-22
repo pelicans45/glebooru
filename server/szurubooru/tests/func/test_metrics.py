@@ -125,12 +125,14 @@ def test_update_or_create_metric(tag_factory):
     assert tag.metric is not None
     assert tag.metric.min == 1
     assert tag.metric.max == 2
+    assert tag.metric.version == 1
 
     new_metric = metrics.update_or_create_metric(tag, {'min': 3, 'max': 4})
     assert new_metric is None
     db.session.flush()
     assert tag.metric.min == 3
     assert tag.metric.max == 4
+    assert tag.metric.version == 2
 
 
 @pytest.mark.parametrize('params', [
@@ -174,11 +176,13 @@ def test_update_or_create_post_metric_update(post_factory, metric_factory):
     post_metric = model.PostMetric(post=post, metric=metric, value=1.2)
     db.session.add(post_metric)
     db.session.flush()
+    assert post_metric.version == 1
 
     metrics.update_or_create_post_metric(post, metric, 3.4)
     db.session.flush()
 
     assert post_metric.value == 3.4
+    assert post_metric.version == 2
 
 
 def test_update_or_create_post_metrics_missing_tag(
@@ -304,12 +308,14 @@ def test_update_or_create_post_metric_range_update(
         post=post, metric=metric, low=2, high=3)
     db.session.add(post_metric_range)
     db.session.flush()
+    assert post_metric_range.version == 1
 
     metrics.update_or_create_post_metric_range(post, metric, 4, 5)
     db.session.flush()
 
     assert post_metric_range.low == 4
     assert post_metric_range.high == 5
+    assert post_metric_range.version == 2
 
 
 def test_update_or_create_post_metric_ranges_missing_tag(
