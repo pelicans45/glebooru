@@ -13,6 +13,7 @@ class Metric extends events.EventTarget {
         this._updateFromResponse({});
     }
 
+    get version()  { return this._version; }
     get min()      { return this._min; }
     get max()      { return this._max; }
 
@@ -47,6 +48,20 @@ class Metric extends events.EventTarget {
             .then(response => {
                 this._updateFromResponse(response);
                 this.dispatchEvent(new CustomEvent('change', {
+                    detail: {
+                        metric: this,
+                    },
+                }));
+                return Promise.resolve();
+            });
+    }
+
+    delete() {
+        return api.delete(
+            uri.formatApiLink('metric', this._orig),
+            {version: this._version})
+            .then(response => {
+                this.dispatchEvent(new CustomEvent('delete', {
                     detail: {
                         metric: this,
                     },

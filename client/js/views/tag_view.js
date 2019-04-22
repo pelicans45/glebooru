@@ -57,6 +57,7 @@ class TagView extends events.EventTarget {
             } else {
                 this._view = new TagMetricView(ctx);
                 events.proxyEvent(this._view, this, 'submit', 'metricUpdate');
+                events.proxyEvent(this._view, this, 'delete', 'metricDelete');
             }
 
         } else if (ctx.section === 'merge') {

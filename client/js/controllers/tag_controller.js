@@ -46,6 +46,7 @@ class TagController {
                 canEditSuggestions: api.hasPrivilege('tags:edit:suggestions'),
                 canEditDescription: api.hasPrivilege('tags:edit:description'),
                 canCreateMetric: api.hasPrivilege('metrics:create'),
+                canDeleteMetric: api.hasPrivilege('metrics:delete'),
                 canEditMetricBounds: api.hasPrivilege('metrics:edit:bounds'),
                 canMerge: api.hasPrivilege('tags:merge'),
                 canDelete: api.hasPrivilege('tags:delete'),
@@ -58,6 +59,7 @@ class TagController {
             this._view.addEventListener('merge', e => this._evtMerge(e));
             this._view.addEventListener('delete', e => this._evtDelete(e));
             this._view.addEventListener('metricUpdate', e => this._evtMetricUpdate(e));
+            this._view.addEventListener('metricDelete', e => this._evtMetricDelete(e));
         }, error => {
             this._view = new EmptyView();
             this._view.showError(error.message);
@@ -108,6 +110,18 @@ class TagController {
 
         e.detail.tag.save().then(() => {
             this._view.showSuccess('Metric updated.');
+            this._view.enableForm();
+        }, error => {
+            this._view.showError(error.message);
+            this._view.enableForm();
+        });
+    }
+
+    _evtMetricDelete(e) {
+        this._view.clearMessages();
+        this._view.disableForm();
+        e.detail.tag.deleteMetric().then(() => {
+            this._view.showSuccess('Metric deleted.');
             this._view.enableForm();
         }, error => {
             this._view.showError(error.message);

@@ -26,6 +26,9 @@ class TagMetricView extends events.EventTarget {
         views.replaceContent(this._hostNode, template(ctx));
 
         this._formNode.addEventListener('submit', e => this._evtSubmit(e));
+        if (this._deleteButtonNode) {
+            this._deleteButtonNode.addEventListener('click', e => this._evtDelete(e));
+        }
     }
 
     _evtSubmit(e) {
@@ -37,6 +40,17 @@ class TagMetricView extends events.EventTarget {
                 metricMax: this._maxFieldNode.value,
             },
         }));
+    }
+
+    _evtDelete(e) {
+        e.preventDefault();
+        if (!this._deleteConfirmationNode.checked) {
+            this.showError('Please confirm deletion.')
+        } else {
+            this.dispatchEvent(new CustomEvent('delete', {
+                detail: {tag: this._tag},
+            }));
+        }
     }
 
     clearMessages() {
@@ -69,6 +83,14 @@ class TagMetricView extends events.EventTarget {
 
     get _maxFieldNode() {
         return this._formNode.querySelector('input[name=metric-max]');
+    }
+
+    get _deleteConfirmationNode() {
+        return this._formNode.querySelector('input[name=confirm-delete]');
+    }
+
+    get _deleteButtonNode() {
+        return this._formNode.querySelector('input[name=delete]');
     }
 }
 

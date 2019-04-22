@@ -133,6 +133,20 @@ class Tag extends events.EventTarget {
             });
     }
 
+    deleteMetric() {
+        return api.delete(
+            uri.formatApiLink('metric', this._origName),
+            {version: this.metric.version})
+            .then(response => {
+                this.dispatchEvent(new CustomEvent('delete', {
+                    detail: {
+                        metric: this.metric,
+                    },
+                }));
+                return Promise.resolve();
+            });
+    }
+
     _updateFromResponse(response) {
         const map = {
             _version:      response.version,

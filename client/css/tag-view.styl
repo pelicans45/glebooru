@@ -1,3 +1,6 @@
+@import colors
+$delete-button-color = tomato
+
 #tag
     width: 100%
     max-width: 40em
@@ -33,7 +36,7 @@
                     margin-bottom: 1em
     .metric-bounds-edit
         display: flex
-        margin-bottom: 2em
+        margin-bottom: 1em
         input[type=number]
             flex: 2
             margin-left: 0.5em
@@ -43,3 +46,11 @@
             flex 1
         input[name=metric-min]
             margin-right: 2em
+    .confirmation
+        margin-bottom: 2em
+    .delete
+        background: $delete-button-color
+        border-color: $delete-button-color
+        margin-left: 0.5em
+        &:focus
+            border: 2px solid $text-color
