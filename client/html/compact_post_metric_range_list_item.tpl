@@ -1,9 +1,12 @@
 <li><!--
 --><% if (ctx.editMode) { %><!--
-    --><a href="<%- ctx.formatClientLink('tag', ctx.postMetricRange.tagName) %>"
+    --><a href="<%- ctx.formatClientLink('posts', {
+                query: 'metric-' + ctx.escapeColons(ctx.postMetricRange.tagName) +
+                    ':' + ctx.postMetricRange.high + '..' + ctx.postMetricRange.high
+                }) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fas fa-arrows-alt-h tag-icon'></i><!--
-    --><%- ctx.postMetricRange.tagName %>: </a><!--
+    --><%- ctx.postMetricRange.tagName %>:</a><!--
     --><%= ctx.makeNumericInput({
            name: 'low',
            value: ctx.postMetricRange.low,

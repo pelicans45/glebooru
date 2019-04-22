@@ -43,9 +43,6 @@ class PostMetricInputControl extends events.EventTarget {
             const metricNode = this._createMetricNode(tag);
             this._metricListNode.appendChild(metricNode);
         }
-        this._separatorNode.style.display =
-            this._post.tags.filterMetrics().length && this._post.metrics.length
-                ? 'block' : 'none';
         this._postMetricListNode.innerHTML = '';
         for (let pm of this._post.metrics) {
             const postMetricNode = this._createPostMetricNode(pm);
@@ -55,6 +52,8 @@ class PostMetricInputControl extends events.EventTarget {
             const postMetricRangeNode = this._createPostMetricRangeNode(pmr);
             this._postMetricListNode.appendChild(postMetricRangeNode);
         }
+        this._separatorNode.style.display =
+            this._postMetricListNode.innerHTML ? 'block' : 'none';
     }
 
     _createMetricNode(tag) {

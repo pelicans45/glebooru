@@ -1,9 +1,12 @@
 <li><!--
 --><% if (ctx.editMode) { %><!--
-    --><a href="<%- ctx.formatClientLink('tag', ctx.postMetric.tagName) %>"
+    --><a href="<%- ctx.formatClientLink('posts', {
+                query: 'metric-' + ctx.escapeColons(ctx.postMetric.tagName) +
+                    ':' + ctx.postMetric.value
+                }) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fas fa-angle-right tag-icon'></i><!--
-    --><%- ctx.postMetric.tagName %>: </a><!--
+    --><%- ctx.postMetric.tagName %>:</a><!--
     --><%= ctx.makeNumericInput({
            name: 'value',
            value: ctx.postMetric.value,
