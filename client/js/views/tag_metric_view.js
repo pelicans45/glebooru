@@ -19,8 +19,8 @@ class TagMetricView extends events.EventTarget {
             ctx.metricMax = ctx.tag.metric.max;
         } else {
             // default new values
-            ctx.metricMin = '0';
-            ctx.metricMax = '10';
+            ctx.metricMin = 0;
+            ctx.metricMax = 10;
         }
 
         views.replaceContent(this._hostNode, template(ctx));
