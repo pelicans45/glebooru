@@ -1,20 +1,15 @@
 'use strict';
 
-const api = require('../api.js');
-const tags = require('../tags.js');
-const misc = require('../util/misc.js');
 const uri = require('../util/uri.js');
-const Tag = require('../models/tag.js');
-const TagList = require('../models/tag_list.js');
 const PostMetric = require('../models/post_metric.js');
-const PostMetricList = require('../models/post_metric_list.js');
-const settings = require('../models/settings.js');
+const PostMetricRange = require('../models/post_metric_range.js');
 const events = require('../events.js');
 const views = require('../util/views.js');
 
 const mainTemplate = views.getTemplate('post-metric-input');
 const metricNodeTemplate = views.getTemplate('compact-metric-list-item');
 const postMetricNodeTemplate = views.getTemplate('compact-post-metric-list-item');
+const postMetricRangeNodeTemplate = views.getTemplate('compact-post-metric-range-list-item');
 
 class PostMetricInputControl extends events.EventTarget {
     constructor(hostNode, post) {
@@ -56,6 +51,10 @@ class PostMetricInputControl extends events.EventTarget {
             const postMetricNode = this._createPostMetricNode(pm);
             this._postMetricListNode.appendChild(postMetricNode);
         }
+        for (let pmr of this._post.metricRanges) {
+            const postMetricRangeNode = this._createPostMetricRangeNode(pmr);
+            this._postMetricListNode.appendChild(postMetricRangeNode);
+        }
     }
 
     _createMetricNode(tag) {
@@ -73,10 +72,14 @@ class PostMetricInputControl extends events.EventTarget {
             });
         }
         const createRangeNode = node.querySelector('a.create-range');
-        createRangeNode.addEventListener('click', e => {
-            e.preventDefault();
-            this.createPostMetricRange(tag);
-        });
+        if (this._post.metricRanges.hasTagName(tag.names[0])) {
+            createRangeNode.style.display = 'none';
+        } else {
+            createRangeNode.addEventListener('click', e => {
+                e.preventDefault();
+                this.createPostMetricRange(tag);
+            });
+        }
         return node;
     }
 
@@ -90,13 +93,32 @@ class PostMetricInputControl extends events.EventTarget {
         return node;
     }
 
+    _createPostMetricRangeNode(pmr) {
+        const tag = this._post.tags.findByName(pmr.tagName);
+        const node = postMetricRangeNodeTemplate({
+            editMode: true,
+            postMetricRange: pmr,
+            tag: tag,
+        });
+        return node;
+    }
+
     createPostMetric(tag) {
+        let postMetricRange = this._post.metricRanges.findByTagName(tag.names[0]);
+        if (postMetricRange) {
+            this._post.metricRanges.remove(postMetricRange);
+        }
         this._post.metrics.add(PostMetric.create(this._post.id, tag));
         this._refreshContent();
     }
 
     createPostMetricRange(tag) {
-        //TODO
+        let postMetric = this._post.metrics.findByTagName(tag.names[0]);
+        if (postMetric) {
+            this._post.metrics.remove(postMetric);
+        }
+        this._post.metricRanges.add(PostMetricRange.create(this._post.id, tag));
+        this._refreshContent();
     }
 }
 

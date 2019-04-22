@@ -2,7 +2,7 @@
 --><% if (ctx.editMode) { %><!--
     --><a href="<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'metric') %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
-        --><i class='fa fa-arrows-alt-h'></i><!--
+        --><i class='fa fa-sliders-h tag-icon'></i><!--
     --></a><!--
     --><a href="<%- ctx.formatClientLink('posts', {
                 query: 'metric-' + ctx.escapeColons(ctx.tag.names[0]) +

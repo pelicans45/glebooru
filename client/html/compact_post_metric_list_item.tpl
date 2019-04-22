@@ -2,7 +2,7 @@
 --><% if (ctx.editMode) { %><!--
     --><a href="<%- ctx.formatClientLink('tag', ctx.postMetric.tagName) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
-        --><i class='fas fa-check'></i><!--
+        --><i class='fas fa-angle-right tag-icon'></i><!--
     --><%- ctx.postMetric.tagName %>: </a><!--
     --><%= ctx.makeNumericInput({
            name: 'value',
