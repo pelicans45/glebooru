@@ -21,7 +21,6 @@ class PostMetricInputControl extends events.EventTarget {
         const editAreaNode = mainTemplate({
             tags: this._post.tags,
             postMetrics: this._post.metrics,
-            escapeColons: uri.escapeColons,
         });
         this._editAreaNode = editAreaNode;
         this._metricListNode = editAreaNode.querySelector('ul.compact-unset-metrics');
