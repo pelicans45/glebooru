@@ -1,6 +1,6 @@
 <li><!--
 --><% if (ctx.editMode) { %><!--
-    --><a href="<%- ctx.formatClientLink('tag', ctx.tag.names[0], 'metric') %>"
+    --><a href="<%- ctx.formatClientLink('tag', ctx.tag.names[0]) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fa fa-sliders-h tag-icon'></i><!--
     --></a><!--
