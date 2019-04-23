@@ -1,5 +1,6 @@
 <li><!--
 --><% if (ctx.editMode) { %><!--
+    --><a class='remove-metric' data-pseudo-content='×'/><!--
     --><a href="<%- ctx.formatClientLink('posts', {
                 query: 'metric-' + ctx.escapeColons(ctx.postMetricRange.tagName) +
                     ':' + ctx.postMetricRange.low + '..' + ctx.postMetricRange.high

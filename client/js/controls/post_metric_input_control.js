@@ -88,11 +88,14 @@ class PostMetricInputControl extends events.EventTarget {
             postMetric: pm,
             tag: tag,
         });
-        node.querySelector('input[name=value]')
-            .addEventListener('change', e => {
-                pm.value = e.target.value;
-                this.dispatchEvent(new CustomEvent('change'));
-            });
+        node.querySelector('input[name=value]').addEventListener('change', e => {
+            pm.value = e.target.value;
+            this.dispatchEvent(new CustomEvent('change'));
+        });
+        node.querySelector('.remove-metric').addEventListener('click', e => {
+            e.preventDefault();
+            this.deletePostMetric(pm);
+        });
         return node;
     }
 
@@ -103,16 +106,18 @@ class PostMetricInputControl extends events.EventTarget {
             postMetricRange: pmr,
             tag: tag,
         });
-        node.querySelector('input[name=low]')
-            .addEventListener('change', e => {
-                pmr.low = e.target.value;
-                this.dispatchEvent(new CustomEvent('change'));
-            });
-        node.querySelector('input[name=high]')
-            .addEventListener('change', e => {
-                pmr.high = e.target.value;
-                this.dispatchEvent(new CustomEvent('change'));
-            });
+        node.querySelector('input[name=low]').addEventListener('change', e => {
+            pmr.low = e.target.value;
+            this.dispatchEvent(new CustomEvent('change'));
+        });
+        node.querySelector('input[name=high]').addEventListener('change', e => {
+            pmr.high = e.target.value;
+            this.dispatchEvent(new CustomEvent('change'));
+        });
+        node.querySelector('.remove-metric').addEventListener('click', e => {
+            e.preventDefault();
+            this.deletePostMetricRange(pmr);
+        });
         return node;
     }
 
@@ -132,6 +137,18 @@ class PostMetricInputControl extends events.EventTarget {
             this._post.metrics.remove(postMetric);
         }
         this._post.metricRanges.add(PostMetricRange.create(this._post.id, tag));
+        this.refreshContent();
+        this.dispatchEvent(new CustomEvent('change'));
+    }
+
+    deletePostMetric(pm) {
+        this._post.metrics.remove(pm);
+        this.refreshContent();
+        this.dispatchEvent(new CustomEvent('change'));
+    }
+
+    deletePostMetricRange(pmr) {
+        this._post.metricRanges.remove(pmr);
         this.refreshContent();
         this.dispatchEvent(new CustomEvent('change'));
     }
