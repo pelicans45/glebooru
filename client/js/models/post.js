@@ -283,6 +283,13 @@ class Post extends events.EventTarget {
             });
     }
 
+    removeMetricsWithoutTag() {
+        this._metrics.filter(pm => !this._tags.findByName(pm.tagName))
+            .map(pm => this._metrics.remove(pm));
+        this._metricRanges.filter(pmr => !this._tags.findByName(pmr.tagName))
+            .map(pmr => this._metricRanges.remove(pmr));
+    }
+
     mutateContentUrl() {
         this._contentUrl =
             this._orig._contentUrl +

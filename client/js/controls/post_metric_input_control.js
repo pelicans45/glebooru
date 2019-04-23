@@ -33,10 +33,10 @@ class PostMetricInputControl extends events.EventTarget {
             this._editAreaNode, hostNode.nextSibling);
 
         // add existing metrics and post metrics:
-        this._refreshContent();
+        this.refreshContent();
     }
 
-    _refreshContent() {
+    refreshContent() {
         this._metricListNode.innerHTML = '';
         for (let tag of this._post.tags.filterMetrics()) {
             const metricNode = this._createMetricNode(tag);
@@ -122,7 +122,7 @@ class PostMetricInputControl extends events.EventTarget {
             this._post.metricRanges.remove(postMetricRange);
         }
         this._post.metrics.add(PostMetric.create(this._post.id, tag));
-        this._refreshContent();
+        this.refreshContent();
         this.dispatchEvent(new CustomEvent('change'));
     }
 
@@ -132,7 +132,7 @@ class PostMetricInputControl extends events.EventTarget {
             this._post.metrics.remove(postMetric);
         }
         this._post.metricRanges.add(PostMetricRange.create(this._post.id, tag));
-        this._refreshContent();
+        this.refreshContent();
         this.dispatchEvent(new CustomEvent('change'));
     }
 }

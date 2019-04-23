@@ -39,6 +39,10 @@ class ExpanderControl {
         this._syncIcon();
     }
 
+    get containerNode() {
+        return this._expanderNode;
+    }
+
     set title(newTitle) {
         if (this._expanderNode) {
             this._expanderNode

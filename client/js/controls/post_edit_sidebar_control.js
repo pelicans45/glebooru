@@ -188,6 +188,10 @@ class PostEditSidebarControl extends events.EventTarget {
                 'change', e => {
                     this.dispatchEvent(new CustomEvent('change'));
                     this._syncExpanderTitles();
+                    this._post.removeMetricsWithoutTag();
+                    if (this._metricControl) {
+                        this._metricControl.refreshContent();
+                    }
                 });
         }
 
@@ -218,7 +222,13 @@ class PostEditSidebarControl extends events.EventTarget {
     _syncExpanderTitles() {
         this._notesExpander.title = `Notes (${this._post.notes.length})`;
         this._tagsExpander.title = `Tags (${this._post.tags.length})`;
-        this._metricsExpander.title = `Metrics (${this._post.tags.filterMetrics().length})`;
+        let metricCount = this._post.tags.filterMetrics().length;
+        if (metricCount > 0) {
+            this._metricsExpander.containerNode.style.display = 'block';
+            this._metricsExpander.title = `Metrics (${metricCount})`;
+        } else {
+            this._metricsExpander.containerNode.style.display = 'none';
+        }
     }
 
     _evtPostContentChange(e) {
