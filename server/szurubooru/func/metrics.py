@@ -118,8 +118,8 @@ def try_get_post_metric(
     return (
         db.session
         .query(model.PostMetric)
-        .filter(model.PostMetric.metric == metric and
-                model.PostMetric.post == post)
+        .filter(model.PostMetric.metric == metric)
+        .filter(model.PostMetric.post == post)
         .one_or_none())
 
 
@@ -129,8 +129,8 @@ def try_get_post_metric_range(
     return (
         db.session
         .query(model.PostMetricRange)
-        .filter(model.PostMetricRange.metric == metric and
-                model.PostMetricRange.post == post)
+        .filter(model.PostMetricRange.metric == metric)
+        .filter(model.PostMetricRange.post == post)
         .one_or_none())
 
 
@@ -139,7 +139,7 @@ def create_metric(
         min: float,
         max: float) -> model.Metric:
     assert tag
-    if tag.metric is not None:
+    if tag.metric:
         raise MetricAlreadyExistsError('Tag already has a metric.')
     if min >= max:
         raise InvalidMetricError('Metric min(%r) >= max(%r)' % (min, max))
@@ -159,7 +159,7 @@ def update_or_create_metric(
     min, max = metric_data['min'], metric_data['max']
     if min >= max:
         raise InvalidMetricError('Metric min(%r) >= max(%r)' % (min, max))
-    if tag.metric is not None:
+    if tag.metric:
         tag.metric.min = min
         tag.metric.max = max
         versions.bump_version(tag.metric)
@@ -203,7 +203,7 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
         value = float(metric_data['value'])
         tag_name = metric_data['tag_name']
         tag = tags.get_tag_by_name(tag_name)
-        if tag.metric is None:
+        if not tag.metric:
             raise MetricDoesNotExistsError(
                 'Tag %r has no metric.' % tag_name)
         post_metric = update_or_create_post_metric(post, tag.metric, value)
@@ -256,7 +256,7 @@ def update_or_create_post_metric_ranges(
         high = float(metric_data['high'])
         tag_name = metric_data['tag_name']
         tag = tags.get_tag_by_name(tag_name)
-        if tag.metric is None:
+        if not tag.metric:
             raise MetricDoesNotExistsError(
                 'Tag %r has no metric.' % tag_name)
         post_metric_range = update_or_create_post_metric_range(

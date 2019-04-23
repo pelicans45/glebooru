@@ -184,17 +184,23 @@ def test_update_or_create_post_metric_create(post_factory, metric_factory):
 
 def test_update_or_create_post_metric_update(post_factory, metric_factory):
     metric = metric_factory()
-    post = post_factory(tags=[metric.tag])
-    post_metric = model.PostMetric(post=post, metric=metric, value=1.2)
-    db.session.add(post_metric)
+    post1 = post_factory(tags=[metric.tag])
+    post2 = post_factory(tags=[metric.tag])
+    post_metric1 = model.PostMetric(post=post1, metric=metric, value=1.2)
+    post_metric2 = model.PostMetric(post=post2, metric=metric, value=5.6)
+    db.session.add_all([post1, post2, post_metric1, post_metric2])
     db.session.flush()
-    assert post_metric.version == 1
+    assert post_metric1.version == 1
+    assert post_metric2.version == 1
 
-    metrics.update_or_create_post_metric(post, metric, 3.4)
+    metrics.update_or_create_post_metric(post1, metric, 3.4)
     db.session.flush()
 
-    assert post_metric.value == 3.4
-    assert post_metric.version == 2
+    assert db.session.query(model.PostMetric).count() == 2
+    assert post_metric1.value == 3.4
+    assert post_metric1.version == 2
+    assert post_metric2.value == 5.6
+    assert post_metric2.version == 1
 
 
 def test_update_or_create_post_metrics_missing_tag(
