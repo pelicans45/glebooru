@@ -382,7 +382,7 @@ class PostSearchConfig(BaseSearchConfig):
             (
                 ['flag'],
                 search_util.create_str_filter(
-                    model.Post.flags, _flag_transformer)
+                    model.Post.flags_string, _flag_transformer)
             ),
         ]))
         return filters
