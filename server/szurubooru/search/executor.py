@@ -29,6 +29,8 @@ class Executor:
     Class for search parsing and execution. Handles plaintext parsing and
     delegates sqlalchemy filter decoration to SearchConfig instances.
     '''
+    AROUND_NEXT = 'up'
+    AROUND_PREV = 'down'
 
     def __init__(self, search_config: BaseSearchConfig) -> None:
         self.config = search_config
@@ -44,20 +46,14 @@ class Executor:
             self.config
                 .create_around_query()
                 .options(sa.orm.lazyload('*')))
-        filter_query = self._prepare_db_query(
-            filter_query, search_query, False)
         prev_filter_query = (
-            filter_query
-            .filter(self.config.id_column > entity_id)
-            .order_by(None)
-            .order_by(sa.func.abs(self.config.id_column - entity_id).asc())
-            .limit(1))
+            self._prepare_sorted_around_query(
+                filter_query, search_query, entity_id, self.AROUND_PREV
+            ).limit(1))
         next_filter_query = (
-            filter_query
-            .filter(self.config.id_column < entity_id)
-            .order_by(None)
-            .order_by(sa.func.abs(self.config.id_column - entity_id).asc())
-            .limit(1))
+            self._prepare_sorted_around_query(
+                filter_query, search_query, entity_id, self.AROUND_NEXT
+            ).limit(1))
         # random post
         if 'sort:random' not in query_text:
             query_text = query_text + ' sort:random'
@@ -192,4 +188,74 @@ class Executor:
                     db_query = db_query.order_by(column.desc())
 
         db_query = self.config.finalize_query(db_query)
+        return db_query
+
+    def _prepare_sorted_around_query(
+            self,
+            db_query: SaQuery,
+            search_query: SearchQuery,
+            entity_id: int,
+            direction: str):
+        db_query = self._prepare_db_query(db_query, search_query, False)
+        db_query = db_query.order_by(None)
+        found_sort_column = False
+
+        for sort_token in search_query.sort_tokens:
+            if sort_token.name not in self.config.sort_columns:
+                raise errors.SearchError(
+                    'Unknown sort token: %r. '
+                    'Available sort tokens: %r.' % (
+                        sort_token.name,
+                        _format_dict_keys(self.config.sort_columns)))
+            column, default_order = (
+                self.config.sort_columns[sort_token.name])
+            order = _get_order(sort_token.order, default_order)
+
+            # the order column may be joined, so we need to query its value:
+            column_query = (
+                db.session.query(self.config.id_column, column)
+                .options(sa.orm.lazyload('*')))
+            column_query = (
+                # empty search query because we already know entity id
+                self._prepare_db_query(column_query, SearchQuery(), False)
+                .filter(self.config.id_column == entity_id))
+            id, column_value = column_query.one_or_none()
+            # it's possible that this entity doesn't have the column
+            if not column_value:
+                continue
+            found_sort_column = True
+
+            if order == sort_token.SORT_ASC:
+                if direction == self.AROUND_NEXT:
+                    db_query = (
+                        db_query
+                        .order_by(column.asc())
+                        .filter(column > column_value))
+                elif direction == self.AROUND_PREV:
+                    db_query = (
+                        db_query
+                        .order_by(column.desc())
+                        .filter(column < column_value))
+            elif order == sort_token.SORT_DESC:
+                if direction == self.AROUND_NEXT:
+                    db_query = (
+                        db_query
+                        .order_by(column.desc())
+                        .filter(column < column_value))
+                elif direction == self.AROUND_PREV:
+                    db_query = (
+                        db_query
+                        .order_by(column.asc())
+                        .filter(column > column_value))
+
+        if not found_sort_column:
+            # no sorting, use default sorting by id
+            if direction == self.AROUND_NEXT:
+                db_query = db_query.filter(self.config.id_column < entity_id)
+            elif direction == self.AROUND_PREV:
+                db_query = db_query.filter(self.config.id_column > entity_id)
+            db_query = db_query.order_by(
+                sa.func.abs(self.config.id_column - entity_id).asc())
+            return db_query
+
         return db_query

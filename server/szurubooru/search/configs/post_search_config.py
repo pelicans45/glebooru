@@ -110,7 +110,7 @@ def _create_metric_filter(name: str):
                 negated: bool) -> SaQuery:
         assert criterion
         t = sa.orm.aliased(model.TagName)
-        pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + name)
+        pm = sa.orm.aliased(model.PostMetric)
         expr = t.name == name
         expr = expr & search_util.apply_num_criterion_to_column(
             pm.value, criterion, search_util.float_transformer)
@@ -126,8 +126,15 @@ def _create_metric_filter(name: str):
 
 
 def _create_metric_sort_column(metric_name: str):
-    pm = sa.orm.aliased(model.PostMetric, name='post_metric_' + metric_name)
-    return pm.value
+    t = sa.orm.aliased(model.TagName)
+    pm = sa.orm.aliased(model.PostMetric)
+    ret = (
+        db.session.query(pm.value)
+        .filter(pm.post_id == model.Post.post_id)
+        .join(t, t.tag_id == pm.tag_id)
+        .filter(t.name == metric_name)
+        .as_scalar())
+    return ret
 
 
 class PostSearchConfig(BaseSearchConfig):
