@@ -6,7 +6,8 @@
     --></a><!--
     --><a href="<%- ctx.formatClientLink('posts', {
                 query: 'metric-' + ctx.escapeColons(ctx.tag.names[0]) +
-                    ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max
+                    ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
+                    ' sort:metric-' + ctx.escapeColons(ctx.tag.names[0])
                 }) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><%- ctx.tag.names[0] %>&#32;<!--
