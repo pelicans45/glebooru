@@ -199,12 +199,20 @@
             display: none
         label
             display: inline !important
+            margin-left: -0.5em
         .metric-list
             li
                 display: inline-block
+                line-height: 1.7em
+                margin-right: 0.5em
+                @media (max-width: 500px)
+                    margin-bottom: 0.5em
+                &:not(.selected)
+                    border-width: 1px
+                    border-style: dotted
             li a
                 vertical-align: middle
-                margin-right: 1em
+                padding: 0.2em 0.5em
     .bulk-edit-block
         &.hidden
             display: none

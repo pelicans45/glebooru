@@ -1,4 +1,4 @@
-<li>
+<li class="<%= ctx.makeCssName(ctx.metric.tag.category, 'tag') %>">
     <a href="<%- ctx.formatClientLink('posts', {
                 query: 'metric-' + ctx.escapeColons(ctx.metric.tag.names[0]) +
                     ':' + ctx.metric.min + '..' + ctx.metric.max +

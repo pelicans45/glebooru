@@ -82,7 +82,7 @@ function makeCheckbox(options) {
                 disabled: options.readonly,
                 required: options.required,
             }),
-        makeElement('span', {class: 'checkbox'}, options.text));
+        makeElement('span', {class: 'checkbox ' + (options.class || '')}, options.text));
 }
 
 function makeSelect(options) {

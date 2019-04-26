@@ -15,7 +15,7 @@ function refreshCategoryColorMap() {
         for (let category of response.results) {
             const ruleName = misc.makeCssName(category.name, 'tag');
             _stylesheet.sheet.insertRule(
-                `.${ruleName} { color: ${category.color} }`,
+                `.${ruleName} { color: ${category.color}; border-color: ${category.color} }`,
                 _stylesheet.sheet.cssRules.length);
         }
     });
