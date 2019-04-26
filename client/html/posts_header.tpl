@@ -12,14 +12,22 @@
             %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
         %><% } %><%
         %><wbr/><%
-        %><a class='mousetrap button append' href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'>Syntax help</a><%
+        %><a class='mousetrap button append desktop-only'
+             href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'><%
+                if (window.innerWidth <= 500) { %>Help<%
+                } else { %>Syntax help<% }
+        %></a><%
         %><wbr/><%
         %><span class="bulk-edit-btn-holder"><%
             %><a class='mousetrap button append open bulk-edit-btn'><%
-                %>Mass edit<i class='fa fa-chevron-down icon-inline'></i><%
+                if (window.innerWidth <= 500) { %>Mass<%
+                } else { %>Mass edit<% }
+                %><i class='fa fa-chevron-down icon-inline'></i><%
             %></a><%
             %><a class='mousetrap button append close bulk-edit-btn'><%
-                %>Mass edit<i class='fa fa-chevron-up icon-inline'></i><%
+                if (window.innerWidth <= 500) { %>Mass<%
+                } else { %>Mass edit<% }
+                %><i class='fa fa-chevron-up icon-inline'></i><%
             %></a><%
         %></span><%
     %></form><%
