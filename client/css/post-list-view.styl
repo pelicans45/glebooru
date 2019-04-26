@@ -185,19 +185,26 @@
         vertical-align: middle
         font-size: 0.95em
         color: $inactive-link-color
+    .bulk-edit-btn-holder
+        &:not(.opened)
+            .close
+                display: none
+        &.opened
+            .open
+                display: none
     .bulk-edit-block
-        display: contents
-        @media (max-width: 1000px)
-            form
-                &:not(.opened)
-                    display: inline-block
-                &.opened
-                    display: block
-            input[type=submit]
-                margin-right: 1em
-            .append
-                margin-left: 0
-                margin-right: 1em
+        &.hidden
+            display: none
+        form
+            &:not(.opened)
+                display: inline-block
+            &.opened
+                display: block
+        input[type=submit]
+            margin-right: 1em
+        .append
+            margin-left: 0
+            margin-right: 1em
         .bulk-edit
             &:not(.opened)
                 .close
@@ -252,3 +259,6 @@
         margin-bottom: 0.25em
         i
             vertical-align: middle
+    .icon-inline
+        vertical-align: baseline
+        margin-left: 0.3em

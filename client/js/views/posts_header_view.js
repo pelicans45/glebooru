@@ -183,6 +183,15 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkAddRelationEditor);
         }
 
+        if (this._bulkEditOpenButtonNode) {
+            this._bulkEditOpenButtonNode.addEventListener(
+                'click', e => this._evtOpenBulkEditBtnClick(e));
+        }
+        if (this._bulkEditCloseButtonNode) {
+            this._bulkEditCloseButtonNode.addEventListener(
+                'click', e => this._evtCloseBulkEditBtnClick(e));
+        }
+
         for (let editor of this._bulkEditors) {
             editor.addEventListener('submit', e => {
                 this._navigate();
@@ -222,6 +231,22 @@ class PostsHeaderView extends events.EventTarget {
         return this._hostNode.querySelector('#randomize-button');
     }
 
+    get _bulkEditBtnHolderNode() {
+        return this._hostNode.querySelector('.bulk-edit-btn-holder');
+    }
+
+    get _bulkEditOpenButtonNode() {
+        return this._hostNode.querySelector('.bulk-edit-btn.open');
+    }
+
+    get _bulkEditCloseButtonNode() {
+        return this._hostNode.querySelector('.bulk-edit-btn.close');
+    }
+
+    get _bulkEditBlockNode() {
+        return this._hostNode.querySelector('.bulk-edit-block');
+    }
+
     get _bulkEditTagsNode() {
         return this._hostNode.querySelector('.bulk-edit-tags');
     }
@@ -232,6 +257,21 @@ class PostsHeaderView extends events.EventTarget {
 
     get _bulkAddRelationNode() {
         return this._hostNode.querySelector('.bulk-add-relation');
+    }
+
+    _evtOpenBulkEditBtnClick(e) {
+        e.preventDefault();
+        this._bulkEditBtnHolderNode.classList.toggle('opened', true);
+        this._bulkEditBlockNode.classList.toggle('hidden', false);
+        this._navigate();
+    }
+
+    _evtCloseBulkEditBtnClick(e) {
+        e.preventDefault();
+        this._bulkEditBtnHolderNode.classList.toggle('opened', false);
+        this._closeAndShowAllBulkEditors();
+        this._bulkEditBlockNode.classList.toggle('hidden', true);
+        this._navigate();
     }
 
     _openBulkEditor(editor) {

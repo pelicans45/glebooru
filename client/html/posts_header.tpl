@@ -13,8 +13,17 @@
         %><% } %><%
         %><wbr/><%
         %><a class='mousetrap button append' href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'>Syntax help</a><%
+        %><wbr/><%
+        %><span class="bulk-edit-btn-holder"><%
+            %><a class='mousetrap button append open bulk-edit-btn'><%
+                %>Mass edit<i class='fa fa-chevron-down icon-inline'></i><%
+            %></a><%
+            %><a class='mousetrap button append close bulk-edit-btn'><%
+                %>Mass edit<i class='fa fa-chevron-up icon-inline'></i><%
+            %></a><%
+        %></span><%
     %></form><%
-    %><div class='bulk-edit-block'><%
+    %><div class='bulk-edit-block hidden'><%
         %><% if (ctx.canBulkEditTags) { %><%
             %><form class='horizontal bulk-edit bulk-edit-tags'><%
                 %><span class='append hint'>Tagging with:</span><%
