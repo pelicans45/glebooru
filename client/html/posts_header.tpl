@@ -30,9 +30,22 @@
                 %><i class='fa fa-chevron-up icon-inline'></i><%
             %></a><%
         %></span><%
+        %><wbr/><%
+        if (ctx.canViewMetrics) {
+            %><span class="metrics-btn-holder"><%
+                %><a class='mousetrap button append open metrics-btn'><%
+                    %>Metrics<%
+                    %><i class='fa fa-chevron-down icon-inline'></i><%
+                %></a><%
+                %><a class='mousetrap button append close metrics-btn'><%
+                    %>Metrics<%
+                    %><i class='fa fa-chevron-up icon-inline'></i><%
+                %></a><%
+            %></span><%
+        }
     %></form><%
     %><div class='bulk-edit-block hidden'><%
-        %><% if (ctx.canBulkEditTags) { %><%
+        if (ctx.canBulkEditTags) {
             %><form class='horizontal bulk-edit bulk-edit-tags'><%
                 %><span class='append hint'>Tagging with:</span><%
                 %><a href class='mousetrap button append open'>Mass tag</a><%
@@ -41,17 +54,20 @@
                 %><input class='mousetrap start' type='submit' value='Start tagging'/><%
                 %><a href class='mousetrap button append close'>Stop tagging</a><%
             %></form><%
-        %><% } %><%
-        %><% if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
+        }
+        if (ctx.enableSafety && ctx.canBulkEditSafety) {
             %><form class='horizontal bulk-edit bulk-edit-safety'><%
                 %><a href class='mousetrap button append open'>Mass edit safety</a><%
                 %><a href class='mousetrap button append close'>Stop editing safety</a><%
             %></form><%
-        %><% } %><%
+        }
         %><!--TODO: create permission--><%
         %><form class='horizontal bulk-edit bulk-add-relation'><%
             %><a href class='mousetrap button append open'>Mass add relation</a><%
             %><a href class='mousetrap button append close'>Stop adding relation</a><%
         %></form><%
     %></div><%
+    if (ctx.canViewMetrics) {
+    %><div class='metrics-block hidden'>Hello</div><%
+    }
 %></div>

@@ -35,6 +35,7 @@ class PostListController {
             enableSafety: api.safetyEnabled(),
             canBulkEditTags: api.hasPrivilege('posts:bulk-edit:tags'),
             canBulkEditSafety: api.hasPrivilege('posts:bulk-edit:safety'),
+            canViewMetrics: api.hasPrivilege('metrics:list'),
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
@@ -135,8 +136,8 @@ class PostListController {
                 Object.assign(pageCtx, {
                     canViewPosts: api.hasPrivilege('posts:view'),
                     canBulkEditTags: api.hasPrivilege('posts:bulk-edit:tags'),
-                    canBulkEditSafety:
-                        api.hasPrivilege('posts:bulk-edit:safety'),
+                    canBulkEditSafety: api.hasPrivilege('posts:bulk-edit:safety'),
+                    canViewMetrics: api.hasPrivilege('metrics:list'),
                     bulkEdit: {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,

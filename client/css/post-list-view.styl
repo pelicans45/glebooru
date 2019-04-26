@@ -182,16 +182,21 @@
             width: 100%
             margin-bottom: 0.5em
     .append
+        @media (max-width: 500px)
+            margin-left: 0.8em
         vertical-align: middle
         font-size: 0.95em
         color: $inactive-link-color
-    .bulk-edit-btn-holder
+    .bulk-edit-btn-holder, .metrics-btn-holder
         &:not(.opened)
             .close
                 display: none
         &.opened
             .open
                 display: none
+    .metrics-block
+        &.hidden
+            display: none
     .bulk-edit-block
         &.hidden
             display: none

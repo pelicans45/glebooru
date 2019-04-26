@@ -183,13 +183,16 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkAddRelationEditor);
         }
 
-        if (this._bulkEditOpenButtonNode) {
-            this._bulkEditOpenButtonNode.addEventListener(
-                'click', e => this._evtOpenBulkEditBtnClick(e));
-        }
-        if (this._bulkEditCloseButtonNode) {
-            this._bulkEditCloseButtonNode.addEventListener(
-                'click', e => this._evtCloseBulkEditBtnClick(e));
+        this._bulkEditOpenButtonNode.addEventListener(
+            'click', e => this._evtOpenBulkEditBtnClick(e));
+        this._bulkEditCloseButtonNode.addEventListener(
+            'click', e => this._evtCloseBulkEditBtnClick(e));
+
+        if (this._metricsButtonHolderNode) {
+            this._metricsOpenButtonNode.addEventListener(
+                'click', e => this._evtOpenMetricsBtnClick(e));
+            this._metricsCloseButtonNode.addEventListener(
+                'click', e => this._evtCloseMetricsBtnClick(e));
         }
 
         for (let editor of this._bulkEditors) {
@@ -259,6 +262,22 @@ class PostsHeaderView extends events.EventTarget {
         return this._hostNode.querySelector('.bulk-add-relation');
     }
 
+    get _metricsButtonHolderNode() {
+        return this._hostNode.querySelector('.metrics-btn-holder');
+    }
+
+    get _metricsOpenButtonNode() {
+        return this._hostNode.querySelector('.metrics-btn.open');
+    }
+
+    get _metricsCloseButtonNode() {
+        return this._hostNode.querySelector('.metrics-btn.close');
+    }
+
+    get _metricsBlockNode() {
+        return this._hostNode.querySelector('.metrics-block');
+    }
+
     _evtOpenBulkEditBtnClick(e) {
         e.preventDefault();
         this._bulkEditBtnHolderNode.classList.toggle('opened', true);
@@ -293,6 +312,20 @@ class PostsHeaderView extends events.EventTarget {
             otherEditor.toggleOpen(false);
             otherEditor.toggleHide(false);
         }
+    }
+
+    _evtOpenMetricsBtnClick(e) {
+        e.preventDefault();
+        this._metricsButtonHolderNode.classList.toggle('opened', true);
+        this._metricsBlockNode.classList.toggle('hidden', false);
+        this._navigate();
+    }
+
+    _evtCloseMetricsBtnClick(e) {
+        e.preventDefault();
+        this._metricsButtonHolderNode.classList.toggle('opened', false);
+        this._metricsBlockNode.classList.toggle('hidden', true);
+        this._navigate();
     }
 
     _evtSafetyButtonClick(e, url) {
