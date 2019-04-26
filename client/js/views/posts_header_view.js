@@ -8,6 +8,7 @@ const search = require('../util/search.js');
 const views = require('../util/views.js');
 const TagAutoCompleteControl =
     require('../controls/tag_auto_complete_control.js');
+const MetricHeaderControl = require('../controls/metric_header_control');
 
 const template = views.getTemplate('posts-header');
 
@@ -189,6 +190,7 @@ class PostsHeaderView extends events.EventTarget {
             'click', e => this._evtCloseBulkEditBtnClick(e));
 
         if (this._metricsButtonHolderNode) {
+            this._metricControl = new MetricHeaderControl(this._metricsBlockNode, ctx);
             this._metricsOpenButtonNode.addEventListener(
                 'click', e => this._evtOpenMetricsBtnClick(e));
             this._metricsCloseButtonNode.addEventListener(

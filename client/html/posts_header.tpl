@@ -68,6 +68,6 @@
         %></form><%
     %></div><%
     if (ctx.canViewMetrics) {
-    %><div class='metrics-block hidden'>Hello</div><%
+    %><div class='metrics-block hidden'></div><%
     }
 %></div>

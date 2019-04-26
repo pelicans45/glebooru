@@ -33,6 +33,10 @@ class MetricSerializer(serialization.BaseSerializer):
             'version': lambda: self.metric.version,
             'min': lambda: self.metric.min,
             'max': lambda: self.metric.max,
+            'exact_count': lambda: self.metric.post_metric_count,
+            'range_count': lambda: self.metric.post_metric_range_count,
+            'tag': lambda: tags.serialize_tag(self.metric.tag, [
+                'names', 'category', 'description', 'usages'])
         }
 
 

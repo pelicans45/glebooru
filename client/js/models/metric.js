@@ -4,6 +4,7 @@ const api = require('../api.js');
 const uri = require('../util/uri.js');
 const events = require('../events.js');
 const misc = require('../util/misc.js');
+const Tag = require('./tag.js');
 
 class Metric extends events.EventTarget {
     constructor() {
@@ -16,6 +17,7 @@ class Metric extends events.EventTarget {
     get version()  { return this._version; }
     get min()      { return this._min; }
     get max()      { return this._max; }
+    get tag()      { return this._tag; }
 
     set min(value) { this._min = value; }
     set max(value) { this._max = value; }
@@ -75,6 +77,7 @@ class Metric extends events.EventTarget {
             _version:      response.version,
             _min:          response.min,
             _max:          response.max,
+            _tag:          Tag.fromResponse(response.tag || {}),
         };
 
         Object.assign(this, map);
