@@ -17,6 +17,9 @@ function refreshCategoryColorMap() {
             _stylesheet.sheet.insertRule(
                 `.${ruleName} { color: ${category.color}; border-color: ${category.color} }`,
                 _stylesheet.sheet.cssRules.length);
+            _stylesheet.sheet.insertRule(
+                `.${ruleName}.selected { color: white; background-color: ${category.color} }`,
+                _stylesheet.sheet.cssRules.length);
         }
     });
 }

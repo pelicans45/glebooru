@@ -191,6 +191,9 @@ class PostsHeaderView extends events.EventTarget {
 
         if (this._metricsButtonHolderNode) {
             this._metricControl = new MetricHeaderControl(this._metricsBlockNode, ctx);
+            this._metricControl.addEventListener('submit', e => {
+                this._navigate();
+            });
             this._metricsOpenButtonNode.addEventListener(
                 'click', e => this._evtOpenMetricsBtnClick(e));
             this._metricsCloseButtonNode.addEventListener(
@@ -217,6 +220,9 @@ class PostsHeaderView extends events.EventTarget {
             this._openBulkEditor(this._bulkSafetyEditor);
         } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
             this._openBulkEditor(this._bulkAddRelationEditor);
+        }
+        if (ctx.parameters.metrics) {
+            this._toggleMetricsBlock(true);
         }
     }
 
@@ -282,22 +288,26 @@ class PostsHeaderView extends events.EventTarget {
 
     _evtOpenBulkEditBtnClick(e) {
         e.preventDefault();
-        this._bulkEditBtnHolderNode.classList.toggle('opened', true);
-        this._bulkEditBlockNode.classList.toggle('hidden', false);
+        this._toggleBulkEditBlock(true);
         this._navigate();
     }
 
     _evtCloseBulkEditBtnClick(e) {
         e.preventDefault();
-        this._bulkEditBtnHolderNode.classList.toggle('opened', false);
+        this._toggleBulkEditBlock(false);
         this._closeAndShowAllBulkEditors();
-        this._bulkEditBlockNode.classList.toggle('hidden', true);
         this._navigate();
     }
 
     _openBulkEditor(editor) {
         editor.toggleOpen(true);
+        this._toggleBulkEditBlock(true);
         this._hideBulkEditorsExcept(editor);
+    }
+
+    _toggleBulkEditBlock(open) {
+        this._bulkEditBtnHolderNode.classList.toggle('opened', open);
+        this._bulkEditBlockNode.classList.toggle('hidden', !open);
     }
 
     _hideBulkEditorsExcept(editor) {
@@ -318,16 +328,19 @@ class PostsHeaderView extends events.EventTarget {
 
     _evtOpenMetricsBtnClick(e) {
         e.preventDefault();
-        this._metricsButtonHolderNode.classList.toggle('opened', true);
-        this._metricsBlockNode.classList.toggle('hidden', false);
+        this._toggleMetricsBlock(true);
         this._navigate();
     }
 
     _evtCloseMetricsBtnClick(e) {
         e.preventDefault();
-        this._metricsButtonHolderNode.classList.toggle('opened', false);
-        this._metricsBlockNode.classList.toggle('hidden', true);
+        this._toggleMetricsBlock(false);
         this._navigate();
+    }
+
+    _toggleMetricsBlock(open) {
+        this._metricsButtonHolderNode.classList.toggle('opened', open);
+        this._metricsBlockNode.classList.toggle('hidden', !open);
     }
 
     _evtSafetyButtonClick(e, url) {
@@ -366,6 +379,7 @@ class PostsHeaderView extends events.EventTarget {
         let parameters = {
             query: this._queryInputNode.value,
             cachenumber: this._ctx.parameters.cachenumber,
+            metrics: this._ctx.parameters.metrics,
         };
         parameters.offset = parameters.query === this._ctx.parameters.query ?
             this._ctx.parameters.offset : 0;

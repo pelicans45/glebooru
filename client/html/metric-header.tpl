@@ -1,5 +1,6 @@
 <form class='horizontal'>
     <ul class='metric-list'></ul>
+    <wbr>
     <%= ctx.makeCheckbox({
         text: 'Show values on posts',
         name: 'show-values-on-posts',

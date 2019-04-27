@@ -12,7 +12,7 @@
             %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
         %><% } %><%
         %><wbr/><%
-        %><a class='mousetrap button append desktop-only'
+        %><a class='mousetrap button append'
              href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'><%
                 if (window.innerWidth <= 500) { %>Help<%
                 } else { %>Syntax help<% }

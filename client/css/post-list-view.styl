@@ -200,15 +200,24 @@
         label
             display: inline !important
             margin-left: -0.5em
+            line-height 1.7em
+        a.append
+            line-height 1.7em
+            padding: 0.2em 0
+        form, ul
+            display: flex
+            flex-wrap: wrap
         .metric-list
             li
                 display: inline-block
                 line-height: 1.7em
                 margin-right: 0.5em
-                @media (max-width: 500px)
+                @media (max-width: 700px)
                     margin-bottom: 0.5em
+                border-width: 1px
+                &.selected
+                    border-style: solid
                 &:not(.selected)
-                    border-width: 1px
                     border-style: dotted
             li a
                 vertical-align: middle

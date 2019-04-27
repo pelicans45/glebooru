@@ -90,6 +90,10 @@ class AbstractList extends events.EventTarget {
         return this._list.filter(...args);
     }
 
+    includes(item) {
+        return this._list.includes(item);
+    }
+
     [Symbol.iterator]() {
         return this._list[Symbol.iterator]();
     }

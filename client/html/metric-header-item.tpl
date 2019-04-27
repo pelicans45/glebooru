@@ -1,9 +1,6 @@
-<li class="<%= ctx.makeCssName(ctx.metric.tag.category, 'tag') %>">
-    <a href="<%- ctx.formatClientLink('posts', {
-                query: 'metric-' + ctx.escapeColons(ctx.metric.tag.names[0]) +
-                    ':' + ctx.metric.min + '..' + ctx.metric.max +
-                    ' sort:metric-' + ctx.escapeColons(ctx.metric.tag.names[0])
-                }) %>"
-       class="<%= ctx.makeCssName(ctx.metric.tag.category, 'tag') %>"><%
+<li class="<%= ctx.makeCssName(ctx.metric.tag.category, 'tag') %><%
+            if (ctx.selected) { %> selected<% } %>">
+    <a class="<%= ctx.makeCssName(ctx.metric.tag.category, 'tag') %><%
+            if (ctx.selected) { %> selected<% } %>"><%
         %><%- ctx.metric.tag.names[0] %></a>
 </li>
