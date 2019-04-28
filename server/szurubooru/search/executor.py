@@ -201,6 +201,8 @@ class Executor:
         found_sort_column = False
 
         for sort_token in search_query.sort_tokens:
+            if sort_token.name == 'random':
+                continue
             if sort_token.name not in self.config.sort_columns:
                 raise errors.SearchError(
                     'Unknown sort token: %r. '
