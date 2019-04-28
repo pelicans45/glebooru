@@ -129,8 +129,8 @@ class PostListController {
                 return uri.formatClientLink('posts', parameters);
             },
             requestPage: (offset, limit) => {
-                return PostList.search(
-                    this._ctx.parameters.query, offset, limit, fields, this._ctx.parameters.cachenumber);
+                let query = uri.getPostsQuery(this._ctx.parameters);
+                return PostList.search(query, offset, limit, fields, this._ctx.parameters.cachenumber);
             },
             pageRenderer: pageCtx => {
                 Object.assign(pageCtx, {

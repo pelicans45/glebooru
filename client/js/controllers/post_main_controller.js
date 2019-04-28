@@ -18,17 +18,16 @@ class PostMainController extends BasePostController {
         super(ctx);
 
         let parameters = ctx.parameters;
+        let query = uri.getPostsQuery(parameters);
         Promise.all([
                 Post.get(ctx.parameters.id),
-                PostList.getAround(
-                    ctx.parameters.id,
-                    parameters ? parameters.query : null),
+                PostList.getAround(ctx.parameters.id, query),
         ]).then(responses => {
             const [post, aroundResponse] = responses;
 
             // remove junk from query, but save it into history so that it can
             // be still accessed after history navigation / page refresh
-            if (parameters.query) {
+            if (parameters.query || parameters.metrics) {
                 ctx.state.parameters = parameters;
                 const url = editMode ?
                     uri.formatClientLink('post', ctx.parameters.id, 'edit') :

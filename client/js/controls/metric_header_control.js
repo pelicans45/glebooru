@@ -45,7 +45,8 @@ class MetricHeaderControl extends events.EventTarget {
                     selected: this._selectedMetrics.includes(metric),
                 },
                 this._ctx));
-            node.addEventListener('click', e => this._evtMetricClicked(e, node, metric));
+            node.addEventListener('click', e =>
+                this._evtMetricClicked(e, node, metric));
             this._metricListNode.appendChild(node);
         }
     }
@@ -59,10 +60,11 @@ class MetricHeaderControl extends events.EventTarget {
         } else {
             this._selectedMetrics.add(metric);
         }
-        this._ctx.parameters = Object.assign({}, this._ctx.parameters, {
-                metrics: this._selectedMetrics
-                    .map(metric => metric.tag.names[0]).join(' ')
-            });
+        this._ctx.parameters = Object.assign({},
+            this._ctx.parameters, {
+            metrics: this._selectedMetrics
+                .map(m => m.tag.names[0]).join(' '),
+        });
         this.dispatchEvent(new CustomEvent('submit'));
     }
 }

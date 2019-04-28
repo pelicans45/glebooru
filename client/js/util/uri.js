@@ -31,6 +31,16 @@ function unescapeParam(text) {
     return decodeURIComponent(text);
 }
 
+function getPostsQuery(parameters) {
+    let normalQuery = parameters.query || '';
+    let metricQuery = (parameters.metrics || '')
+        .split(' ') //see metric_header_control
+        .filter(m => m)
+        .map(m => m + ' sort:metric-' + m)
+        .join(' ');
+    return normalQuery + ' ' + metricQuery;
+}
+
 function formatClientLink(...values) {
     let parts = [];
     for (let value of values) {
@@ -85,6 +95,7 @@ function escapeColons(text) {
 }
 
 module.exports = {
+    getPostsQuery:     getPostsQuery,
     formatClientLink:  formatClientLink,
     formatApiLink:     formatApiLink,
     escapeColons:      escapeColons,

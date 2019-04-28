@@ -176,13 +176,19 @@ function makeDateInput(options) {
 function getPostUrl(id, parameters) {
     return uri.formatClientLink(
         'post', id,
-        parameters ? {query: parameters.query} : {});
+        parameters ? {
+            query: parameters.query,
+            metrics: parameters.metrics,
+        } : {});
 }
 
 function getPostEditUrl(id, parameters) {
     return uri.formatClientLink(
         'post', id, 'edit',
-        parameters ? {query: parameters.query} : {});
+        parameters ? {
+            query: parameters.query,
+            metrics: parameters.metrics,
+        } : {});
 }
 
 function makePostLink(id, includeHash) {
