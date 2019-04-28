@@ -56,7 +56,7 @@ class Executor:
             ).limit(1))
         # random post
         if 'sort:random' not in query_text:
-            query_text = query_text + ' sort:random'
+            query_text = 'sort:random ' + query_text
         count, random_entities = self.execute(query_text, 0, 1)
         return (
             prev_filter_query.one_or_none(),
