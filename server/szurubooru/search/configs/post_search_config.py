@@ -104,7 +104,7 @@ def _note_filter(
         search_util.create_str_filter)(query, criterion, negated)
 
 
-def _create_metric_filter(name: str):
+def _create_metric_num_filter(name: str):
     def wrapper(query: SaQuery,
                 criterion: Optional[criteria.BaseCriterion],
                 negated: bool) -> SaQuery:
@@ -123,6 +123,26 @@ def _create_metric_filter(name: str):
             .filter(expr))
         return ret
     return wrapper
+
+
+def _metric_presence_filter(
+        query: SaQuery,
+        criterion: Optional[criteria.BaseCriterion],
+        negated: bool) -> SaQuery:
+    assert criterion
+    t = sa.orm.aliased(model.TagName)
+    tag_name_filter = search_util.apply_str_criterion_to_column(
+        t.name, criterion)
+    pm = sa.orm.aliased(model.PostMetric)
+    subquery = (
+        db.session.query(pm.post_id)
+        .join(t, t.tag_id == pm.tag_id)
+        .filter(tag_name_filter)
+        .subquery())
+    post_filter = model.Post.post_id.in_(subquery)
+    if negated:
+        post_filter = ~post_filter
+    return query.filter(post_filter)
 
 
 def _create_metric_sort_column(metric_name: str):
@@ -217,7 +237,7 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
-        filters = {'metric-' + name: _create_metric_filter(name)
+        filters = {'metric-' + name: _create_metric_num_filter(name)
                    for name in self.all_metric_names}
         filters.update(util.unalias_dict([
             (
@@ -234,6 +254,11 @@ class PostSearchConfig(BaseSearchConfig):
                     search_util.create_str_filter,
                     lambda subquery:
                         subquery.join(model.Tag).join(model.TagName))
+            ),
+
+            (
+                ['metric'],
+                _metric_presence_filter
             ),
 
             (
