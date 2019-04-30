@@ -140,6 +140,20 @@ class Executor:
             'results': list([serializer(entity) for entity in entities]),
         }
 
+    def count(self, query_text:str) -> int:
+        search_query = self.parser.parse(query_text)
+        self.config.on_search_query_parsed(search_query)
+        count_query = self.config.create_count_query(True)
+        count_query = count_query.options(sa.orm.lazyload('*'))
+        count_query = self._prepare_db_query(count_query, search_query, False)
+        count_statement = (
+            count_query
+            .statement
+            .with_only_columns([sa.func.count()])
+            .order_by(None))
+        count = db.session.execute(count_statement).scalar()
+        return count
+
     def _prepare_db_query(
             self,
             db_query: SaQuery,

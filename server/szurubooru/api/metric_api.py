@@ -1,3 +1,4 @@
+from math import ceil
 from typing import Optional, List, Dict
 from szurubooru import db, model, search, rest
 from szurubooru.func import (
@@ -23,7 +24,7 @@ def _serialize_post_metric(
     )
 
 
-def _get_metric(params: Dict[str, str]) -> model.Tag:
+def _get_metric(params: Dict[str, str]) -> model.Metric:
     return metrics.get_metric_by_tag_name(params['tag_name'])
 
 
@@ -68,6 +69,21 @@ def delete_metric(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 def get_post_metrics(
         ctx: rest.Context, params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, 'metrics:list')
-    _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(
         ctx, lambda post_metric: _serialize_post_metric(ctx, post_metric))
+
+
+@rest.routes.get('/post-metrics/median/(?P<tag_name>.+)')
+def get_post_metrics_median(
+        ctx: rest.Context, params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, 'metrics:list')
+    metric = _get_metric(params)
+    tag_name = params['tag_name']
+    query_text = ctx.get_param_as_string(
+        'query',
+        default='%s:%f..%f' % (tag_name, metric.min, metric.max))
+    count = _search_executor.count(query_text)
+    _, results = _search_executor.execute(query_text, ceil(count/2) - 1, 1)
+    return {
+        'results': list([_serialize_post_metric(ctx, pm) for pm in results])
+    }
