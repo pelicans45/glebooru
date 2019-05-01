@@ -50,6 +50,7 @@ api.fetchConfig().then(() => {
     controllers.push(require('./controllers/user_controller.js'));
     controllers.push(require('./controllers/user_list_controller.js'));
     controllers.push(require('./controllers/user_registration_controller.js'));
+    controllers.push(require('./controllers/metric_sorter_contoller.js'));
 
     // 404 controller needs to be registered last
     controllers.push(require('./controllers/not_found_controller.js'));

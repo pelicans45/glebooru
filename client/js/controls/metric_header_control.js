@@ -22,15 +22,16 @@ class MetricHeaderControl extends events.EventTarget {
             this._headerNode, this._hostNode.nextSibling);
 
         MetricList.loadAll().then(response => {
-            this._metrics = response.results;
+            this._ctx.allMetrics = response.results;
             this._addSelectedMetrics(ctx.parameters.metrics);
             this._installMetrics(response.results);
+            this._refreshStartSortingBtn();
         });
     }
 
     _addSelectedMetrics(metricsStr) {
         let selectedNames = (metricsStr || '').split(' ');
-        for (let metric of [...this._metrics]) {
+        for (let metric of [...this._ctx.allMetrics]) {
             if (selectedNames.includes(metric.tag.names[0])) {
                 this._selectedMetrics.add(metric);
             }
@@ -65,7 +66,13 @@ class MetricHeaderControl extends events.EventTarget {
             metrics: this._selectedMetrics
                 .map(m => m.tag.names[0]).join(' '),
         });
+        this._refreshStartSortingBtn();
         this.dispatchEvent(new CustomEvent('submit'));
+    }
+
+    _refreshStartSortingBtn() {
+        let btn = this._hostNode.querySelector('a.sorting');
+        btn.hidden = !this._selectedMetrics.length;
     }
 }
 

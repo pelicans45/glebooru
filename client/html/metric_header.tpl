@@ -6,5 +6,6 @@
         name: 'show-values-on-posts',
         checked: ctx.showValuesOnPost,
         class: 'append'}) %>
-    <a href class='mousetrap button append close'>Start sorting</a>
+    <a class='mousetrap button append close sorting'
+       href="<%= ctx.getMetricSorterUrl(ctx.parameters) %>">Start sorting</a>
 </form>

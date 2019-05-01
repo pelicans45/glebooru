@@ -34,6 +34,21 @@ class PostList extends AbstractList {
             });
     }
 
+    static getMedian(text, fields) {
+        return api.get(
+            uri.formatApiLink(
+                'posts', 'median', {
+                    query: PostList._decorateSearchQuery(text || ''),
+                    fields: fields.join(','),
+                }))
+            .then(response => {
+                return Promise.resolve(Object.assign(
+                    {},
+                    response,
+                    {results: PostList.fromResponse(response.results)}));
+            });
+    }
+
     static _decorateSearchQuery(text) {
         const browsingSettings = settings.get();
         const disabledSafety = [];

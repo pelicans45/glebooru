@@ -191,6 +191,15 @@ function getPostEditUrl(id, parameters) {
         } : {});
 }
 
+function getMetricSorterUrl(parameters) {
+    return uri.formatClientLink(
+        'posts', 'metric-sorter',
+        parameters ? {
+            query: parameters.query,
+            metrics: parameters.metrics,
+        } : {});
+}
+
 function makePostLink(id, includeHash) {
     let text = id;
     if (includeHash) {
@@ -391,6 +400,7 @@ function getTemplate(templatePath) {
         Object.assign(ctx, {
             getPostUrl:        getPostUrl,
             getPostEditUrl:    getPostEditUrl,
+            getMetricSorterUrl:getMetricSorterUrl,
             makeRelativeTime:  makeRelativeTime,
             makeFileSize:      makeFileSize,
             makeMarkdown:      makeMarkdown,
