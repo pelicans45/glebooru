@@ -1,3 +1,4 @@
+from math import ceil
 from typing import Optional, Dict, List
 from datetime import datetime
 from szurubooru import db, model, errors, rest, search
@@ -276,4 +277,22 @@ def get_posts_by_image(
                 }
                 for lookalike in lookalikes
             ],
+    }
+
+
+@rest.routes.get('/posts/median/?')
+def get_posts_median(
+        ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, 'posts:list')
+    _search_executor_config.user = ctx.user
+    query_text = ctx.get_param_as_string('query', default='')
+    total_count = _search_executor.count(query_text)
+    offset = ceil(total_count / 2) - 1
+    _, results = _search_executor.execute(query_text, offset, 1)
+    return {
+        'query': query_text,
+        'offset': offset,
+        'limit': 1,
+        'total': len(results),
+        'results': list([_serialize_post(ctx, post) for post in results])
     }

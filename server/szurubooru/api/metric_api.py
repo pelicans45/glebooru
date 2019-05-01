@@ -82,8 +82,13 @@ def get_post_metrics_median(
     query_text = ctx.get_param_as_string(
         'query',
         default='%s:%f..%f' % (tag_name, metric.min, metric.max))
-    count = _search_executor.count(query_text)
-    _, results = _search_executor.execute(query_text, ceil(count/2) - 1, 1)
+    total_count = _search_executor.count(query_text)
+    offset = ceil(total_count/2) - 1
+    _, results = _search_executor.execute(query_text, offset, 1)
     return {
+        'query': query_text,
+        'offset': offset,
+        'limit': 1,
+        'total': len(results),
         'results': list([_serialize_post_metric(ctx, pm) for pm in results])
     }

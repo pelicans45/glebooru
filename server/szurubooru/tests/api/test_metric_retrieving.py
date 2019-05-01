@@ -45,6 +45,8 @@ def test_median(
             user=user_factory(rank=model.User.RANK_REGULAR)),
         {'tag_name': 'mytag'})
     if not expected_value:
+        assert response['total'] == 0
         assert len(response['results']) == 0
     else:
+        assert response['total'] == 1
         assert response['results'][0]['value'] == expected_value
