@@ -19,12 +19,12 @@
         %></a><%
         %><wbr/><%
         %><span class="bulk-edit-btn-holder"><%
-            %><a class='mousetrap button append open bulk-edit-btn'><%
+            %><a href class='mousetrap button append open bulk-edit-btn'><%
                 if (window.innerWidth <= 500) { %>Mass<%
                 } else { %>Mass edit<% }
                 %><i class='fa fa-chevron-down icon-inline'></i><%
             %></a><%
-            %><a class='mousetrap button append close bulk-edit-btn'><%
+            %><a href class='mousetrap button append close bulk-edit-btn'><%
                 if (window.innerWidth <= 500) { %>Mass<%
                 } else { %>Mass edit<% }
                 %><i class='fa fa-chevron-up icon-inline'></i><%
@@ -33,11 +33,11 @@
         %><wbr/><%
         if (ctx.canViewMetrics) {
             %><span class="metrics-btn-holder"><%
-                %><a class='mousetrap button append open metrics-btn'><%
+                %><a href class='mousetrap button append open metrics-btn'><%
                     %>Metrics<%
                     %><i class='fa fa-chevron-down icon-inline'></i><%
                 %></a><%
-                %><a class='mousetrap button append close metrics-btn'><%
+                %><a href class='mousetrap button append close metrics-btn'><%
                     %>Metrics<%
                     %><i class='fa fa-chevron-up icon-inline'></i><%
                 %></a><%

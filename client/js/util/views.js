@@ -559,4 +559,5 @@ module.exports = {
     showError:             showError,
     showSuccess:           showSuccess,
     showInfo:              showInfo,
+    getMetricSorterUrl:    getMetricSorterUrl,
 };

@@ -73,6 +73,7 @@ class MetricHeaderControl extends events.EventTarget {
     _refreshStartSortingBtn() {
         let btn = this._hostNode.querySelector('a.sorting');
         btn.hidden = !this._selectedMetrics.length;
+        btn.setAttribute('href', views.getMetricSorterUrl(this._ctx.parameters));
     }
 }
 

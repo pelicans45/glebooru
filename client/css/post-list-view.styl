@@ -217,8 +217,12 @@
                 border-width: 1px
                 &.selected
                     border-style: solid
+                    &.tag-default
+                        background-color: $main-color
                 &:not(.selected)
                     border-style: dotted
+                    &.tag-default
+                        border-color: $main-color
             li a
                 vertical-align: middle
                 padding: 0.2em 0.5em
