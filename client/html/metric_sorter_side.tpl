@@ -1,9 +1,5 @@
-<header>
-    <% if (ctx.post) { %>
-        <label>Post #<%- ctx.post.id %></label>
-    <% } %>
-</header>
-
 <% if (ctx.post) { %>
-    <div class='post-container'></div>
+    <a href='<%= ctx.getPostUrl(ctx.post.id, ctx.parameters) %>'>
+        <div class='post-container'></div>
+    </a>
 <% } %>

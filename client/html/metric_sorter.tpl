@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='metric-sorter'>
-    <h1>Sorting metric "<%- ctx.primaryMetric %>"</h1>
+    <h2>Sorting metric "<%- ctx.primaryMetric %>"</h2>
     <form>
         <div class='posts-container'>
             <div class='left-post-container'></div>
@@ -11,7 +11,7 @@
 
         <div class='buttons'>
             <input class='mousetrap done-btn' type='submit' value='Done'>
-            <a class='mousetrap append skip-btn'>Skip</a>
+            <a href class='mousetrap append skip-btn'>Skip</a>
         </div>
     </form>
 </div>

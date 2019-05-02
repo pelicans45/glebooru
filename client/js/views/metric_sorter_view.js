@@ -15,6 +15,7 @@ class MetricSorterView extends events.EventTarget {
         this._ctx = ctx;
         this._hostNode = document.getElementById('content-holder');
         views.replaceContent(this._hostNode, template(ctx));
+        this._skipButtonNode.addEventListener('click', e => this._evtSkipClick(e));
     }
 
     installLeftPost(post) {
@@ -36,10 +37,16 @@ class MetricSorterView extends events.EventTarget {
             containerNode,
             post,
             () => {
-                return [
-                    containerNode.getBoundingClientRect().width,
-                    iosCorrectedInnerHeight() - containerNode.getBoundingClientRect().top,
-                ];
+                // TODO: come up with a more reliable resizing mechanism
+                return window.innerWidth < 1000 ?
+                    [
+                        window.innerWidth,
+                        window.innerHeight * 0.6
+                    ] : [
+                        containerNode.getBoundingClientRect().width,
+                        window.innerHeight - containerNode.getBoundingClientRect().top -
+                            this._buttonsNode.getBoundingClientRect().height * 2
+                    ];
             });
     }
 
@@ -75,10 +82,22 @@ class MetricSorterView extends events.EventTarget {
         return this._hostNode.querySelector('.right-post-container');
     }
 
+    get _buttonsNode() {
+        return this._hostNode.querySelector('.buttons');
+    }
+
+    get _skipButtonNode() {
+        return this._hostNode.querySelector('.skip-btn');
+    }
+
     _getSidePostContainerNode(sideNode) {
         return sideNode.querySelector('.post-container');
     }
 
+    _evtSkipClick(e) {
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('skip'));
+    }
 }
 
 module.exports = MetricSorterView;

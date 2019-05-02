@@ -1,4 +1,24 @@
+@import colors
+
 #metric-sorter
     width: 100%
-    //padding: 0
-    // background-color: none
+    @media (max-width: 1000px)
+        padding: 0 !important
+        background-color: white !important
+        h2
+            display: none
+    form
+        width: 100%
+    .posts-container
+        display: flex
+        flex-wrap: wrap
+        margin-bottom: 1em
+        @media (max-width: 1000px)
+            margin-left: -1em
+            margin-right: -1em
+            margin-top: -1em
+        .left-post-container, .right-post-container
+            flex: 1
+            width: 100%
+    .append
+        color: $inactive-link-color

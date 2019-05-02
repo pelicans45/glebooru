@@ -70,7 +70,8 @@ class MetricSorterController  {
         let filterQuery = this._ctx.parameters.query || '';
         let unsetFullQuery = `${filterQuery} ${unsetMetricsQuery} sort:random`;
 
-        return PostList.search(unsetFullQuery, 0, 1, []).then(response => {
+        return PostList.search(unsetFullQuery,
+                this._ctx.parameters.skips || 0, 1, []).then(response => {
             if (!response.results.length) {
                 return Promise.reject(new Error('No posts found'));
             } else {
@@ -116,6 +117,7 @@ class MetricSorterController  {
     }
 
     _evtSkip(e) {
+        this._ctx.parameters.skips = (this._ctx.parameters.skips || 0) + 1;
         this.startSortingNewPost();
     }
 
