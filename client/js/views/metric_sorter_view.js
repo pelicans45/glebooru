@@ -117,7 +117,10 @@ class MetricSorterView extends events.EventTarget {
 
     _evtFormSubmit(e) {
         e.preventDefault();
-        this.dispatchEvent(new CustomEvent('submit'));
+        this.dispatchEvent(new CustomEvent('submit', {
+            detail: {
+                greaterPost: this._ctx.greaterPost,
+            }}));
     }
 
     _evtCompareClick(e) {

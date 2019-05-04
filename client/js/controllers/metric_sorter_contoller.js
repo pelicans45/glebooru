@@ -46,21 +46,31 @@ class MetricSorterController  {
     }
 
     startSortingNewPost() {
-        const metricName = this._primaryMetricName;
+        this._view.clearMessages();
+        this._foundExactValue = false;
         this._getRandomUnsortedPost().then(unsortedPost => {
             this._unsortedPost = unsortedPost;
             this._view.installLeftPost(unsortedPost);
-            let range = this._getOrCreateRange(unsortedPost, metricName);
-            return this._tryGetMedianPost(metricName, range);
-        }).then(medianResponse => {
+            this.reloadMedianPost();
+        }).catch(error => {
+            this._view.showError(error.message)
+        });
+    }
+
+    reloadMedianPost() {
+        const metricName = this._primaryMetricName;
+        let range = this._getOrCreateRange(this._unsortedPost, metricName);
+        this._tryGetMedianPost(metricName, range).then(medianResponse => {
             if (medianResponse.post) {
-                this._view.installRightPost(medianResponse.post);
+                this._sortedPost = medianResponse.post;
+                this._view.installRightPost(this._sortedPost);
             } else {
                 // No existing metrics, apply the median value
+                this._foundExactValue = true;
                 let exactValue = (medianResponse.range.low + medianResponse.range.high) / 2;
                 this._view.showSuccess(`Found exact value: ${exactValue}`);
                 this._setExactMetric(this._unsortedPost, metricName, exactValue);
-                //TODO continue sorting
+                //TODO: maybe allow to set exact value?
             }
         }).catch(error => {
             this._view.showError(error.message)
@@ -85,7 +95,9 @@ class MetricSorterController  {
     }
 
     _tryGetMedianPost(metric, range) {
-        let median_query = `metric-${metric}:${range.low}..${range.high} sort:metric-${metric}`;
+        let low = range.low + 0.000001;
+        let high = range.high - 0.000001;
+        let median_query = `metric-${metric}:${low}..${high} sort:metric-${metric}`;
         return PostList.getMedian(median_query, []).then(response => {
             return Promise.resolve({
                 range: range,
@@ -116,8 +128,26 @@ class MetricSorterController  {
     }
 
     _evtSubmit(e) {
-        //TODO update metric ranges
-        // Then A) reload median or B) start sorting a new post
+        let range = this._getOrCreateRange(this._unsortedPost, this._primaryMetricName);
+        if (this._foundExactValue) {
+            this._unsortedPost.metricRanges.remove(range);
+        } else {
+            let medianValue = this._sortedPost.metrics.findByTagName(this._primaryMetricName).value;
+            if (e.detail.greaterPost === LEFT) {
+                range.low = medianValue;
+            } else {
+                range.high = medianValue;
+            }
+        }
+        this._unsortedPost.save().then(() => {
+            if (this._foundExactValue) {
+                this.startSortingNewPost();
+            } else {
+                this.reloadMedianPost();
+            }
+        }, error => {
+            this._view.showError(error.message)
+        });
     }
 
     _evtSkip(e) {
@@ -126,7 +156,7 @@ class MetricSorterController  {
     }
 
     _evtChangeMetric(e) {
-        this._primaryMetricName = e.detail.metricName;
+        // this._primaryMetricName = e.detail.metricName;
     }
 }
 
