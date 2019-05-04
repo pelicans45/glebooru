@@ -3,24 +3,37 @@
     <form>
         <div class='posts-container'>
             <div class='left-post-container'></div>
+            <% if (window.innerWidth <= 1000) { %>
+                <div class='messages'></div>
+            <% } %>
             <div class='sorting-buttons'>
                 <div class='compare-block'>
+                    <% if (window.innerWidth <= 1000) { %>
+                        <input class='mousetrap done-btn' type='submit' value='Done'>
+                    <% } %>
                     <button class='compare left-lt-right'>
                         <i class='fa fa-less-than'></i>
                     </button>
                     <button class='compare left-gt-right'>
                         <i class='fa fa-greater-than'></i>
                     </button>
+                    <% if (window.innerWidth <= 1000) { %>
+                        <a href class='mousetrap append skip-btn'>Skip</a>
+                    <% } %>
                 </div>
             </div>
             <div class='right-post-container'></div>
         </div>
 
-        <div class='messages'></div>
+        <% if (window.innerWidth > 1000) { %>
+            <div class='messages'></div>
+        <% } %>
 
         <div class='buttons'>
-            <input class='mousetrap done-btn' type='submit' value='Done'>
-            <a href class='mousetrap append skip-btn'>Skip</a>
+            <% if (window.innerWidth > 1000) { %>
+                <input class='mousetrap done-btn' type='submit' value='Done'>
+                <a href class='mousetrap append skip-btn'>Skip</a>
+            <% } %>
         </div>
     </form>
 </div>

@@ -49,7 +49,7 @@ class MetricSorterView extends events.EventTarget {
                 return window.innerWidth < 1000 ?
                     [
                         window.innerWidth,
-                        window.innerHeight * 0.6
+                        window.innerHeight / 2
                     ] : [
                         containerNode.getBoundingClientRect().width,
                         window.innerHeight - containerNode.getBoundingClientRect().top -
