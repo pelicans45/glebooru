@@ -22,3 +22,23 @@
             width: 100%
     .append
         color: $inactive-link-color
+    .sorting-buttons
+        display: flex
+        .compare-block
+            margin: auto
+            button
+                width: 1.3em
+                height: 1.3em
+                font-size: 200%
+        @media (min-width: 1000px)
+            padding: 0 0.5em
+            button
+                padding: 0
+                padding-top: 0.05em
+        @media (max-width: 1000px)
+            padding: 0.5em 1em
+            width: 100%
+            button
+                padding: 0
+            i
+                transform: rotate(90deg)

@@ -8,6 +8,10 @@ const PostContentControl = require('../controls/post_content_control.js');
 const template = views.getTemplate('metric-sorter');
 const sideTemplate = views.getTemplate('metric-sorter-side');
 
+//TODO: find a way to export these constants once
+const LEFT = 'left';
+const RIGHT = 'right';
+
 class MetricSorterView extends events.EventTarget {
     constructor(ctx) {
         super();
@@ -15,7 +19,11 @@ class MetricSorterView extends events.EventTarget {
         this._ctx = ctx;
         this._hostNode = document.getElementById('content-holder');
         views.replaceContent(this._hostNode, template(ctx));
+        this._formNode.addEventListener('submit', e => this._evtFormSubmit(e));
         this._skipButtonNode.addEventListener('click', e => this._evtSkipClick(e));
+        this._compareLessBtnNode.addEventListener('click', e => this._evtCompareClick(e));
+        this._compareGreaterBtnNode.addEventListener('click', e => this._evtCompareClick(e));
+        this._refreshCompareButton();
     }
 
     installLeftPost(post) {
@@ -82,6 +90,14 @@ class MetricSorterView extends events.EventTarget {
         return this._hostNode.querySelector('.right-post-container');
     }
 
+    get _compareGreaterBtnNode() {
+        return this._hostNode.querySelector('.left-gt-right')
+    }
+
+    get _compareLessBtnNode() {
+        return this._hostNode.querySelector('.left-lt-right')
+    }
+
     get _buttonsNode() {
         return this._hostNode.querySelector('.buttons');
     }
@@ -97,6 +113,22 @@ class MetricSorterView extends events.EventTarget {
     _evtSkipClick(e) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent('skip'));
+    }
+
+    _evtFormSubmit(e) {
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('submit'));
+    }
+
+    _evtCompareClick(e) {
+        e.preventDefault();
+        this._ctx.greaterPost = this._ctx.greaterPost === LEFT ? RIGHT : LEFT;
+        this._refreshCompareButton();
+    }
+
+    _refreshCompareButton() {
+        this._compareGreaterBtnNode.hidden = this._ctx.greaterPost === RIGHT;
+        this._compareLessBtnNode.hidden = this._ctx.greaterPost === LEFT;
     }
 }
 

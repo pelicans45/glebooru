@@ -3,7 +3,16 @@
     <form>
         <div class='posts-container'>
             <div class='left-post-container'></div>
-            <div class='sorting-buttons'></div>
+            <div class='sorting-buttons'>
+                <div class='compare-block'>
+                    <button class='compare left-lt-right'>
+                        <i class='fa fa-less-than'></i>
+                    </button>
+                    <button class='compare left-gt-right'>
+                        <i class='fa fa-greater-than'></i>
+                    </button>
+                </div>
+            </div>
             <div class='right-post-container'></div>
         </div>
 

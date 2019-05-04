@@ -8,6 +8,9 @@ const PostList = require('../models/post_list.js');
 const MetricSorterView = require('../views/metric_sorter_view.js');
 const EmptyView = require('../views/empty_view.js');
 
+const LEFT = 'left';
+const RIGHT = 'right';
+
 class MetricSorterController  {
     constructor(ctx) {
         if (!api.hasPrivilege('posts:view') ||
@@ -33,6 +36,7 @@ class MetricSorterController  {
 
         this._view = new MetricSorterView({
             primaryMetric: this._primaryMetricName,
+            greaterPost: RIGHT,
         });
         this._view.addEventListener('submit', e => this._evtSubmit(e));
         this._view.addEventListener('skip', e => this._evtSkip(e));
