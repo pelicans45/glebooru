@@ -191,9 +191,9 @@ function getPostEditUrl(id, parameters) {
         } : {});
 }
 
-function getMetricSorterUrl(parameters) {
+function getMetricSorterUrl(id, parameters) {
     return uri.formatClientLink(
-        'posts', 'metric-sorter',
+        'post', id, 'metric-sorter',
         parameters ? {
             query: parameters.query,
             metrics: parameters.metrics,

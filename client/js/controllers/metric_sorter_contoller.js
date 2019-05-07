@@ -1,7 +1,10 @@
 'use strict';
 
 const api = require('../api.js');
+const router = require('../router.js');
+const views = require('../util/views.js');
 const topNavigation = require('../models/top_navigation.js');
+const Post = require('../models/post.js');
 const PostMetric = require('../models/post_metric.js');
 const PostMetricRange = require('../models/post_metric_range.js');
 const PostList = require('../models/post_list.js');
@@ -42,16 +45,31 @@ class MetricSorterController  {
         this._view.addEventListener('skip', e => this._evtSkip(e));
         this._view.addEventListener('changeMetric', e => this._evtChangeMetric(e));
 
-        this.startSortingNewPost();
+        if (ctx.parameters.id === 'random') {
+            this.startSortingRandomPost();
+        } else {
+            this.startSortingPost(ctx.parameters.id);
+        }
     }
 
-    startSortingNewPost() {
+    startSortingPost(id) {
         this._view.clearMessages();
         this._foundExactValue = false;
-        this._getRandomUnsortedPost().then(unsortedPost => {
-            this._unsortedPost = unsortedPost;
-            this._view.installLeftPost(unsortedPost);
+        Post.get(id).then(post => {
+            this._unsortedPost = post;
+            this._view.installLeftPost(post);
             this.reloadMedianPost();
+        }).catch(error => {
+            this._view.showError(error.message)
+        });
+    }
+
+    startSortingRandomPost() {
+        this._view.clearMessages();
+        this._getRandomUnsortedPostId().then(id => {
+            this._ctx.parameters.id = id;
+            router.replace(views.getMetricSorterUrl(id, this._ctx.parameters));
+            this.startSortingPost(id);
         }).catch(error => {
             this._view.showError(error.message)
         });
@@ -77,7 +95,7 @@ class MetricSorterController  {
         });
     }
 
-    _getRandomUnsortedPost() {
+    _getRandomUnsortedPostId() {
         let unsetMetricsQuery = this._metricNames
             .map(m => `${m} -metric:${m}`)
             .join(' ');
@@ -85,18 +103,18 @@ class MetricSorterController  {
         let unsetFullQuery = `${filterQuery} ${unsetMetricsQuery} sort:random`;
 
         return PostList.search(unsetFullQuery,
-                this._ctx.parameters.skips || 0, 1, []).then(response => {
+                this._ctx.parameters.skips || 0, 1, ['id']).then(response => {
             if (!response.results.length) {
                 return Promise.reject(new Error('No posts found'));
             } else {
-                return Promise.resolve(response.results.at(0));
+                return Promise.resolve(response.results.at(0).id);
             }
         });
     }
 
     _tryGetMedianPost(metric, range) {
-        let low = range.low + 0.000001;
-        let high = range.high - 0.000001;
+        let low = range.low + 0.000000001;
+        let high = range.high - 0.000000001;
         let median_query = `metric-${metric}:${low}..${high} sort:metric-${metric}`;
         return PostList.getMedian(median_query, []).then(response => {
             return Promise.resolve({
@@ -141,7 +159,7 @@ class MetricSorterController  {
         }
         this._unsortedPost.save().then(() => {
             if (this._foundExactValue) {
-                this.startSortingNewPost();
+                this.startSortingRandomPost();
             } else {
                 this.reloadMedianPost();
             }
@@ -152,7 +170,7 @@ class MetricSorterController  {
 
     _evtSkip(e) {
         this._ctx.parameters.skips = (this._ctx.parameters.skips || 0) + 1;
-        this.startSortingNewPost();
+        this.startSortingRandomPost();
     }
 
     _evtChangeMetric(e) {
@@ -162,7 +180,7 @@ class MetricSorterController  {
 
 module.exports = router => {
     router.enter(
-        ['posts', 'metric-sorter'],
+        ['post', ':id', 'metric-sorter'],
         (ctx, next) => {
             ctx.controller = new MetricSorterController(ctx);
         });

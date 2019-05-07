@@ -7,5 +7,5 @@
         checked: ctx.showValuesOnPost,
         class: 'append'}) %>
     <a class='mousetrap button append close sorting'
-       href="<%= ctx.getMetricSorterUrl(ctx.parameters) %>">Start sorting</a>
+       href="<%= ctx.getMetricSorterUrl('random', ctx.parameters) %>">Start sorting</a>
 </form>
