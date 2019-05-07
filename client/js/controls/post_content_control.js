@@ -118,7 +118,10 @@ class PostContentControl {
 
     _install() {
         this._reinstall();
-        optimizedResize.add(() => this._refreshSize());
+        // Don't auto-resize on mobile, to prevent size jerk when scrolling
+        if (window.innerWidth > 1000) {
+            optimizedResize.add(() => this._refreshSize());
+        }
         views.monitorNodeRemoval(
             this._hostNode, () => { this._uninstall(); });
     }
