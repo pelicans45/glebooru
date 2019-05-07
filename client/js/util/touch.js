@@ -13,13 +13,20 @@ function getSwipeThresholdInPx() {
 
 function handleTouchStart(handler, evt) {
     const touchEvent = evt.touches[0];
-    handler._xStart = touchEvent.clientX;
-    handler._yStart = touchEvent.clientY;
-    handler._startScrollY = window.scrollY;
+    if (window.visualViewport.scale === 1) {
+        handler._xStart = touchEvent.clientX;
+        handler._yStart = touchEvent.clientY;
+        handler._startScrollY = window.scrollY;
+    }
 }
 
 function handleTouchMove(handler, evt) {
     if (!handler._xStart || !handler._yStart) {
+        return;
+    }
+    if (window.visualViewport.scale > 1) {
+        handler._xStart = null;
+        handler._yStart = null;
         return;
     }
 
