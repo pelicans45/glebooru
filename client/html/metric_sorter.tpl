@@ -9,7 +9,7 @@
             <div class='sorting-buttons'>
                 <div class='compare-block'>
                     <% if (window.innerWidth <= 1000) { %>
-                        <input class='mousetrap save-btn' type='submit' value='Done'>
+                        <input class='mousetrap save-btn' type='submit' value='Save'>
                     <% } %>
                     <button class='compare left-lt-right'>
                         <i class='fa fa-less-than'></i>
