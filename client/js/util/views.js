@@ -179,6 +179,7 @@ function getPostUrl(id, parameters) {
         parameters ? {
             query: parameters.query,
             metrics: parameters.metrics,
+            cachenumber: parameters.cachenumber,
         } : {});
 }
 
@@ -188,6 +189,7 @@ function getPostEditUrl(id, parameters) {
         parameters ? {
             query: parameters.query,
             metrics: parameters.metrics,
+            cachenumber: parameters.cachenumber,
         } : {});
 }
 
