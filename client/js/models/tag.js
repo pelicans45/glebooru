@@ -151,7 +151,7 @@ class Tag extends events.EventTarget {
         const map = {
             _version:      response.version,
             _origName:     response.names ? response.names[0] : null,
-            _names:        response.names,
+            _names:        response.names || [],
             _category:     response.category,
             _description:  response.description,
             _creationTime: response.creationTime,

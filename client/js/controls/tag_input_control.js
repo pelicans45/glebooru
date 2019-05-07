@@ -85,7 +85,6 @@ class TagInputControl extends events.EventTarget {
     constructor(hostNode, tagList, placeholder) {
         super();
         this.tags = tagList;
-        this.newTags = new TagList();
         this._hostNode = hostNode;
         this._suggestions = new SuggestionList();
         this._tagToListItemNode = new Map();
@@ -143,44 +142,27 @@ class TagInputControl extends events.EventTarget {
     }
 
     addTagByText(text, source) {
-        // try to find category for new tags in the format "category:name"
-        text = text.replace(/:\s+/, ':');
-        for (let tagName of text.split(/\s+/).filter(word => word).reverse()) {
-            let nameAndCat = tagName.split(':');
-            if (nameAndCat.length > 1) {
-                // "cat:my:tag" should parse to category "cat" and tag "my:tag"
-                let categoryName = nameAndCat.shift();
-                let joinedTagName = nameAndCat.join(':');
-                this.addTagByCategoryAndName(categoryName, joinedTagName, source);
-            } else {
-                this.addTagByName(tagName, source);
-            }
-        }
+        tags.resolveTagAndCategory(text).then(
+            tag => this.addTag(tag, source),
+            error => window.alert(error.message));
     }
 
     addTagByName(name, source) {
-        // use the default category
-        return this.addTagByCategoryAndName(null, name, source);
-    }
-
-    addTagByCategoryAndName(category, name, source) {
-        category = category ? category.trim() : null;
         name = name.trim();
         if (!name) {
             return;
         }
-        // if tag with this name already exists, existing category will be used
         return Tag.get(name).then(tag => {
             return this.addTag(tag, source);
         }, () => {
             const tag = new Tag();
             tag.names = [name];
-            tag.category = category;
-            return this.addTag(tag, source, true);
+            tag.category = null;
+            return this.addTag(tag, source);
         });
     }
 
-    addTag(tag, source, isNew) {
+    addTag(tag, source) {
         if (source != SOURCE_INIT && this.tags.isTaggedWith(tag.names[0])) {
             const listItemNode = this._getListItemNode(tag);
             if (source !== SOURCE_IMPLICATION) {
@@ -191,13 +173,8 @@ class TagInputControl extends events.EventTarget {
         }
 
         return this.tags.addByTag(tag, false).then(() => {
-            // new tags with categories will be saved separately after the post
-            return isNew && tag.category
-                ? this.newTags.add(tag)
-                : Promise.resolve();
-        }).then( () => {
             const listItemNode = this._createListItemNode(tag);
-            if (isNew === true) {
+            if (!tag.category) {
                 listItemNode.classList.add('new');
             }
             if (source === SOURCE_IMPLICATION) {
@@ -223,7 +200,6 @@ class TagInputControl extends events.EventTarget {
         if (!this.tags.isTaggedWith(tag.names[0])) {
             return;
         }
-        this.newTags.removeByName(tag.names[0]);
         this.tags.removeByName(tag.names[0]);
         this._hideAutoComplete();
 

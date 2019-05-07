@@ -4,6 +4,7 @@ const router = require('../router.js');
 const api = require('../api.js');
 const settings = require('../models/settings.js');
 const uri = require('../util/uri.js');
+const tags = require('../tags.js');
 const PostList = require('../models/post_list.js');
 const topNavigation = require('../models/top_navigation.js');
 const PageController = require('../controllers/page_controller.js');
@@ -66,20 +67,27 @@ class PostListController {
         router.showNoDispatch(
             uri.formatClientLink('posts', e.detail.parameters));
         Object.assign(this._ctx.parameters, e.detail.parameters);
+        this._bulkEditTags.map(tagName =>
+            tags.resolveTagAndCategory(tagName)
+                .catch(error => window.alert(error.message))
+        );
         this._syncPageController();
     }
 
     _evtTag(e) {
         Promise.all(
-            this._bulkEditTags.map(tag =>
-                e.detail.post.tags.addByName(tag)))
-            .then(e.detail.post.save())
+            this._bulkEditTags.map(tag => {
+                let tagData = tags.parseTagAndCategory(tag);
+                return e.detail.post.tags.addByName(tagData.name);
+            }))
+            .then(() => e.detail.post.save())
             .catch(error => window.alert(error.message));
     }
 
     _evtUntag(e) {
         for (let tag of this._bulkEditTags) {
-            e.detail.post.tags.removeByName(tag);
+            let tagData = tags.parseTagAndCategory(tag);
+            e.detail.post.tags.removeByName(tagData.name);
         }
         e.detail.post.save().catch(error => window.alert(error.message));
     }

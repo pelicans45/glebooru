@@ -378,7 +378,6 @@ class PostUploadView extends events.EventTarget {
                 eventType,
                 {detail: {
                     uploadables: this._uploadables,
-                    newTags: this._tagInputNode ? this._tagControl.newTags : undefined,
                     skipDuplicates: this._skipDuplicatesCheckboxNode.checked,
                     copyTagsToOriginals: this._copyTagsToOriginalsCheckboxNode.checked,
                 }}));

@@ -1,6 +1,7 @@
 'use strict';
 
 const events = require('../events.js');
+const tags = require('../tags.js');
 const views = require('../util/views.js');
 
 const template = views.getTemplate('posts-page');
@@ -123,7 +124,8 @@ class PostsPageView extends events.EventTarget {
             if (tagFlipperNode) {
                 let tagged = true;
                 for (let tag of this._ctx.bulkEdit.tags) {
-                    tagged = tagged & post.tags.isTaggedWith(tag);
+                    let tagData = tags.parseTagAndCategory(tag);
+                    tagged = tagged & post.tags.isTaggedWith(tagData.name);
                 }
                 tagFlipperNode.classList.toggle('tagged', tagged);
             }

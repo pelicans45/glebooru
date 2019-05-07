@@ -2,6 +2,7 @@
 
 const misc = require('./util/misc.js');
 const TagCategoryList = require('./models/tag_category_list.js');
+const Tag = require('./models/tag.js');
 
 let _stylesheet = null;
 
@@ -24,6 +25,42 @@ function refreshCategoryColorMap() {
     });
 }
 
+function parseTagAndCategory(text) {
+    let nameAndCat = text.split(':');
+    if (nameAndCat.length > 1) {
+        // "cat:my:tag" should parse to category "cat" and tag "my:tag"
+        let category = nameAndCat.shift();
+        let name = nameAndCat.join(':');
+        return {name: name, category: category};
+    } else {
+        return {name: text, category: null};
+    }
+}
+
+function resolveTagAndCategory(text) {
+    let tagData = parseTagAndCategory(text);
+    return _createTagByCategoryAndName(tagData.category, tagData.name);
+}
+
+function _createTagByCategoryAndName(category, name) {
+    category = category ? category.trim() : 'default';
+    name = name.trim();
+    if (!name) {
+        return Promise.reject(new Error('Empty tag name'));
+    }
+    // if tag with this name already exists, existing category will be used
+    return Tag.get(name).then(tag => {
+        return Promise.resolve(tag);
+    }, () => {
+        const tag = new Tag();
+        tag.names = [name];
+        tag.category = category;
+        return tag.save().then(() => Promise.resolve(tag));
+    });
+}
+
 module.exports = {
     refreshCategoryColorMap: refreshCategoryColorMap,
+    parseTagAndCategory:     parseTagAndCategory,
+    resolveTagAndCategory:   resolveTagAndCategory,
 };

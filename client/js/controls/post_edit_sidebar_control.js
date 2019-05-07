@@ -379,11 +379,6 @@ class PostEditSidebarControl extends events.EventTarget {
                 tags: this._tagInputNode ?
                     misc.splitByWhitespace(this._tagInputNode.value) :
                     undefined,
-
-                newTags: this._tagControl ?
-                    this._tagControl.newTags :
-                    undefined,
-
                 relations: this._relationsInputNode ?
                     misc.splitByWhitespace(this._relationsInputNode.value)
                         .map(x => parseInt(x)) :

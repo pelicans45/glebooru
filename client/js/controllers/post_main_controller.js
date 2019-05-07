@@ -153,29 +153,6 @@ class PostMainController extends BasePostController {
         }
         post.save()
             .then(() => {
-                this._view.sidebarControl.showSuccess('Post saved.');
-                // now save the new tags with categories
-                if (!e.detail.newTags) {
-                    return Promise.resolve();
-                }
-                let tagPromises = [];
-                for (let newTag of e.detail.newTags) {
-                    // load the tag that was created during updating the post
-                    tagPromises.push(
-                        Tag.get(newTag.names[0]).then(tag => {
-                                tag.category = newTag.category;
-                                return tag.save();
-                            }
-                        ).then(() => {
-                            e.detail.newTags.removeByName(newTag.names[0]);
-                        }, error => {
-                            this._view.sidebarControl.showError(error.message);
-                        })
-                    );
-                }
-                return Promise.all(tagPromises);
-            })
-            .then(() => {
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
             }, error => {
