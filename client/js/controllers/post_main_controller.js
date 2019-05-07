@@ -24,17 +24,6 @@ class PostMainController extends BasePostController {
                 PostList.getAround(ctx.parameters.id, query),
         ]).then(responses => {
             const [post, aroundResponse] = responses;
-
-            // remove junk from query, but save it into history so that it can
-            // be still accessed after history navigation / page refresh
-            if (parameters.query || parameters.metrics) {
-                ctx.state.parameters = parameters;
-                const url = editMode ?
-                    uri.formatClientLink('post', ctx.parameters.id, 'edit') :
-                    uri.formatClientLink('post', ctx.parameters.id);
-                router.replace(url, ctx.state, false);
-            }
-
             this._post = post;
             this._view = new PostMainView({
                 post: post,

@@ -221,7 +221,7 @@ class PostsHeaderView extends events.EventTarget {
         } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
             this._openBulkEditor(this._bulkAddRelationEditor);
         }
-        if (ctx.parameters.metrics) {
+        if (ctx.parameters.metrics && this._metricsBlockNode) {
             this._toggleMetricsBlock(true);
         }
     }
@@ -364,6 +364,9 @@ class PostsHeaderView extends events.EventTarget {
     _evtFormSubmit(e) {
         e.preventDefault();
         this._navigate();
+        if (this._metricControl) {
+            this._metricControl.refreshQuery(this._queryInputNode.value);
+        }
     }
     _evtRandomizeButtonClick(e) {
         e.preventDefault();
