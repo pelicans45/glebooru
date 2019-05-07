@@ -116,12 +116,12 @@ class PostMainView {
         if (ctx.editMode) {
             this.sidebarControl = new PostEditSidebarControl(
                 sidebarContainerNode,
-                ctx.post,
+                ctx,
                 this._postContentControl,
                 this._postNotesOverlayControl);
         } else {
             this.sidebarControl = new PostReadonlySidebarControl(
-                sidebarContainerNode, ctx.post, this._postContentControl);
+                sidebarContainerNode, ctx, this._postContentControl);
         }
     }
 

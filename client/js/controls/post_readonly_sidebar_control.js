@@ -11,14 +11,15 @@ const scoreTemplate = views.getTemplate('score');
 const favTemplate = views.getTemplate('fav');
 
 class PostReadonlySidebarControl extends events.EventTarget {
-    constructor(hostNode, post, postContentControl) {
+    constructor(hostNode, ctx, postContentControl) {
         super();
         this._hostNode = hostNode;
-        this._post = post;
+        this._ctx = ctx;
+        this._post = ctx.post;
         this._postContentControl = postContentControl;
 
-        post.addEventListener('changeFavorite', e => this._evtChangeFav(e));
-        post.addEventListener('changeScore', e => this._evtChangeScore(e));
+        this._post.addEventListener('changeFavorite', e => this._evtChangeFav(e));
+        this._post.addEventListener('changeScore', e => this._evtChangeScore(e));
 
         views.replaceContent(this._hostNode, template({
             post: this._post,

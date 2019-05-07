@@ -12,9 +12,10 @@ const postMetricNodeTemplate = views.getTemplate('compact-post-metric-list-item'
 const postMetricRangeNodeTemplate = views.getTemplate('compact-post-metric-range-list-item');
 
 class PostMetricInputControl extends events.EventTarget {
-    constructor(hostNode, post) {
+    constructor(hostNode, ctx) {
         super();
-        this._post = post;
+        this._ctx = ctx;
+        this._post = ctx.post;
         this._hostNode = hostNode;
 
         // dom
@@ -59,6 +60,8 @@ class PostMetricInputControl extends events.EventTarget {
         const node = metricNodeTemplate({
             editMode: true,
             tag: tag,
+            post: this._post,
+            query: this._ctx.parameters.query,
         });
         const createExactNode = node.querySelector('a.create-exact');
         if (this._post.metrics.hasTagName(tag.names[0])) {
@@ -77,6 +80,10 @@ class PostMetricInputControl extends events.EventTarget {
                 e.preventDefault();
                 this.createPostMetricRange(tag);
             });
+        }
+        const sortNode = node.querySelector('a.sort');
+        if (this._post.metrics.hasTagName(tag.names[0])) {
+            sortNode.style.display = 'none';
         }
         return node;
     }

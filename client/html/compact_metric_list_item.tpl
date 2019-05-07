@@ -15,8 +15,12 @@
     --><span class='metric-bounds' data-pseudo-content=
     '<%- ctx.tag.metric.min %> &mdash; <%- ctx.tag.metric.max %>'></span><!--
     --><span class='metric-controls'>Set<!--
-        --> <a href class='create-exact'>exact</a><!--
-        --> <a href class='create-range'>range</a><!--
+        --><a href class='create-exact'> exact</a><!--
+        --><a href class='create-range'> range</a><!--
+        --><a href='<%= ctx.getMetricSorterUrl(ctx.post.id, {
+                    metrics: ctx.tag.names[0],
+                    query: ctx.query}) %>'
+               class='sort'> sort</a><!--
     --></span><!--
 --><% } %><!--
 --></li>

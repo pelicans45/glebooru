@@ -15,10 +15,11 @@ const FileDropperControl = require('../controls/file_dropper_control.js');
 const template = views.getTemplate('post-edit-sidebar');
 
 class PostEditSidebarControl extends events.EventTarget {
-    constructor(hostNode, post, postContentControl, postNotesOverlayControl) {
+    constructor(hostNode, ctx, postContentControl, postNotesOverlayControl) {
         super();
         this._hostNode = hostNode;
-        this._post = post;
+        this._ctx = ctx;
+        this._post = ctx.post;
         this._postContentControl = postContentControl;
         this._postNotesOverlayControl = postNotesOverlayControl;
         this._newPostContent = null;
@@ -35,8 +36,8 @@ class PostEditSidebarControl extends events.EventTarget {
             canEditPostMetrics: api.hasPrivilege('metrics:edit:posts'),
             canEditPostRelations: api.hasPrivilege('posts:edit:relations'),
             canEditPostNotes: api.hasPrivilege('posts:edit:notes') &&
-                post.type !== 'video' &&
-                post.type !== 'flash',
+                this._post.type !== 'video' &&
+                this._post.type !== 'flash',
             canEditPostFlags: api.hasPrivilege('posts:edit:flags'),
             canEditPostContent: api.hasPrivilege('posts:edit:content'),
             canEditPostThumbnail: api.hasPrivilege('posts:edit:thumbnail'),
@@ -79,12 +80,12 @@ class PostEditSidebarControl extends events.EventTarget {
 
         if (this._tagInputNode) {
             this._tagControl = new TagInputControl(
-                this._tagInputNode, post.tags);
+                this._tagInputNode, this._post.tags);
         }
 
         if (this._metricInputNode) {
             this._metricControl = new PostMetricInputControl(
-                this._metricInputNode, post);
+                this._metricInputNode, this._ctx);
         }
 
         if (this._contentInputNode) {
