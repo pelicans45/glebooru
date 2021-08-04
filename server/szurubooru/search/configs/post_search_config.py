@@ -339,8 +339,12 @@ class PostSearchConfig(BaseSearchConfig):
                     ),
                 ),
                 (
-                    ["content-checksum"],
+                    ["content-checksum", "sha1"],
                     search_util.create_str_filter(model.Post.checksum),
+                ),
+                (
+                    ["md5"],
+                    search_util.create_str_filter(model.Post.checksum_md5),
                 ),
                 (
                     ["file-size"],

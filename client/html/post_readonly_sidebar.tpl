@@ -9,6 +9,10 @@
                     'image/jpeg': 'JPEG',
                     'image/png': 'PNG',
                     'image/webp': 'WEBP',
+                    'image/bmp': 'BMP',
+                    'image/avif': 'AVIF',
+                    'image/heif': 'HEIF',
+                    'image/heic': 'HEIC',
                     'video/webm': 'WEBM',
                     'video/mp4': 'MPEG-4',
                     'application/x-shockwave-flash': 'SWF',
@@ -52,6 +56,7 @@
         <section class='search'>
             Search on
             <a href='http://iqdb.org/?url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>IQDB</a> &middot;
+            <a href='https://danbooru.donmai.us/posts?tags=md5:<%- ctx.post.checksumMD5 %>'>Danbooru</a> &middot;
             <a href='https://www.google.com/searchbyimage?&image_url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
         </section>
 
@@ -91,7 +96,7 @@
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeColons(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
                         --><% if (ctx.canListPosts) { %><!--

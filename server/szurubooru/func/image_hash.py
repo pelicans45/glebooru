@@ -6,6 +6,10 @@ from typing import Any, Callable, List, Optional, Set, Tuple
 
 import numpy as np
 from PIL import Image
+import pillow_avif
+import pyheif
+from pyheif_pillow_opener import register_heif_opener
+register_heif_opener()
 
 from szurubooru import config, errors
 
@@ -40,7 +44,7 @@ def _preprocess_image(content: bytes) -> NpMatrix:
     try:
         img = Image.open(BytesIO(content))
         return np.asarray(img.convert("L"), dtype=np.uint8)
-    except IOError:
+    except (IOError, ValueError):
         raise errors.ProcessingError(
             "Unable to generate a signature hash " "for this image."
         )

@@ -175,6 +175,7 @@ class PostSerializer(serialization.BaseSerializer):
             "type": self.serialize_type,
             "mimeType": self.serialize_mime,
             "checksum": self.serialize_checksum,
+            "checksumMD5": self.serialize_checksum_md5,
             "fileSize": self.serialize_file_size,
             "canvasWidth": self.serialize_canvas_width,
             "canvasHeight": self.serialize_canvas_height,
@@ -229,6 +230,9 @@ class PostSerializer(serialization.BaseSerializer):
 
     def serialize_checksum(self) -> Any:
         return self.post.checksum
+
+    def serialize_checksum_md5(self) -> Any:
+        return self.post.checksum_md5
 
     def serialize_file_size(self) -> Any:
         return self.post.file_size
@@ -602,7 +606,25 @@ def update_all_post_signatures() -> None:
                 post, files.get(get_post_content_path(post))
             )
             db.session.commit()
-            logger.info("Hashed Post %d", post.post_id)
+            logger.info("Created Signature - Post %d", post.post_id)
+        except Exception as ex:
+            logger.exception(ex)
+
+
+def update_all_md5_checksums() -> None:
+    posts_to_hash = (
+        db.session.query(model.Post)
+        .filter(model.Post.checksum_md5 == None)  # noqa: E711
+        .order_by(model.Post.post_id.asc())
+        .all()
+    )
+    for post in posts_to_hash:
+        try:
+            post.checksum_md5 = util.get_md5(
+                files.get(get_post_content_path(post))
+            )
+            db.session.commit()
+            logger.info("Created MD5 - Post %d", post.post_id)
         except Exception as ex:
             logger.exception(ex)
 
@@ -630,6 +652,7 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
         )
 
     post.checksum = util.get_sha1(content)
+    post.checksum_md5 = util.get_md5(content)
     other_post = (
         db.session.query(model.Post)
         .filter(model.Post.checksum == post.checksum)
@@ -652,7 +675,8 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
         image = images.Image(content)
         post.canvas_width = image.width
         post.canvas_height = image.height
-    except errors.ProcessingError:
+    except errors.ProcessingError as ex:
+        logger.exception(ex)
         if not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError("Unable to process image metadata")
         else:

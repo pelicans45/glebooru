@@ -1,81 +1,89 @@
 import json
 import logging
-import os
+import subprocess
 import urllib.error
 import urllib.request
-from tempfile import NamedTemporaryFile
 from threading import Thread
 from typing import Any, Dict, List
 
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import YoutubeDLError
-
 from szurubooru import config, errors
-from szurubooru.func import mime, util
+from szurubooru.func import mime
 
 logger = logging.getLogger(__name__)
+_dl_chunk_size = 2 ** 15
+
+
+class DownloadError(errors.ProcessingError):
+    pass
+
+
+class DownloadTooLargeError(DownloadError):
+    pass
 
 
 def download(url: str, use_video_downloader: bool = False) -> bytes:
     assert url
+    youtube_dl_error = None
+    if use_video_downloader:
+        try:
+            url = _get_youtube_dl_content_url(url) or url
+        except errors.ThirdPartyError as ex:
+            youtube_dl_error = ex
+
     request = urllib.request.Request(url)
     if config.config["user_agent"]:
         request.add_header("User-Agent", config.config["user_agent"])
     request.add_header("Referer", url)
+
+    content_buffer = b""
+    length_tally = 0
     try:
         with urllib.request.urlopen(request) as handle:
-            content = handle.read()
-    except Exception as ex:
-        raise errors.ProcessingError("Error downloading %s (%s)" % (url, ex))
+            while (chunk := handle.read(_dl_chunk_size)) :
+                length_tally += len(chunk)
+                if length_tally > config.config["max_dl_filesize"]:
+                    raise DownloadTooLargeError(url)
+                content_buffer += chunk
+    except urllib.error.HTTPError as ex:
+        raise DownloadError(url) from ex
+
     if (
-        use_video_downloader
-        and mime.get_mime_type(content) == "application/octet-stream"
+        youtube_dl_error
+        and mime.get_mime_type(content_buffer) == "application/octet-stream"
     ):
-        return _youtube_dl_wrapper(url)
-    return content
+        raise youtube_dl_error
+
+    return content_buffer
 
 
-def _youtube_dl_wrapper(url: str) -> bytes:
-    outpath = os.path.join(
-        config.config["data_dir"],
-        "temporary-uploads",
-        "youtubedl-" + util.get_sha1(url)[0:8] + ".dat",
-    )
-    options = {
-        "ignoreerrors": False,
-        "format": "best[ext=webm]/best[ext=mp4]/best[ext=flv]",
-        "logger": logger,
-        "max_filesize": config.config["max_dl_filesize"],
-        "max_downloads": 1,
-        "outtmpl": outpath,
-    }
+def _get_youtube_dl_content_url(url: str) -> str:
+    cmd = ["youtube-dl", "--format", "best", "--no-playlist"]
+    if config.config["user_agent"]:
+        cmd.extend(["--user-agent", config.config["user_agent"]])
+    cmd.extend(["--get-url", url])
     try:
-        with YoutubeDL(options) as ydl:
-            ydl.extract_info(url, download=True)
-        with open(outpath, "rb") as f:
-            return f.read()
-    except YoutubeDLError as ex:
-        raise errors.ThirdPartyError(
-            "Error downloading video %s (%s)" % (url, ex)
+        return (
+            subprocess.run(cmd, text=True, capture_output=True, check=True)
+            .stdout.split("\n")[0]
+            .strip()
         )
-    except FileNotFoundError:
+    except subprocess.CalledProcessError:
         raise errors.ThirdPartyError(
-            "Error downloading video %s (file could not be saved)" % (url)
-        )
+            "Could not extract content location from %s" % (url)
+        ) from None
 
 
 def post_to_webhooks(payload: Dict[str, Any]) -> List[Thread]:
     threads = [
-        Thread(target=_post_to_webhook, args=(webhook, payload))
+        Thread(target=_post_to_webhook, args=(webhook, payload), daemon=False)
         for webhook in (config.config["webhooks"] or [])
     ]
     for thread in threads:
-        thread.daemon = False
         thread.start()
     return threads
 
 
-def _post_to_webhook(webhook: str, payload: Dict[str, Any]) -> None:
+def _post_to_webhook(webhook: str, payload: Dict[str, Any]) -> int:
     req = urllib.request.Request(webhook)
     req.data = json.dumps(
         payload,
@@ -89,6 +97,6 @@ def _post_to_webhook(webhook: str, payload: Dict[str, Any]) -> None:
                 f"Webhook {webhook} returned {res.status} {res.reason}"
             )
         return res.status
-    except urllib.error.URLError as e:
-        logger.warning(f"Unable to call webhook {webhook}: {str(e)}")
+    except urllib.error.URLError as ex:
+        logger.warning(f"Unable to call webhook {webhook}: {ex}")
         return 400
