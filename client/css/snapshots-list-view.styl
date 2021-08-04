@@ -31,16 +31,34 @@ $snapshot-merged-background-color = #FEC
             div.operation-created
                 background: $snapshot-created-background-color
                 &+.details
-                    background: lighten($snapshot-created-background-color, 50%)
+                    background: alpha(@background, 50%)
             div.operation-modified
                 background: $snapshot-modified-background-color
                 &+.details
-                    background: lighten($snapshot-modified-background-color, 50%)
+                    background: alpha(@background, 50%)
             div.operation-deleted
                 background: $snapshot-deleted-background-color
                 &+.details
-                    background: lighten($snapshot-deleted-background-color, 50%)
+                    background: alpha(@background, 50%)
             div.operation-merged
                 background: $snapshot-merged-background-color
                 &+.details
-                    background: lighten($snapshot-merged-background-color, 50%)
+                    background: alpha(@background, 50%)
+
+.darktheme .snapshot-list ul li
+    div.operation-created
+        background: darken($snapshot-created-background-color, 80%)
+        &+.details
+            background: alpha(@background, 50%)
+    div.operation-modified
+        background: darken($snapshot-modified-background-color, 80%)
+        &+.details
+            background: alpha(@background, 50%)
+    div.operation-deleted
+        background: darken($snapshot-deleted-background-color, 80%)
+        &+.details
+            background: alpha(@background, 50%)
+    div.operation-merged
+        background: darken($snapshot-merged-background-color, 80%)
+        &+.details
+            background: alpha(@background, 50%)

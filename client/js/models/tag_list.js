@@ -1,25 +1,27 @@
-'use strict';
+"use strict";
 
-const api = require('../api.js');
-const uri = require('../util/uri.js');
-const AbstractList = require('./abstract_list.js');
-const Tag = require('./tag.js');
+const api = require("../api.js");
+const uri = require("../util/uri.js");
+const AbstractList = require("./abstract_list.js");
+const Tag = require("./tag.js");
 
 class TagList extends AbstractList {
     static search(text, offset, limit, fields) {
-        return api.get(
-                uri.formatApiLink(
-                    'tags', {
-                        query: text,
-                        offset: offset,
-                        limit: limit,
-                        fields: fields.join(','),
-                    }))
-            .then(response => {
-                return Promise.resolve(Object.assign(
-                    {},
-                    response,
-                    {results: TagList.fromResponse(response.results)}));
+        return api
+            .get(
+                uri.formatApiLink("tags", {
+                    query: text,
+                    offset: offset,
+                    limit: limit,
+                    fields: fields.join(","),
+                })
+            )
+            .then((response) => {
+                return Promise.resolve(
+                    Object.assign({}, response, {
+                        results: TagList.fromResponse(response.results),
+                    })
+                );
             });
     }
 
@@ -52,10 +54,12 @@ class TagList extends AbstractList {
         this.add(tag);
 
         if (addImplications !== false) {
-            return Tag.get(tag.names[0]).then(actualTag => {
+            return Tag.get(tag.names[0]).then((actualTag) => {
                 return Promise.all(
-                    actualTag.implications.map(
-                        relation => this.addByName(relation.names[0], true)));
+                    actualTag.implications.map((relation) =>
+                        this.addByName(relation.names[0], true)
+                    )
+                );
             });
         }
 
@@ -78,6 +82,6 @@ class TagList extends AbstractList {
 }
 
 TagList._itemClass = Tag;
-TagList._itemName = 'tag';
+TagList._itemName = "tag";
 
 module.exports = TagList;

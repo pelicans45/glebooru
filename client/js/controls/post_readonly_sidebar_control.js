@@ -1,14 +1,15 @@
-'use strict';
+"use strict";
 
-const api = require('../api.js');
-const events = require('../events.js');
-const views = require('../util/views.js');
-const uri = require('../util/uri.js');
-const PostMetricListControl = require('./post_metric_list_control.js');
+const api = require("../api.js");
+const events = require("../events.js");
+const views = require("../util/views.js");
+const uri = require("../util/uri.js");
+const misc = require("../util/misc.js");
+const PostMetricListControl = require("./post_metric_list_control.js");
 
-const template = views.getTemplate('post-readonly-sidebar');
-const scoreTemplate = views.getTemplate('score');
-const favTemplate = views.getTemplate('fav');
+const template = views.getTemplate("post-readonly-sidebar");
+const scoreTemplate = views.getTemplate("score");
+const favTemplate = views.getTemplate("fav");
 
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {
@@ -18,84 +19,95 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._post = ctx.post;
         this._postContentControl = postContentControl;
 
-        this._post.addEventListener('changeFavorite', e => this._evtChangeFav(e));
-        this._post.addEventListener('changeScore', e => this._evtChangeScore(e));
+        this._post.addEventListener("changeFavorite", (e) => this._evtChangeFav(e));
+        this._post.addEventListener("changeScore", (e) => this._evtChangeScore(e));
 
-        views.replaceContent(this._hostNode, template({
-            post: this._post,
-            enableSafety: api.safetyEnabled(),
-            canListPosts: api.hasPrivilege('posts:list'),
-            canEditPosts: api.hasPrivilege('posts:edit'),
-            canViewTags: api.hasPrivilege('tags:view'),
-            escapeColons: uri.escapeColons,
-        }));
+        views.replaceContent(
+            this._hostNode,
+            template({
+                post: this._post,
+                enableSafety: api.safetyEnabled(),
+                canListPosts: api.hasPrivilege("posts:list"),
+                canEditPosts: api.hasPrivilege("posts:edit"),
+                canViewTags: api.hasPrivilege("tags:view"),
+                escapeColons: uri.escapeColons,
+                extractRootDomain: uri.extractRootDomain,
+                getPrettyName: misc.getPrettyName,
+            })
+        );
 
         this._installFav();
         this._installScore();
         this._installFitButtons();
         this._syncFitButton();
         if (this._metricsListNode) {
-            this._metricsControl = new PostMetricListControl(this._metricsListNode, this._post);
+            this._metricsControl = new PostMetricListControl(
+                this._metricsListNode, this._post
+            );
         }
     }
 
     get _scoreContainerNode() {
-        return this._hostNode.querySelector('.score-container');
+        return this._hostNode.querySelector(".score-container");
     }
 
     get _favContainerNode() {
-        return this._hostNode.querySelector('.fav-container');
+        return this._hostNode.querySelector(".fav-container");
     }
 
     get _upvoteButtonNode() {
-        return this._hostNode.querySelector('.upvote');
+        return this._hostNode.querySelector(".upvote");
     }
 
     get _downvoteButtonNode() {
-        return this._hostNode.querySelector('.downvote');
+        return this._hostNode.querySelector(".downvote");
     }
 
     get _addFavButtonNode() {
-        return this._hostNode.querySelector('.add-favorite');
+        return this._hostNode.querySelector(".add-favorite");
     }
 
     get _remFavButtonNode() {
-        return this._hostNode.querySelector('.remove-favorite');
+        return this._hostNode.querySelector(".remove-favorite");
     }
 
     get _fitBothButtonNode() {
-        return this._hostNode.querySelector('.fit-both');
+        return this._hostNode.querySelector(".fit-both");
     }
 
     get _fitOriginalButtonNode() {
-        return this._hostNode.querySelector('.fit-original');
+        return this._hostNode.querySelector(".fit-original");
     }
 
     get _fitWidthButtonNode() {
-        return this._hostNode.querySelector('.fit-width');
+        return this._hostNode.querySelector(".fit-width");
     }
 
     get _fitHeightButtonNode() {
-        return this._hostNode.querySelector('.fit-height');
+        return this._hostNode.querySelector(".fit-height");
     }
 
     get _metricsListNode() {
-        return this._hostNode.querySelector('ul.compact-post-metrics');
+        return this._hostNode.querySelector("ul.compact-post-metrics");
     }
 
     _installFitButtons() {
         this._fitBothButtonNode.addEventListener(
-            'click', this._eventZoomProxy(
-                () => this._postContentControl.fitBoth()));
+            "click",
+            this._eventZoomProxy(() => this._postContentControl.fitBoth())
+        );
         this._fitOriginalButtonNode.addEventListener(
-            'click', this._eventZoomProxy(
-                () => this._postContentControl.fitOriginal()));
+            "click",
+            this._eventZoomProxy(() => this._postContentControl.fitOriginal())
+        );
         this._fitWidthButtonNode.addEventListener(
-            'click', this._eventZoomProxy(
-                () => this._postContentControl.fitWidth()));
+            "click",
+            this._eventZoomProxy(() => this._postContentControl.fitWidth())
+        );
         this._fitHeightButtonNode.addEventListener(
-            'click', this._eventZoomProxy(
-                () => this._postContentControl.fitHeight()));
+            "click",
+            this._eventZoomProxy(() => this._postContentControl.fitHeight())
+        );
     }
 
     _installFav() {
@@ -104,16 +116,19 @@ class PostReadonlySidebarControl extends events.EventTarget {
             favTemplate({
                 favoriteCount: this._post.favoriteCount,
                 ownFavorite: this._post.ownFavorite,
-                canFavorite: api.hasPrivilege('posts:favorite'),
-            }));
+                canFavorite: api.hasPrivilege("posts:favorite"),
+            })
+        );
 
         if (this._addFavButtonNode) {
-            this._addFavButtonNode.addEventListener(
-                'click', e => this._evtAddToFavoritesClick(e));
+            this._addFavButtonNode.addEventListener("click", (e) =>
+                this._evtAddToFavoritesClick(e)
+            );
         }
         if (this._remFavButtonNode) {
-            this._remFavButtonNode.addEventListener(
-                'click', e => this._evtRemoveFromFavoritesClick(e));
+            this._remFavButtonNode.addEventListener("click", (e) =>
+                this._evtRemoveFromFavoritesClick(e)
+            );
         }
     }
 
@@ -123,77 +138,88 @@ class PostReadonlySidebarControl extends events.EventTarget {
             scoreTemplate({
                 score: this._post.score,
                 ownScore: this._post.ownScore,
-                canScore: api.hasPrivilege('posts:score'),
-            }));
+                canScore: api.hasPrivilege("posts:score"),
+            })
+        );
         if (this._upvoteButtonNode) {
-            this._upvoteButtonNode.addEventListener(
-                'click', e => this._evtScoreClick(e, 1));
+            this._upvoteButtonNode.addEventListener("click", (e) =>
+                this._evtScoreClick(e, 1)
+            );
         }
         if (this._downvoteButtonNode) {
-            this._downvoteButtonNode.addEventListener(
-                'click', e => this._evtScoreClick(e, -1));
+            this._downvoteButtonNode.addEventListener("click", (e) =>
+                this._evtScoreClick(e, -1)
+            );
         }
     }
 
     _eventZoomProxy(func) {
-        return e => {
+        return (e) => {
             e.preventDefault();
             e.target.blur();
             func();
             this._syncFitButton();
-            this.dispatchEvent(new CustomEvent('fitModeChange', {
-                detail: {
-                    mode: this._getFitMode(),
-                },
-            }));
+            this.dispatchEvent(
+                new CustomEvent("fitModeChange", {
+                    detail: {
+                        mode: this._getFitMode(),
+                    },
+                })
+            );
         };
     }
 
     _getFitMode() {
         const funcToName = {};
-        funcToName[this._postContentControl.fitBoth] = 'fit-both';
-        funcToName[this._postContentControl.fitOriginal] = 'fit-original';
-        funcToName[this._postContentControl.fitWidth] = 'fit-width';
-        funcToName[this._postContentControl.fitHeight] = 'fit-height';
+        funcToName[this._postContentControl.fitBoth] = "fit-both";
+        funcToName[this._postContentControl.fitOriginal] = "fit-original";
+        funcToName[this._postContentControl.fitWidth] = "fit-width";
+        funcToName[this._postContentControl.fitHeight] = "fit-height";
         return funcToName[this._postContentControl._currentFitFunction];
     }
 
     _syncFitButton() {
         const className = this._getFitMode();
-        const oldNode = this._hostNode.querySelector('.zoom a.active');
+        const oldNode = this._hostNode.querySelector(".zoom a.active");
         const newNode = this._hostNode.querySelector(`.zoom a.${className}`);
         if (oldNode) {
-            oldNode.classList.remove('active');
+            oldNode.classList.remove("active");
         }
-        newNode.classList.add('active');
+        newNode.classList.add("active");
     }
 
     _evtAddToFavoritesClick(e) {
         e.preventDefault();
-        this.dispatchEvent(new CustomEvent('favorite', {
-            detail: {
-                post: this._post,
-            },
-        }));
+        this.dispatchEvent(
+            new CustomEvent("favorite", {
+                detail: {
+                    post: this._post,
+                },
+            })
+        );
     }
 
     _evtRemoveFromFavoritesClick(e) {
         e.preventDefault();
-        this.dispatchEvent(new CustomEvent('unfavorite', {
-            detail: {
-                post: this._post,
-            },
-        }));
+        this.dispatchEvent(
+            new CustomEvent("unfavorite", {
+                detail: {
+                    post: this._post,
+                },
+            })
+        );
     }
 
     _evtScoreClick(e, score) {
         e.preventDefault();
-        this.dispatchEvent(new CustomEvent('score', {
-            detail: {
-                post: this._post,
-                score: this._post.ownScore === score ? 0 : score,
-            },
-        }));
+        this.dispatchEvent(
+            new CustomEvent("score", {
+                detail: {
+                    post: this._post,
+                    score: this._post.ownScore === score ? 0 : score,
+                },
+            })
+        );
     }
 
     _evtChangeFav(e) {
@@ -203,6 +229,6 @@ class PostReadonlySidebarControl extends events.EventTarget {
     _evtChangeScore(e) {
         this._installScore();
     }
-};
+}
 
 module.exports = PostReadonlySidebarControl;

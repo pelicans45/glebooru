@@ -1,27 +1,30 @@
-'use strict';
+"use strict";
 
-const events = require('../events.js');
-const views = require('../util/views.js');
-const FileDropperControl = require('../controls/file_dropper_control.js');
-const TagList = require('../models/tag_list.js');
-const TagInputControl = require('../controls/tag_input_control.js');
+const events = require("../events.js");
+const views = require("../util/views.js");
+const FileDropperControl = require("../controls/file_dropper_control.js");
+const TagList = require("../models/tag_list.js");
+const TagInputControl = require("../controls/tag_input_control.js");
 
-const template = views.getTemplate('post-upload');
-const rowTemplate = views.getTemplate('post-upload-row');
+const template = views.getTemplate("post-upload");
+const rowTemplate = views.getTemplate("post-upload-row");
 
-const misc = require('../util/misc.js');
+const misc = require("../util/misc.js");
 const TagAutoCompleteControl =
-    require('../controls/tag_auto_complete_control.js');
+    require("../controls/tag_auto_complete_control.js");
 
 function _mimeTypeToPostType(mimeType) {
-    return {
-        'application/x-shockwave-flash': 'flash',
-        'image/gif': 'image',
-        'image/jpeg': 'image',
-        'image/png': 'image',
-        'video/mp4': 'video',
-        'video/webm': 'video',
-    }[mimeType] || 'unknown';
+    return (
+        {
+            "application/x-shockwave-flash": "flash",
+            "image/gif": "image",
+            "image/jpeg": "image",
+            "image/png": "image",
+            "image/webp": "image",
+            "video/mp4": "video",
+            "video/webm": "video",
+        }[mimeType] || "unknown"
+    );
 }
 
 class Uploadable extends events.EventTarget {
@@ -29,18 +32,17 @@ class Uploadable extends events.EventTarget {
         super();
         this.lookalikes = [];
         this.lookalikesConfirmed = false;
-        this.safety = 'safe';
+        this.safety = "safe";
         this.flags = [];
         this.tags = [];
         this.relations = [];
         this.anonymous = false;
     }
 
-    destroy() {
-    }
+    destroy() {}
 
     get mimeType() {
-        return 'application/octet-stream';
+        return "application/octet-stream";
     }
 
     get type() {
@@ -48,17 +50,11 @@ class Uploadable extends events.EventTarget {
     }
 
     get key() {
-        throw new Error('Not implemented');
+        throw new Error("Not implemented");
     }
 
     get name() {
-        throw new Error('Not implemented');
-    }
-
-    _initComplete() {
-        if (['video'].includes(this.type)) {
-            this.flags.push('loop');
-        }
+        throw new Error("Not implemented");
     }
 }
 
@@ -73,13 +69,13 @@ class File extends Uploadable {
         } else {
             let reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.addEventListener('load', e => {
+            reader.addEventListener("load", (e) => {
                 this._previewUrl = e.target.result;
                 this.dispatchEvent(
-                    new CustomEvent('finish', {detail: {uploadable: this}}));
+                    new CustomEvent("finish", { detail: { uploadable: this } })
+                );
             });
         }
-        this._initComplete();
     }
 
     destroy() {
@@ -109,25 +105,25 @@ class Url extends Uploadable {
     constructor(url) {
         super();
         this.url = url;
-        this.dispatchEvent(new CustomEvent('finish'));
-        this._initComplete();
+        this.dispatchEvent(new CustomEvent("finish"));
     }
 
     get mimeType() {
         let mime = {
-            'swf': 'application/x-shockwave-flash',
-            'jpg': 'image/jpeg',
-            'png': 'image/png',
-            'gif': 'image/gif',
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
+            swf: "application/x-shockwave-flash",
+            jpg: "image/jpeg",
+            png: "image/png",
+            gif: "image/gif",
+            webp: "image/webp",
+            mp4: "video/mp4",
+            webm: "video/webm",
         };
         for (let extension of Object.keys(mime)) {
-            if (this.url.toLowerCase().indexOf('.' + extension) !== -1) {
+            if (this.url.toLowerCase().indexOf("." + extension) !== -1) {
                 return mime[extension];
             }
         }
-        return 'unknown';
+        return "unknown";
     }
 
     get previewUrl() {
@@ -147,7 +143,7 @@ class PostUploadView extends events.EventTarget {
     constructor(ctx) {
         super();
         this._ctx = ctx;
-        this._hostNode = document.getElementById('content-holder');
+        this._hostNode = document.getElementById("content-holder");
 
         views.replaceContent(this._hostNode, template());
         views.syncScrollPosition();
@@ -155,50 +151,56 @@ class PostUploadView extends events.EventTarget {
         this._cancelButtonNode.disabled = true;
 
         this._uploadables = [];
-        this._uploadables.find = u => {
-            return this._uploadables.findIndex(u2 => u.key === u2.key);
+        this._uploadables.find = (u) => {
+            return this._uploadables.findIndex((u2) => u.key === u2.key);
         };
 
         this._contentFileDropper = new FileDropperControl(
             this._contentInputNode,
             {
                 extraText:
-                    'Allowed extensions: .jpg, .png, .gif, .webm, .mp4, .swf',
+                    "Allowed extensions: .jpg, .png, .gif, .webm, .mp4, .swf",
                 allowUrls: true,
                 allowMultiple: true,
                 lock: false,
-            });
-        this._contentFileDropper.addEventListener(
-            'fileadd', e => this._evtFilesAdded(e));
-        this._contentFileDropper.addEventListener(
-            'urladd', e => this._evtUrlsAdded(e));
+            }
+        );
+        this._contentFileDropper.addEventListener("fileadd", (e) =>
+            this._evtFilesAdded(e)
+        );
+        this._contentFileDropper.addEventListener("urladd", (e) =>
+            this._evtUrlsAdded(e)
+        );
 
-        this._skipDuplicatesCheckboxNode.addEventListener(
-            'change', e => this._evtSkipDuplicatesCheck(e, this._skipDuplicatesCheckboxNode.checked)
+        this._skipDuplicatesCheckboxNode.addEventListener("change", e =>
+            this._evtSkipDuplicatesCheck(e, this._skipDuplicatesCheckboxNode.checked)
         );
         this._copyTagsToOriginalsSpanNode.hidden = true;
 
-        this._cancelButtonNode.addEventListener(
-            'click', e => this._evtCancelButtonClick(e));
-        this._formNode.addEventListener('submit', e => this._evtFormSubmit(e));
-        this._formNode.classList.add('inactive');
+        this._cancelButtonNode.addEventListener("click", (e) =>
+            this._evtCancelButtonClick(e)
+        );
+        this._formNode.addEventListener("submit", (e) =>
+            this._evtFormSubmit(e)
+        );
+        this._formNode.classList.add("inactive");
 
         if (this._tagInputNode) {
             this._tagControl = new TagInputControl(
-                this._tagInputNode, new TagList(), 'Type common tags…');
+                this._tagInputNode, new TagList(), "Type common tags…");
         }
     }
 
     enableForm() {
         views.enableForm(this._formNode);
         this._cancelButtonNode.disabled = true;
-        this._formNode.classList.remove('uploading');
+        this._formNode.classList.remove("uploading");
     }
 
     disableForm() {
         views.disableForm(this._formNode);
         this._cancelButtonNode.disabled = false;
-        this._formNode.classList.add('uploading');
+        this._formNode.classList.add("uploading");
     }
 
     clearMessages() {
@@ -223,7 +225,7 @@ class PostUploadView extends events.EventTarget {
     }
 
     addUploadables(uploadables) {
-        this._formNode.classList.remove('inactive');
+        this._formNode.classList.remove("inactive");
         let duplicatesFound = 0;
         for (let uploadable of uploadables) {
             uploadable.safety = this._ctx.defaultSafety || uploadable.safety;
@@ -232,20 +234,22 @@ class PostUploadView extends events.EventTarget {
                 continue;
             }
             this._uploadables.push(uploadable);
-            this._emit('change');
+            this._emit("change");
             this._renderRowNode(uploadable);
-            uploadable.addEventListener(
-                'finish', e => this._updateThumbnailNode(e.detail.uploadable));
+            uploadable.addEventListener("finish", (e) =>
+                this._updateThumbnailNode(e.detail.uploadable)
+            );
         }
         if (duplicatesFound) {
             let message = null;
             if (duplicatesFound < uploadables.length) {
-                message = 'Some of the files were already added ' +
-                    'and have been skipped.';
+                message =
+                    "Some of the files were already added " +
+                    "and have been skipped.";
             } else if (duplicatesFound === 1) {
-                message = 'This file was already added.';
+                message = "This file was already added.";
             } else {
-                message = 'These files were already added.';
+                message = "These files were already added.";
             }
             alert(message);
         }
@@ -258,10 +262,10 @@ class PostUploadView extends events.EventTarget {
         uploadable.destroy();
         uploadable.rowNode.parentNode.removeChild(uploadable.rowNode);
         this._uploadables.splice(this._uploadables.find(uploadable), 1);
-        this._emit('change');
+        this._emit("change");
         if (!this._uploadables.length) {
-            this._formNode.classList.add('inactive');
-            this._submitButtonNode.value = 'Upload all';
+            this._formNode.classList.add("inactive");
+            this._submitButtonNode.value = "Upload all";
         }
     }
 
@@ -271,11 +275,11 @@ class PostUploadView extends events.EventTarget {
     }
 
     _evtFilesAdded(e) {
-        this.addUploadables(e.detail.files.map(file => new File(file)));
+        this.addUploadables(e.detail.files.map((file) => new File(file)));
     }
 
     _evtUrlsAdded(e) {
-        this.addUploadables(e.detail.urls.map(url => new Url(url)));
+        this.addUploadables(e.detail.urls.map((url) => new Url(url)));
     }
 
     _evtSkipDuplicatesCheck(e, checked) {
@@ -289,7 +293,7 @@ class PostUploadView extends events.EventTarget {
 
     _evtCancelButtonClick(e) {
         e.preventDefault();
-        this._emit('cancel');
+        this._emit("cancel");
     }
 
     _evtFormSubmit(e) {
@@ -297,47 +301,47 @@ class PostUploadView extends events.EventTarget {
         for (let uploadable of this._uploadables) {
             this._updateUploadableFromDom(uploadable);
         }
-        this._submitButtonNode.value = 'Resume upload';
-        this._emit('submit');
+        this._submitButtonNode.value = "Resume upload";
+        this._emit("submit");
     }
 
     _updateUploadableFromDom(uploadable) {
         const rowNode = uploadable.rowNode;
 
-        const safetyNode = rowNode.querySelector('.safety input:checked');
+        const safetyNode = rowNode.querySelector(".safety input:checked");
         if (safetyNode) {
             uploadable.safety = safetyNode.value;
         }
 
-        const anonymousNode = rowNode.querySelector('.anonymous input:checked');
+        const anonymousNode = rowNode.querySelector(
+            ".anonymous input:checked"
+        );
         if (anonymousNode) {
             uploadable.anonymous = true;
-        }
-
-        uploadable.flags = [];
-        if (rowNode.querySelector('.loop-video input:checked')) {
-            uploadable.flags.push('loop');
         }
 
         uploadable.tags = [];
         if (this._tagControl) {
             uploadable.tags = this._tagControl.tags.map(tag => tag.names[0]);
         }
-        
+
         uploadable.relations = [];
         for (let [i, lookalike] of uploadable.lookalikes.entries()) {
             let lookalikeNode = rowNode.querySelector(
-                `.lookalikes li:nth-child(${i + 1})`);
-            if ((lookalikeNode.querySelector('[name=copy-tags]') || '').checked) {
+                `.lookalikes li:nth-child(${i + 1})`
+            );
+            if ((lookalikeNode.querySelector("[name=copy-tags]") || "").checked) {
                 if (lookalike.distance === 0.0) {
                     // found exact match, copy tags to it instead
                     uploadable.foundOriginal = lookalike.post;
                 } else {
-                    uploadable.tags = uploadable.tags.concat(lookalike.post.tagNames);
+                    uploadable.tags = uploadable.tags.concat(
+                        lookalike.post.tagNames
+                    );
                     uploadable.foundOriginal = undefined;
                 }
             }
-            if ((lookalikeNode.querySelector('[name=add-relation]') || '').checked) {
+            if ((lookalikeNode.querySelector("[name=add-relation]") || "").checked) {
                 uploadable.relations.push(lookalike.post.id);
             }
         }
@@ -364,91 +368,111 @@ class PostUploadView extends events.EventTarget {
             this._uploadables[index + delta] = uploadable1;
             if (delta === 1) {
                 this._listNode.insertBefore(
-                    uploadable2.rowNode, uploadable1.rowNode);
+                    uploadable2.rowNode,
+                    uploadable1.rowNode
+                );
             } else {
                 this._listNode.insertBefore(
-                    uploadable1.rowNode, uploadable2.rowNode);
+                    uploadable1.rowNode,
+                    uploadable2.rowNode
+                );
             }
         }
     }
 
     _emit(eventType) {
         this.dispatchEvent(
-            new CustomEvent(
-                eventType,
-                {detail: {
+            new CustomEvent(eventType, {
+                detail: {
                     uploadables: this._uploadables,
                     skipDuplicates: this._skipDuplicatesCheckboxNode.checked,
-                    copyTagsToOriginals: this._copyTagsToOriginalsCheckboxNode.checked,
-                }}));
+                    copyTagsToOriginals:
+                        this._copyTagsToOriginalsCheckboxNode.checked,
+                },
+            })
+        );
     }
 
     _renderRowNode(uploadable) {
-        const rowNode = rowTemplate(Object.assign(
-            {}, this._ctx, {uploadable: uploadable}));
+        const rowNode = rowTemplate(
+            Object.assign({}, this._ctx, { uploadable: uploadable })
+        );
         if (uploadable.rowNode) {
             uploadable.rowNode.parentNode.replaceChild(
-                rowNode, uploadable.rowNode);
+                rowNode,
+                uploadable.rowNode
+            );
         } else {
             this._listNode.appendChild(rowNode);
         }
 
         uploadable.rowNode = rowNode;
 
-        rowNode.querySelector('a.remove').addEventListener('click',
-            e => this._evtRemoveClick(e, uploadable));
-        rowNode.querySelector('a.move-up').addEventListener('click',
-            e => this._evtMoveClick(e, uploadable, -1));
-        rowNode.querySelector('a.move-down').addEventListener('click',
-            e => this._evtMoveClick(e, uploadable, 1));
+        rowNode
+            .querySelector("a.remove")
+            .addEventListener("click", (e) =>
+                this._evtRemoveClick(e, uploadable)
+            );
+        rowNode
+            .querySelector("a.move-up")
+            .addEventListener("click", (e) =>
+                this._evtMoveClick(e, uploadable, -1)
+            );
+        rowNode
+            .querySelector("a.move-down")
+            .addEventListener("click", (e) =>
+                this._evtMoveClick(e, uploadable, 1)
+            );
     }
 
     _updateThumbnailNode(uploadable) {
-        const rowNode = rowTemplate(Object.assign(
-            {}, this._ctx, {uploadable: uploadable}));
+        const rowNode = rowTemplate(
+            Object.assign({}, this._ctx, { uploadable: uploadable })
+        );
         views.replaceContent(
-            uploadable.rowNode.querySelector('.thumbnail'),
-            rowNode.querySelector('.thumbnail').childNodes);
+            uploadable.rowNode.querySelector(".thumbnail"),
+            rowNode.querySelector(".thumbnail").childNodes
+        );
     }
 
     get _uploading() {
-        return this._formNode.classList.contains('uploading');
+        return this._formNode.classList.contains("uploading");
     }
 
     get _listNode() {
-        return this._hostNode.querySelector('.uploadables-container');
+        return this._hostNode.querySelector(".uploadables-container");
     }
 
     get _formNode() {
-        return this._hostNode.querySelector('form');
+        return this._hostNode.querySelector("form");
     }
 
     get _skipDuplicatesCheckboxNode() {
-        return this._hostNode.querySelector('form [name=skip-duplicates]');
+        return this._hostNode.querySelector("form [name=skip-duplicates]");
     }
 
     get _copyTagsToOriginalsSpanNode() {
-        return this._hostNode.querySelector('.copy-tags-to-originals');
+        return this._hostNode.querySelector(".copy-tags-to-originals");
     }
 
     get _copyTagsToOriginalsCheckboxNode() {
-        return this._hostNode.querySelector('form [name=copy-tags-to-originals]');
+        return this._hostNode.querySelector("form [name=copy-tags-to-originals]");
     }
 
     get _submitButtonNode() {
-        return this._hostNode.querySelector('form [type=submit]');
+        return this._hostNode.querySelector("form [type=submit]");
     }
 
     get _cancelButtonNode() {
-        return this._hostNode.querySelector('form .cancel');
+        return this._hostNode.querySelector("form .cancel");
     }
 
     get _contentInputNode() {
-        return this._formNode.querySelector('.dropper-container');
+        return this._formNode.querySelector(".dropper-container");
     }
 
     get _tagInputNode() {
-        return this._formNode.querySelector('.tags input');
+        return this._formNode.querySelector(".tags input");
     }
 }
 

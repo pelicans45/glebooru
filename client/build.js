@@ -21,11 +21,13 @@ const webapp_splash_screens = [
 ];
 
 const external_js = [
-    'underscore',
-    'superagent',
-    'mousetrap',
+    'dompurify',
     'js-cookie',
+    'marked',
+    'mousetrap',
     'nprogress',
+    'superagent',
+    'underscore',
 ];
 
 const app_manifest = {
@@ -35,7 +37,7 @@ const app_manifest = {
             src: baseUrl() + 'img/android-chrome-192x192.png',
             type: 'image/png',
             sizes: '192x192'
-        }, 
+        },
         {
             src: baseUrl() + 'img/android-chrome-512x512.png',
             type: 'image/png',
@@ -225,7 +227,6 @@ function bundleConfig() {
 
 function bundleBinaryAssets() {
     fs.copyFileSync('./img/favicon.png', './public/img/favicon.png');
-    fs.copyFileSync('./img/transparency_grid.png', './public/img/transparency_grid.png');
     console.info('Copied images');
 
     fs.copyFileSync('./fonts/open_sans.woff2', './public/webfonts/open_sans.woff2')
@@ -301,8 +302,12 @@ function makeOutputDirs() {
 
 makeOutputDirs();
 bundleConfig();
-bundleBinaryAssets();
-bundleWebAppFiles();
+if (!process.argv.includes('--no-binary-assets')) {
+    bundleBinaryAssets();
+}
+if (!process.argv.includes('--no-web-app-files')) {
+    bundleWebAppFiles();
+}
 if (!process.argv.includes('--no-html')) {
     bundleHtml();
 }

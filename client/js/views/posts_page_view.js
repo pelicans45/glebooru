@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-const events = require('../events.js');
-const tags = require('../tags.js');
-const views = require('../util/views.js');
+const events = require("../events.js");
+const tags = require("../tags.js");
+const views = require("../util/views.js");
 
-const template = views.getTemplate('posts-page');
+const template = views.getTemplate("posts-page");
 
 class PostsPageView extends events.EventTarget {
     constructor(ctx) {
@@ -16,32 +16,35 @@ class PostsPageView extends events.EventTarget {
         this._postIdToPost = {};
         for (let post of ctx.response.results) {
             this._postIdToPost[post.id] = post;
-            post.addEventListener('change', e => this._evtPostChange(e));
+            post.addEventListener("change", (e) => this._evtPostChange(e));
         }
 
         this._postIdToListItemNode = {};
         for (let listItemNode of this._listItemNodes) {
-            const postId = listItemNode.getAttribute('data-post-id');
+            const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
             this._postIdToListItemNode[postId] = listItemNode;
 
             const tagFlipperNode = this._getTagFlipperNode(listItemNode);
             if (tagFlipperNode) {
-                tagFlipperNode.addEventListener(
-                    'click', e => this._evtBulkEditTagsClick(e, post));
+                tagFlipperNode.addEventListener("click", (e) =>
+                    this._evtBulkEditTagsClick(e, post)
+                );
             }
 
             const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
             if (relationFlipperNode) {
-                relationFlipperNode.addEventListener(
-                    'click', e => this._evtBulkAddRelationClick(e, post));
+                relationFlipperNode.addEventListener("click", e =>
+                    this._evtBulkAddRelationClick(e, post)
+                );
             }
 
             const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
             if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll('a')) {
-                    linkNode.addEventListener(
-                        'click', e => this._evtBulkEditSafetyClick(e, post));
+                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
+                    linkNode.addEventListener("click", (e) =>
+                        this._evtBulkEditSafetyClick(e, post)
+                    );
                 }
             }
         }
@@ -50,25 +53,25 @@ class PostsPageView extends events.EventTarget {
     }
 
     get _listItemNodes() {
-        return this._hostNode.querySelectorAll('li');
+        return this._hostNode.querySelectorAll("li");
     }
 
     _getTagFlipperNode(listItemNode) {
-        return listItemNode.querySelector('.tag-flipper');
+        return listItemNode.querySelector(".tag-flipper");
     }
 
     _getSafetyFlipperNode(listItemNode) {
-        return listItemNode.querySelector('.safety-flipper');
+        return listItemNode.querySelector(".safety-flipper");
     }
 
     _getRelationFlipperNode(listItemNode) {
-        return listItemNode.querySelector('.relation-flipper');
+        return listItemNode.querySelector(".relation-flipper");
     }
 
     _evtPostChange(e) {
         const listItemNode = this._postIdToListItemNode[e.detail.post.id];
-        for (let node of listItemNode.querySelectorAll('[data-disabled]')) {
-            node.removeAttribute('data-disabled');
+        for (let node of listItemNode.querySelectorAll("[data-disabled]")) {
+            node.removeAttribute("data-disabled");
         }
         this._syncBulkEditorsHighlights();
     }
@@ -76,48 +79,58 @@ class PostsPageView extends events.EventTarget {
     _evtBulkEditTagsClick(e, post) {
         e.preventDefault();
         const linkNode = e.target;
-        if (linkNode.getAttribute('data-disabled')) {
+        if (linkNode.getAttribute("data-disabled")) {
             return;
         }
-        linkNode.setAttribute('data-disabled', true);
+        linkNode.setAttribute("data-disabled", true);
         this.dispatchEvent(
             new CustomEvent(
-                linkNode.classList.contains('tagged') ? 'untag' : 'tag',
-                {detail: {post: post}}));
+                linkNode.classList.contains("tagged") ? "untag" : "tag",
+                {
+                    detail: { post: post },
+                }
+            )
+        );
     }
 
     _evtBulkAddRelationClick(e, post) {
         e.preventDefault();
         const linkNode = e.target;
-        if (linkNode.getAttribute('data-disabled')) {
+        if (linkNode.getAttribute("data-disabled")) {
             return;
         }
-        linkNode.setAttribute('data-disabled', true);
+        linkNode.setAttribute("data-disabled", true);
         this.dispatchEvent(
             new CustomEvent(
-                linkNode.classList.contains('related') ? 'removeRelation' : 'addRelation',
-                {detail: {post: post}}));
+                linkNode.classList.contains("related") ? "removeRelation" : "addRelation",
+                {
+                    detail: { post: post }
+                }
+            )
+        );
     }
 
     _evtBulkEditSafetyClick(e, post) {
         e.preventDefault();
         const linkNode = e.target;
-        if (linkNode.getAttribute('data-disabled')) {
+        if (linkNode.getAttribute("data-disabled")) {
             return;
         }
-        const newSafety = linkNode.getAttribute('data-safety');
+        const newSafety = linkNode.getAttribute("data-safety");
         if (post.safety === newSafety) {
             return;
         }
-        linkNode.setAttribute('data-disabled', true);
+        linkNode.setAttribute("data-disabled", true);
         this.dispatchEvent(
-            new CustomEvent(
-                'changeSafety', {detail: {post: post, safety: newSafety}}));
+            new CustomEvent("changeSafety", {
+                detail: { post: post, safety: newSafety },
+            })
+        );
     }
 
     _syncBulkEditorsHighlights() {
         for (let listItemNode of this._listItemNodes) {
-            const postId = listItemNode.getAttribute('data-post-id');
+            const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
 
             const tagFlipperNode = this._getTagFlipperNode(listItemNode);
@@ -125,23 +138,26 @@ class PostsPageView extends events.EventTarget {
                 let tagged = true;
                 for (let tag of this._ctx.bulkEdit.tags) {
                     let tagData = tags.parseTagAndCategory(tag);
-                    tagged = tagged & post.tags.isTaggedWith(tagData.name);
+                    tagged &= post.tags.isTaggedWith(tagData.name);
                 }
-                tagFlipperNode.classList.toggle('tagged', tagged);
+                tagFlipperNode.classList.toggle("tagged", tagged);
             }
 
             const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
             if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll('a')) {
-                    const safety = linkNode.getAttribute('data-safety');
-                    linkNode.classList.toggle('active', post.safety == safety);
+                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
+                    const safety = linkNode.getAttribute("data-safety");
+                    linkNode.classList.toggle(
+                        "active",
+                        post.safety === safety
+                    );
                 }
             }
 
             const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
             if (relationFlipperNode) {
                 let related = this._ctx.parameters.relations.includes(post.id);
-                relationFlipperNode.classList.toggle('related', related);
+                relationFlipperNode.classList.toggle("related", related);
             }
         }
     }

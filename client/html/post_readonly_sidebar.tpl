@@ -8,6 +8,7 @@
                     'image/gif': 'GIF',
                     'image/jpeg': 'JPEG',
                     'image/png': 'PNG',
+                    'image/webp': 'WEBP',
                     'video/webm': 'WEBM',
                     'video/mp4': 'MPEG-4',
                     'application/x-shockwave-flash': 'SWF',
@@ -41,9 +42,10 @@
 
         <% if (ctx.post.source) { %>
             <section class='source'>
-                Source: <a href='<%- ctx.post.source %>' title='<%- ctx.post.source %>'>
-                    <%- ctx.post.prettyPrintSource() %>
-                </a>
+                Source: <% for (let i = 0; i < ctx.post.sourceSplit.length; i++) { %>
+                    <% if (i != 0) { %>&middot;<% } %>
+                    <a href='<%- ctx.post.sourceSplit[i] %>' title='<%- ctx.post.sourceSplit[i] %>'><%- ctx.extractRootDomain(ctx.post.sourceSplit[i]) %></a>
+                <% } %>
             </section>
         <% } %>
 
@@ -91,7 +93,7 @@
                         --><% if (ctx.canListPosts) { %><!--
                             --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeColons(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
                         --><% } %><!--
-                            --><%- tag.names[0] %>&#32;<!--
+                            --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
                         --><% if (ctx.canListPosts) { %><!--
                             --></a><!--
                         --><% } %><!--

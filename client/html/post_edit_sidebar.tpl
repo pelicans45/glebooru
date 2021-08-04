@@ -60,9 +60,8 @@
 
         <% if (ctx.canEditPostSource) { %>
             <section class='post-source'>
-                <%= ctx.makeTextInput({
+                <%= ctx.makeTextarea({
                     text: 'Source',
-                    name: 'source',
                     value: ctx.post.source,
                 }) %>
             </section>
@@ -70,6 +69,12 @@
 
         <% if (ctx.canEditPostTags) { %>
             <section class='tags'>
+                <%= ctx.makeTextInput({}) %>
+            </section>
+        <% } %>
+
+        <% if (ctx.canEditPoolPosts) { %>
+            <section class='pools'>
                 <%= ctx.makeTextInput({}) %>
             </section>
         <% } %>

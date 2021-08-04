@@ -48,6 +48,15 @@
 
             <li>
                 <%= ctx.makeCheckbox({
+                    text: 'Use dark theme',
+                    name: 'dark-theme',
+                    checked: ctx.browsingSettings.darkTheme,
+                }) %>
+                <p class='hint'>Changing this setting will require you to refresh the page for it to apply.</p>
+            </li>
+
+            <li>
+                <%= ctx.makeCheckbox({
                     text: 'Upscale small posts',
                     name: 'upscale-small-posts',
                     checked: ctx.browsingSettings.upscaleSmallPosts}) %>
@@ -60,6 +69,15 @@
                     checked: ctx.browsingSettings.endlessScroll,
                 }) %>
                 <p class='hint'>Rather than using a paged navigation, smoothly scrolls through the content.</p>
+            </li>
+
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Use post flow',
+                    name: 'post-flow',
+                    checked: ctx.browsingSettings.postFlow,
+                }) %>
+                <p class='hint'>Use a content-aware flow for thumbnails on the post search page.</p>
             </li>
 
             <li>
@@ -86,6 +104,15 @@
                     name: 'autoplay-videos',
                     checked: ctx.browsingSettings.autoplayVideos,
                 }) %>
+            </li>
+
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Display underscores as spaces',
+                    name: 'underscores-as-spaces',
+                    checked: ctx.browsingSettings.tagUnderscoresAsSpaces,
+                }) %>
+                <p class='hint'>Display all underscores as if they were spaces. This is only a visual change, which means that you'll still have to use underscores when searching or editing tags.</p>
             </li>
         </ul>
 

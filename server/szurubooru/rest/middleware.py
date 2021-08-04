@@ -1,8 +1,7 @@
-from typing import List, Callable
+from typing import Callable, List
+
 from szurubooru.rest.context import Context
 
-
-# pylint: disable=invalid-name
 pre_hooks = []  # type: List[Callable[[Context], None]]
 post_hooks = []  # type: List[Callable[[Context], None]]
 

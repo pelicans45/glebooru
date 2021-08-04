@@ -20,15 +20,15 @@
         </tr>
         <tr>
             <td><code>uploader</code></td>
-            <td>uploaded by given use (accepts wildcards)r</td>
+            <td>uploaded by given user (accepts wildcards)</td>
         </tr>
         <tr>
             <td><code>upload</code></td>
-            <td>alias of <code>upload</code></td>
+            <td>alias of <code>uploader</code></td>
         </tr>
         <tr>
             <td><code>submit</code></td>
-            <td>alias of <code>upload</code></td>
+            <td>alias of <code>uploader</code></td>
         </tr>
         <tr>
             <td><code>comment</code></td>
@@ -41,6 +41,10 @@
         <tr>
             <td><code>source</code></td>
             <td>having given source URL (accepts wildcards)</td>
+        </tr>
+        <tr>
+            <td><code>pool</code></td>
+            <td>belonging to the pool with the given ID</td>
         </tr>
         <tr>
             <td><code>tag-count</code></td>

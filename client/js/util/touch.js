@@ -1,9 +1,11 @@
+"use strict";
+
 const direction = {
     NONE: null,
-    LEFT: 'left',
-    RIGHT: 'right',
-    DOWN: 'down',
-    UP: 'up'
+    LEFT: "left",
+    RIGHT: "right",
+    DOWN: "down",
+    UP: "up",
 };
 
 function getSwipeThresholdInPx() {
@@ -69,6 +71,7 @@ function handleTouchEnd(handler, evt) {
             break;
         case direction.UP:
             handler._swipeUpTask(evt);
+        // no default
     }
 
     handler._xStart = null;
@@ -76,11 +79,13 @@ function handleTouchEnd(handler, evt) {
 }
 
 class Touch {
-    constructor(target,
-                swipeLeft = () => {},
-                swipeRight = () => {},
-                swipeUp = () => {},
-                swipeDown = () => {}) {
+    constructor(
+        target,
+        swipeLeft = () => {},
+        swipeRight = () => {},
+        swipeUp = () => {},
+        swipeDown = () => {}
+    ) {
         this._target = target;
 
         this._swipeLeftTask = swipeLeft;
@@ -92,12 +97,15 @@ class Touch {
         this._yStart = null;
         this._direction = direction.NONE;
 
-        this._target.addEventListener('touchstart',
-            (evt) => { handleTouchStart(this, evt); });
-        this._target.addEventListener('touchmove',
-            (evt) => { handleTouchMove(this, evt); });
-        this._target.addEventListener('touchend',
-            (evt) => { handleTouchEnd(this, evt); });
+        this._target.addEventListener("touchstart", (evt) => {
+            handleTouchStart(this, evt);
+        });
+        this._target.addEventListener("touchmove", (evt) => {
+            handleTouchMove(this, evt);
+        });
+        this._target.addEventListener("touchend", (evt) => {
+            handleTouchEnd(this, evt);
+        });
     }
 }
 

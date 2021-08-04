@@ -1,39 +1,41 @@
-'use strict';
+"use strict";
 
-const settings = require('../models/settings.js');
-const views = require('../util/views.js');
-const optimizedResize = require('../util/optimized_resize.js');
+const settings = require("../models/settings.js");
+const views = require("../util/views.js");
+const optimizedResize = require("../util/optimized_resize.js");
 
 class PostContentControl {
     constructor(hostNode, post, viewportSizeCalculator, fitFunctionOverride) {
         this._post = post;
         this._viewportSizeCalculator = viewportSizeCalculator;
         this._hostNode = hostNode;
-        this._template = views.getTemplate('post-content');
+        this._template = views.getTemplate("post-content");
 
         let fitMode = settings.get().fitMode;
-        if (typeof fitFunctionOverride !== 'undefined') {
+        if (typeof fitFunctionOverride !== "undefined") {
             fitMode = fitFunctionOverride;
         }
 
-        this._currentFitFunction = {
-            'fit-both': this.fitBoth,
-            'fit-original': this.fitOriginal,
-            'fit-width': this.fitWidth,
-            'fit-height': this.fitHeight,
-        }[fitMode] || this.fitBoth;
+        this._currentFitFunction =
+            {
+                "fit-both": this.fitBoth,
+                "fit-original": this.fitOriginal,
+                "fit-width": this.fitWidth,
+                "fit-height": this.fitHeight,
+            }[fitMode] || this.fitBoth;
 
         this._install();
 
-        this._post.addEventListener(
-            'changeContent', e => this._evtPostContentChange(e));
+        this._post.addEventListener("changeContent", (e) =>
+            this._evtPostContentChange(e)
+        );
 
         // Always disable overlay, because I'm not going to use notes
         this.disableOverlay();
     }
 
     disableOverlay() {
-        this._hostNode.querySelector('.post-overlay').style.display = 'none';
+        this._hostNode.querySelector(".post-overlay").style.display = "none";
     }
 
     fitWidth() {
@@ -95,10 +97,10 @@ class PostContentControl {
 
     _resize(width, height) {
         this._resizePostContent(width, height);
-        const resizeListenerNodes = this._postContentNode.querySelectorAll('.resize-listener');
+        const resizeListenerNodes = this._postContentNode.querySelectorAll(".resize-listener");
         for (let node of resizeListenerNodes) {
-            node.style.width = width + 'px';
-            node.style.height = height + 'px';
+            node.style.width = width + "px";
+            node.style.height = height + "px";
         }
     }
 
@@ -108,8 +110,8 @@ class PostContentControl {
         if (window.innerWidth < 1000) {
             width = Math.max(window.innerWidth, width);
         }
-        this._postContentNode.style.width = width + 'px';
-        this._postContentNode.style.height = height + 'px';
+        this._postContentNode.style.width = width + "px";
+        this._postContentNode.style.height = height + "px";
     }
 
     _refreshSize() {
@@ -122,8 +124,9 @@ class PostContentControl {
         if (window.innerWidth > 1000) {
             optimizedResize.add(() => this._refreshSize());
         }
-        views.monitorNodeRemoval(
-            this._hostNode, () => { this._uninstall(); });
+        views.monitorNodeRemoval(this._hostNode, () => {
+            this._uninstall();
+        });
     }
 
     _reinstall() {
@@ -132,7 +135,7 @@ class PostContentControl {
             autoplay: settings.get().autoplayVideos,
         });
         if (settings.get().transparencyGrid) {
-            newNode.classList.add('transparency-grid');
+            newNode.classList.add("transparency-grid");
         }
         if (this._postContentNode) {
             this._hostNode.replaceChild(newNode, this._postContentNode);

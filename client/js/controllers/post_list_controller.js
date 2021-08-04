@@ -1,48 +1,58 @@
-'use strict';
+"use strict";
 
-const router = require('../router.js');
-const api = require('../api.js');
-const settings = require('../models/settings.js');
-const uri = require('../util/uri.js');
-const tags = require('../tags.js');
-const PostList = require('../models/post_list.js');
-const topNavigation = require('../models/top_navigation.js');
-const PageController = require('../controllers/page_controller.js');
-const PostsHeaderView = require('../views/posts_header_view.js');
-const PostsPageView = require('../views/posts_page_view.js');
-const EmptyView = require('../views/empty_view.js');
+const router = require("../router.js");
+const api = require("../api.js");
+const settings = require("../models/settings.js");
+const tags = require("../tags.js");
+const uri = require("../util/uri.js");
+const PostList = require("../models/post_list.js");
+const topNavigation = require("../models/top_navigation.js");
+const PageController = require("../controllers/page_controller.js");
+const PostsHeaderView = require("../views/posts_header_view.js");
+const PostsPageView = require("../views/posts_page_view.js");
+const EmptyView = require("../views/empty_view.js");
 
 const fields = [
-    'id', 'thumbnailUrl', 'type', 'safety',
-    'score', 'favoriteCount', 'commentCount', 'tags', 'version'];
+    "id",
+    "thumbnailUrl",
+    "type",
+    "safety",
+    "score",
+    "favoriteCount",
+    "commentCount",
+    "tags",
+    "version",
+];
 
 class PostListController {
     constructor(ctx) {
-        if (!api.hasPrivilege('posts:list')) {
+        this._pageController = new PageController();
+
+        if (!api.hasPrivilege("posts:list")) {
             this._view = new EmptyView();
-            this._view.showError('You don\'t have privileges to view posts.');
+            this._view.showError("You don't have privileges to view posts.");
             return;
         }
 
-        topNavigation.activate('posts');
-        topNavigation.setTitle('Listing posts');
-
         this._ctx = ctx;
-        this._pageController = new PageController();
+
+        topNavigation.activate("posts");
+        topNavigation.setTitle("Listing posts");
 
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
             enableSafety: api.safetyEnabled(),
-            canBulkEditTags: api.hasPrivilege('posts:bulk-edit:tags'),
-            canBulkEditSafety: api.hasPrivilege('posts:bulk-edit:safety'),
-            canViewMetrics: api.hasPrivilege('metrics:list'),
+            canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
+            canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
+            canViewMetrics: api.hasPrivilege("metrics:list"),
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
         });
-        this._headerView.addEventListener(
-            'navigate', e => this._evtNavigate(e));
+        this._headerView.addEventListener("navigate", (e) =>
+            this._evtNavigate(e)
+        );
 
         this._syncPageController();
     }
@@ -56,32 +66,35 @@ class PostListController {
     }
 
     get _bulkEditTags() {
-        return (this._ctx.parameters.tag || '').split(/\s+/).filter(s => s);
+        return (this._ctx.parameters.tag || "").split(/\s+/).filter((s) => s);
     }
 
     get _bulkEditRelationsIds() {
-        return (this._ctx.parameters.relations || '').split(/\s+/).filter(s => s).map(id => parseInt(id));
+        return (this._ctx.parameters.relations || "").split(/\s+/).filter(s => s)
+            .map(id => parseInt(id));
     }
 
     _evtNavigate(e) {
         router.showNoDispatch(
-            uri.formatClientLink('posts', e.detail.parameters));
+            uri.formatClientLink("posts", e.detail.parameters)
+        );
         Object.assign(this._ctx.parameters, e.detail.parameters);
-        this._bulkEditTags.map(tagName =>
+        this._bulkEditTags.map((tagName) =>
             tags.resolveTagAndCategory(tagName)
-                .catch(error => window.alert(error.message))
+                .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
     }
 
     _evtTag(e) {
         Promise.all(
-            this._bulkEditTags.map(tag => {
+            this._bulkEditTags.map((tag) => {
                 let tagData = tags.parseTagAndCategory(tag);
                 return e.detail.post.tags.addByName(tagData.name);
-            }))
-            .then(() => e.detail.post.save())
-            .catch(error => window.alert(error.message));
+            })
+        )
+            .then(e.detail.post.save())
+            .catch((error) => window.alert(error.message));
     }
 
     _evtUntag(e) {
@@ -89,23 +102,25 @@ class PostListController {
             let tagData = tags.parseTagAndCategory(tag);
             e.detail.post.tags.removeByName(tagData.name);
         }
-        e.detail.post.save().catch(error => window.alert(error.message));
+        e.detail.post.save().catch((error) => window.alert(error.message));
     }
 
     _evtChangeSafety(e) {
         e.detail.post.safety = e.detail.safety;
-        e.detail.post.save().catch(error => window.alert(error.message));
+        e.detail.post.save().catch((error) => window.alert(error.message));
     }
 
     _evtAddRelation(e) {
         let addedPost = e.detail.post;
-        // If we're just starting to build this instance of relations, use the first post's list:
+        // If we're just starting to build this instance of relations,
+        // use the first post's list:
         let relations = this._bulkEditRelationsIds || addedPost.relations;
         for (let relationId of relations) {
             addedPost.relations.push(relationId);
         }
-        // Only save the updated post, the relationship will propagate to others automatically
-        addedPost.save().catch(error => window.alert(error.message));
+        // Only save the updated post, the relationship will propagate to
+        // others automatically
+        addedPost.save().catch((error) => window.alert(error.message));
         relations.push(addedPost.id);
         this._updateRelationsForBulkEdit(relations);
 
@@ -115,16 +130,16 @@ class PostListController {
         let removedPost = e.detail.post;
         let relations = this._bulkEditRelationsIds;
         removedPost.relations = removedPost.relations
-            .filter(id => !relations.some(relationId => relationId == id));
+            .filter((id)=> !relations.some((relationId) => relationId == id));
         // Only save the updated post, the relationship will propagate to others automatically
-        removedPost.save().catch(error => window.alert(error.message));
-        relations = relations.filter(id => id != removedPost.id);
+        removedPost.save().catch((error) => window.alert(error.message));
+        relations = relations.filter((id) => id != removedPost.id);
         this._updateRelationsForBulkEdit(relations);
     }
 
     _updateRelationsForBulkEdit(relations) {
         //Whitespace instead of empty string so that it stays part of the query:
-        this._ctx.parameters.relations = relations.join(' ') || ' ';
+        this._ctx.parameters.relations = relations.join(" ") || " ";
     }
 
     _syncPageController() {
@@ -132,42 +147,56 @@ class PostListController {
             parameters: this._ctx.parameters,
             defaultLimit: parseInt(settings.get().postsPerPage),
             getClientUrlForPage: (offset, limit) => {
-                const parameters = Object.assign(
-                    {}, this._ctx.parameters, {offset: offset, limit: limit});
-                return uri.formatClientLink('posts', parameters);
+                const parameters = Object.assign({}, this._ctx.parameters, {
+                    offset: offset,
+                    limit: limit,
+                });
+                return uri.formatClientLink("posts", parameters);
             },
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);
-                return PostList.search(query, offset, limit, fields, this._ctx.parameters.cachenumber);
+                return PostList.search(
+                    query,
+                    offset,
+                    limit,
+                    fields,
+                    this._ctx.parameters.cachenumber
+                );
             },
-            pageRenderer: pageCtx => {
+            pageRenderer: (pageCtx) => {
                 Object.assign(pageCtx, {
-                    canViewPosts: api.hasPrivilege('posts:view'),
-                    canBulkEditTags: api.hasPrivilege('posts:bulk-edit:tags'),
-                    canBulkEditSafety: api.hasPrivilege('posts:bulk-edit:safety'),
-                    canViewMetrics: api.hasPrivilege('metrics:list'),
+                    canViewPosts: api.hasPrivilege("posts:view"),
+                    canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
+                    canBulkEditSafety: api.hasPrivilege(
+                        "posts:bulk-edit:safety"
+                    ),
+                    canViewMetrics: api.hasPrivilege("metrics:list"),
                     bulkEdit: {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
                     },
+                    postFlow: settings.get().postFlow,
                 });
                 const view = new PostsPageView(pageCtx);
-                view.addEventListener('tag', e => this._evtTag(e));
-                view.addEventListener('untag', e => this._evtUntag(e));
-                view.addEventListener(
-                    'changeSafety', e => this._evtChangeSafety(e));
-                view.addEventListener(
-                    'addRelation', e => this._evtAddRelation(e));
-                view.addEventListener(
-                    'removeRelation', e => this._evtRemoveRelation(e));
+                view.addEventListener("tag", (e) => this._evtTag(e));
+                view.addEventListener("untag", (e) => this._evtUntag(e));
+                view.addEventListener("changeSafety", (e) =>
+                    this._evtChangeSafety(e)
+                );
+                view.addEventListener("addRelation", (e) =>
+                    this._evtAddRelation(e)
+                );
+                view.addEventListener("removeRelation", (e) =>
+                    this._evtRemoveRelation(e)
+                );
                 return view;
             },
         });
     }
 }
 
-module.exports = router => {
-    router.enter(
-        ['posts'],
-        (ctx, next) => { ctx.controller = new PostListController(ctx); });
+module.exports = (router) => {
+    router.enter(["posts"], (ctx, next) => {
+        ctx.controller = new PostListController(ctx);
+    });
 };
