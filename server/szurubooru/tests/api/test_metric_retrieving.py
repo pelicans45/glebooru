@@ -1,6 +1,17 @@
-import pytest
 from szurubooru import api, db, model
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def inject_config(config_injector):
+    config_injector(
+        {
+            "privileges": {
+                "metrics:list": model.User.RANK_REGULAR,
+            },
+        }
+    )
 
 @pytest.mark.parametrize('query,expected_value', [
     ('', 5),

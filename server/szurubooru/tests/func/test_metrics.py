@@ -3,8 +3,9 @@ from szurubooru import db, model
 from szurubooru.func import metrics
 
 
-def test_serialize_metric(tag_factory):
-    tag = tag_factory()
+def test_serialize_metric(tag_category_factory, tag_factory):
+    cat = tag_category_factory(name="cat")
+    tag = tag_factory(names=["tag1"], category=cat)
     metric = model.Metric(tag=tag, min=1, max=2)
     db.session.add(metric)
     db.session.flush()
@@ -13,6 +14,14 @@ def test_serialize_metric(tag_factory):
         "version": 1,
         "min": 1,
         "max": 2,
+        "exact_count": 0,
+        "range_count": 0,
+        "tag": {
+            "names": ["tag1"],
+            "category": "cat",
+            "description": None,
+            "usages": 0,
+        },
     }
 
 

@@ -1,5 +1,12 @@
 from szurubooru import db, model
 
+import pytest
+
+@pytest.fixture(autouse=True)
+def inject_config(config_injector):
+    config_injector(
+        {"secret": "secret", "data_dir": "", "delete_source_files": False}
+    )
 
 def test_saving_metric(post_factory, tag_factory):
     tag = tag_factory()
