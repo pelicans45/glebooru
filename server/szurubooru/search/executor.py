@@ -31,8 +31,8 @@ class Executor:
     Class for search parsing and execution. Handles plaintext parsing and
     delegates sqlalchemy filter decoration to SearchConfig instances.
     """
-    AROUND_NEXT = 'up'
-    AROUND_PREV = 'down'
+    AROUND_NEXT = "up"
+    AROUND_PREV = "down"
 
     def __init__(self, search_config: BaseSearchConfig) -> None:
         self.config = search_config
@@ -46,7 +46,7 @@ class Executor:
         filter_query = (
             self.config
                 .create_around_query()
-                .options(sa.orm.lazyload('*')))
+                .options(sa.orm.lazyload("*")))
         prev_filter_query = (
             self._prepare_sorted_around_query(
                 filter_query, search_query, entity_id, self.AROUND_PREV
@@ -56,8 +56,8 @@ class Executor:
                 filter_query, search_query, entity_id, self.AROUND_NEXT
             ).limit(1))
         # random post
-        if 'sort:random' not in query_text:
-            query_text = 'sort:random ' + query_text
+        if "sort:random" not in query_text:
+            query_text = "sort:random " + query_text
         count, random_entities = self.execute(query_text, 0, 1)
         return (
             prev_filter_query.one_or_none(),
@@ -137,7 +137,7 @@ class Executor:
         search_query = self.parser.parse(query_text)
         self.config.on_search_query_parsed(search_query)
         count_query = self.config.create_count_query(True)
-        count_query = count_query.options(sa.orm.lazyload('*'))
+        count_query = count_query.options(sa.orm.lazyload("*"))
         count_query = self._prepare_db_query(count_query, search_query, False)
         count_statement = (
             count_query
@@ -220,12 +220,12 @@ class Executor:
         found_sort_column = False
 
         for sort_token in search_query.sort_tokens:
-            if sort_token.name == 'random':
+            if sort_token.name == "random":
                 continue
             if sort_token.name not in self.config.sort_columns:
                 raise errors.SearchError(
-                    'Unknown sort token: %r. '
-                    'Available sort tokens: %r.' % (
+                    "Unknown sort token: %r. "
+                    "Available sort tokens: %r." % (
                         sort_token.name,
                         _format_dict_keys(self.config.sort_columns)))
             column, default_order = (
@@ -235,7 +235,7 @@ class Executor:
             # the order column may be joined, so we need to query its value:
             column_query = (
                 db.session.query(self.config.id_column, column)
-                .options(sa.orm.lazyload('*')))
+                .options(sa.orm.lazyload("*")))
             column_query = (
                 # empty search query because we already know entity id
                 self._prepare_db_query(column_query, SearchQuery(), False)
