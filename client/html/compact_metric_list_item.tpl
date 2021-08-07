@@ -5,9 +5,9 @@
         --><i class='fa fa-sliders-h tag-icon'></i><!--
     --></a><!--
     --><a href="<%- ctx.formatClientLink('posts', {
-                query: 'metric-' + ctx.escapeColons(ctx.tag.names[0]) +
+                query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
-                    ' sort:metric-' + ctx.escapeColons(ctx.tag.names[0])
+                    ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
                 }) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><%- ctx.tag.names[0] %>&#32;<!--

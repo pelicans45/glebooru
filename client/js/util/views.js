@@ -482,7 +482,7 @@ function getTemplate(templatePath) {
             makeCssName: misc.makeCssName,
             makeNumericInput: makeNumericInput,
             formatClientLink: uri.formatClientLink,
-            escapeColons: uri.escapeColons,
+            escapeTagName: uri.escapeTagName,
         });
         return htmlToDom(templateFactory(ctx));
     };
