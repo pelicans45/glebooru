@@ -59,7 +59,8 @@ class Settings extends events.EventTarget {
     }
 
     get _settingsKey() {
-        return "settings-" + api.userName;
+        //FIXME(hunternif): username is null if settings are accessed before api.loginFromCookies()
+        return "settings" //-" + api.userName;
     }
 }
 
