@@ -10,6 +10,7 @@ const PostMetricListControl = require("./post_metric_list_control.js");
 const template = views.getTemplate("post-readonly-sidebar");
 const scoreTemplate = views.getTemplate("score");
 const favTemplate = views.getTemplate("fav");
+const similarItemTemplate = views.getTemplate("similar-post-item")
 
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {
@@ -45,6 +46,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 this._metricsListNode, this._post
             );
         }
+        this._loadSimilarPosts();
     }
 
     get _scoreContainerNode() {
@@ -89,6 +91,10 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     get _metricsListNode() {
         return this._hostNode.querySelector("ul.compact-post-metrics");
+    }
+
+    get _similarListNode() {
+        return this._hostNode.querySelector("nav.similar ul");
     }
 
     _installFitButtons() {
@@ -228,6 +234,25 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     _evtChangeScore(e) {
         this._installScore();
+    }
+
+    _loadSimilarPosts() {
+        return api
+            .get(
+                uri.formatApiLink("post", this._post.id, "similar", {
+                    limit: 10,
+                })
+            )
+            .then((response) => {
+                const listNode = this._similarListNode;
+                for (let post of response.results) {
+                    let poseNode = similarItemTemplate({
+                        id: post.id,
+                        thumbnailUrl: post.thumbnailUrl,
+                    });
+                    listNode.appendChild(poseNode);
+                }
+            });
     }
 }
 

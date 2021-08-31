@@ -82,6 +82,11 @@
         </nav>
     <% } %>
 
+    <nav class='similar'>
+        <h1>Similar</h1>
+        <ul></ul>
+    </nav>
+
     <nav class='tags'>
         <h1>Tags (<%- ctx.post.tags.length %>)</h1>
         <% if (ctx.post.tags.length) { %>
