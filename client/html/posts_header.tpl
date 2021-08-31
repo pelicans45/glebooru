@@ -11,6 +11,16 @@
             %><input data-safety=sketchy type='button' class='mousetrap safety safety-sketchy <%- ctx.settings.listPosts.sketchy ? '' : 'disabled' %>'/><%
             %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
         %><% } %><%
+        %><% if (ctx.isLoggedIn) { %><%
+            %><a href class='mousetrap icon-button query-shortcut' data-term='special:liked'><%
+                %><i class="fa fa-thumbs-up term-selected"></i><%
+                %><i class="far fa-thumbs-up term-unselected"></i><%
+            %></a><%
+            %><a href class='mousetrap icon-button query-shortcut' data-term='special:fav'><%
+                %><i class="fa fa-heart term-selected"></i><%
+                %><i class="far fa-heart term-unselected"></i><%
+            %></a><%
+        %><% } %><%
         %><wbr/><%
         %><a class='mousetrap button append'
              href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'><%

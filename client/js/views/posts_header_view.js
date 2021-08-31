@@ -195,6 +195,19 @@ class PostsHeaderView extends events.EventTarget {
             this._evtRandomizeButtonClick(e)
         );
 
+        for (let shortcut of this._shortcutButtonNodes) {
+            this._setupQueryShortcutButton(shortcut, ctx.parameters.query);
+            shortcut.addEventListener("click", (e) =>
+                this._evtToggleQueryShortcut(e)
+            );
+            this.addEventListener("navigate", (e) =>
+                this._setupQueryShortcutButton(
+                    shortcut,
+                    e.detail.parameters.query
+                )
+            );
+        }
+
         this._bulkEditors = [];
         if (this._bulkEditTagsNode) {
             this._bulkTagEditor = new BulkTagEditor(this._bulkEditTagsNode);
@@ -275,6 +288,10 @@ class PostsHeaderView extends events.EventTarget {
 
     get _randomizeButtonNode() {
         return this._hostNode.querySelector("#randomize-button");
+    }
+
+    get _shortcutButtonNodes() {
+        return this._hostNode.querySelectorAll("form .query-shortcut");
     }
 
     get _bulkEditBtnHolderNode() {
@@ -391,6 +408,44 @@ class PostsHeaderView extends events.EventTarget {
             new CustomEvent("navigate", {
                 detail: {
                     parameters: Object.assign({}, this._ctx.parameters, {
+                        tag: null,
+                        offset: 0,
+                    }),
+                },
+            })
+        );
+    }
+
+    _setupQueryShortcutButton(btn, query) {
+        const term = btn.getAttribute("data-term");
+        const selectedContent = btn.querySelector(".term-selected");
+        const unselectedContent = btn.querySelector(".term-unselected");
+        const termInUse = (query || "").includes(term);
+        if (termInUse) {
+            selectedContent.style.display = "inline-block";
+            unselectedContent.style.display = "none";
+        } else {
+            selectedContent.style.display = "none";
+            unselectedContent.style.display = "inline-block";
+        }
+    }
+
+    _evtToggleQueryShortcut(e) {
+        e.preventDefault();
+        const term = e.currentTarget.getAttribute("data-term");
+        let query = this._ctx.parameters.query || "";
+        if (query.includes(term)) {
+            query = query.replace(" " + term, "");
+            query = query.replace(term, "");
+        } else {
+            query += " " + term;
+        }
+        this._queryInputNode.value = query;
+        this.dispatchEvent(
+            new CustomEvent("navigate", {
+                detail: {
+                    parameters: Object.assign({}, this._ctx.parameters, {
+                        query: query,
                         tag: null,
                         offset: 0,
                     }),

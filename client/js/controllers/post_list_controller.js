@@ -42,6 +42,7 @@ class PostListController {
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
+            isLoggedIn: api.isLoggedIn(),
             enableSafety: api.safetyEnabled(),
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
