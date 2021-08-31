@@ -1,3 +1,4 @@
+from math import ceil
 from queue import Queue
 from typing import List
 
@@ -6,26 +7,19 @@ from szurubooru import model, search
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
 
-_max_removals = 3
-
 
 def find_similar_posts(source_post: model.Post, limit: int) -> List[model.Post]:
     results = []
-    queue = Queue()  # contains lists of tags to search
-    queue.put(source_post.tags)
-    source_tag_count = len(source_post.tags)
+    # Sort tags in order of increasing post count, i.e. least to most popular
+    # This will help yield results quicker
+    source_tags = sorted(source_post.tags, key=lambda t: t.post_count)
+    source_tag_count = len(source_tags)
+    max_removals = ceil(source_tag_count / 2)  # remove at most 50% of tags
 
-    while not queue.empty():
-        # put follow-up searches on the queue
-        last_tags = queue.get()
-        tag_count = len(last_tags)
-        if tag_count > 1 and tag_count > source_tag_count - _max_removals:
-            for removed_tag in last_tags:
-                next_search = list(filter(lambda t: t != removed_tag, last_tags))
-                queue.put(next_search)
-
+    tags = source_tags
+    for x in range(max_removals + 1):
         # prepare the current search, remove known results
-        query = ' '.join([t.first_name for t in last_tags])
+        query = ' '.join([t.first_name for t in tags])
         query += ' -id:%d' % source_post.post_id
         for r in results:
             query += ' -id:%d' % r.post_id
@@ -37,6 +31,11 @@ def find_similar_posts(source_post: model.Post, limit: int) -> List[model.Post]:
         for p in posts:
             results.append(p)
             if len(results) >= limit:
-                return results
+                break
+
+        # remove the least popular tag
+        if len(tags) <= 1:
+            break
+        tags = tags[1:]
 
     return results
