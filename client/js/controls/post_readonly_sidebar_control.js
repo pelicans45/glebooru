@@ -7,6 +7,7 @@ const views = require("../util/views.js");
 const uri = require("../util/uri.js");
 const misc = require("../util/misc.js");
 const PostMetricListControl = require("./post_metric_list_control.js");
+const PostList = require("../models/post_list.js");
 
 const template = views.getTemplate("post-readonly-sidebar");
 const scoreTemplate = views.getTemplate("score");
@@ -241,6 +242,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         return api
             .get(
                 uri.formatApiLink("post", this._post.id, "similar", {
+                    query: PostList.decorateSearchQuery(""),
                     limit: parseInt(settings.get().similarPosts),
                 })
             )

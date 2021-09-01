@@ -346,11 +346,13 @@ def get_posts_similar(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:similar")
     _search_executor_config.user = ctx.user
+    query_text = ctx.get_param_as_string("query", default="")
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
-    results = similar.find_similar_posts(post, limit)
+    results = similar.find_similar_posts(post, limit, query_text)
     return {
+        "query": query_text,
         "limit": limit,
         "results": list([
             posts.serialize_micro_post(result, ctx.user) for result in results

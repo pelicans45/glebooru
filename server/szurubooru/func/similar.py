@@ -8,7 +8,9 @@ _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
 
 
-def find_similar_posts(source_post: model.Post, limit: int) -> List[model.Post]:
+def find_similar_posts(
+    source_post: model.Post, limit: int, query_text: str = ''
+) -> List[model.Post]:
     results = []
     # Sort tags in order of increasing post count, i.e. least to most popular
     # This will help yield results quicker
@@ -19,7 +21,7 @@ def find_similar_posts(source_post: model.Post, limit: int) -> List[model.Post]:
     tags = source_tags
     for x in range(max_removals + 1):
         # prepare the current search, remove known results
-        query = ' '.join([t.first_name for t in tags])
+        query = query_text + ' ' + ' '.join([t.first_name for t in tags])
         query += ' -id:%d' % source_post.post_id
         for r in results:
             query += ' -id:%d' % r.post_id

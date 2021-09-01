@@ -10,7 +10,7 @@ class PostList extends AbstractList {
     static getAround(id, searchQuery, cachenumber) {
         return api.get(
             uri.formatApiLink("post", id, "around", {
-                query: PostList._decorateSearchQuery(searchQuery || ""),
+                query: PostList.decorateSearchQuery(searchQuery || ""),
                 fields: "id",
                 cachenumber: cachenumber,
             })
@@ -21,7 +21,7 @@ class PostList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("posts", {
-                    query: PostList._decorateSearchQuery(text || ""),
+                    query: PostList.decorateSearchQuery(text || ""),
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),
@@ -41,7 +41,7 @@ class PostList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("posts", "median", {
-                    query: PostList._decorateSearchQuery(text || ""),
+                    query: PostList.decorateSearchQuery(text || ""),
                     fields: fields.join(","),
                 })
             )
@@ -54,7 +54,7 @@ class PostList extends AbstractList {
             });
     }
 
-    static _decorateSearchQuery(text) {
+    static decorateSearchQuery(text) {
         const browsingSettings = settings.get();
         const disabledSafety = [];
         if (api.safetyEnabled()) {
