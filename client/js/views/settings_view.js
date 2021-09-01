@@ -42,6 +42,7 @@ class SettingsView extends events.EventTarget {
                     tagSuggestions: this._find("tag-suggestions").checked,
                     autoplayVideos: this._find("autoplay-videos").checked,
                     postsPerPage: this._find("posts-per-page").value,
+                    similarPosts: this._find("similar-posts").value,
                     tagUnderscoresAsSpaces: this._find("underscores-as-spaces")
                         .checked,
                     darkTheme: this._find("dark-theme").checked,

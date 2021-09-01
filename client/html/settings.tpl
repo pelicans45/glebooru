@@ -47,6 +47,16 @@
             </li>
 
             <li>
+                <%= ctx.makeNumericInput({
+                text: 'Number of similar posts',
+                name: 'similar-posts',
+                value: ctx.browsingSettings.similarPosts,
+                min: 0,
+                max: 100,
+                }) %>
+            </li>
+
+            <li>
                 <%= ctx.makeCheckbox({
                     text: 'Use dark theme',
                     name: 'dark-theme',

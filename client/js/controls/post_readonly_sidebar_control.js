@@ -2,6 +2,7 @@
 
 const api = require("../api.js");
 const events = require("../events.js");
+const settings = require("../models/settings.js");
 const views = require("../util/views.js");
 const uri = require("../util/uri.js");
 const misc = require("../util/misc.js");
@@ -240,7 +241,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         return api
             .get(
                 uri.formatApiLink("post", this._post.id, "similar", {
-                    limit: 10,
+                    limit: parseInt(settings.get().similarPosts),
                 })
             )
             .then((response) => {
