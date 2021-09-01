@@ -87,6 +87,11 @@ input[type=radio], input[type=checkbox]
     border: 2px solid $input-enabled-border-color
     content: ''
 
+.darktheme
+    .radio:before, .checkbox:before
+        background: darken($input-enabled-background-color, 75%)
+        border: 2px solid darken($input-enabled-border-color, 60%)
+
 .radio:after
     background: $main-color
     transition: opacity 0.1s linear
@@ -134,6 +139,17 @@ input[type=checkbox]:disabled + .checkbox:after
 input[type=radio]:disabled + .radio,
 input[type=checkbox]:disabled + .checkbox
     border-color: $input-disabled-text-color
+
+.darktheme
+    input[type=radio]:disabled + .radio:before,
+    input[type=checkbox]:disabled + .checkbox:before,
+    input[type=radio]:disabled + .radio:after,
+    input[type=checkbox]:disabled + .checkbox:after
+        border-color: darken($input-disabled-text-color, 60%)
+
+    input[type=radio]:disabled + .radio,
+    input[type=checkbox]:disabled + .checkbox
+        border-color: darken($input-disabled-text-color, 60%)
 
 input[type=radio]:focus + .radio:before,
 input[type=checkbox]:focus + .checkbox:before
