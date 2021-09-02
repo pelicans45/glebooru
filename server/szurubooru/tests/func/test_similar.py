@@ -13,7 +13,6 @@ def verify_posts():
     return verify
 
 
-# I'd like my behavior to be like this
 def test_find_similar_posts(post_factory, tag_factory, verify_posts):
     tagA = tag_factory(names=["a"])
     tagB = tag_factory(names=["b"])
@@ -45,38 +44,6 @@ def test_find_similar_posts(post_factory, tag_factory, verify_posts):
     verify_posts(results, [postABC, postBC, postAB, postA])
 
 
-# but it's actually like this for performance reasons
-def test_find_similar_posts_naive(post_factory, tag_factory, verify_posts):
-    tagA = tag_factory(names=["a"])  # count=4
-    tagB = tag_factory(names=["b"])  # count=3
-    tagC = tag_factory(names=["c"])  # count=3
-    postA = post_factory(id=1, tags=[tagA])
-    postAB = post_factory(id=2, tags=[tagA, tagB])
-    postAC = post_factory(id=3, tags=[tagA, tagC])
-    postABC = post_factory(id=4, tags=[tagA, tagB, tagC])
-    postBC = post_factory(id=5, tags=[tagB, tagC])
-    db.session.add_all([tagA, tagB, tagC, postA, postAB, postAC, postABC, postBC])
-    db.session.flush()
-
-    results = similar.find_similar_posts(postBC, 10)
-    verify_posts(results, [postABC, postAC])
-
-    results = similar.find_similar_posts(postBC, 2)
-    verify_posts(results, [postABC, postAC])
-
-    results = similar.find_similar_posts(postABC, 10)
-    verify_posts(results, [postAC, postAB, postA])
-
-    results = similar.find_similar_posts(postA, 10)
-    verify_posts(results, [postABC, postAC, postAB])  # sorted by id
-
-    results = similar.find_similar_posts(postAB, 10)
-    verify_posts(results, [postABC, postAC, postA])
-
-    results = similar.find_similar_posts(postAC, 10)
-    verify_posts(results, [postABC, postAB, postA])
-
-
 def test_find_similar_posts_with_limit(post_factory, tag_factory, verify_posts):
     tagA = tag_factory(names=["a"])
     tagB = tag_factory(names=["b"])
@@ -90,7 +57,4 @@ def test_find_similar_posts_with_limit(post_factory, tag_factory, verify_posts):
     db.session.flush()
 
     results = similar.find_similar_posts(postABCDE, 10)
-    # I'd like it to be like this:
-    # verify_posts(results, [postAB])
-    # but it's like this for performance reasons:
     verify_posts(results, [postAB, postA])
