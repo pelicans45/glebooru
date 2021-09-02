@@ -971,7 +971,7 @@ def test_around_query(
     ("similar:1", [6, 4, 1]),
     ("similar:2", [6, 5, 4, 2]),
     ("similar:3", [6, 5, 3]),
-    ("similar:4", [6, 5, 4, 2, 1]),
+    ("similar:4", [6, 4, 5, 2, 1]),
     ("similar:5", [6, 5, 4, 3, 2]),
     ("similar:6", [6, 5, 4, 3, 2, 1]),
     ("-similar:1", [5, 3, 2]),
@@ -980,6 +980,9 @@ def test_around_query(
     ("-similar:4", [3]),
     ("-similar:5", [1]),
     ("-similar:6", []),
+    ("similar:4 sort:id,asc", [4, 6, 1, 2, 5]),
+    ("similar:4 b", [6, 4, 5, 2]),
+    ("similar:4 c", [6, 5]),
 ])
 def test_filter_by_similar(
     post_factory, tag_factory, verify_unpaged, input, expected_post_ids
@@ -995,6 +998,28 @@ def test_filter_by_similar(
     postABC = post_factory(id=6, tags=[tagA, tagB, tagC])
     db.session.add_all(
         [tagA, tagB, tagC, postA, postB, postC, postAB, postBC, postABC]
+    )
+    db.session.flush()
+    verify_unpaged(input, expected_post_ids, True)
+
+
+
+@pytest.mark.parametrize("input,expected_post_ids", [
+    ("similar:1", [3, 1, 2]),
+    ("similar:2", [3, 2, 1]),
+    ("similar:3", [3, 1, 2]),
+])
+def test_sort_by_similar(
+    post_factory, tag_factory, verify_unpaged, input, expected_post_ids
+):
+    tagA = tag_factory(names=["a"])
+    tagB = tag_factory(names=["b"])
+    tagC = tag_factory(names=["c"])
+    postAB = post_factory(id=1, tags=[tagA, tagB])
+    postA = post_factory(id=2, tags=[tagA])
+    postABC = post_factory(id=3, tags=[tagA, tagB, tagC])
+    db.session.add_all(
+        [tagA, tagB, tagC, postA,postAB, postABC]
     )
     db.session.flush()
     verify_unpaged(input, expected_post_ids, True)

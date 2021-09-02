@@ -122,29 +122,40 @@ def _pool_filter(
     )(query, criterion, negated)
 
 
-# includes the given post itself
+# includes the given post itself, also applies sort
 def _similar_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
     assert criterion
-    # subquery for tags of the given post (post id in criterion)
     filter_func_tag = search_util.create_num_filter(model.PostTag.post_id)
+    pt_alias = sa.orm.aliased(model.PostTag)
+
+    # subquery for tags of the given post (post id in criterion)
     tag_query = db.session.query(model.PostTag.tag_id)
     tag_query = filter_func_tag(tag_query, criterion, False)
     tag_query = tag_query.subquery("source_tags")
 
-    # subquery for posts with matching tags
-    pt_alias = sa.orm.aliased(model.PostTag)
-    subquery = (
-        db.session.query(pt_alias.post_id)
-        .filter(pt_alias.tag_id.in_(tag_query))
-        .group_by(pt_alias.post_id)
-        .subquery("similar_posts")
-    )
-    expr = model.Post.post_id.in_(subquery)
     if negated:
-        expr = ~expr
-    return query.filter(expr)
+        # negated query runs normally, doesn't apply sort
+        subquery = (
+            db.session.query(pt_alias.post_id)
+            .filter(pt_alias.tag_id.in_(tag_query))
+            .group_by(pt_alias.post_id)
+            .subquery("similar_posts")
+        )
+        expr = model.Post.post_id.in_(subquery)
+        return query.filter(~expr)
+    else:
+        # direct query applies sort
+        subquery = query.subquery("main_query")
+        return (
+            db.session.query(model.Post)
+            .join(pt_alias, pt_alias.post_id == model.Post.post_id)
+            .filter(pt_alias.tag_id.in_(tag_query))
+            .group_by(model.Post.post_id)
+            .join(subquery, pt_alias.post_id == subquery.c.id)
+            .order_by(sa.func.count(pt_alias.tag_id).desc())
+        )
 
 
 def _create_metric_num_filter(name: str):
