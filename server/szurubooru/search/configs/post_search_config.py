@@ -122,6 +122,31 @@ def _pool_filter(
     )(query, criterion, negated)
 
 
+# includes the given post itself
+def _similar_filter(
+    query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
+) -> SaQuery:
+    assert criterion
+    # subquery for tags of the given post (post id in criterion)
+    filter_func_tag = search_util.create_num_filter(model.PostTag.post_id)
+    tag_query = db.session.query(model.PostTag.tag_id)
+    tag_query = filter_func_tag(tag_query, criterion, False)
+    tag_query = tag_query.subquery("source_tags")
+
+    # subquery for posts with matching tags
+    pt_alias = sa.orm.aliased(model.PostTag)
+    subquery = (
+        db.session.query(pt_alias.post_id)
+        .filter(pt_alias.tag_id.in_(tag_query))
+        .group_by(pt_alias.post_id)
+        .subquery("similar_posts")
+    )
+    expr = model.Post.post_id.in_(subquery)
+    if negated:
+        expr = ~expr
+    return query.filter(expr)
+
+
 def _create_metric_num_filter(name: str):
     def wrapper(
         query: SaQuery,
@@ -414,6 +439,7 @@ class PostSearchConfig(BaseSearchConfig):
                     ),
                 ),
                 (["pool"], _pool_filter),
+                (["similar"], _similar_filter),
             ]
         ))
         return filters
