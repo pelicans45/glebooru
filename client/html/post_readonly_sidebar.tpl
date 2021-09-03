@@ -82,11 +82,13 @@
         </nav>
     <% } %>
 
-    <nav class='similar'>
-        <h1>Similar</h1>
-        <ul></ul>
-        <a href='<%- ctx.formatClientLink("posts", {query: "similar:" + ctx.post.id}) %>'>See more</a>
-    </nav>
+    <% if (ctx.canViewSimilar) { %>
+        <nav class='similar'>
+            <h1>Similar</h1>
+            <ul></ul>
+            <a href='<%- ctx.formatClientLink("posts", {query: "similar:" + ctx.post.id}) %>'>See more</a>
+        </nav>
+    <% } %>
 
     <nav class='tags'>
         <h1>Tags (<%- ctx.post.tags.length %>)</h1>
