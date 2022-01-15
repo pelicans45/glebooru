@@ -10,6 +10,7 @@ const PageController = require("../controllers/page_controller.js");
 const PostsHeaderView = require("../views/posts_header_view.js");
 const PostsPageView = require("../views/posts_page_view.js");
 const EmptyView = require("../views/empty_view.js");
+const Post = require("../models/post.js");
 
 const fields = [
     "id",
@@ -44,6 +45,7 @@ class PostListController {
             enableSafety: api.safetyEnabled(),
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
+            canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
@@ -51,6 +53,16 @@ class PostListController {
         this._headerView.addEventListener("navigate", (e) =>
             this._evtNavigate(e)
         );
+        // This doesn't feel like the best solution
+        this._headerView._bulkDeleteEditor.addEventListener(
+            "deleteSelectedPosts",
+            (e) => {
+                this._evtDeleteSelectedPosts(e);
+            }
+        );
+
+        // Contains the id of each post that we want to delete (while using the bulk delete feature).
+        this._bulkEditDelete = [];
 
         this._syncPageController();
     }
@@ -91,6 +103,36 @@ class PostListController {
         e.detail.post.save().catch((error) => window.alert(error.message));
     }
 
+    _evtMarkForDeletion(e) {
+        const postId = e.detail.post.id;
+
+        if (e.detail.delete) {
+            this._bulkEditDelete.push(postId);
+        } else {
+            // Remove item from delete list
+            this._bulkEditDelete = this._bulkEditDelete.filter(
+                (x) => x != postId
+            );
+        }
+    }
+
+    async _evtDeleteSelectedPosts(e) {
+        if (
+            confirm(
+                `Are you sure you want to delete ${this._bulkEditDelete.length} posts?`
+            )
+        ) {
+            for (let postId of this._bulkEditDelete) {
+                const post = await Post.get(postId);
+                await post.delete();
+            }
+
+            // Reset delete list and refresh the post view
+            this._bulkEditDelete = [];
+            this._headerView._navigate();
+        }
+    }
+
     _syncPageController() {
         this._pageController.run({
             parameters: this._ctx.parameters,
@@ -117,8 +159,10 @@ class PostListController {
                     canBulkEditSafety: api.hasPrivilege(
                         "posts:bulk-edit:safety"
                     ),
+                    canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
                     bulkEdit: {
                         tags: this._bulkEditTags,
+                        delete: this._bulkEditDelete,
                     },
                     postFlow: settings.get().postFlow,
                 });
@@ -127,6 +171,9 @@ class PostListController {
                 view.addEventListener("untag", (e) => this._evtUntag(e));
                 view.addEventListener("changeSafety", (e) =>
                     this._evtChangeSafety(e)
+                );
+                view.addEventListener("markForDeletion", (e) =>
+                    this._evtMarkForDeletion(e)
                 );
                 return view;
             },

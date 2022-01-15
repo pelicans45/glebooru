@@ -39,6 +39,13 @@ class PostsPageView extends events.EventTarget {
                     );
                 }
             }
+
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                deleteFlipperNode.addEventListener("click", (e) =>
+                    this._evtBulkToggleDeleteClick(e, post)
+                );
+            }
         }
 
         this._syncBulkEditorsHighlights();
@@ -54,6 +61,10 @@ class PostsPageView extends events.EventTarget {
 
     _getSafetyFlipperNode(listItemNode) {
         return listItemNode.querySelector(".safety-flipper");
+    }
+
+    _getDeleteFlipperNode(listItemNode) {
+        return listItemNode.querySelector(".delete-flipper");
     }
 
     _evtPostChange(e) {
@@ -99,6 +110,20 @@ class PostsPageView extends events.EventTarget {
         );
     }
 
+    _evtBulkToggleDeleteClick(e, post) {
+        e.preventDefault();
+        const linkNode = e.target;
+        linkNode.classList.toggle("delete");
+        this.dispatchEvent(
+            new CustomEvent("markForDeletion", {
+                detail: {
+                    post: post,
+                    delete: linkNode.classList.contains("delete"),
+                },
+            })
+        );
+    }
+
     _syncBulkEditorsHighlights() {
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
@@ -121,6 +146,13 @@ class PostsPageView extends events.EventTarget {
                         "active",
                         post.safety === safety
                     );
+                }
+            }
+
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                if (this._ctx.bulkEdit.delete.indexOf(parseInt(postId)) != -1) {
+                    deleteFlipperNode.classList.toggle("delete", true);
                 }
             }
         }
