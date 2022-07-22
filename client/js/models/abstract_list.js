@@ -10,6 +10,7 @@ class AbstractList extends events.EventTarget {
 
     static fromResponse(response) {
         const ret = new this();
+        ret.raw_data = response;
         for (let item of response) {
             const addedItem = this._itemClass.fromResponse(item);
             if (addedItem.addEventListener) {

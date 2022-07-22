@@ -1,5 +1,6 @@
 "use strict";
 
+const PostList = require("../models/post_list.js");
 const router = require("../router.js");
 const views = require("../util/views.js");
 
@@ -38,13 +39,18 @@ class EndlessPageView {
         this.defaultLimit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
 
         const initialOffset = parseInt(ctx.parameters.offset || 0);
-        this._loadPage(ctx, initialOffset, this.defaultLimit, true).then(
-            (pageNode) => {
-                if (initialOffset !== 0) {
-                    pageNode.scrollIntoView();
+        if (ctx.browserState.cachedPageData) {
+            this._loadCachedPages(ctx);
+        } else {
+            ctx.browserState.cachedPageData = {};
+            this._loadPage(ctx, initialOffset, this.defaultLimit, true).then(
+                (pageNode) => {
+                    if (initialOffset !== 0) {
+                        pageNode.scrollIntoView();
+                    }
                 }
-            }
-        );
+            );
+        }
 
         this._timeout = window.setInterval(() => {
             window.requestAnimationFrame(() => {
@@ -138,6 +144,22 @@ class EndlessPageView {
         }
     }
 
+    _loadCachedPages(ctx) {
+        // k-v map of page offset to raw response
+        const pageData = ctx.browserState.cachedPageData;
+        window.requestAnimationFrame(() => {
+            for (const [offset, data] of Object.entries(pageData)) {
+                const response = {
+                    offset: data.offset,
+                    limit: data.limit,
+                    total: data.total,
+                    results: PostList.fromResponse(data.raw_data)
+                };
+                this._renderPage(ctx, true, response);
+            }
+        });
+    }
+
     _loadPage(ctx, offset, limit, append) {
         this._runningRequests++;
         return new Promise((resolve, reject) => {
@@ -147,6 +169,13 @@ class EndlessPageView {
                         this._runningRequests--;
                         return Promise.reject();
                     }
+                    // Need to extract raw_data, otherwise it can't be stored in history
+                    ctx.browserState.cachedPageData[offset] = {
+                        offset: response.offset,
+                        limit: response.limit,
+                        total: response.total,
+                        raw_data: response.results.raw_data,
+                    };
                     window.requestAnimationFrame(() => {
                         let pageNode = this._renderPage(ctx, append, response);
                         this._runningRequests--;
