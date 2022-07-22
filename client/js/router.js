@@ -157,7 +157,10 @@ class Router {
         window.addEventListener("popstate", this._onPopState, false);
         document.addEventListener(clickEvent, this._onClick, false);
         const url = location.pathname + location.search + location.hash;
-        return this.replace(url, history.state, true);
+        // clear cached page data, in case we are refreshing the page:
+        const initialState = Object.assign({}, history.state);
+        delete initialState.cachedPageData;
+        return this.replace(url, initialState, true);
     }
 
     stop() {
@@ -208,7 +211,7 @@ class Router {
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
-            [this._unhandled, (ctx, next) => {}]
+            [this._unhandled, (ctx, next) => { }]
         );
 
         let i = 0;
