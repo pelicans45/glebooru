@@ -101,7 +101,8 @@ class EndlessPageView {
                     topOffset,
                     topLimit === ctx.defaultLimit ? null : topLimit
                 ),
-                ctx.state,
+                // ctx here is not "real" context, it's the object from _syncPageController()
+                ctx.browserState,
                 false
             );
             this.currentOffset = topOffset;
