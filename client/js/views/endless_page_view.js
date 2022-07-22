@@ -56,6 +56,7 @@ class EndlessPageView {
             window.requestAnimationFrame(() => {
                 this._probePageLoad(ctx);
                 this._syncUrl(ctx);
+                ctx.browserState.scrollY = window.scrollY;
             });
         }, 250);
 
@@ -157,6 +158,7 @@ class EndlessPageView {
                 };
                 this._renderPage(ctx, true, response);
             }
+            window.scroll(0, ctx.browserState.scrollY || 0);
         });
     }
 
