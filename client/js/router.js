@@ -159,7 +159,7 @@ class Router {
         const url = location.pathname + location.search + location.hash;
         // clear cached page data, in case we are refreshing the page:
         const initialState = Object.assign({}, history.state);
-        delete initialState.cachedPageData;
+        delete initialState.pageCache;
         return this.replace(url, initialState, true);
     }
 
@@ -175,6 +175,7 @@ class Router {
     showNoDispatch(path, state) {
         const ctx = new Context(path, state);
         ctx.pushState();
+        // replaces old ctx with the current ctx (new page + history state)
         this.ctx = ctx;
         return ctx;
     }
@@ -204,6 +205,7 @@ class Router {
 
     dispatch(ctx, middle) {
         const swap = (_ctx, next) => {
+            // replaces old ctx with the current ctx (new page + history state)
             this.ctx = ctx;
             middle();
             next();
@@ -216,6 +218,7 @@ class Router {
 
         let i = 0;
         let fn = () => {
+            // Passes old ctx into the callbacks
             callChain[i++](this.ctx, fn);
         };
         fn();

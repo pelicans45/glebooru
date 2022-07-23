@@ -39,10 +39,10 @@ class EndlessPageView {
         this.defaultLimit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
 
         const initialOffset = parseInt(ctx.parameters.offset || 0);
-        if (ctx.browserState.cachedPageData) {
+        if (this._isCacheValid(ctx)) {
             this._loadCachedPages(ctx);
         } else {
-            ctx.browserState.cachedPageData = {};
+            this._clearCache(ctx);
             this._loadPage(ctx, initialOffset, this.defaultLimit, true).then(
                 (pageNode) => {
                     if (initialOffset !== 0) {
@@ -103,11 +103,15 @@ class EndlessPageView {
         let topOffset = parseInt(topPageNode.getAttribute("data-offset"));
         let topLimit = parseInt(topPageNode.getAttribute("data-limit"));
         if (topOffset !== this.currentOffset) {
+            const path = ctx.getClientUrlForPage(
+                topOffset,
+                topLimit === ctx.defaultLimit ? null : topLimit
+            );
+            // We only scrolled, so we should continue using the same cache entry;
+            // Update the cache path so it's not invalidated:
+            ctx.browserState.pageCache.path = "/" + path;
             router.replace(
-                ctx.getClientUrlForPage(
-                    topOffset,
-                    topLimit === ctx.defaultLimit ? null : topLimit
-                ),
+                path,
                 // ctx here is not "real" context, it's the object from _syncPageController()
                 ctx.browserState,
                 false
@@ -145,11 +149,22 @@ class EndlessPageView {
         }
     }
 
+    _isCacheValid(ctx) {
+        const cache = ctx.browserState.pageCache;
+        return cache !== null && cache !== undefined &&
+            cache.path == history.state.path &&
+            cache.pages !== undefined && cache.pages !== null;
+    }
+
+    _clearCache(ctx) {
+        ctx.browserState.pageCache = { path: history.state.path, pages: {} };
+    }
+
     _loadCachedPages(ctx) {
         // k-v map of page offset to raw response
-        const pageData = ctx.browserState.cachedPageData;
+        const pages = ctx.browserState.pageCache.pages || {};
         window.requestAnimationFrame(() => {
-            for (const [offset, data] of Object.entries(pageData)) {
+            for (const [offset, data] of Object.entries(pages)) {
                 const response = {
                     offset: data.offset,
                     limit: data.limit,
@@ -172,7 +187,8 @@ class EndlessPageView {
                         return Promise.reject();
                     }
                     // Need to extract raw_data, otherwise it can't be stored in history
-                    ctx.browserState.cachedPageData[offset] = {
+                    const pages = ctx.browserState.pageCache.pages || {};
+                    pages[offset] = {
                         offset: response.offset,
                         limit: response.limit,
                         total: response.total,
@@ -222,7 +238,7 @@ class EndlessPageView {
             }
             if (
                 response.offset + response.results.length >
-                    this.maxOffsetShown ||
+                this.maxOffsetShown ||
                 this.maxOffsetShown === null
             ) {
                 this.maxOffsetShown =
