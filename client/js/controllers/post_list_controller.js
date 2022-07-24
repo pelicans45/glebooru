@@ -76,7 +76,7 @@ class PostListController {
     }
 
     _evtNavigate(e) {
-        router.showNoDispatch(
+        this._ctx = router.showNoDispatch(
             uri.formatClientLink("posts", e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
