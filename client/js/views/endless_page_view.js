@@ -1,6 +1,5 @@
 "use strict";
 
-const PostList = require("../models/post_list.js");
 const router = require("../router.js");
 const views = require("../util/views.js");
 
@@ -56,7 +55,9 @@ class EndlessPageView {
             window.requestAnimationFrame(() => {
                 this._probePageLoad(ctx);
                 this._syncUrl(ctx);
-                ctx.browserState.scrollY = window.scrollY;
+                if (this._shouldUseCache(ctx)) {
+                    ctx.browserState.scrollY = window.scrollY;
+                }
             });
         }, 250);
 
@@ -107,9 +108,11 @@ class EndlessPageView {
                 topOffset,
                 topLimit === ctx.defaultLimit ? null : topLimit
             );
-            // We only scrolled, so we should continue using the same cache entry;
-            // Update the cache path so it's not invalidated:
-            ctx.browserState.pageCache.path = "/" + path;
+            if (this._shouldUseCache(ctx)) {
+                // We only scrolled, so we should continue using the same cache entry;
+                // Update the cache path so it's not invalidated:
+                ctx.browserState.pageCache.path = "/" + path;
+            }
             router.replace(
                 path,
                 // ctx here is not "real" context, it's the object from _syncPageController()
@@ -149,7 +152,13 @@ class EndlessPageView {
         }
     }
 
+    _shouldUseCache(ctx) {
+        return ctx.browserState != undefined && ctx.browserState != null &&
+            ctx.readPageFromCache !== undefined;
+    }
+
     _isCacheValid(ctx) {
+        if (!this._shouldUseCache(ctx)) return false;
         const cache = ctx.browserState.pageCache;
         return cache !== null && cache !== undefined &&
             cache.path == history.state.path &&
@@ -157,10 +166,12 @@ class EndlessPageView {
     }
 
     _clearCache(ctx) {
+        if (!this._shouldUseCache(ctx)) return;
         ctx.browserState.pageCache = { path: history.state.path, pages: {} };
     }
 
     _loadCachedPages(ctx) {
+        if (!this._shouldUseCache(ctx)) return;
         // k-v map of page offset to raw response
         const pages = ctx.browserState.pageCache.pages || {};
         window.requestAnimationFrame(() => {
@@ -169,7 +180,7 @@ class EndlessPageView {
                     offset: data.offset,
                     limit: data.limit,
                     total: data.total,
-                    results: PostList.fromResponse(data.raw_data)
+                    results: ctx.readPageFromCache(data.raw_data)
                 };
                 this._renderPage(ctx, true, response);
             }
@@ -186,14 +197,16 @@ class EndlessPageView {
                         this._runningRequests--;
                         return Promise.reject();
                     }
-                    // Need to extract raw_data, otherwise it can't be stored in history
-                    const pages = ctx.browserState.pageCache.pages || {};
-                    pages[offset] = {
-                        offset: response.offset,
-                        limit: response.limit,
-                        total: response.total,
-                        raw_data: response.results.raw_data,
-                    };
+                    if (this._shouldUseCache(ctx)) {
+                        // Need to extract raw_data, otherwise it can't be stored in history
+                        const pages = ctx.browserState.pageCache.pages || {};
+                        pages[offset] = {
+                            offset: response.offset,
+                            limit: response.limit,
+                            total: response.total,
+                            raw_data: response.results.raw_data,
+                        };
+                    }
                     window.requestAnimationFrame(() => {
                         let pageNode = this._renderPage(ctx, append, response);
                         this._runningRequests--;

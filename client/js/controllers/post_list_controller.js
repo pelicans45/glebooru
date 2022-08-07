@@ -193,6 +193,7 @@ class PostListController {
                 );
                 return view;
             },
+            readPageFromCache: (rawPage) => PostList.fromResponse(rawPage),
         });
     }
 }
