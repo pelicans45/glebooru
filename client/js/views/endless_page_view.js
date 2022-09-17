@@ -6,8 +6,6 @@ const views = require("../util/views.js");
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
 
-const SCROLL_THRESHOLD = 100;
-
 function isScrolledIntoView(element) {
     let top = 0;
     do {
@@ -82,12 +80,7 @@ class EndlessPageView {
         return this._hostNode.querySelector(".pages-holder");
     }
 
-    _destroy() {
-        window.clearInterval(this._timeout);
-        this._active = false;
-    }
-
-    _syncUrl(ctx) {
+    get _topPageNode() {
         let topPageNode = null;
         let element = document.elementFromPoint(
             window.innerWidth / 2,
@@ -100,6 +93,16 @@ class EndlessPageView {
             }
             element = element.parentNode;
         }
+        return topPageNode;
+    }
+
+    _destroy() {
+        window.clearInterval(this._timeout);
+        this._active = false;
+    }
+
+    _syncUrl(ctx) {
+        const topPageNode = this._topPageNode;
         if (!topPageNode) {
             return;
         }
@@ -133,8 +136,9 @@ class EndlessPageView {
         if (this.totalRecords === null) {
             return;
         }
+        const scrollThreshold = this._topPageNode.scrollHeight * 0.2;
 
-        if (this.minOffsetShown > 0 && window.scrollY < SCROLL_THRESHOLD) {
+        if (this.minOffsetShown > 0 && window.scrollY < scrollThreshold) {
             this._loadPage(
                 ctx,
                 this.minOffsetShown - this.defaultLimit,
@@ -146,7 +150,7 @@ class EndlessPageView {
         const pageBottom = this._pagesHolderNode.getBoundingClientRect().bottom;
         if (
             this.maxOffsetShown < this.totalRecords &&
-            pageBottom < window.innerHeight + SCROLL_THRESHOLD
+            pageBottom < window.innerHeight + scrollThreshold
         ) {
             this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
         }
