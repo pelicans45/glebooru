@@ -118,11 +118,7 @@ class PostMainView {
                 }
             },
             () => {},
-            (e) => {
-                if (!ctx.editMode && e.startScrollY === 0) {
-                    showRandomImage();
-                }
-            }
+            () => {}
         );
     }
 
