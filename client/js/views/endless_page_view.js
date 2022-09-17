@@ -6,6 +6,8 @@ const views = require("../util/views.js");
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
 
+const SCROLL_THRESHOLD = 100;
+
 function isScrolledIntoView(element) {
     let top = 0;
     do {
@@ -132,10 +134,7 @@ class EndlessPageView {
             return;
         }
 
-        if (
-            this.minOffsetShown > 0 &&
-            isScrolledIntoView(this.topPageGuardNode)
-        ) {
+        if (this.minOffsetShown > 0 && window.scrollY < SCROLL_THRESHOLD) {
             this._loadPage(
                 ctx,
                 this.minOffsetShown - this.defaultLimit,
@@ -144,16 +143,17 @@ class EndlessPageView {
             );
         }
 
+        const pageBottom = this._pagesHolderNode.getBoundingClientRect().bottom;
         if (
             this.maxOffsetShown < this.totalRecords &&
-            isScrolledIntoView(this.bottomPageGuardNode)
+            pageBottom < window.innerHeight + SCROLL_THRESHOLD
         ) {
             this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
         }
     }
 
     _shouldUseCache(ctx) {
-        return ctx.browserState != undefined && ctx.browserState != null &&
+        return ctx.browserState !== undefined && ctx.browserState != null &&
             ctx.readPageFromCache !== undefined;
     }
 
@@ -167,7 +167,7 @@ class EndlessPageView {
 
     _clearCache(ctx) {
         if (!this._shouldUseCache(ctx)) return;
-        ctx.browserState.pageCache = { path: history.state.path, pages: {} };
+        ctx.browserState.pageCache = {path: history.state.path, pages: {}};
     }
 
     _loadCachedPages(ctx) {
