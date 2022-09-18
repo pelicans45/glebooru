@@ -241,7 +241,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     _loadSimilarPosts() {
         return PostList.search(
-            "similar:" + this._post.id,
+            "similar:" + this._post.id + " -id:" + this._post.id,
             0,
             parseInt(settings.get().similarPosts),
             ["id", "thumbnailUrl"],
