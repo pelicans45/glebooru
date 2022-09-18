@@ -240,23 +240,22 @@ class PostReadonlySidebarControl extends events.EventTarget {
     }
 
     _loadSimilarPosts() {
-        return api
-            .get(
-                uri.formatApiLink("post", this._post.id, "similar", {
-                    query: PostList.decorateSearchQuery(""),
-                    limit: parseInt(settings.get().similarPosts),
-                })
-            )
-            .then((response) => {
-                const listNode = this._similarListNode;
-                for (let post of response.results) {
-                    let poseNode = similarItemTemplate({
-                        id: post.id,
-                        thumbnailUrl: post.thumbnailUrl,
-                    });
-                    listNode.appendChild(poseNode);
-                }
-            });
+        return PostList.search(
+            "similar:" + this._post.id,
+            0,
+            parseInt(settings.get().similarPosts),
+            ["id", "thumbnailUrl"],
+        )
+        .then((response) => {
+            const listNode = this._similarListNode;
+            for (let post of response.results) {
+                let poseNode = similarItemTemplate({
+                    id: post.id,
+                    thumbnailUrl: post.thumbnailUrl,
+                });
+                listNode.appendChild(poseNode);
+            }
+        });
     }
 }
 

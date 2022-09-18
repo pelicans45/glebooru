@@ -8,6 +8,8 @@ _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
 
 
+# TODO(hunternif): this ignores the query, e.g. rating.
+# (But we're actually using a "similar" search query on the client anyway.)
 def find_similar_posts(
     source_post: model.Post, limit: int, query_text: str = ''
 ) -> List[model.Post]:
