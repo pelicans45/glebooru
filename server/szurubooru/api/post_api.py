@@ -340,8 +340,8 @@ def get_posts_median(
     }
 
 
-@rest.routes.get("/post/(?P<post_id>[^/]+)/similar/?")
-def get_posts_similar(
+@rest.routes.get("/post/(?P<post_id>[^/]+)/similar-by-tags/?")
+def get_posts_similar_by_tags(
     ctx: rest.Context, params: Dict[str, str]
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:similar")
