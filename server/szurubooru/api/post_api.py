@@ -330,6 +330,9 @@ def get_posts_lookalikes(
     threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
+    if post.signature is None:
+        return {"similarPosts": []}
+
     sig = image_hash.unpack_signature(post.signature.signature)
     # limit + 1 because the original post will be excluded
     lookalikes = posts.search_by_signature(sig, limit + 1, threshold)
