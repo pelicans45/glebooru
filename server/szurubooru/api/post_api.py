@@ -331,8 +331,9 @@ def get_posts_lookalikes(
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     sig = image_hash.unpack_signature(post.signature.signature)
-    lookalikes = posts.search_by_signature(sig, limit, threshold)
-    # exclude the same post:
+    # limit + 1 because the original post will be excluded
+    lookalikes = posts.search_by_signature(sig, limit + 1, threshold)
+    # exclude the original post:
     lookalikes = filter(lambda la: la[1].post_id != post_id, lookalikes)
     lookalikes = sorted(lookalikes, key=lambda la: la[0])
     return {
