@@ -104,7 +104,9 @@ class PostEditSidebarControl extends events.EventTarget {
         if (this._tagInputNode) {
             this._tagControl = new TagInputControl(
                 this._tagInputNode,
-                this._post.tags
+                this._post.tags,
+                null,
+                this._post,
             );
         }
 

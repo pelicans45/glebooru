@@ -18,4 +18,6 @@
     </div>
 
     <ul class='compact-tags'></ul>
+
+    <a class='tag-from-lookalikes'>From lookalikes...</a>
 </div>

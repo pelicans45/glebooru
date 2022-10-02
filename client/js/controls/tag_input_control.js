@@ -10,6 +10,7 @@ const settings = require("../models/settings.js");
 const events = require("../events.js");
 const views = require("../util/views.js");
 const TagAutoCompleteControl = require("./tag_auto_complete_control.js");
+const PostList = require("../models/post_list.js");
 
 const KEY_SPACE = 32;
 const KEY_RETURN = 13;
@@ -83,9 +84,10 @@ class SuggestionList {
 }
 
 class TagInputControl extends events.EventTarget {
-    constructor(hostNode, tagList, placeholder) {
+    constructor(hostNode, tagList, placeholder, post) {
         super();
         this.tags = tagList;
+        this._post = post;
         this._hostNode = hostNode;
         this._suggestions = new SuggestionList();
         this._tagToListItemNode = new Map();
@@ -153,6 +155,8 @@ class TagInputControl extends events.EventTarget {
             const listItemNode = this._createListItemNode(tag);
             this._tagListNode.appendChild(listItemNode);
         }
+
+        this._createSuggestionsFromLookalikes();
     }
 
     addTagByText(text, source) {
@@ -349,6 +353,20 @@ class TagInputControl extends events.EventTarget {
         return listItemNode;
     }
 
+    _createSuggestionsFromLookalikes() {
+        const node = this._editAreaNode.querySelector("a.tag-from-lookalikes");
+        if (this._post === undefined) {
+            node.style.display = "none";
+        } else {
+            node.addEventListener("click", (e) => {
+                e.preventDefault();
+                this._suggestions.clear();
+                this._loadSuggestionsFromLookalikes();
+                this._removeSuggestionsPopupOpacity();
+            });
+        }
+    }
+
     _deleteListItemNode(tag) {
         const listItemNode = this._getListItemNode(tag);
         if (listItemNode) {
@@ -390,6 +408,31 @@ class TagInputControl extends events.EventTarget {
                 }
                 for (let suggestion of tag.suggestions || []) {
                     this._suggestions.set(suggestion, 5);
+                }
+                if (this._suggestions.length) {
+                    this._openSuggestionsPopup();
+                } else {
+                    this._closeSuggestionsPopup();
+                }
+            });
+    }
+
+    _loadSuggestionsFromLookalikes() {
+        const limit = 20;
+        const fields = ["id", "thumbnailUrl", "tags"];
+        const threshold = 1;
+        PostList.reverseSearch(this._post.id, limit, threshold, fields)
+            .then((response) => {
+                const tagOccurrences = {};
+                for (let post of response.results) {
+                    for (let tag of post.tags) {
+                        const name = tag.names[0];
+                        let count = tagOccurrences[name] || 0;
+                        tagOccurrences[name] = count + 1;
+                    }
+                }
+                for (const [tagName, count] of Object.entries(tagOccurrences)) {
+                    this._suggestions.set(tagName, count);
                 }
                 if (this._suggestions.length) {
                     this._openSuggestionsPopup();
