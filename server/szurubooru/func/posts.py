@@ -21,6 +21,7 @@ from szurubooru.func import (
     users,
     util,
 )
+from szurubooru.func.image_hash import NpMatrix
 
 logger = logging.getLogger(__name__)
 
@@ -954,8 +955,15 @@ def search_by_image_exact(image_content: bytes) -> Optional[model.Post]:
 
 def search_by_image(image_content: bytes) -> List[Tuple[float, model.Post]]:
     query_signature = image_hash.generate_signature(image_content)
-    query_words = image_hash.generate_words(query_signature)
+    return search_by_signature(query_signature)
 
+
+def search_by_signature(
+    signature: NpMatrix,
+    limit: int = 100,
+    distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
+) -> List[Tuple[float, model.Post]]:
+    query_words = image_hash.generate_words(signature)
     """
     The unnest function is used here to expand one row containing the 'words'
     array into multiple rows each containing a singular word.
@@ -969,10 +977,10 @@ def search_by_image(image_content: bytes) -> List[Tuple[float, model.Post]]:
     FROM post_signature AS s, unnest(s.words, :q) AS a(word, query)
     WHERE a.word = a.query
     GROUP BY s.post_id
-    ORDER BY score DESC LIMIT 100;
+    ORDER BY score DESC LIMIT :limit;
     """
 
-    candidates = db.session.execute(dbquery, {"q": query_words})
+    candidates = db.session.execute(dbquery, {"q": query_words, "limit": limit})
     data = tuple(
         zip(
             *[
@@ -983,13 +991,13 @@ def search_by_image(image_content: bytes) -> List[Tuple[float, model.Post]]:
     )
     if data:
         candidate_post_ids, sigarray = data
-        distances = image_hash.normalized_distance(sigarray, query_signature)
+        distances = image_hash.normalized_distance(sigarray, signature)
         return [
             (distance, try_get_post_by_id(candidate_post_id))
             for candidate_post_id, distance in zip(
                 candidate_post_ids, distances
             )
-            if distance < image_hash.DISTANCE_CUTOFF
+            if distance < distance_cutoff
         ]
     else:
         return []

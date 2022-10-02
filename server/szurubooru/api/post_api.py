@@ -14,7 +14,7 @@ from szurubooru.func import (
     similar,
     snapshots,
     tags,
-    versions,
+    versions, image_hash,
 )
 
 _search_executor_config = search.configs.PostSearchConfig()
@@ -311,6 +311,31 @@ def get_posts_by_image(
         "exactPost": _serialize_post(
             ctx, posts.search_by_image_exact(content)
         ),
+        "similarPosts": [
+            {
+                "distance": distance,
+                "post": _serialize_post(ctx, post),
+            }
+            for distance, post in lookalikes
+        ],
+    }
+
+
+@rest.routes.get("/post/(?P<post_id>[^/]+)/reverse-search/?")
+def get_posts_lookalikes(
+        ctx: rest.Context, params: Dict[str, str] = {}
+) -> rest.Response:
+    auth.verify_privilege(ctx.user, "posts:reverse_search")
+    limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
+    threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
+    post_id = _get_post_id(params)
+    post = posts.get_post_by_id(post_id)
+    sig = image_hash.unpack_signature(post.signature.signature)
+    lookalikes = posts.search_by_signature(sig, limit, threshold)
+    # exclude the same post:
+    lookalikes = filter(lambda la: la[1].post_id != post_id, lookalikes)
+    lookalikes = sorted(lookalikes, key=lambda la: la[0])
+    return {
         "similarPosts": [
             {
                 "distance": distance,

@@ -50,6 +50,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
             );
         }
         this._loadSimilarPosts();
+        this._loadLookalikePosts();
     }
 
     get _scoreContainerNode() {
@@ -98,6 +99,14 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     get _similarListNode() {
         return this._hostNode.querySelector("nav.similar ul");
+    }
+
+    get _lookalikesNode() {
+        return this._hostNode.querySelector("nav.lookalikes");
+    }
+
+    get _lookalikesListNode() {
+        return this._hostNode.querySelector("nav.lookalikes ul");
     }
 
     _installFitButtons() {
@@ -256,6 +265,26 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 listNode.appendChild(poseNode);
             }
         });
+    }
+
+    _loadLookalikePosts() {
+        const limit = parseInt(settings.get().similarPosts);
+        const fields = ["id", "thumbnailUrl"];
+        const threshold = 1;
+        return PostList.reverseSearch(this._post.id, limit, threshold, fields)
+            .then((response) => {
+                if (response.results.length === 0) {
+                    this._lookalikesNode.style.display = "none";
+                }
+                const listNode = this._lookalikesListNode;
+                for (let post of response.results) {
+                    let poseNode = similarItemTemplate({
+                        id: post.id,
+                        thumbnailUrl: post.thumbnailUrl,
+                    });
+                    listNode.appendChild(poseNode);
+                }
+            });
     }
 }
 

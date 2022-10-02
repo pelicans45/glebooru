@@ -54,6 +54,25 @@ class PostList extends AbstractList {
             });
     }
 
+    static reverseSearch(id, limit, threshold, fields) {
+        return api
+            .get(
+                uri.formatApiLink("post", id, "reverse-search", {
+                    limit: limit,
+                    threshold: threshold,
+                    fields: fields.join(","),
+                })
+            )
+            .then((response) => {
+                const results = response.similarPosts.map((sim) => sim.post);
+                return Promise.resolve(
+                    Object.assign({}, response, {
+                        results: PostList.fromResponse(results)
+                    })
+                );
+            });
+    }
+
     static decorateSearchQuery(text) {
         const browsingSettings = settings.get();
         const disabledSafety = [];

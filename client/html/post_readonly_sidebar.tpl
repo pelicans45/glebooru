@@ -88,6 +88,11 @@
             <ul></ul>
             <a href='<%- ctx.formatClientLink("posts", {query: "similar:" + ctx.post.id}) %>'>See more</a>
         </nav>
+
+        <nav class='lookalikes'>
+            <h1>Look-alikes</h1>
+            <ul></ul>
+        </nav>
     <% } %>
 
     <nav class='tags'>
