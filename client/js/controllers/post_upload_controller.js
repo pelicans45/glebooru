@@ -13,7 +13,7 @@ const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
 
 const genericErrorMessage =
-    "One of the posts needs your attention; " +
+    "One or more posts needs your attention; " +
     'click "resume upload" when you\'re ready.';
 
 class PostUploadController {
@@ -32,7 +32,7 @@ class PostUploadController {
             canUploadAnonymously: api.hasPrivilege("posts:create:anonymous"),
             canViewPosts: api.hasPrivilege("posts:view"),
             enableSafety: api.safetyEnabled(),
-            defaultSafety: settings.get().uploadSafety
+            defaultSafety: settings.get().uploadSafety,
         });
         this._view.addEventListener("change", (e) => this._evtChange(e));
         this._view.addEventListener("submit", (e) => this._evtSubmit(e));
@@ -57,7 +57,7 @@ class PostUploadController {
     _evtSubmit(e) {
         this._view.disableForm();
         this._view.clearMessages();
-        const tagErrors = []; // to be displayed after all uploads
+        let anyFailures = false;
 
         e.detail.uploadables
             .reduce(
@@ -66,47 +66,65 @@ class PostUploadController {
                         this._uploadSinglePost(
                             uploadable,
                             e.detail.skipDuplicates,
+                            e.detail.alwaysUploadSimilar,
                             e.detail.copyTagsToOriginals
-                        )
+                        ).catch((error) => {
+                            anyFailures = true;
+                            if (error.uploadable) {
+                                if (error.similarPosts) {
+                                    error.uploadable.lookalikes =
+                                        error.similarPosts;
+                                    this._view.updateUploadable(
+                                        error.uploadable
+                                    );
+                                    this._view.showInfo(
+                                        error.message,
+                                        error.uploadable
+                                    );
+                                } else {
+                                    this._view.showError(
+                                        error.message,
+                                        error.uploadable
+                                    );
+                                }
+                            } else {
+                                this._view.showError(
+                                    error.message,
+                                    uploadable
+                                );
+                            }
+                            if (e.detail.pauseRemainOnError) {
+                                return Promise.reject();
+                            }
+                        })
                     ),
                 Promise.resolve()
             )
+            .then(() => {
+                if (anyFailures) {
+                    return Promise.reject();
+                }
+            })
             .then(
                 () => {
                     this._view.clearMessages();
                     misc.disableExitConfirmation();
                     const ctx = router.show(uri.formatClientLink("posts"));
                     ctx.controller.showSuccess("Posts uploaded.");
-                    for (let tagError of tagErrors) {
-                        ctx.controller.showError(tagError);
-                    }
                 },
                 (error) => {
-                    if (error.uploadable) {
-                        if (error.similarPosts) {
-                            error.uploadable.lookalikes = error.similarPosts;
-                            this._view.updateUploadable(error.uploadable);
-                            this._view.showInfo(genericErrorMessage);
-                            this._view.showInfo(
-                                error.message,
-                                error.uploadable
-                            );
-                        } else {
-                            this._view.showError(genericErrorMessage);
-                            this._view.showError(
-                                error.message,
-                                error.uploadable
-                            );
-                        }
-                    } else {
-                        this._view.showError(error.message);
-                    }
+                    this._view.showError(genericErrorMessage);
                     this._view.enableForm();
                 }
             );
     }
 
-    _uploadSinglePost(uploadable, skipDuplicates, copyTagsToOriginals) {
+    _uploadSinglePost(
+        uploadable,
+        skipDuplicates,
+        alwaysUploadSimilar,
+        copyTagsToOriginals
+    ) {
         progress.start();
         let reverseSearchPromise = Promise.resolve();
         if (!uploadable.lookalikesConfirmed) {
@@ -123,7 +141,8 @@ class PostUploadController {
                     if (searchResult.exactPost) {
                         if (copyTagsToOriginals) {
                             return this._copyTagsToOriginalAndSave(
-                                uploadable, searchResult.exactPost
+                                uploadable,
+                                searchResult.exactPost
                             );
                         } else if (skipDuplicates) {
                             this._view.removeUploadable(uploadable);
@@ -137,15 +156,18 @@ class PostUploadController {
                             error.similarPosts = [
                                 {
                                     distance: 0,
-                                    post: searchResult.exactPost
-                                }
+                                    post: searchResult.exactPost,
+                                },
                             ];
                             return Promise.reject(error);
                         }
                     }
 
                     // notify about similar posts
-                    if (searchResult.similarPosts.length) {
+                    if (
+                        searchResult.similarPosts.length &&
+                        !alwaysUploadSimilar
+                    ) {
                         let error = new Error(
                             `Found ${searchResult.similarPosts.length} similar ` +
                                 "posts.\nYou can resume or discard this upload."
@@ -155,7 +177,8 @@ class PostUploadController {
                         return Promise.reject(error);
                     } else if (uploadable.foundOriginal) {
                         return this._copyTagsToOriginalAndSave(
-                            uploadable, uploadable.foundOriginal
+                            uploadable,
+                            uploadable.foundOriginal
                         );
                     }
                 }
@@ -202,14 +225,11 @@ class PostUploadController {
     }
 
     _copyTagsToOriginalAndSave(uploadable, original) {
-        uploadable.tags.map(tag => original.tags.addByName(tag));
-        let savePromise = original.save()
-            .then(
-                () => {
-                    this._view.removeUploadable(uploadable);
-                    return Promise.resolve();
-                }
-            );
+        uploadable.tags.map((tag) => original.tags.addByName(tag));
+        let savePromise = original.save().then(() => {
+            this._view.removeUploadable(uploadable);
+            return Promise.resolve();
+        });
         this._lastCancellablePromise = savePromise;
         return savePromise;
     }

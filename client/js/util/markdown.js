@@ -82,7 +82,7 @@ class EntityPermalinkWrapper extends BaseMarkdownWrapper {
         );
         text = text.replace(/\]\(@(\d+)\)/g, "](/post/$1)");
         text = text.replace(/\]\(\+([a-zA-Z0-9_-]+)\)/g, "](/user/$1)");
-        text = text.replace(/\]\(#([a-zA-Z0-9_-]+)\)/g, "](/posts/query=$1)");
+        text = text.replace(/\]\(#([a-zA-Z0-9_-]+)\)/g, "](/query=$1)");
         return text;
     }
 }
@@ -91,7 +91,7 @@ class SearchPermalinkWrapper extends BaseMarkdownWrapper {
     postprocess(text) {
         return text.replace(
             /\[search\]((?:[^\[]|\[(?!\/?search\]))+)\[\/search\]/gi,
-            '<a href="/posts/query=$1"><code>$1</code></a>'
+            '<a href="/query=$1"><code>$1</code></a>'
         );
     }
 }
@@ -136,12 +136,8 @@ function createRenderer() {
 
     const renderer = new marked.Renderer();
     renderer.image = (href, title, alt) => {
-        let [
-            _,
-            url,
-            width,
-            height,
-        ] = /^(.+?)(?:\s=\s*(\d*)\s*x\s*(\d*)\s*)?$/.exec(href);
+        let [_, url, width, height] =
+            /^(.+?)(?:\s=\s*(\d*)\s*x\s*(\d*)\s*)?$/.exec(href);
         let res = '<img src="' + sanitize(url) + '" alt="' + sanitize(alt);
         if (width) {
             res += '" width="' + width;
@@ -174,7 +170,7 @@ function formatMarkdown(text) {
     for (let wrapper of wrappers) {
         text = wrapper.preprocess(text);
     }
-    text = marked(text, options);
+    text = marked.parse(text, options);
     wrappers.reverse();
     for (let wrapper of wrappers) {
         text = wrapper.postprocess(text);
@@ -200,7 +196,7 @@ function formatInlineMarkdown(text) {
     for (let wrapper of wrappers) {
         text = wrapper.preprocess(text);
     }
-    text = marked.inlineLexer(text, [], options);
+    text = marked.parseInline(text, options);
     wrappers.reverse();
     for (let wrapper of wrappers) {
         text = wrapper.postprocess(text);

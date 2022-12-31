@@ -109,7 +109,7 @@ def get_post_security_hash(id: int) -> str:
 
 def get_post_content_url(post: model.Post) -> str:
     assert post
-    return "%s/posts/%d_%s.%s" % (
+    return "%s/%d_%s.%s" % (
         config.config["data_url"].rstrip("/"),
         post.post_id,
         get_post_security_hash(post.post_id),

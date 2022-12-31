@@ -32,9 +32,10 @@ class PostsPageView extends events.EventTarget {
                 );
             }
 
-            const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
+            const relationFlipperNode =
+                this._getRelationFlipperNode(listItemNode);
             if (relationFlipperNode) {
-                relationFlipperNode.addEventListener("click", e =>
+                relationFlipperNode.addEventListener("click", (e) =>
                     this._evtBulkAddRelationClick(e, post)
                 );
             }
@@ -46,6 +47,13 @@ class PostsPageView extends events.EventTarget {
                         this._evtBulkEditSafetyClick(e, post)
                     );
                 }
+            }
+
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                deleteFlipperNode.addEventListener("click", (e) =>
+                    this._evtBulkToggleDeleteClick(e, post)
+                );
             }
         }
 
@@ -66,6 +74,10 @@ class PostsPageView extends events.EventTarget {
 
     _getRelationFlipperNode(listItemNode) {
         return listItemNode.querySelector(".relation-flipper");
+    }
+
+    _getDeleteFlipperNode(listItemNode) {
+        return listItemNode.querySelector(".delete-flipper");
     }
 
     _evtPostChange(e) {
@@ -102,9 +114,11 @@ class PostsPageView extends events.EventTarget {
         linkNode.setAttribute("data-disabled", true);
         this.dispatchEvent(
             new CustomEvent(
-                linkNode.classList.contains("related") ? "removeRelation" : "addRelation",
+                linkNode.classList.contains("related")
+                    ? "removeRelation"
+                    : "addRelation",
                 {
-                    detail: { post: post }
+                    detail: { post: post },
                 }
             )
         );
@@ -124,6 +138,20 @@ class PostsPageView extends events.EventTarget {
         this.dispatchEvent(
             new CustomEvent("changeSafety", {
                 detail: { post: post, safety: newSafety },
+            })
+        );
+    }
+
+    _evtBulkToggleDeleteClick(e, post) {
+        e.preventDefault();
+        const linkNode = e.target;
+        linkNode.classList.toggle("delete");
+        this.dispatchEvent(
+            new CustomEvent("markForDeletion", {
+                detail: {
+                    post: post,
+                    delete: linkNode.classList.contains("delete"),
+                },
             })
         );
     }
@@ -154,10 +182,20 @@ class PostsPageView extends events.EventTarget {
                 }
             }
 
-            const relationFlipperNode = this._getRelationFlipperNode(listItemNode);
+            const relationFlipperNode =
+                this._getRelationFlipperNode(listItemNode);
             if (relationFlipperNode) {
                 let related = this._ctx.parameters.relations.includes(post.id);
                 relationFlipperNode.classList.toggle("related", related);
+            }
+
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                if (
+                    this._ctx.bulkEdit.delete.indexOf(parseInt(postId)) != -1
+                ) {
+                    deleteFlipperNode.classList.toggle("delete", true);
+                }
             }
         }
     }

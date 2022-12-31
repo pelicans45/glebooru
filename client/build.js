@@ -31,24 +31,24 @@ const external_js = [
 ];
 
 const app_manifest = {
-    name: 'szurubooru',
+    name: "szurubooru",
     icons: [
         {
-            src: baseUrl() + 'img/android-chrome-192x192.png',
-            type: 'image/png',
-            sizes: '192x192'
+            src: baseUrl() + "img/android-chrome-192x192.png",
+            type: "image/png",
+            sizes: "192x192",
         },
         {
-            src: baseUrl() + 'img/android-chrome-512x512.png',
-            type: 'image/png',
-            sizes: '512x512'
-        }
+            src: baseUrl() + "img/android-chrome-512x512.png",
+            type: "image/png",
+            sizes: "512x512",
+        },
     ],
     start_url: baseUrl(),
-    theme_color: '#24aadd',
-    background_color: '#ffffff',
-    display: 'standalone'
-}
+    theme_color: "#6824dd",
+    background_color: "#ffffff",
+    display: "standalone",
+};
 
 // -------------------------------------------------
 

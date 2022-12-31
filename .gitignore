@@ -17,3 +17,4 @@ __pycache__/
 # IDE files
 .idea
 *.iml
+.DS_Store

@@ -11,6 +11,7 @@ const PageController = require("../controllers/page_controller.js");
 const PostsHeaderView = require("../views/posts_header_view.js");
 const PostsPageView = require("../views/posts_page_view.js");
 const EmptyView = require("../views/empty_view.js");
+const Post = require("../models/post.js");
 
 const fields = [
     "id",
@@ -47,6 +48,7 @@ class PostListController {
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),
+            canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
@@ -54,6 +56,16 @@ class PostListController {
         this._headerView.addEventListener("navigate", (e) =>
             this._evtNavigate(e)
         );
+        // This doesn't feel like the best solution
+        this._headerView._bulkDeleteEditor.addEventListener(
+            "deleteSelectedPosts",
+            (e) => {
+                this._evtDeleteSelectedPosts(e);
+            }
+        );
+
+        // Contains the id of each post that we want to delete (while using the bulk delete feature).
+        this._bulkEditDelete = [];
 
         this._syncPageController();
     }
@@ -71,8 +83,10 @@ class PostListController {
     }
 
     get _bulkEditRelationsIds() {
-        return (this._ctx.parameters.relations || "").split(/\s+/).filter(s => s)
-            .map(id => parseInt(id));
+        return (this._ctx.parameters.relations || "")
+            .split(/\s+/)
+            .filter((s) => s)
+            .map((id) => parseInt(id));
     }
 
     _evtNavigate(e) {
@@ -81,7 +95,8 @@ class PostListController {
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._bulkEditTags.map((tagName) =>
-            tags.resolveTagAndCategory(tagName)
+            tags
+                .resolveTagAndCategory(tagName)
                 .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
@@ -124,14 +139,14 @@ class PostListController {
         addedPost.save().catch((error) => window.alert(error.message));
         relations.push(addedPost.id);
         this._updateRelationsForBulkEdit(relations);
-
     }
 
     _evtRemoveRelation(e) {
         let removedPost = e.detail.post;
         let relations = this._bulkEditRelationsIds;
-        removedPost.relations = removedPost.relations
-            .filter((id)=> !relations.some((relationId) => relationId == id));
+        removedPost.relations = removedPost.relations.filter(
+            (id) => !relations.some((relationId) => relationId == id)
+        );
         // Only save the updated post, the relationship will propagate to others automatically
         removedPost.save().catch((error) => window.alert(error.message));
         relations = relations.filter((id) => id != removedPost.id);
@@ -141,6 +156,36 @@ class PostListController {
     _updateRelationsForBulkEdit(relations) {
         //Whitespace instead of empty string so that it stays part of the query:
         this._ctx.parameters.relations = relations.join(" ") || " ";
+    }
+
+    _evtMarkForDeletion(e) {
+        const postId = e.detail.post.id;
+
+        if (e.detail.delete) {
+            this._bulkEditDelete.push(postId);
+        } else {
+            // Remove item from delete list
+            this._bulkEditDelete = this._bulkEditDelete.filter(
+                (x) => x != postId
+            );
+        }
+    }
+
+    async _evtDeleteSelectedPosts(e) {
+        if (
+            confirm(
+                `Are you sure you want to delete ${this._bulkEditDelete.length} posts?`
+            )
+        ) {
+            for (let postId of this._bulkEditDelete) {
+                const post = await Post.get(postId);
+                await post.delete();
+            }
+
+            // Reset delete list and refresh the post view
+            this._bulkEditDelete = [];
+            this._headerView._navigate();
+        }
     }
 
     _syncPageController() {
@@ -173,9 +218,11 @@ class PostListController {
                         "posts:bulk-edit:safety"
                     ),
                     canViewMetrics: api.hasPrivilege("metrics:list"),
+                    canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
                     bulkEdit: {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
+                        delete: this._bulkEditDelete,
                     },
                     postFlow: settings.get().postFlow,
                 });
@@ -190,6 +237,9 @@ class PostListController {
                 );
                 view.addEventListener("removeRelation", (e) =>
                     this._evtRemoveRelation(e)
+                );
+                view.addEventListener("markForDeletion", (e) =>
+                    this._evtMarkForDeletion(e)
                 );
                 return view;
             },

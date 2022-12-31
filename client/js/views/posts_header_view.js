@@ -142,6 +142,34 @@ class BulkTagEditor extends BulkEditor {
     }
 }
 
+class BulkDeleteEditor extends BulkEditor {
+    constructor(hostNode) {
+        super(hostNode);
+        this._hostNode.addEventListener("submit", (e) =>
+            this._evtFormSubmit(e)
+        );
+    }
+
+    _evtFormSubmit(e) {
+        e.preventDefault();
+        this.dispatchEvent(
+            new CustomEvent("deleteSelectedPosts", { detail: {} })
+        );
+    }
+
+    _evtOpenLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(true);
+        this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+    }
+
+    _evtCloseLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(false);
+        this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+    }
+}
+
 class BulkAddRelationEditor extends BulkEditor {
     constructor(hostNode) {
         super(hostNode);
@@ -221,6 +249,13 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkSafetyEditor);
         }
 
+        if (this._bulkEditDeleteNode) {
+            this._bulkDeleteEditor = new BulkDeleteEditor(
+                this._bulkEditDeleteNode
+            );
+            this._bulkEditors.push(this._bulkDeleteEditor);
+        }
+
         if (this._bulkAddRelationNode) {
             this._bulkAddRelationEditor = new BulkAddRelationEditor(
                 this._bulkAddRelationNode
@@ -236,7 +271,10 @@ class PostsHeaderView extends events.EventTarget {
         );
 
         if (this._metricsButtonHolderNode) {
-            this._metricControl = new MetricHeaderControl(this._metricsBlockNode, ctx);
+            this._metricControl = new MetricHeaderControl(
+                this._metricsBlockNode,
+                ctx
+            );
             this._metricControl.addEventListener("submit", (e) =>
                 this._navigate()
             );
@@ -266,6 +304,8 @@ class PostsHeaderView extends events.EventTarget {
             this._openBulkEditor(this._bulkTagEditor);
         } else if (ctx.parameters.safety && this._bulkSafetyEditor) {
             this._openBulkEditor(this._bulkSafetyEditor);
+        } else if (ctx.parameters.delete && this._bulkDeleteEditor) {
+            this._openBulkEditor(this._bulkDeleteEditor);
         } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
             this._openBulkEditor(this._bulkAddRelationEditor);
         }
@@ -316,6 +356,10 @@ class PostsHeaderView extends events.EventTarget {
 
     get _bulkEditSafetyNode() {
         return this._hostNode.querySelector(".bulk-edit-safety");
+    }
+
+    get _bulkEditDeleteNode() {
+        return this._hostNode.querySelector(".bulk-edit-delete");
     }
 
     get _bulkAddRelationNode() {
@@ -400,9 +444,8 @@ class PostsHeaderView extends events.EventTarget {
         e.target.classList.toggle("disabled");
         const safety = e.target.getAttribute("data-safety");
         let browsingSettings = settings.get();
-        browsingSettings.listPosts[safety] = !browsingSettings.listPosts[
-            safety
-        ];
+        browsingSettings.listPosts[safety] =
+            !browsingSettings.listPosts[safety];
         settings.save(browsingSettings, true);
         this.dispatchEvent(
             new CustomEvent("navigate", {
@@ -475,7 +518,7 @@ class PostsHeaderView extends events.EventTarget {
         let parameters = {
             query: this._queryInputNode.value,
             cachenumber: this._ctx.parameters.cachenumber,
-            metrics: this._ctx.parameters.metrics
+            metrics: this._ctx.parameters.metrics,
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query
@@ -492,6 +535,10 @@ class PostsHeaderView extends events.EventTarget {
         }
         parameters.safety =
             this._bulkSafetyEditor && this._bulkSafetyEditor.opened
+                ? "1"
+                : null;
+        parameters.delete =
+            this._bulkDeleteEditor && this._bulkDeleteEditor.opened
                 ? "1"
                 : null;
         parameters.relations =

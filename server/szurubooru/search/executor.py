@@ -130,7 +130,8 @@ class Executor:
             "offset": offset,
             "limit": limit,
             "total": count,
-            "results": list([serializer(entity) for entity in entities]),
+            #"results": list([serializer(entity) for entity in entities]),
+            "results": [serializer(entity) for entity in entities],
         }
 
     def count(self, query_text:str) -> int:

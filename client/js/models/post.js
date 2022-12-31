@@ -13,6 +13,8 @@ const PostMetricList = require("./post_metric_list.js");
 const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 
+const maxNameLength = 250;
+
 class Post extends events.EventTarget {
     constructor() {
         super();
@@ -72,6 +74,11 @@ class Post extends events.EventTarget {
 
     get thumbnailUrl() {
         return this._thumbnailUrl;
+    }
+
+    get fileExtension() {
+        const parts = this.contentUrl.split(".");
+        return parts[parts.length - 1];
     }
 
     get source() {
@@ -281,13 +288,13 @@ class Post extends events.EventTarget {
             }));
         }
         if (misc.arraysDiffer(this._metrics, this._orig._metrics)) {
-            detail.metrics = this._metrics.map(metric => ({
+            detail.metrics = this._metrics.map((metric) => ({
                 tag_name: metric.tagName,
                 value: metric.value,
             }));
         }
         if (misc.arraysDiffer(this._metricRanges, this._orig._metricRanges)) {
-            detail.metricRanges = this._metricRanges.map(metricRange => ({
+            detail.metricRanges = this._metricRanges.map((metricRange) => ({
                 tag_name: metricRange.tagName,
                 low: metricRange.low,
                 high: metricRange.high,
@@ -480,10 +487,33 @@ class Post extends events.EventTarget {
     }
 
     removeMetricsWithoutTag() {
-        this._metrics.filter(pm => !this._tags.findByName(pm.tagName))
-            .map(pm => this._metrics.remove(pm));
-        this._metricRanges.filter(pmr => !this._tags.findByName(pmr.tagName))
-            .map(pmr => this._metricRanges.remove(pmr));
+        this._metrics
+            .filter((pm) => !this._tags.findByName(pm.tagName))
+            .map((pm) => this._metrics.remove(pm));
+        this._metricRanges
+            .filter((pmr) => !this._tags.findByName(pmr.tagName))
+            .map((pmr) => this._metricRanges.remove(pmr));
+    }
+
+    getDownloadFilename() {
+        let filename = "";
+        let nameParts = [];
+
+        // 4 characters for the file extension
+        let nameLength = this.id.length + 4;
+
+        for (const name of this.tagNames()) {
+            nameLength += name.length;
+            if (nameLength > maxNameLength) {
+                break;
+            }
+            tagNames.push(name);
+        }
+
+        this.tagNames.push(this.id);
+
+        const joinedTags = tagNames.join(" ");
+        return `${joinedTags}.${this.fileExtension}`;
     }
 
     mutateContentUrl() {

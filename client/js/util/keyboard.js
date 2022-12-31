@@ -44,3 +44,19 @@ module.exports = {
         paused = false;
     },
 };
+
+function downloadURL(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name + ".json";
+    a.click();
+}
+
+document.body.addEventListener("click", function (event) {
+    if (!event.target.classList.contains("gallery-thumb")) {
+        return;
+    }
+
+	const path = event.target.src.replace("generated-thumbnails", "posts")
+	downloadURL(path)
+});
