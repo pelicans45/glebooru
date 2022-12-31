@@ -1,7 +1,9 @@
 FROM python:3.11.1-alpine3.17 as prereqs
 WORKDIR /opt/app
 
-RUN apk --no-cache add \
+RUN apk del .python-rundeps \
+    && apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
+    && apk --no-cache add \
     python3-dev \
     py3-pip \
     build-base \
