@@ -72,10 +72,9 @@
         %></form><%
     %></div><%
     if (ctx.canViewMetrics) {
-    %><div class='metrics-block hidden'></div><%
+        %><div class='metrics-block hidden'></div><%
     }
-    %><% } %><%
-    %><% if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
+    if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
         %><form class='horizontal bulk-edit bulk-edit-safety'><%
             %><a href class='mousetrap button append open'>Mass edit safety</a><%
             %><a href class='mousetrap button append close'>Stop editing safety</a><%
