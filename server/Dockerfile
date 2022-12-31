@@ -29,43 +29,8 @@ RUN apk del .python-rundeps \
     "heif-image-plugin>=0.3.2" \
     youtube_dl \
     "pillow-avif-plugin>=1.1.0" \
-    && apk --no-cache del py3-pip
-
-COPY ./ /opt/app/
-RUN rm -rf /opt/app/szurubooru/tests
-
-
-FROM --platform=$BUILDPLATFORM prereqs as testing
-WORKDIR /opt/app
-
-RUN apk --no-cache add \
-    py3-pip \
-    py3-pytest \
-    py3-pytest-cov \
-    postgresql \
-    && pip3 install --no-cache-dir --disable-pip-version-check \
-    pytest-pgsql \
-    freezegun \
     && apk --no-cache del py3-pip \
-    && addgroup app \
-    && adduser -SDH -h /opt/app -g '' -G app app \
-    && chown app:app /opt/app
-
-COPY --chown=app:app ./szurubooru/tests /opt/app/szurubooru/tests/
-
-ENV TEST_ENVIRONMENT="true"
-USER app
-ENTRYPOINT ["pytest", "--tb=short"]
-CMD ["szurubooru/"]
-
-
-FROM prereqs as release
-WORKDIR /opt/app
-
-ARG PUID=1000
-ARG PGID=1000
-
-RUN apk --no-cache add \
+    && apk --no-cache add \
     dumb-init \
     py3-setuptools \
     py3-waitress \
@@ -74,6 +39,13 @@ RUN apk --no-cache add \
     && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
     && chown -R app:app /opt/app /data
 
+
+COPY ./ /opt/app/
+RUN rm -rf /opt/app/szurubooru/tests
+
+
+ARG PUID=1000
+ARG PGID=1000
 USER app
 CMD ["/opt/app/docker-start.sh"]
 
