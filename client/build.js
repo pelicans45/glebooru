@@ -93,7 +93,7 @@ function bundleHtml() {
     let baseHtml = readTextFile('./html/index.htm')
         .replace('<!-- Base HTML Placeholder -->', `<base href="${baseUrl()}"/>`);
 
-	baseHtml = baseHTML.replaceAll("$RAND$", Math.random().toString(36).substring(7));
+	baseHtml = baseHtml.replaceAll("$RAND$", Math.random().toString(36).substring(7));
     fs.writeFileSync('./public/index.htm', minifyHtml(baseHtml));
 
     let compiledTemplateJs = [
