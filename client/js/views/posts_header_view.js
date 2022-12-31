@@ -314,7 +314,7 @@ class PostsHeaderView extends events.EventTarget {
         }
     }
 
-    get focusSearchInputIfSet() {
+    focusSearchInputIfSet() {
         if (this._queryInputNode.value) {
             this._queryInputNode.focus();
         }

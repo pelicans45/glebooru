@@ -247,8 +247,8 @@ nav
             #mobile-navigation-toggle
                 color: $text-color-darktheme
 
-a .access-key
-    text-decoration: underline
+//a .access-key
+//    text-decoration: underline
 
 .messages
     margin: 0 auto
@@ -274,8 +274,11 @@ a .access-key
 .darktheme .messages
     .message
         &.info
-            border: 1px solid darken($message-info-border-color, 30%)
-            background: darken($message-info-background-color, 60%)
+            //border: 1px solid darken($message-info-border-color, 30%)
+            //background: darken($message-info-background-color, 60%)
+
+            border: 1px solid $message-info-border-color
+            background: $message-info-background-color, 60%
         &.error
             border: 1px solid darken($message-error-border-color, 30%)
             background: darken($message-error-background-color, 60%)

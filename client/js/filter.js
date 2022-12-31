@@ -6,3 +6,7 @@ const hostnameFilters = {
 function getHostnameFilter() {
     return hostnameFilters[location.hostname];
 }
+
+module.exports = {
+    getHostnameFilter: getHostnameFilter,
+};
