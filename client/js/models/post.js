@@ -496,8 +496,7 @@ class Post extends events.EventTarget {
     }
 
     getDownloadFilename() {
-        let filename = "";
-        let nameParts = [];
+        const tagNames = [];
 
         // 4 characters for the file extension
         let nameLength = this.id.length + 4;
@@ -510,7 +509,7 @@ class Post extends events.EventTarget {
             tagNames.push(name);
         }
 
-        this.tagNames.push(this.id);
+        tagNames.push(this.id);
 
         const joinedTags = tagNames.join(" ");
         return `${joinedTags}.${this.fileExtension}`;
@@ -518,9 +517,7 @@ class Post extends events.EventTarget {
 
     mutateContentUrl() {
         this._contentUrl =
-            this._orig._contentUrl +
-            "?bypass-cache=" +
-            Math.round(Math.random() * 1000);
+            this._orig._contentUrl + "?" + Math.round(Math.random() * 1000);
     }
 
     _updateFromResponse(response) {

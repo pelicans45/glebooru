@@ -20,7 +20,7 @@ class FileDropperControl extends events.EventTarget {
             id: "file-" + Math.random().toString(36).substring(7),
             urlPlaceholder:
                 options.urlPlaceholder ||
-                "or paste an image/URL here",
+                "or paste file/URL here",
         });
 
         this._dropperNode = source.querySelector(".file-dropper");

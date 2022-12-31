@@ -1,7 +1,7 @@
 <div class='content-wrapper' id='settings'>
     <form onsubmit="setTimeout(() => location.reload(), 500)">
         <strong>Browsing settings</strong>
-        <p>These settings are saved to the browser's local storage and are not coupled to the user account, so they don't apply to other devices or browsers alike.</p>
+        <p>(These settings only apply to your current browser, not your account.)</p>
         <ul class='input'>
             <li style="display: none">
                 <%= ctx.makeCheckbox({
@@ -63,7 +63,7 @@
                     name: 'dark-theme',
                     checked: ctx.browsingSettings.darkTheme,
                 }) %>
-                <p class='hint'>Changing this setting will require you to refresh the page for it to apply.</p>
+                <p style="display: none" class='hint'>Changing this setting will require you to refresh the page for it to apply.</p>
             </li>
 
             <li style="display: none">

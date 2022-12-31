@@ -19,7 +19,7 @@
             <% if (ctx.lock) { %>
                 <button>Confirm</button>
             <% } else { %>
-                <button>Add URL</button>
+                <button>Add</button>
             <% } %>
         </div>
     <% } %>

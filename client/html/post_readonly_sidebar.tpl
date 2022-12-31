@@ -1,8 +1,9 @@
 <div class='readonly-sidebar'>
     <article class='details'>
         <section class='download'>
-            <a rel='external' href='<%- ctx.post.contentUrl %>'>
+            <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
                 <i class='fa fa-download'></i><!--
+                <span style="display: none">
             --><%= ctx.makeFileSize(ctx.post.fileSize) %> <!--
                 --><%- {
                     'image/gif': 'GIF',
@@ -17,6 +18,7 @@
                     'video/mp4': 'MPEG-4',
                     'application/x-shockwave-flash': 'SWF',
                 }[ctx.post.mimeType] %>
+                </span>
             </a>
             (<%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>)
             <% if (ctx.post.flags.length) { %><!--
