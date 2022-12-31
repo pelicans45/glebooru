@@ -1,6 +1,10 @@
 FROM python:3.11.1-alpine3.17 as prereqs
 WORKDIR /opt/app
 
+ARG PUID=1000
+ARG PGID=1000
+USER app
+
 RUN apk del .python-rundeps \
     && apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
     && apk --no-cache add \
@@ -43,10 +47,6 @@ RUN apk del .python-rundeps \
 COPY ./ /opt/app/
 RUN rm -rf /opt/app/szurubooru/tests
 
-
-ARG PUID=1000
-ARG PGID=1000
-USER app
 CMD ["/opt/app/docker-start.sh"]
 
 ARG PORT=6666
