@@ -1,5 +1,6 @@
 <div class='content-wrapper' id='login'>
-    <h1>Log in</h1>
+    <h1 style="margin-bottom: 0.3em">Log in</h1>
+    <div style="margin-bottom: 1.3em"><a href="/register">Or click here to register</a></div>
     <form>
         <ul class='input'>
             <li>

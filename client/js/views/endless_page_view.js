@@ -12,7 +12,7 @@ function isScrolledIntoView(element) {
         top += element.offsetTop || 0;
         element = element.offsetParent;
     } while (element);
-    return top >= window.scrollY && top <= window.scrollY + window.innerHeight;
+    return top >= window.scrollY && top <= window.scrollY + (window.innerHeight - 300);
 }
 
 class EndlessPageView {

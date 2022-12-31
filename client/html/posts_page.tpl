@@ -5,6 +5,7 @@
                 <li data-post-id='<%= post.id %>'>
                     <a class='thumbnail-wrapper <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
                             title='@<%- post.id %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
+                            target="_blank"
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
                         <span class='type' data-type='<%- post.type %>'>

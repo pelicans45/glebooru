@@ -7,7 +7,8 @@ version: '2'
 services:
 
   server:
-    image: szurubooru/server:latest
+    #image: szurubooru/server:latest
+    build: server
     depends_on:
       - sql
     environment:
@@ -27,7 +28,8 @@ services:
       - "./server/config.yaml:/opt/app/config.yaml"
 
   client:
-    image: szurubooru/client:latest
+    #image: szurubooru/client:latest
+    build: client
     depends_on:
       - server
     environment:
@@ -36,7 +38,7 @@ services:
     volumes:
       - "${MOUNT_DATA}:/data:ro"
     ports:
-      - "${PORT}:80"
+      - "${PORT}:8080"
 
   sql:
     image: postgres:11-alpine

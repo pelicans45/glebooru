@@ -11,6 +11,8 @@ const PoolList = require("./pool_list.js");
 const Pool = require("./pool.js");
 const misc = require("../util/misc.js");
 
+const maxNameLength = 250;
+
 class Post extends events.EventTarget {
     constructor() {
         super();
@@ -68,6 +70,11 @@ class Post extends events.EventTarget {
 
     get thumbnailUrl() {
         return this._thumbnailUrl;
+    }
+
+    get fileExtension() {
+        const parts = this.contentUrl.split(".");
+        return parts[parts.length - 1];
     }
 
     get source() {
@@ -452,6 +459,27 @@ class Post extends events.EventTarget {
                 );
                 return Promise.resolve();
             });
+    }
+
+    getDownloadFilename() {
+        let filename = "";
+        let nameParts = [];
+
+        // 4 characters for the file extension
+        let nameLength = this.id.length + 4;
+
+        for (const name of this.tagNames()) {
+            nameLength += name.length;
+            if (nameLength > maxNameLength) {
+                break;
+            }
+            tagNames.push(name);
+        }
+
+        this.tagNames.push(this.id);
+
+        const joinedTags = tagNames.join(" ");
+        return `${joinedTags}.${this.fileExtension}`;
     }
 
     mutateContentUrl() {

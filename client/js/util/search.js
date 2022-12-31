@@ -11,6 +11,7 @@ function searchInputNodeFocusHelper(inputNode) {
             inputNode.value.length,
             inputNode.value.length
         );
+        return false;
     });
 }
 

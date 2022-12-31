@@ -1,9 +1,9 @@
 <div class='content-wrapper' id='settings'>
-    <form>
+    <form onsubmit="setTimeout(() => location.reload(), 500)">
         <strong>Browsing settings</strong>
         <p>These settings are saved to the browser's local storage and are not coupled to the user account, so they don't apply to other devices or browsers alike.</p>
         <ul class='input'>
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: "Enable keyboard shortcuts <a class='append icon' href='" + ctx.formatClientLink('help', 'keyboard') + "'><i class='fa fa-question-circle-o'></i></a>",
                     name: 'keyboard-shortcuts',
@@ -11,7 +11,7 @@
                 }) %>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeNumericInput({
                     text: 'Number of posts per page',
                     name: 'posts-per-page',
@@ -31,7 +31,7 @@
                 <p class='hint'>Changing this setting will require you to refresh the page for it to apply.</p>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Upscale small posts',
                     name: 'upscale-small-posts',
@@ -47,7 +47,7 @@
                 <p class='hint'>Rather than using a paged navigation, smoothly scrolls through the content.</p>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Use post flow',
                     name: 'post-flow',
@@ -56,7 +56,7 @@
                 <p class='hint'>Use a content-aware flow for thumbnails on the post search page.</p>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Enable transparency grid',
                     name: 'transparency-grid',
@@ -65,7 +65,7 @@
                 <p class='hint'>Renders a checkered pattern behind posts with transparent background.</p>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Show tag suggestions',
                     name: 'tag-suggestions',
@@ -82,7 +82,7 @@
                 }) %>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Display underscores as spaces',
                     name: 'underscores-as-spaces',
