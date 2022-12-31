@@ -146,7 +146,7 @@ class PostMainController extends BasePostController {
         e.detail.post.delete().then(
             () => {
                 misc.disableExitConfirmation();
-                const ctx = router.show(uri.formatClientlink(""));
+                const ctx = router.show(uri.formatClientLink(""));
                 ctx.controller.showSuccess("Post deleted.");
             },
             (error) => {

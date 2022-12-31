@@ -312,7 +312,7 @@ class TagInputControl extends events.EventTarget {
         }
         searchLinkNode.setAttribute(
             "href",
-            uri.formatClientlink("", {
+            uri.formatClientLink("", {
                 query: uri.escapeTagName(tag.names[0]),
             })
         );

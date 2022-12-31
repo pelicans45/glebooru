@@ -88,7 +88,7 @@
         <nav class='similar'>
             <h1>Similar</h1>
             <ul></ul>
-            <a href='<%- ctx.formatClientlink("", {query: "similar:" + ctx.post.id}) %>'>See more</a>
+            <a href='<%- ctx.formatClientLink("", {query: "similar:" + ctx.post.id}) %>'>See more</a>
         </nav>
 
         <nav class='lookalikes'>

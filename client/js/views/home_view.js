@@ -106,7 +106,7 @@ class HomeView {
         e.preventDefault();
         this._searchInputNode.blur();
         router.show(
-            uri.formatClientlink("", {
+            uri.formatClientLink("", {
                 query: this._searchInputNode.value,
             })
         );

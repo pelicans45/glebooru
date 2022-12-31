@@ -94,7 +94,7 @@ class PostListController {
 
     _evtNavigate(e) {
         this._ctx = router.showNoDispatch(
-            uri.formatClientlink("", e.detail.parameters)
+            uri.formatClientLink("", e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._bulkEditTags.map((tagName) =>
@@ -201,7 +201,7 @@ class PostListController {
                     offset: offset,
                     limit: limit,
                 });
-                return uri.formatClientlink("", parameters);
+                return uri.formatClientLink("", parameters);
             },
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);

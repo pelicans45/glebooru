@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='login'>
-    <h1 style="margin-bottom: 0.3em">Log in</h1>
+    <h1 style="margin-bottom: 0.3em">Login</h1>
     <div style="margin-bottom: 1.3em"><a href="/register">Or click here to register</a></div>
     <form>
         <ul class='input'>
@@ -30,7 +30,7 @@
         <div class='messages'></div>
 
         <div class='buttons'>
-            <input type='submit' value='Log in'/>
+            <input type='submit' value='Login'/>
             <a class='append' href='<%- ctx.formatClientLink('password-reset') %>'>Forgot the password?</a>
         </div>
     </form>
