@@ -49,7 +49,11 @@ function makeThumbnail(url) {
                   style: `background-image: url(\'${url}\')`,
               }
             : { class: "thumbnail empty" },
-        makeElement("img", { alt: "thumbnail", "class": "gallery-thumb", src: url })
+        makeElement("img", {
+            alt: "thumbnail",
+            class: "gallery-thumb",
+            src: url,
+        })
     );
 }
 
@@ -85,9 +89,13 @@ function makeCheckbox(options) {
             disabled: options.readonly,
             required: options.required,
         }),
-        makeElement("span", {
-            class: "checkbox " + (options.class || '')
-        }, options.text)
+        makeElement(
+            "span",
+            {
+                class: "checkbox " + (options.class || ""),
+            },
+            options.text
+        )
     );
 }
 
@@ -183,11 +191,13 @@ function getPostUrl(id, parameters) {
     return uri.formatClientLink(
         "",
         id,
-        parameters ? {
-            query: parameters.query,
-            metrics: parameters.metrics,
-            cachenumber: parameters.cachenumber,
-        } : {}
+        parameters
+            ? {
+                  query: parameters.query,
+                  metrics: parameters.metrics,
+                  c: parameters.c,
+              }
+            : {}
     );
 }
 
@@ -196,11 +206,13 @@ function getPostEditUrl(id, parameters) {
         "",
         id,
         "edit",
-        parameters ? {
-            query: parameters.query,
-            metrics: parameters.metrics,
-            cachenumber: parameters.cachenumber,
-        } : {}
+        parameters
+            ? {
+                  query: parameters.query,
+                  metrics: parameters.metrics,
+                  c: parameters.c,
+              }
+            : {}
     );
 }
 
@@ -209,10 +221,12 @@ function getMetricSorterUrl(id, parameters) {
         "",
         id,
         "metric-sorter",
-        parameters ? {
-            query: parameters.query,
-            metrics: parameters.metrics,
-        } : {}
+        parameters
+            ? {
+                  query: parameters.query,
+                  metrics: parameters.metrics,
+              }
+            : {}
     );
 }
 

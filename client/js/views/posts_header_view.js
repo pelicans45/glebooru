@@ -314,6 +314,12 @@ class PostsHeaderView extends events.EventTarget {
         }
     }
 
+    get focusSearchInputIfSet() {
+        if (this._queryInputNode.value) {
+            this._queryInputNode.focus();
+        }
+    }
+
     get _formNode() {
         return this._hostNode.querySelector("form.search");
     }
@@ -509,7 +515,7 @@ class PostsHeaderView extends events.EventTarget {
         if (!this._queryInputNode.value.includes("sort:random")) {
             this._queryInputNode.value += " sort:random";
         }
-        this._ctx.parameters.cachenumber = Math.round(Math.random() * 1000);
+        this._ctx.parameters.c = Math.round(Math.random() * 1000);
         this._navigate();
     }
 
@@ -517,7 +523,7 @@ class PostsHeaderView extends events.EventTarget {
         this._autoCompleteControl.hide();
         let parameters = {
             query: this._queryInputNode.value,
-            cachenumber: this._ctx.parameters.cachenumber,
+            c: this._ctx.parameters.c,
             metrics: this._ctx.parameters.metrics,
         };
 

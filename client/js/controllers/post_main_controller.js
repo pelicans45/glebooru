@@ -21,11 +21,7 @@ class PostMainController extends BasePostController {
         let query = uri.getPostsQuery(parameters);
         Promise.all([
             Post.get(ctx.parameters.id),
-            PostList.getAround(
-                ctx.parameters.id,
-                query,
-                ctx.parameters.cachenumber
-            ),
+            PostList.getAround(ctx.parameters.id, query, ctx.parameters.c),
         ]).then(
             (responses) => {
                 const [post, aroundResponse] = responses;

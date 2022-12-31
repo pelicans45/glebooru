@@ -35,12 +35,12 @@
                         <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            cachenumber: Math.round(Math.random() * 1000)}) %>'>
+                            c: Math.round(Math.random() * 1000)}) %>'>
                     <% } else { %>
                         <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            cachenumber: Math.round(Math.random() * 1000)}) %>'>
+                            c: Math.round(Math.random() * 1000)}) %>'>
                     <% } %>
                 <% } else { %>
                     <a rel='next' class='inactive'>

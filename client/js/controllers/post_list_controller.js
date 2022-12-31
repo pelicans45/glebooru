@@ -103,6 +103,7 @@ class PostListController {
                 .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
+        this._headerView.focusSearchInputIfSet();
     }
 
     _evtTag(e) {
@@ -210,7 +211,7 @@ class PostListController {
                     offset,
                     limit,
                     fields,
-                    this._ctx.parameters.cachenumber
+                    this._ctx.parameters.c
                 );
             },
             pageRenderer: (pageCtx) => {
