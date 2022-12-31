@@ -34,6 +34,9 @@ class TopNavigationController {
             ? api.user.avatarUrl
             : null;
 
+        console.log("upload", api.hasPrivilege("posts:create"));
+        console.log("view", api.hasPrivilege("posts:list"));
+
         topNavigation.showAll();
         if (!api.hasPrivilege("posts:list")) {
             topNavigation.hide("posts");

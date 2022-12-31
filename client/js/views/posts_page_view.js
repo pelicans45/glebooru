@@ -6,6 +6,13 @@ const views = require("../util/views.js");
 
 const template = views.getTemplate("posts-page");
 
+function downloadURL(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+}
+
 class PostsPageView extends events.EventTarget {
     constructor(ctx) {
         super();
@@ -56,6 +63,18 @@ class PostsPageView extends events.EventTarget {
                 );
             }
         }
+
+        document.body.addEventListener("click", function (event) {
+            if (!event.target.classList.contains("gallery-thumb")) {
+                return;
+            }
+
+            const path = event.target.src.replace(
+                "generated-thumbnails",
+                "posts"
+            );
+            downloadURL(path);
+        });
 
         this._syncBulkEditorsHighlights();
     }
