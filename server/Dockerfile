@@ -4,7 +4,7 @@ WORKDIR /opt/app
 ARG PUID=1000
 ARG PGID=1000
 
-COPY server/requirements.txt /tmp/
+COPY requirements.txt /tmp/
 
 RUN apk del .python-rundeps \
     && apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
