@@ -3,7 +3,7 @@ WORKDIR /opt/app
 
 ARG PUID=1000
 ARG PGID=1000
-USER app
+
 
 RUN apk del .python-rundeps \
     && apk add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
@@ -43,12 +43,12 @@ RUN apk del .python-rundeps \
     && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
     && chown -R app:app /opt/app /data
 
-
 COPY ./ /opt/app/
 RUN rm -rf /opt/app/szurubooru/tests
 
 CMD ["/opt/app/docker-start.sh"]
 
+USER app
 ARG PORT=6666
 ENV PORT=${PORT}
 EXPOSE ${PORT}
