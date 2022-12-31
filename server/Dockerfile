@@ -8,12 +8,6 @@ ARG PGID=1000
 COPY requirements.txt /tmp/
 
 RUN apk --no-cache add \
-    #apk del .python-rundeps \
-    #&& apk add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
-    #&& apk --no-cache add \
-    #python3-dev \
-    #py3-numpy \
-    # py3-pip \
     build-base \
     libheif \
     libheif-dev \
