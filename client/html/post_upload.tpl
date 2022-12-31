@@ -17,6 +17,10 @@
                 <%= ctx.makeCheckbox({
                     text: 'Copy tags to originals',
                     name: 'copy-tags-to-originals',
+                    checked: false,
+                }) %>
+            </span>
+
             <span class='always-upload-similar'>
                 <%= ctx.makeCheckbox({
                     text: 'Force upload similar',
@@ -28,6 +32,7 @@
             <div class='tags'>
                 <%= ctx.makeTextInput({}) %>
             </div>
+
             <span class='pause-remain-on-error'>
                 <%= ctx.makeCheckbox({
                     text: 'Pause on error',
