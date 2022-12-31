@@ -161,8 +161,9 @@ class TagInputControl extends events.EventTarget {
 
     addTagByText(text, source) {
         tags.resolveTagAndCategory(text).then(
-            tag => this.addTag(tag, source),
-            error => window.alert(error.message));
+            (tag) => this.addTag(tag, source),
+            (error) => window.alert(error.message)
+        );
     }
 
     addTagByName(name, source) {
@@ -311,7 +312,7 @@ class TagInputControl extends events.EventTarget {
         }
         searchLinkNode.setAttribute(
             "href",
-            uri.formatClientLink("posts", {
+            uri.formatClientlink("", {
                 query: uri.escapeTagName(tag.names[0]),
             })
         );
@@ -419,8 +420,8 @@ class TagInputControl extends events.EventTarget {
         const limit = 20;
         const fields = ["id", "thumbnailUrl", "tags"];
         const threshold = 1;
-        PostList.reverseSearch(this._post.id, limit, threshold, fields)
-            .then((response) => {
+        PostList.reverseSearch(this._post.id, limit, threshold, fields).then(
+            (response) => {
                 const tagOccurrences = {};
                 for (let post of response.results) {
                     for (let tag of post.tags) {
@@ -429,7 +430,9 @@ class TagInputControl extends events.EventTarget {
                         tagOccurrences[name] = count + 1;
                     }
                 }
-                for (const [tagName, count] of Object.entries(tagOccurrences)) {
+                for (const [tagName, count] of Object.entries(
+                    tagOccurrences
+                )) {
                     this._suggestions.set(tagName, count);
                 }
                 if (this._suggestions.length) {
@@ -437,7 +440,8 @@ class TagInputControl extends events.EventTarget {
                 } else {
                     this._closeSuggestionsPopup();
                 }
-            });
+            }
+        );
     }
 
     _refreshSuggestionsPopup() {

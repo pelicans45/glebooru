@@ -18,7 +18,7 @@ const defaultSettings = {
     tagSuggestions: true,
     autoplayVideos: false,
     postsPerPage: 58,
-	similarPosts: 10,
+	similarPosts: 5,
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
     postFlow: false,

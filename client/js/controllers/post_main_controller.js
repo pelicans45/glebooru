@@ -137,7 +137,7 @@ class PostMainController extends BasePostController {
     }
 
     _evtMergePost(e) {
-        router.show(uri.formatClientLink("post", e.detail.post.id, "merge"));
+        router.show(uri.formatClientLink("", e.detail.post.id, "merge"));
     }
 
     _evtDeletePost(e) {
@@ -146,7 +146,7 @@ class PostMainController extends BasePostController {
         e.detail.post.delete().then(
             () => {
                 misc.disableExitConfirmation();
-                const ctx = router.show(uri.formatClientLink("posts"));
+                const ctx = router.show(uri.formatClientlink(""));
                 ctx.controller.showSuccess("Post deleted.");
             },
             (error) => {
@@ -267,14 +267,22 @@ class PostMainController extends BasePostController {
 }
 
 module.exports = (router) => {
-    router.enter(["post", ":id", "edit"], (ctx, next) => {
+    router.enter(["", ":id", "edit"], (ctx, next) => {
+        if (!/^\d+$/.test(ctx.parameters.id)) {
+            return;
+        }
+
         // restore parameters from history state
         if (ctx.state.parameters) {
             Object.assign(ctx.parameters, ctx.state.parameters);
         }
         ctx.controller = new PostMainController(ctx, true);
     });
-    router.enter(["post", ":id"], (ctx, next) => {
+    router.enter(["", ":id"], (ctx, next) => {
+        if (!/^\d+$/.test(ctx.parameters.id)) {
+            return;
+        }
+
         // restore parameters from history state
         if (ctx.state.parameters) {
             Object.assign(ctx.parameters, ctx.state.parameters);

@@ -30,8 +30,7 @@
                     placeholder: 'optional',
                 }) %>
                 <p class='hint'>
-                    Used for password reminder and to show a <a href='http://gravatar.com/'>Gravatar</a>.
-                    Leave blank for random Gravatar.
+                    (Optional) To reset the password, if needed
                 </p>
             </li>
         </ul>

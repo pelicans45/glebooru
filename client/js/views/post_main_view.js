@@ -90,9 +90,9 @@ class PostMainView {
 
         keyboard.bind("e", () => {
             if (ctx.editMode) {
-                router.show(uri.formatClientLink("post", ctx.post.id));
+                router.show(uri.formatClientLink("", ctx.post.id));
             } else {
-                router.show(uri.formatClientLink("post", ctx.post.id, "edit"));
+                router.show(uri.formatClientLink("", ctx.post.id, "edit"));
             }
         });
         keyboard.bind(["a", "left"], showPreviousImage);

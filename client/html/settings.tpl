@@ -1,7 +1,7 @@
 <div class='content-wrapper' id='settings'>
     <form onsubmit="setTimeout(() => location.reload(), 500)">
-        <strong>Browsing settings</strong>
-        <p>(These settings only apply to your current browser, not your account.)</p>
+        <strong style="font-size: 110%">Settings</strong>
+        <p style="display: none">(These settings only apply to your browser.)</p>
         <ul class='input'>
             <li style="display: none">
                 <%= ctx.makeCheckbox({
@@ -47,7 +47,7 @@
                 }) %>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeNumericInput({
                 text: 'Number of similar posts',
                 name: 'similar-posts',
@@ -79,7 +79,7 @@
                     name: 'endless-scroll',
                     checked: ctx.browsingSettings.endlessScroll,
                 }) %>
-                <p class='hint'>Rather than using a paged navigation, smoothly scrolls through the content.</p>
+                <p class='hint' style="display: none">Rather than using a paged navigation, smoothly scrolls through the content.</p>
             </li>
 
             <li style="display: none">
@@ -109,7 +109,7 @@
                 <p class='hint'>Shows a popup with suggested tags in edit forms.</p>
             </li>
 
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Automatically play video posts',
                     name: 'autoplay-videos',

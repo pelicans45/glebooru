@@ -109,7 +109,7 @@ class PostUploadController {
                 () => {
                     this._view.clearMessages();
                     misc.disableExitConfirmation();
-                    const ctx = router.show(uri.formatClientLink("posts"));
+                    const ctx = router.show(uri.formatClientlink(""));
                     ctx.controller.showSuccess("Posts uploaded.");
                 },
                 (error) => {

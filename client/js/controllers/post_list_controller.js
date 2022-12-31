@@ -38,7 +38,7 @@ class PostListController {
         this._ctx = ctx;
 
         topNavigation.activate("posts");
-        topNavigation.setTitle("Listing posts");
+        topNavigation.setTitle("");
 
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
@@ -56,13 +56,16 @@ class PostListController {
         this._headerView.addEventListener("navigate", (e) =>
             this._evtNavigate(e)
         );
-        // This doesn't feel like the best solution
-        this._headerView._bulkDeleteEditor.addEventListener(
-            "deleteSelectedPosts",
-            (e) => {
-                this._evtDeleteSelectedPosts(e);
-            }
-        );
+
+        if (this._headerView._bulkDeleteEditor) {
+            // This doesn't feel like the best solution
+            this._headerView._bulkDeleteEditor.addEventListener(
+                "deleteSelectedPosts",
+                (e) => {
+                    this._evtDeleteSelectedPosts(e);
+                }
+            );
+        }
 
         // Contains the id of each post that we want to delete (while using the bulk delete feature).
         this._bulkEditDelete = [];
@@ -91,7 +94,7 @@ class PostListController {
 
     _evtNavigate(e) {
         this._ctx = router.showNoDispatch(
-            uri.formatClientLink("posts", e.detail.parameters)
+            uri.formatClientlink("", e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._bulkEditTags.map((tagName) =>
@@ -198,7 +201,7 @@ class PostListController {
                     offset: offset,
                     limit: limit,
                 });
-                return uri.formatClientLink("posts", parameters);
+                return uri.formatClientlink("", parameters);
             },
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);
@@ -249,7 +252,7 @@ class PostListController {
 }
 
 module.exports = (router) => {
-    router.enter(["posts"], (ctx, next) => {
+    router.enter([""], (ctx, next) => {
         ctx.controller = new PostListController(ctx);
     });
 };

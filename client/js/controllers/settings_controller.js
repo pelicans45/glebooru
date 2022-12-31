@@ -7,7 +7,7 @@ const SettingsView = require("../views/settings_view.js");
 class SettingsController {
     constructor() {
         topNavigation.activate("settings");
-        topNavigation.setTitle("Browsing settings");
+        topNavigation.setTitle("Settings");
         this._view = new SettingsView({
             settings: settings.get(),
         });

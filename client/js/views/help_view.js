@@ -6,10 +6,11 @@ const views = require("../util/views.js");
 const template = views.getTemplate("help");
 const sectionTemplates = {
     about: views.getTemplate("help-about"),
+    about: views.getTemplate("help-tips"),
     keyboard: views.getTemplate("help-keyboard"),
     search: views.getTemplate("help-search"),
     comments: views.getTemplate("help-comments"),
-    tos: views.getTemplate("help-tos"),
+    //tos: views.getTemplate("help-tos"),
 };
 const subsectionTemplates = {
     search: {
@@ -30,7 +31,7 @@ class HelpView {
             name: api.getName(),
         };
 
-        section = section || "about";
+        section = section || "tips";
         if (section in sectionTemplates) {
             views.replaceContent(
                 sourceNode.querySelector(".content"),

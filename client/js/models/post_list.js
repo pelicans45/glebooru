@@ -48,7 +48,7 @@ class PostList extends AbstractList {
             .then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
-                        results: PostList.fromResponse(response.results)
+                        results: PostList.fromResponse(response.results),
                     })
                 );
             });
@@ -67,7 +67,7 @@ class PostList extends AbstractList {
                 const results = response.similarPosts.map((sim) => sim.post);
                 return Promise.resolve(
                     Object.assign({}, response, {
-                        results: PostList.fromResponse(results)
+                        results: PostList.fromResponse(results),
                     })
                 );
             });

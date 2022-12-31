@@ -52,6 +52,21 @@ def get_posts(
         ctx, lambda post: _serialize_post(ctx, post)
     )
 
+@rest.routes.get("/random-post/?")
+def get_random_post(
+    ctx: rest.Context, _params: Dict[str, str] = {}
+) -> rest.Response:
+    #auth.verify_privilege(ctx.user, "posts:list")
+    _search_executor_config.user = ctx.user
+    query_text = ctx.get_param_as_string("query", default="").strip()
+    if not query_text:
+        return ""
+    count, posts = _search_executor.execute(query_text, 0, 1)
+    if count == 0:
+        return ""
+    return get_post_content_url(posts[0])
+
+
 
 @rest.routes.post("/posts/?")
 def create_post(

@@ -66,7 +66,7 @@ class TagPermalinkFixWrapper extends BaseMarkdownWrapper {
 class EntityPermalinkWrapper extends BaseMarkdownWrapper {
     preprocess(text) {
         // URL-based permalinks
-        text = text.replace(new RegExp("\\b/post/(\\d+)/?\\b", "g"), "@$1");
+        text = text.replace(new RegExp("\\b/(\\d+)/?\\b", "g"), "@$1");
         text = text.replace(
             new RegExp("\\b/tag/([a-zA-Z0-9_-]+?)/?", "g"),
             "#$1"
@@ -80,7 +80,7 @@ class EntityPermalinkWrapper extends BaseMarkdownWrapper {
             /(^|^\(|(?:[^\]])\(|[\s<>\[\]\)])([+#@][a-zA-Z0-9_-]+)/g,
             "$1[$2]($2)"
         );
-        text = text.replace(/\]\(@(\d+)\)/g, "](/post/$1)");
+        text = text.replace(/\]\(@(\d+)\)/g, "](/$1)");
         text = text.replace(/\]\(\+([a-zA-Z0-9_-]+)\)/g, "](/user/$1)");
         text = text.replace(/\]\(#([a-zA-Z0-9_-]+)\)/g, "](/query=$1)");
         return text;

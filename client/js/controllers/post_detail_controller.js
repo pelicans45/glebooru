@@ -64,7 +64,7 @@ class PostDetailController extends BasePostController {
         misc.disableExitConfirmation();
         if (this._id !== e.detail.post.id) {
             router.replace(
-                uri.formatClientLink("post", e.detail.post.id, section),
+                uri.formatClientLink("", e.detail.post.id, section),
                 null,
                 false
             );
@@ -82,7 +82,7 @@ class PostDetailController extends BasePostController {
                     this._view.showSuccess("Post merged.");
                     router.replace(
                         uri.formatClientLink(
-                            "post",
+                            "",
                             e.detail.targetPost.id,
                             "merge"
                         ),
@@ -99,7 +99,11 @@ class PostDetailController extends BasePostController {
 }
 
 module.exports = (router) => {
-    router.enter(["post", ":id", "merge"], (ctx, next) => {
+    router.enter(["", ":id", "merge"], (ctx, next) => {
+        if (!/^\d+$/.test(ctx.parameters.id)) {
+            return;
+        }
+
         ctx.controller = new PostDetailController(ctx, "merge");
     });
 };

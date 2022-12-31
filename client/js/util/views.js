@@ -181,7 +181,7 @@ function makeDateInput(options) {
 
 function getPostUrl(id, parameters) {
     return uri.formatClientLink(
-        "post",
+        "",
         id,
         parameters ? {
             query: parameters.query,
@@ -193,7 +193,7 @@ function getPostUrl(id, parameters) {
 
 function getPostEditUrl(id, parameters) {
     return uri.formatClientLink(
-        "post",
+        "",
         id,
         "edit",
         parameters ? {
@@ -206,7 +206,7 @@ function getPostEditUrl(id, parameters) {
 
 function getMetricSorterUrl(id, parameters) {
     return uri.formatClientLink(
-        "post",
+        "",
         id,
         "metric-sorter",
         parameters ? {
@@ -224,7 +224,7 @@ function makePostLink(id, includeHash) {
     return api.hasPrivilege("posts:view")
         ? makeElement(
               "a",
-              { href: uri.formatClientLink("post", id) },
+              { href: uri.formatClientLink("", id) },
               misc.escapeHtml(text)
           )
         : misc.escapeHtml(text);

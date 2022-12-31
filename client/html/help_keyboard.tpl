@@ -1,5 +1,4 @@
-<p>You can use your keyboard to navigate around the site. There are a few
-shortcuts:</p>
+<p>You can use keyboard shortcuts to navigate around the site.</p>
 
 <table>
     <thead>

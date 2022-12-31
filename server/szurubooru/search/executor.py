@@ -163,10 +163,10 @@ class Executor:
         for named_token in search_query.named_tokens:
             if named_token.name not in self.config.named_filters:
                 raise errors.SearchError(
-                    "Unknown named token: %r. Available named tokens: %r."
+                    'Unknown filter "%s". Available filters: %s'
                     % (
                         named_token.name,
-                        _format_dict_keys(self.config.named_filters),
+                        ", ".join(_format_dict_keys(self.config.named_filters)),
                     )
                 )
             db_query = self.config.named_filters[named_token.name](
@@ -176,11 +176,11 @@ class Executor:
         for sp_token in search_query.special_tokens:
             if sp_token.value not in self.config.special_filters:
                 raise errors.SearchError(
-                    "Unknown special token: %r. "
-                    "Available special tokens: %r."
+                    'Unknown special filter "%s". '
+                    "Available special tokens: %s"
                     % (
                         sp_token.value,
-                        _format_dict_keys(self.config.special_filters),
+                        ", ".join(_format_dict_keys(self.config.special_filters)),
                     )
                 )
             db_query = self.config.special_filters[sp_token.value](
@@ -191,11 +191,11 @@ class Executor:
             for sort_token in search_query.sort_tokens:
                 if sort_token.name not in self.config.sort_columns:
                     raise errors.SearchError(
-                        "Unknown sort token: %r. "
-                        "Available sort tokens: %r."
+                        'Unknown sort filter "%s". '
+                        "Available sort filters: s"
                         % (
                             sort_token.name,
-                            _format_dict_keys(self.config.sort_columns),
+                            ", ".join(_format_dict_keys(self.config.sort_columns)),
                         )
                     )
                 column, default_order = self.config.sort_columns[
@@ -225,10 +225,10 @@ class Executor:
                 continue
             if sort_token.name not in self.config.sort_columns:
                 raise errors.SearchError(
-                    "Unknown sort token: %r. "
-                    "Available sort tokens: %r." % (
+                    'Unknown sort filter "%s". '
+                    "Available sort filters: s" % (
                         sort_token.name,
-                        _format_dict_keys(self.config.sort_columns)))
+                        ", ".join(_format_dict_keys(self.config.sort_columns))))
             column, default_order = (
                 self.config.sort_columns[sort_token.name])
             order = _get_order(sort_token.order, default_order)
