@@ -1,11 +1,7 @@
-ARG ALPINE_VERSION=3.13
-
-
-FROM alpine:$ALPINE_VERSION as prereqs
+FROM python:3.11.1-alpine3.17 as prereqs
 WORKDIR /opt/app
 
 RUN apk --no-cache add \
-    python3 \
     python3-dev \
     py3-pip \
     build-base \
