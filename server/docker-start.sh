@@ -2,7 +2,7 @@
 set -e
 cd /opt/app
 
-sleep 1h
+#sleep 1h
 
 alembic upgrade head
 

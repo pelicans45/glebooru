@@ -1,4 +1,5 @@
-FROM python:3.11.1-alpine3.17
+#FROM python:3.11.1-alpine3.17
+FROM mgesoftware/python3.11-base:latest
 WORKDIR /opt/app
 
 ARG PUID=1000
@@ -6,11 +7,12 @@ ARG PGID=1000
 
 COPY requirements.txt /tmp/
 
-RUN apk del .python-rundeps \
-    && apk add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
-    && apk --no-cache add \
-    python3-dev \
-    py3-numpy \
+RUN apk --no-cache add \
+    #apk del .python-rundeps \
+    #&& apk add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main python3-dev=3.11.1-r2 \
+    #&& apk --no-cache add \
+    #python3-dev \
+    #py3-numpy \
     # py3-pip \
     build-base \
     libheif \
