@@ -32,9 +32,9 @@
                 </th>
                 <th class='creation-time'>
                     <% if (ctx.parameters.query == 'sort:creation-time') { %>
-                        <a href='<%- ctx.formatClientLink('tags', {query: '-sort:creation-time'}) %>'>Created on</a>
+                        <a href='<%- ctx.formatClientLink('tags', {query: '-sort:creation-time'}) %>'>Created</a>
                     <% } else { %>
-                        <a href='<%- ctx.formatClientLink('tags', {query: 'sort:creation-time'}) %>'>Created on</a>
+                        <a href='<%- ctx.formatClientLink('tags', {query: 'sort:creation-time'}) %>'>Created</a>
                     <% } %>
                 </th>
             </thead>

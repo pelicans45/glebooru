@@ -10,7 +10,7 @@
     <tbody>
         <tr>
             <td><kbd>Q</kbd></td>
-            <td>Focus search field, if available</td>
+            <td>Focus search field</td>
         </tr>
 
         <tr>
@@ -55,7 +55,4 @@
     </tbody>
 </table>
 
-<p>Additionally, each item in the top navigation can be accessed using a
-feature called &ldquo;access keys&rdquo;. Pressing the underlined letter while
-holding Shift or Alt+Shift (depending on your browser) will go to the desired
-page (most browsers) or focus the link (IE).</p>
+<p>Additionally, press shift + the first letter of navigation header names to navigate to them. ("G" for Gallery, "U" for Upload, "T" for Tags, etc.) </p>

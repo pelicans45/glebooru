@@ -64,7 +64,13 @@ class PostsPageView extends events.EventTarget {
             }
         }
 
-        document.body.addEventListener("click", function (event) {
+		/*
+		const postList = document.querySelector(".post-list");
+        postList.addEventListener("click", function (event) {
+			if (!event.shiftKey) {
+				return
+			}
+
             if (!event.target.classList.contains("gallery-thumb")) {
                 return;
             }
@@ -75,6 +81,7 @@ class PostsPageView extends events.EventTarget {
             );
             downloadURL(path);
         });
+		*/
 
         this._syncBulkEditorsHighlights();
     }
