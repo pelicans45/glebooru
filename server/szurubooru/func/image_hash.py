@@ -1,13 +1,17 @@
 import logging
 import math
+import sys
 from datetime import datetime
 from io import BytesIO
 from typing import Any, Callable, List, Optional, Set, Tuple
 
 import HeifImagePlugin
-import numpy as np
 import pillow_avif
 from PIL import Image
+
+sys.path.append("/usr/lib/python3.11/site-packages")
+import numpy as np
+sys.path = sys.path[:-1]
 
 from szurubooru import config, errors
 
