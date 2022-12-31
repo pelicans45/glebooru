@@ -293,7 +293,7 @@ class PostUploadView extends events.EventTarget {
         this._emit("change");
         if (!this._uploadables.length) {
             this._formNode.classList.add("inactive");
-            this._submitButtonNode.value = "Upload all";
+            this._submitButtonNode.value = "Upload";
         }
     }
 
@@ -329,7 +329,7 @@ class PostUploadView extends events.EventTarget {
         for (let uploadable of this._uploadables) {
             this._updateUploadableFromDom(uploadable);
         }
-        this._submitButtonNode.value = "Resume";
+        this._submitButtonNode.value = "Resume upload";
         this._emit("submit");
     }
 

@@ -3,6 +3,7 @@
 const api = require("../api.js");
 const router = require("../router.js");
 const uri = require("../util/uri.js");
+const filter = require("../filter.js");
 const misc = require("../util/misc.js");
 const progress = require("../util/progress.js");
 const settings = require("../models/settings.js");
@@ -209,6 +210,15 @@ class PostUploadController {
         let post = new Post();
         post.safety = uploadable.safety;
         post.flags = uploadable.flags;
+
+        const hostnameTag = filter.getHostnameFilter();
+        if (hostnameTag) {
+            uploadable.tags = uploadable.tags.filter(
+                (tag) => tag.toLowerCase() !== hostnameTag
+            );
+            uploadable.tags.unshift(hostnameTag);
+        }
+
         for (let tagName of uploadable.tags) {
             const tag = new Tag();
             tag.names = [tagName];

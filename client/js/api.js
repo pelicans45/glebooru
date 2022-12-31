@@ -341,8 +341,8 @@ class Api extends events.EventTarget {
                         fileTokens[fileId] = null;
                     }
                     error.message =
-                        "The uploaded file has expired; " +
-                        "please resend the form to reupload.";
+                        "The uploaded file has expired. " +
+                        "Please resubmit the form to reupload.";
                 }
                 return Promise.reject(error);
             });

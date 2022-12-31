@@ -54,9 +54,11 @@ class TopNavigationController {
             topNavigation.hide("pools");
         }
         if (api.isLoggedIn()) {
+			/*
             if (!api.hasPrivilege("users:create:any")) {
                 topNavigation.hide("register");
             }
+			*/
             topNavigation.hide("login");
         } else {
             if (!api.hasPrivilege("users:create:self")) {
@@ -65,6 +67,8 @@ class TopNavigationController {
             topNavigation.hide("account");
             topNavigation.hide("logout");
         }
+
+        topNavigation.hide("register");
     }
 
     _render() {

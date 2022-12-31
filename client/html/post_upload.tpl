@@ -3,9 +3,9 @@
         <div class='dropper-container'></div>
 
         <div class='control-strip'>
-            <input type='submit' value='Upload all' class='submit'/>
+            <input type='submit' value='Upload' class='submit'/>
 
-            <span class='skip-duplicates control-checkbox'>
+            <span class='skip-duplicates control-checkbox' style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Skip duplicate',
                     name: 'skip-duplicates',
@@ -21,7 +21,7 @@
                 }) %>
             </span>
 
-            <span class='always-upload-similar'>
+            <span class='always-upload-similar' style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Force upload similar',
                     name: 'always-upload-similar',
@@ -33,7 +33,7 @@
                 <%= ctx.makeTextInput({}) %>
             </div>
 
-            <span class='pause-remain-on-error'>
+            <span class='pause-remain-on-error' style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Pause on error',
                     name: 'pause-remain-on-error',

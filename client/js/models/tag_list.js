@@ -2,11 +2,13 @@
 
 const api = require("../api.js");
 const uri = require("../util/uri.js");
+const filter = require("../filter.js");
 const AbstractList = require("./abstract_list.js");
 const Tag = require("./tag.js");
 
 class TagList extends AbstractList {
     static search(text, offset, limit, fields) {
+        //text = filter.addHostnameFilter(text).trim();
         return api
             .get(
                 uri.formatApiLink("tags", {
@@ -77,7 +79,7 @@ class TagList extends AbstractList {
     }
 
     filterMetrics() {
-        return this.filter(tag => tag.metric)
+        return this.filter((tag) => tag.metric);
     }
 }
 

@@ -1,5 +1,6 @@
 @import colors
 @import mixins
+@import vars
 
 $active-tab-text-color = $text-color
 $active-tab-text-color-darktheme = $text-color-darktheme
@@ -58,7 +59,10 @@ th
 
 a
     cursor: pointer
-    color: $main-color //#c067a1
+    //color: $main-color
+    //#c067a1
+    //#b597e8
+    color: $link-color
     text-decoration: none
     transition: color 0.1s linear
     &.inactive

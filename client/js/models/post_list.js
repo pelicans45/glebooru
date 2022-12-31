@@ -2,8 +2,8 @@
 
 const settings = require("../models/settings.js");
 const api = require("../api.js");
-const filter = require("../filter.js");
 const uri = require("../util/uri.js");
+const filter = require("../filter.js");
 const AbstractList = require("./abstract_list.js");
 const Post = require("./post.js");
 
@@ -88,10 +88,7 @@ class PostList extends AbstractList {
             }
         }
 
-		const hostnameFilter = filter.getHostnameFilter()
-		if (hostnameFilter) {
-			text = `${hostnameFilter} ${text}`
-		}
+        text = filter.addHostnameFilter(text);
         return text.trim();
     }
 
