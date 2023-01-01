@@ -1,11 +1,5 @@
 @import colors
 @import mixins
-@import vars
-
-$active-tab-text-color = $text-color
-$active-tab-text-color-darktheme = $text-color-darktheme
-$inactive-tab-text-color = $inactive-link-color
-$inactive-tab-text-color-darktheme = $inactive-link-color-darktheme
 
 /* latin */
 @font-face
@@ -22,11 +16,11 @@ body
     min-height: 100%
 
 body
-    background: $window-color
+    background: var(--window-color)
     overscroll-behavior: none
     overflow-y: scroll
     margin: 0
-    color: $text-color
+    color: var(--text-color)
     font-family: 'Open Sans', sans-serif
     font-size: 1em
     line-height: 1.4
@@ -36,8 +30,8 @@ body
         font-size: 0.95em
 
 body.darktheme
-    color: $text-color-darktheme
-    background: $window-color-darktheme
+    color: var(--text-color-darktheme)
+    background: var(--window-color-darktheme)
 
 h1, h2, h3
     font-weight: normal
@@ -59,28 +53,28 @@ th
 
 a
     cursor: pointer
-    //color: $main-color
+    //color: var(--main-color)
     //#c067a1
     //#b597e8
-    color: $link-color
+    color: var(--link-color)
     text-decoration: none
     transition: color 0.1s linear
     &.inactive
-        color: $inactive-link-color
+        color: var(--inactive-link-color)
         cursor: default
     &.icon
-        color: $inactive-link-color
+        color: var(--inactive-link-color)
         opacity: .5
     &:focus
-        outline: 2px solid $main-color
+        outline: 2px solid var(--main-color)
     .vim-nav-hint
         position: absolute
         visibility: hidden
 .darktheme a
     &.inactive
-        color: $inactive-link-color-darktheme
+        color: var(--inactive-link-color-darktheme)
     &.icon
-        color: $inactive-link-color-darktheme
+        color: var(--inactive-link-color-darktheme)
 
 a.append, span.append
     margin-left: 1em
@@ -108,11 +102,11 @@ form .fa-question-circle-o
                 overflow-x: auto
                 &::-webkit-scrollbar
                     height: 6px
-                    background-color: $scrollbar-bg-color
+                    background-color: var(--scrollbar-bg-color)
                 &::-webkit-scrollbar-thumb
-                    background-color: $scrollbar-thumb-color
+                    background-color: var(--scrollbar-thumb-color)
     >.content-wrapper:not(.transparent)
-        background: $top-navigation-color
+        background: var(--top-navigation-color)
         padding: 1.8em
         @media (max-width: 1000px)
             padding: 1.5em
@@ -123,16 +117,16 @@ form .fa-question-circle-o
 
 .darktheme #content-holder
     >.content-wrapper:not(.transparent)
-        background: $top-navigation-color-darktheme
+        background: var(--top-navigation-color-darktheme)
 
 hr
     border: 0
-    border-top: 1px solid $line-color
+    border-top: 1px solid var(--line-color)
     margin: 1em 0
     padding: 0
 
 .darktheme hr
-    border-top: 1px solid darken($line-color, 25%)
+    border-top: 1px solid darken(var(--line-color), 25%)
 
 nav
     ul
@@ -160,18 +154,18 @@ nav
             li a
                 padding: 0 1.2em
             li:not(.active) a
-                color: $inactive-tab-text-color
+                color: var(--inactive-tab-text-color)
             li:hover:not(.active) a
-                color: $active-tab-text-color
+                color: var(--active-tab-text-color)
             li.active a
-                background: $active-tab-background-color
-                color: $active-tab-text-color
+                background: var(--active-tab-background-color)
+                color: var(--active-tab-text-color)
             :focus
-                background: $focused-tab-background-color
+                background: var(--focused-tab-background-color)
                 outline: 0
 
     &#top-navigation
-        background: $top-navigation-color
+        background: var(--top-navigation-color)
         margin: 0
         ul
             display: block
@@ -189,7 +183,7 @@ nav
                 font-family: inherit
                 border: none
                 background: none
-                color: $active-tab-text-color
+                color: var(--active-tab-text-color)
                 .site-name
                     display: block
                     float: left
@@ -237,19 +231,19 @@ nav
     &.buttons
         ul
             li:not(.active) a
-                color: $inactive-tab-text-color-darktheme
+                color: var(--inactive-tab-text-color-darktheme)
             li:hover:not(.active) a
-                color: $active-tab-text-color-darktheme
+                color: var(--active-tab-text-color-darktheme)
             li.active a
-                background: $active-tab-background-color-darktheme
-                color: $active-tab-text-color-darktheme
+                background: var(--active-tab-background-color-darktheme)
+                color: var(--active-tab-text-color-darktheme)
             :focus
-                background: $focused-tab-background-color-darktheme
+                background: var(--focused-tab-background-color-darktheme)
     &#top-navigation
-        background: $top-navigation-color-darktheme
+        background: var(--top-navigation-color-darktheme)
         ul
             #mobile-navigation-toggle
-                color: $text-color-darktheme
+                color: var(--text-color-darktheme)
 
 //a .access-key
 //    text-decoration: underline
@@ -266,29 +260,29 @@ nav
         text-align: left
         padding: 0.5em 1em
         &.info
-            border: 1px solid $message-info-border-color
-            background: $message-info-background-color
+            border: 1px solid var(--message-info-border-color)
+            background: var(--message-info-background-color)
         &.error
-            border: 1px solid $message-error-border-color
-            background: $message-error-background-color
+            border: 1px solid var(--message-error-border-color)
+            background: var(--message-error-background-color)
         &.success
-            border: 1px solid $message-success-border-color
-            background: $message-success-background-color
+            border: 1px solid var(--message-success-border-color)
+            background: var(--message-success-background-color)
 
 .darktheme .messages
     .message
         &.info
-            //border: 1px solid darken($message-info-border-color, 30%)
-            //background: darken($message-info-background-color, 60%)
+            //border: 1px solid darken(var(--message-info-border-color), 30%)
+            //background: darken(var(--message-info-background-color), 60%)
 
-            border: 1px solid $message-info-border-color
-            background: $message-info-background-color, 60%
+            border: 1px solid var(--message-info-border-color)
+            background: var(--message-info-background-color), 60%
         &.error
-            border: 1px solid darken($message-error-border-color, 30%)
-            background: darken($message-error-background-color, 60%)
+            border: 1px solid darken(var(--message-error-border-color), 30%)
+            background: darken(var(--message-error-background-color), 60%)
         &.success
-            border: 1px solid darken($message-success-border-color, 30%)
-            background: darken($message-success-background-color, 80%)
+            border: 1px solid darken(var(--message-success-border-color), 30%)
+            background: darken(var(--message-success-background-color), 80%)
 
 .thumbnail
     /*background-image: attr(data-src url)*/ /* not available yet */
@@ -301,10 +295,10 @@ nav
     height: 20px
     &.empty
         background-image:
-            linear-gradient(45deg, $transparency-grid-square-color 25%, transparent 25%),
-            linear-gradient(-45deg, $transparency-grid-square-color 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, $transparency-grid-square-color 75%),
-            linear-gradient(-45deg, transparent 75%, $transparency-grid-square-color 75%)
+            linear-gradient(45deg, var(--transparency-grid-square-color) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--transparency-grid-square-color) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--transparency-grid-square-color) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--transparency-grid-square-color) 75%)
         background-position: 0 0, 0 10px, 10px -10px, -10px 0px
         background-repeat: repeat
         background-size: 20px 20px
@@ -327,9 +321,9 @@ nav
     overflow-x: auto
     &::-webkit-scrollbar
         height: 6px
-        background-color: $scrollbar-bg-color
+        background-color: var(--scrollbar-bg-color)
     &::-webkit-scrollbar-thumb
-        background-color: $scrollbar-thumb-color
+        background-color: var(--scrollbar-thumb-color)
 
 /* hack to prevent text from being copied */
 [data-pseudo-content]:before {

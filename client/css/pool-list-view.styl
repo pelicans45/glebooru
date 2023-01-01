@@ -1,5 +1,3 @@
-@import colors
-
 .pool-list
     table
         width: 100%
@@ -7,12 +5,12 @@
         text-align: left
         line-height: 1.3em
         tr:hover td
-            background: $top-navigation-color
+            background: var(--top-navigation-color)
         th, td
             padding: 0.1em 0.5em
         th
             white-space: nowrap
-            background: $top-navigation-color
+            background: var(--top-navigation-color)
         .names
             width: 84%
         .post-count
@@ -39,9 +37,9 @@
 .darktheme .pool-list
     table
         tr:hover td
-            background: $top-navigation-color-darktheme
+            background: var(--top-navigation-color-darktheme)
         th
-            background: $top-navigation-color-darktheme
+            background: var(--top-navigation-color-darktheme)
 
 .pool-list-header
     label
@@ -56,8 +54,8 @@
     .append
         vertical-align: middle
         font-size: 0.95em
-        color: $inactive-link-color
+        color: var(--inactive-link-color)
 
 .darktheme .pool-list-header
     .append
-        color: $inactive-link-color-darktheme
+        color: var(--inactive-link-color-darktheme)

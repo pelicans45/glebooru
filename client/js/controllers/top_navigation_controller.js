@@ -44,17 +44,19 @@ class TopNavigationController {
         if (!api.hasPrivilege("comments:list")) {
             topNavigation.hide("comments");
         }
-        if (!api.hasPrivilege("tags:list")) {
+
+        const userListPrivilege = api.hasPrivilege("users:list");
+        if (!(api.hasPrivilege("tags:list") && userListPrivilege)) {
             topNavigation.hide("tags");
         }
-        if (!api.hasPrivilege("users:list")) {
+        if (!userListPrivilege) {
             topNavigation.hide("users");
         }
         if (!api.hasPrivilege("pools:list")) {
             topNavigation.hide("pools");
         }
         if (api.isLoggedIn()) {
-			/*
+            /*
             if (!api.hasPrivilege("users:create:any")) {
                 topNavigation.hide("register");
             }

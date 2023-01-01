@@ -1,7 +1,3 @@
-@import colors
-$comment-border-color = $top-navigation-color
-$comment-border-color-darktheme = $top-navigation-color-darktheme
-
 .global-comment-list
     text-align: left
 
@@ -13,7 +9,7 @@ $comment-border-color-darktheme = $top-navigation-color-darktheme
         &>li
             margin-top: 2em
             padding-top: 2em
-            border-top: 3px solid $comment-border-color
+            border-top: 3px solid var(--comment-border-color)
             &:first-child
                 margin-top: 0
                 padding-top: 0
@@ -51,4 +47,4 @@ $comment-border-color-darktheme = $top-navigation-color-darktheme
 .darktheme .global-comment-list
     &>ul
         &>li
-            border-top: 3px solid $comment-border-color-darktheme
+            border-top: 3px solid var(--comment-border-color-darktheme)

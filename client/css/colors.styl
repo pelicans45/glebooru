@@ -1,70 +1,97 @@
-$main-color = var(--main-color)
-$window-color = var(--window-color)
-$window-color-darktheme = var(--window-color-darktheme)
-$top-navigation-color = var(--top-navigation-color)
-$top-navigation-color-darktheme = var(--top-navigation-color-darktheme)
-$text-color = var(--text-color)
-$text-color-darktheme = var(--text-color-darktheme)
-$link-color = var(--link-color)
-$inactive-link-color = var(--inactive-link-color)
-$inactive-link-color-darktheme = var(--inactive-link-color-darktheme)
-$line-color = var(--line-color)
+:root
+    --main-color: #6824dd
+    --window-color: white
+    --window-color-darktheme: #1a1a1a
+    --top-navigation-color: #F5F5F5
+    --top-navigation-color-darktheme: #333333
+    --text-color: #111
+    --text-color-darktheme: #aaa
+    --link-color: #b597e8
+    --inactive-link-color: #888
+    --inactive-link-color-darktheme: #cccccc
+    --line-color: #DDD
+    --active-tab-background-color: rgba(0, 0, 0, 0.06)
+    --focused-tab-background-color: rgba(0, 0, 0, 0.03)
+    --active-tab-background-color-darktheme: rgba(255, 255, 255, 0.06)
+    --focused-tab-background-color-darktheme: rgba(255, 255, 255, 0.03)
+    //--message-info-border-color: #BDF
+    --message-info-border-color: #1a151d
+    //--message-info-background-color: #E3EFF9
+    --message-info-background-color: #08253c
+    --message-error-border-color: #FCC
+    --message-error-background-color: #FFF5F5
+    --message-success-border-color: #D3E3D3
+    --message-success-background-color: #F5FFF5
+    --input-bad-border-color: #FCC
+    --input-bad-background-color: #FFF5F5
+    --input-good-border-color: #D3E3D3
+    --input-good-background-color: #F5FFF5
+    --input-enabled-background-color: #FAFAFA
+    --input-enabled-border-color: #EEE
+    --input-enabled-text-color: var(--text-color)
+    --input-enabled-text-color-darktheme: var(--text-color-darktheme)
+    --input-disabled-background-color: #FAFAFA
+    --input-disabled-border-color: #EEE
+    --input-disabled-text-color: #888
+    //--button-enabled-text-color: white
+    --button-enabled-text-color: #ededed
+    //--button-enabled-text-color: #dcdada
+    --button-enabled-background-color: var(--main-color)
+    --button-disabled-text-color: #666
+    --button-disabled-background-color: #CCC
+    --post-thumbnail-border-color: var(--main-color)
+    --post-thumbnail-no-tags-border-color: #F44
+    --default-tag-category-background-color: var(--active-tab-background-color)
+    --new-tag-background-color: #DFC
+    --new-tag-text-color: black
+    --implied-tag-background-color: #FFC
+    --implied-tag-text-color: black
+    --tag-suggestions-header-color: #EEE
+    --tag-suggestions-border-color: #AAA
+    --duplicate-tag-background-color: #FDC
+    --duplicate-tag-text-color: black
+    --active-note-overlay-background-color: rgba(255, 255, 255, 0.3)
+    --active-note-overlay-border-color: rgba(62, 255, 62, 0.8)
+    --note-background-color: rgba(255, 255, 205, 0.3)
+    --note-border-color: rgba(0, 0, 0, 0.2)
+    --edited-note-background-color: rgba(222, 255, 222, 0.3)
+    --edited-note-border-color: rgba(0, 200, 0, 0.9)
+    --note-text-background-color: lemonchiffon
+    --note-text-border-color: black
+    --note-text-text-color: black
+    --first-note-point-color: orangered
+    --hovered-note-point-color: red
+    --hovered-first-note-point-color: red
+    --safety-safe: #88D488
+    --safety-sketchy: #F3D75F
+    --safety-unsafe: #F3985F
+    --scrollbar-thumb-color: var(--main-color)
+    --scrollbar-bg-color: var(--input-enabled-background-color)
+    --transparency-grid-square-color: #F0F0F0
 
-$active-tab-background-color = rgba(0, 0, 0, 0.06)
-$focused-tab-background-color = rgba(0, 0, 0, 0.03)
-$active-tab-background-color-darktheme = rgba(255, 255, 255, 0.06)
-$focused-tab-background-color-darktheme = rgba(255, 255, 255, 0.03)
-//$message-info-border-color = #BDF
-$message-info-border-color = #1a151d
-//$message-info-background-color = #E3EFF9
-$message-info-background-color = #08253c
-$message-error-border-color = #FCC
-$message-error-background-color = #FFF5F5
-$message-success-border-color = #D3E3D3
-$message-success-background-color = #F5FFF5
-$input-bad-border-color = #FCC
-$input-bad-background-color = #FFF5F5
-$input-good-border-color = #D3E3D3
-$input-good-background-color = #F5FFF5
-$input-enabled-background-color = #FAFAFA
-$input-enabled-border-color = #EEE
-$input-enabled-text-color = $text-color
-$input-enabled-text-color-darktheme = $text-color-darktheme
-$input-disabled-background-color = #FAFAFA
-$input-disabled-border-color = #EEE
-$input-disabled-text-color = #888
-//$button-enabled-text-color = white
-$button-enabled-text-color = #ededed
-//$button-enabled-text-color = #dcdada
-$button-enabled-background-color = $main-color
-$button-disabled-text-color = #666
-$button-disabled-background-color = #CCC
-$post-thumbnail-border-color = $main-color
-$post-thumbnail-no-tags-border-color = #F44
-$default-tag-category-background-color = $active-tab-background-color
-$new-tag-background-color = #DFC
-$new-tag-text-color = black
-$implied-tag-background-color = #FFC
-$implied-tag-text-color = black
-$tag-suggestions-header-color = #EEE
-$tag-suggestions-border-color = #AAA
-$duplicate-tag-background-color = #FDC
-$duplicate-tag-text-color = black
-$active-note-overlay-background-color = rgba(255, 255, 255, 0.3)
-$active-note-overlay-border-color = rgba(62, 255, 62, 0.8)
-$note-background-color = rgba(255, 255, 205, 0.3)
-$note-border-color = rgba(0, 0, 0, 0.2)
-$edited-note-background-color = rgba(222, 255, 222, 0.3)
-$edited-note-border-color = rgba(0, 200, 0, 0.9)
-$note-text-background-color = lemonchiffon
-$note-text-border-color = black
-$note-text-text-color = black
-$first-note-point-color = orangered
-$hovered-note-point-color = red
-$hovered-first-note-point-color = red
-$safety-safe = #88D488
-$safety-sketchy = #F3D75F
-$safety-unsafe = #F3985F
-$scrollbar-thumb-color = $main-color
-$scrollbar-bg-color = $input-enabled-background-color
-$transparency-grid-square-color = #F0F0F0
+    --active-tab-text-color: var(--text-color)
+    --active-tab-text-color-darktheme: var(--text-color-darktheme)
+    --inactive-tab-text-color: var(--inactive-link-color)
+    --inactive-tab-text-color-darktheme: var(--inactive-link-color-darktheme)
+
+    --comment-border-color: var(--top-navigation-color)
+    --comment-border-color-darktheme: var(--top-navigation-color-darktheme)
+
+    --comment-header-background-color: var(--top-navigation-color)
+    --comment-header-background-color-darktheme: var(--top-navigation-color-darktheme)
+
+    //--comment-border-color: #DDD
+
+    --upload-header-background-color: var(--top-navigation-color)
+    --upload-header-background-color-darktheme: var(--top-navigation-color-darktheme)
+    --upload-border-color: #DDD
+    --cancel-button-color: tomato
+
+    --delete-button-color: tomato
+
+    --token-border-color = var(--active-tab-background-color)
+
+    --snapshot-created-background-color: #E0F5E0
+    --snapshot-modified-background-color: #E0F5FF
+    --snapshot-deleted-background-color: #FDE5E5
+    --snapshot-merged-background-color: #FEC

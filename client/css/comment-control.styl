@@ -1,9 +1,3 @@
-@import colors
-$comment-header-background-color = $top-navigation-color
-$comment-header-background-color-darktheme = $top-navigation-color-darktheme
-
-$comment-border-color = #DDD
-
 .comment-container
     padding: 0 0 0 60px
 
@@ -22,15 +16,15 @@ $comment-border-color = #DDD
         display: none
 
     .comment
-        border: 1px solid $comment-border-color
+        border: 1px solid var(--comment-border-color)
 
         header
             white-space: nowrap
             font-size: 95%
             vertical-align: middle
             position: relative
-            background: $comment-header-background-color
-            border-bottom: 1px solid $comment-border-color
+            background: var(--comment-header-background-color)
+            border-bottom: 1px solid var(--comment-border-color)
 
             nav.edit
                 padding: 0.25em 1em 0 1em
@@ -45,9 +39,9 @@ $comment-border-color = #DDD
                         a
                             padding: 0 1em
                         &.active
-                            background: $window-color
-                            border: 1px solid $comment-border-color
-                            border-bottom: 1px solid $window-color
+                            background: var(--window-color)
+                            border: 1px solid var(--comment-border-color)
+                            border-bottom: 1px solid var(--window-color)
 
             nav.readonly
                 padding: 0 1em
@@ -68,7 +62,7 @@ $comment-border-color = #DDD
                 left: -1.5em
                 top: calc(50% - 0.75em)
                 border: 0.75em solid transparent
-                border-right: 0.75em solid darken($comment-border-color, 10%)
+                border-right: 0.75em solid darken(var(--comment-border-color), 10%)
 
             &:after
                 position: absolute
@@ -79,11 +73,11 @@ $comment-border-color = #DDD
                 left: calc(-1.5em + 1px)
                 top: calc(50% - 0.75em)
                 border: 0.75em solid transparent
-                border-right: 0.75em solid $comment-header-background-color
+                border-right: 0.75em solid var(--comment-header-background-color)
 
             .edit, .delete, .score-container a, .nickname a
                 &:not(.inactive)
-                    color: mix($main-color, $inactive-link-color)
+                    color: mix(var(--main-color), var(--inactive-link-color))
 
             i
                 margin-right: 0.3em
@@ -115,16 +109,16 @@ $comment-border-color = #DDD
             margin: 1em 0
 
 .darktheme .comment-container .comment header
-    background: $comment-header-background-color-darktheme
+    background: var(--comment-header-background-color-darktheme)
     nav.edit
         ul
             li
                 &.active
-                    background: $window-color-darktheme
-                    border-bottom: 1px solid $window-color-darktheme
+                    background: var(--window-color-darktheme)
+                    border-bottom: 1px solid var(--window-color-darktheme)
     .edit, .delete, .score-container a, .nickname a
         &:not(.inactive)
-            color: mix($main-color, $inactive-link-color-darktheme)
+            color: mix(var(--main-color), var(--inactive-link-color-darktheme))
 
 .comment-content
     ul, ol

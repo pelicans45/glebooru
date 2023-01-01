@@ -1,5 +1,3 @@
-@import colors
-
 div.pool-input
     position: relative
 
@@ -28,22 +26,22 @@ ul.compact-pools
             display: inline
         a:focus
             outline: 0
-            box-shadow: inset 0 0 0 2px $main-color
+            box-shadow: inset 0 0 0 2px var(--main-color)
         &.implication
-            background: $implied-pool-background-color
-            color: $implied-pool-text-color
+            background: var(--implied-pool-background-color)
+            color: var(--implied-pool-text-color)
         &.new
-            background: $new-pool-background-color
-            color: $new-pool-text-color
+            background: var(--new-pool-background-color)
+            color: var(--new-pool-text-color)
         &.duplicate
-            background: $duplicate-pool-background-color
-            color: $duplicate-pool-text-color
+            background: var(--duplicate-pool-background-color)
+            color: var(--duplicate-pool-text-color)
     i
         padding-right: 0.4em
 
 div.pool-input, ul.compact-pools
     .pool-usages, .pool-weight, .remove-pool
-        color: $inactive-link-color
+        color: var(--inactive-link-color)
         unselectable()
     .pool-usages, .pool-weight
         font-size: 90%
@@ -55,4 +53,4 @@ div.pool-input, ul.compact-pools
 .darktheme
     div.pool-input, ul.compact-pools
         .pool-usages, .pool-weight, .remove-pool
-            color: $inactive-link-color-darktheme
+            color: var(--inactive-link-color-darktheme)

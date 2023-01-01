@@ -1,5 +1,3 @@
-@import colors
-
 .pager
     nav
         .disabled
@@ -18,11 +16,11 @@
                 top: 50%
                 right: 0
                 height: 3px
-                background: $top-navigation-color
+                background: var(--top-navigation-color)
                 z-index: 1
             span
                 position: relative
-                background: $window-color
+                background: var(--window-color)
                 padding: 0 1em
                 z-index: 2
 
@@ -30,6 +28,6 @@
     .page
         .page-header
             &:before
-                background: $top-navigation-color-darktheme
+                background: var(--top-navigation-color-darktheme)
             span
-                background: $window-color-darktheme
+                background: var(--window-color-darktheme)

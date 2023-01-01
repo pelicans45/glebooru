@@ -1,5 +1,3 @@
-@import colors
-
 .post-view
     width: 100%
     display: flex !important
@@ -29,7 +27,7 @@
                     vertical-align: middle
                     transition: background 0.2s linear, box-shadow 0.2s linear
                     &:not(.inactive):hover
-                        background: lighten($main-color, 90%)
+                        background: lighten(var(--main-color), 90%)
                 i
                     font-size: 140%
                 text-align: center
@@ -59,7 +57,7 @@
             article
                 a:not(.inactive):hover
                     background: unset
-                    box-shadow: inset 0 0 0 0.3em $main-color
+                    box-shadow: inset 0 0 0 0.3em var(--main-color)
 
 @media (max-width: 800px)
     .post-view
@@ -89,11 +87,11 @@
             text-align: center
 
         .safety-safe
-            color: $safety-safe
+            color: var(--safety-safe)
         .safety-sketchy
-            color: $safety-sketchy
+            color: var(--safety-sketchy)
         .safety-unsafe
-            color: $safety-unsafe
+            color: var(--safety-unsafe)
 
         .upload-info
             .thumbnail
@@ -198,7 +196,7 @@
     button
         width: 100%
         &:focus
-            border: 2px solid $text-color !important
+            border: 2px solid var(--text-color) !important
 
     .messages
         margin-top: 1em
