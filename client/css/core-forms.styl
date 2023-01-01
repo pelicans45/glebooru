@@ -1,3 +1,5 @@
+@import colors
+
 form
     display: block
     width: 20em
@@ -20,13 +22,13 @@ form:not(.horizontal)
     .hint
         margin-top: 0.2em
         margin-bottom: 0
-        color: var(--inactive-link-color)
+        color: $inactive-link-color
         font-size: 80%
         line-height: 120%
 
 .darktheme form:not(.horizontal)
     .hint
-        color: var(--inactive-link-color-darktheme)
+        color: $inactive-link-color-darktheme
 
 form.horizontal
     display: inline-block
@@ -68,7 +70,7 @@ input[type=radio], input[type=checkbox]
     cursor: pointer
 
     &:hover:before
-        border-color: var(--main-color)
+        border-color: $main-color
 
 .radio:before
     border-radius: 100%
@@ -81,17 +83,17 @@ input[type=radio], input[type=checkbox]
     display: block
     width: 16px
     height: 16px
-    background: var(--input-enabled-background-color)
-    border: 2px solid var(--input-enabled-border-color)
+    background: $input-enabled-background-color
+    border: 2px solid $input-enabled-border-color
     content: ''
 
 .darktheme
     .radio:before, .checkbox:before
-        background: darken(var(--input-enabled-background-color), 75%)
-        border: 2px solid darken(var(--input-enabled-border-color), 60%)
+        background: darken($input-enabled-background-color, 75%)
+        border: 2px solid darken($input-enabled-border-color, 60%)
 
 .radio:after
-    background: var(--main-color)
+    background: $main-color
     transition: opacity 0.1s linear
     position: absolute
     left: 5px
@@ -113,8 +115,8 @@ input[type=radio], input[type=checkbox]
     margin-top: 3px
     width: 5px
     height: 9px
-    //border-right: 3px solid var(--main-color)
-    //border-bottom: 3px solid var(--main-color)
+    //border-right: 3px solid $main-color
+    //border-bottom: 3px solid $main-color
     border-right: 3px solid #f6f3fe
     border-bottom: 3px solid #f6f3fe
     content: ''
@@ -124,7 +126,7 @@ input[type=radio], input[type=checkbox]
 
 input[type=radio]:checked + .radio:before,
 input[type=checkbox]:checked + .checkbox:before
-    border-color: var(--main-color)
+    border-color: $main-color
 
 input[type=radio]:checked + .radio:after,
 input[type=checkbox]:checked + .checkbox:after
@@ -134,26 +136,26 @@ input[type=radio]:disabled + .radio:before,
 input[type=checkbox]:disabled + .checkbox:before,
 input[type=radio]:disabled + .radio:after,
 input[type=checkbox]:disabled + .checkbox:after
-    border-color: var(--input-disabled-text-color)
+    border-color: $input-disabled-text-color
 
 input[type=radio]:disabled + .radio,
 input[type=checkbox]:disabled + .checkbox
-    border-color: var(--input-disabled-text-color)
+    border-color: $input-disabled-text-color
 
 .darktheme
     input[type=radio]:disabled + .radio:before,
     input[type=checkbox]:disabled + .checkbox:before,
     input[type=radio]:disabled + .radio:after,
     input[type=checkbox]:disabled + .checkbox:after
-        border-color: darken(var(--input-disabled-text-color), 60%)
+        border-color: darken($input-disabled-text-color, 60%)
 
     input[type=radio]:disabled + .radio,
     input[type=checkbox]:disabled + .checkbox
-        border-color: darken(var(--input-disabled-text-color), 60%)
+        border-color: darken($input-disabled-text-color, 60%)
 
 input[type=radio]:focus + .radio:before,
 input[type=checkbox]:focus + .checkbox:before
-    border-color: var(--main-color)
+    border-color: $main-color
 
 
 
@@ -168,35 +170,35 @@ input[type=time]
     font-size: 100%
     padding: 0.2em 0.3em
     box-sizing: border-box
-    border: 2px solid var(--input-enabled-border-color)
-    background: var(--input-enabled-background-color)
-    color: var(--input-enabled-text-color)
+    border: 2px solid $input-enabled-border-color
+    background: $input-enabled-background-color
+    color: $input-enabled-text-color
     box-shadow: none /* :-moz-submit-invalid on FF */
     transition: border-color 0.1s linear, background-color 0.1s linear
 
     &:disabled
-        border: 2px solid var(--input-disabled-border-color)
-        background: var(--input-disabled-background-color)
-        color: var(--input-disabled-text-color)
+        border: 2px solid $input-disabled-border-color
+        background: $input-disabled-background-color
+        color: $input-disabled-text-color
 
     &:focus
-        border-color: var(--main-color)
+        border-color: $main-color
 
     &[readonly]
-        border: 2px solid var(--input-disabled-border-color)
-        background: var(--input-disabled-background-color)
-        color: var(--input-disabled-text-color)
+        border: 2px solid $input-disabled-border-color
+        background: $input-disabled-background-color
+        color: $input-disabled-text-color
 
 .darktheme
     input[type=date],
     input[type=time]
-        border: 2px solid darken(var(--input-enabled-border-color), 75%)
-        background: darken(var(--input-enabled-background-color), 75%)
-        color: var(--input-enabled-text-color-darktheme)
+        border: 2px solid darken($input-enabled-border-color, 75%)
+        background: darken($input-enabled-background-color, 75%)
+        color: $input-enabled-text-color-darktheme
         &:disabled
-            background: darken(var(--input-disabled-background-color), 75%)
+            background: darken($input-disabled-background-color, 75%)
         &[readonly]
-            background: darken(var(--input-disabled-background-color), 75%)
+            background: darken($input-disabled-background-color, 75%)
 
 
 /*
@@ -215,24 +217,24 @@ input[type=number]
     text-overflow: ellipsis
     width: 100%
     box-sizing: border-box
-    border: 2px solid var(--input-enabled-border-color)
-    background: var(--input-enabled-background-color)
-    color: var(--input-enabled-text-color)
+    border: 2px solid $input-enabled-border-color
+    background: $input-enabled-background-color
+    color: $input-enabled-text-color
     box-shadow: none /* :-moz-submit-invalid on FF */
     transition: border-color 0.1s linear, background-color 0.1s linear
 
     &:disabled
-        border: 2px solid var(--input-disabled-border-color)
-        background: var(--input-disabled-background-color)
-        color: var(--input-disabled-text-color)
+        border: 2px solid $input-disabled-border-color
+        background: $input-disabled-background-color
+        color: $input-disabled-text-color
 
     &:focus
-        border-color: var(--main-color)
+        border-color: $main-color
 
     &[readonly]
-        border: 2px solid var(--input-disabled-border-color)
-        background: var(--input-disabled-background-color)
-        color: var(--input-disabled-text-color)
+        border: 2px solid $input-disabled-border-color
+        background: $input-disabled-background-color
+        color: $input-disabled-text-color
 
 .darktheme
     select,
@@ -241,13 +243,13 @@ input[type=number]
     input[type=email],
     input[type=password],
     input[type=number]
-        border: 2px solid darken(var(--input-enabled-border-color), 75%)
-        background: darken(var(--input-enabled-background-color), 75%)
-        color: var(--input-enabled-text-color-darktheme)
+        border: 2px solid darken($input-enabled-border-color, 75%)
+        background: darken($input-enabled-background-color, 75%)
+        color: $input-enabled-text-color-darktheme
         &:disabled
-            background: darken(var(--input-disabled-background-color), 75%)
+            background: darken($input-disabled-background-color, 75%)
         &[readonly]
-            background: darken(var(--input-disabled-background-color), 75%)
+            background: darken($input-disabled-background-color, 75%)
 
 input[readonly],
 input[readonly]+.radio,
@@ -281,15 +283,15 @@ label.color
 form.show-validation .input
     input:invalid
         outline: 0
-        border: 2px solid var(--input-bad-border-color)
-        background: var(--input-bad-background-color)
+        border: 2px solid $input-bad-border-color
+        background: $input-bad-background-color
     input:valid
         outline: 0
-        border: 2px solid var(--input-good-border-color)
-        background: var(--input-good-background-color)
+        border: 2px solid $input-good-border-color
+        background: $input-good-background-color
 .darktheme form.show-validation .input
     input:valid
-        background: darken(var(--input-good-background-color), 75%)
+        background: darken($input-good-background-color, 75%)
 
 /*
  * Buttons
@@ -301,26 +303,26 @@ input[type=submit]
     font-size: 100%
     padding: 0.2em 0.7em
     border-radius: 0
-    border: 2px solid var(--button-enabled-background-color)
-    background: var(--button-enabled-background-color)
-    color: var(--button-enabled-text-color)
+    border: 2px solid $button-enabled-background-color
+    background: $button-enabled-background-color
+    color: $button-enabled-text-color
     outline: 0 /* something on Chrome */
     -moz-appearance: none
     -webkit-appearance: none
 
     &:disabled
         cursor: default
-        border-color: var(--button-disabled-background-color)
-        background-color: var(--button-disabled-background-color)
-        color: var(--button-disabled-text-color)
+        border-color: $button-disabled-background-color
+        background-color: $button-disabled-background-color
+        color: $button-disabled-text-color
 
     &.discourage
         border-color: transparent
         background-color: transparent
-        color: var(--button-disabled-text-color)
+        color: $button-disabled-text-color
 
     &:focus
-        border: 2px solid var(--text-color)
+        border: 2px solid $text-color
 
     &:hover
         opacity: 0.95;
@@ -340,7 +342,7 @@ input::-moz-focus-inner
 .file-dropper-holder
     .file-dropper
         display: block
-        background: var(--window-color)
+        background: $window-color
         border: 3px dashed #eee
         padding: 0.3em 0.5em
         line-height: 140%
@@ -361,7 +363,7 @@ input::-moz-focus-inner
 
 .darktheme .file-dropper-holder
     .file-dropper
-        background: var(--window-color-darktheme)
+        background: $window-color-darktheme
 
 input[type=file]:disabled+.file-dropper
     cursor: default
@@ -370,13 +372,13 @@ input[type=file]:disabled+.file-dropper
 input[type=file]:active+.file-dropper,
 input[type=file]:focus+.file-dropper,
 .file-dropper.active
-    border-color: var(--main-color)
+    border-color: $main-color
 
 .autocomplete
     position: absolute
     z-index: 10
-    background: var(--window-color)
-    border: 2px solid var(--main-color)
+    background: $window-color
+    border: 2px solid $main-color
     display: none
     font-size: 0.95em
     ul
@@ -389,17 +391,17 @@ input[type=file]:focus+.file-dropper,
                 display: block
                 padding: 0.1em 0.5em
             &.active a, a:hover
-                background: var(--button-enabled-background-color)
-                color: var(--button-enabled-text-color)
+                background: $button-enabled-background-color
+                color: $button-enabled-text-color
                 span
-                    color: var(--button-enabled-text-color)
+                    color: $button-enabled-text-color
             .disabled
-                color: var(--inactive-link-color)
+                color: $inactive-link-color
 
 .darktheme .autocomplete
-    background: var(--window-color-darktheme)
+    background: $window-color-darktheme
     ul li .disabled
-        color: var(--inactive-link-color-darktheme)
+        color: $inactive-link-color-darktheme
 
 .anticomplete
     display: none

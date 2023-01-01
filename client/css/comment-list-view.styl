@@ -1,3 +1,5 @@
+@import colors
+
 .global-comment-list
     text-align: left
 
@@ -9,7 +11,7 @@
         &>li
             margin-top: 2em
             padding-top: 2em
-            border-top: 3px solid var(--comment-border-color)
+            border-top: 3px solid $comment-border-color
             &:first-child
                 margin-top: 0
                 padding-top: 0
@@ -47,4 +49,4 @@
 .darktheme .global-comment-list
     &>ul
         &>li
-            border-top: 3px solid var(--comment-border-color-darktheme)
+            border-top: 3px solid $comment-border-color-darktheme

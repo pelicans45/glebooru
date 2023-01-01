@@ -1,7 +1,9 @@
+@import colors
+
 .metric-controls
     margin-left: 1.4em
     display: inline-block
-    color: var(--inactive-link-color)
+    color: $inactive-link-color
 
 hr.separator
     display: none
@@ -21,15 +23,15 @@ ul.compact-unset-metrics, ul.compact-post-metrics
             display: inline
         a:focus
             outline: 0
-            box-shadow: inset 0 0 0 2px var(--main-color)
+            box-shadow: inset 0 0 0 2px $main-color
         .remove-metric
-            color: var(--inactive-link-color)
+            color: $inactive-link-color
             unselectable()
             margin-right: 0.5em
     i
         padding-right: 0.4em
     .metric-bounds
-        color: var(--inactive-link-color)
+        color: $inactive-link-color
         unselectable()
         font-size: 90%
         margin-left: 0.7em
@@ -44,4 +46,4 @@ ul.compact-post-metrics
         display: none
     .range-delimiter
         margin-left: 0.5em
-        color: var(--inactive-link-color)
+        color: $inactive-link-color

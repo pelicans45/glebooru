@@ -1,3 +1,5 @@
+@import colors
+
 #post-upload
     form
         width: 100%
@@ -54,10 +56,10 @@
 
     .cancel
         margin-top: 1em
-        background: var(--cancel-button-color)
-        border-color: var(--cancel-button-color)
+        background: $cancel-button-color
+        border-color: $cancel-button-color
         &:focus
-            border: 2px solid var(--text-color)
+            border: 2px solid $text-color
 
     .control-checkbox
         margin-left: 1em
@@ -91,7 +93,7 @@
                     height: 100%
 
             .uploadable
-                border: 1px solid var(--upload-border-color)
+                border: 1px solid $upload-border-color
                 min-height: 8em
                 box-sizing: border-box
 
@@ -99,8 +101,8 @@
                     line-height: 1.5em
                     padding: 0.25em 1em
                     text-align: left
-                    background: var(--upload-header-background-color)
-                    border-bottom: 1px solid var(--upload-border-color)
+                    background: $upload-header-background-color
+                    border-bottom: 1px solid $upload-border-color
 
                     nav
                         &:first-of-type
@@ -176,18 +178,18 @@
 
 
             &:first-child .move-up
-                color: var(--inactive-link-color)
+                color: $inactive-link-color
             &:last-child .move-down
-                color: var(--inactive-link-color)
+                color: $inactive-link-color
             .darktheme &:first-child .move-up
-                color: var(--inactive-link-color-darktheme)
+                color: $inactive-link-color-darktheme
             .darktheme &:last-child .move-down
-                color: var(--inactive-link-color-darktheme)
+                color: $inactive-link-color-darktheme
 
 .darktheme #post-upload .uploadables-container .uploadable-container
     .uploadable header
-        background: var(--upload-header-background-color-darktheme)
+        background: $upload-header-background-color-darktheme
     &:first-child .move-up
-        color: var(--inactive-link-color-darktheme)
+        color: $inactive-link-color-darktheme
     &:last-child .move-down
-        color: var(--inactive-link-color-darktheme)
+        color: $inactive-link-color-darktheme

@@ -1,11 +1,13 @@
+@import colors
+
 .post-overlay
     &[data-state=ready-to-draw],
     &[data-state=drawing-rectangle],
     &[data-state=drawing-polygon]
         &:after
             box-sizing: border-box
-            border: 0.3em dashed var(--active-note-overlay-border-color)
-            background: var(--active-note-overlay-background-color)
+            border: 0.3em dashed $active-note-overlay-border-color
+            background: $active-note-overlay-background-color
             display: block
             content: ' '
             pointer-events: none
@@ -22,8 +24,8 @@
         stroke-width: 1px
 
         polygon
-            fill: var(--note-background-color)
-            stroke: var(--note-border-color)
+            fill: $note-background-color
+            stroke: $note-border-color
             pointer-events: auto
         ellipse
             display: none
@@ -32,19 +34,19 @@
         stroke-width: 2px
 
         polygon
-            fill: var(--edited-note-background-color)
-            stroke: var(--edited-note-border-color)
+            fill: $edited-note-background-color
+            stroke: $edited-note-border-color
         ellipse
-            fill: var(--edited-note-border-color)
+            fill: $edited-note-border-color
             display: block
             &.nearby
-                fill: var(--hovered-note-point-color)
+                fill: $hovered-note-point-color
 
     g[data-state=drawing]
         ellipse:first-of-type
-            fill: var(--first-note-point-color)
+            fill: $first-note-point-color
             &.nearby
-                fill: var(--hovered-first-note-point-color)
+                fill: $hovered-first-note-point-color
 
 .note-text
     position: absolute
@@ -55,10 +57,10 @@
         pointer-events: none
 
     &>.wrapper
-        background: var(--note-text-background-color)
+        background: $note-text-background-color
         padding: 0.3em 0.6em
-        border: 1px solid var(--note-text-border-color)
-        color: var(--note-text-text-color)
+        border: 1px solid $note-text-border-color
+        color: $note-text-text-color
         box-sizing: border-box
 
         p:last-of-type

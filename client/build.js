@@ -31,7 +31,7 @@ const external_js = [
 ];
 
 const app_manifest = {
-    name: "szurubooru",
+    name: "Glegle Gallery",
     icons: [
         {
             src: baseUrl() + "img/android-chrome-192x192.png",

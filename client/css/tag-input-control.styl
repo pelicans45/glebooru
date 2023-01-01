@@ -1,3 +1,5 @@
+@import colors
+
 div.tag-input
     position: relative
 
@@ -27,9 +29,9 @@ div.tag-input
             margin-top: 0.5em
             position: absolute
             display: block
-            background: var(--tag-suggestions-header-color)
-            border-left: 1px solid var(--tag-suggestions-border-color)
-            border-bottom: 1px solid var(--tag-suggestions-border-color)
+            background: $tag-suggestions-header-color
+            border-left: 1px solid $tag-suggestions-border-color
+            border-bottom: 1px solid $tag-suggestions-border-color
             width: 0.707107em
             height: 0.707107em
             content: ' '
@@ -40,16 +42,16 @@ div.tag-input
             float: right
             a
                 margin-left: 1em
-                color: var(--inactive-link-color)
+                color: $inactive-link-color
 
         .wrapper
             margin-left: 0.5em
-            background: var(--window-color)
-            border: 1px solid var(--tag-suggestions-border-color)
+            background: $window-color
+            border: 1px solid $tag-suggestions-border-color
             width: 15em
             word-break: break-all
             p
-                background: var(--tag-suggestions-header-color)
+                background: $tag-suggestions-header-color
                 padding: 0.2em 1em
                 margin: 0
             ul
@@ -60,7 +62,7 @@ div.tag-input
                 max-height: 20em
                 padding: 0.5em 1em 0 1em
                 li:last-child
-                    border-bottom: 0.5em solid alpha(var(--window-color), 0)
+                    border-bottom: 0.5em solid alpha($window-color, 0)
                 li
                     margin: 0
                     font-size: 90%
@@ -79,7 +81,7 @@ div.tag-input
                 margin: 0
 
         .append
-            color: var(--inactive-link-color)
+            color: $inactive-link-color
             margin-left: 0.7em
             font-size: 90%
             unselectable()
@@ -106,34 +108,34 @@ ul.compact-tags
             display: inline
         a:focus
             outline: 0
-            box-shadow: inset 0 0 0 2px var(--main-color)
+            box-shadow: inset 0 0 0 2px $main-color
         // these 3 added when tag is added to ul
         &.added, &.new, &.implication
             animation: tag-added-to-post 1s ease forwards
         &.implication
-            color: var(--implied-tag-text-color)
-            background-color: var(--implied-tag-background-color)
+            color: $implied-tag-text-color
+            background-color: $implied-tag-background-color
         &.new
-            color: var(--new-tag-text-color)
-            background-color: var(--new-tag-background-color)
+            color: $new-tag-text-color
+            background-color: $new-tag-background-color
         &.duplicate
-            color: var(--duplicate-tag-text-color)
-            background-color: var(--duplicate-tag-background-color)
+            color: $duplicate-tag-text-color
+            background-color: $duplicate-tag-background-color
     i
         padding-right: 0.4em
 
 .darktheme ul.compact-tags
     li
         &.new
-            background-color: darken(var(--new-tag-background-color), 80%)
+            background-color: darken($new-tag-background-color, 80%)
         &.implication
-            background-color: darken(var(--implied-tag-background-color), 85%)
+            background-color: darken($implied-tag-background-color, 85%)
         &.duplicate
-            background-color: darken(var(--duplicate-tag-background-color), 80%)
+            background-color: darken($duplicate-tag-background-color, 80%)
 
 div.tag-input, ul.compact-tags
     .tag-usages, .tag-weight, .remove-tag
-        color: var(--inactive-link-color)
+        color: $inactive-link-color
         unselectable()
     .tag-usages, .tag-weight
         font-size: 90%
@@ -145,15 +147,15 @@ div.tag-input, ul.compact-tags
 .darktheme
     div.tag-input .tag-suggestions
         .buttons a
-            color: var(--inactive-link-color-darktheme)
+            color: $inactive-link-color-darktheme
         .wrapper
-            background: var(--window-color-darktheme)
+            background: $window-color-darktheme
             ul li:last-child
-                border-bottom: 0.5em solid alpha(var(--window-color-darktheme), 0)
+                border-bottom: 0.5em solid alpha($window-color-darktheme, 0)
             p
-                background: darken(var(--tag-suggestions-header-color), 80%)
+                background: darken($tag-suggestions-header-color, 80%)
         .append
-            color: var(--inactive-link-color-darktheme)
+            color: $inactive-link-color-darktheme
     div.tag-input, ul.compact-tags
         .tag-usages, .tag-weight, .remove-tag
-            color: var(--inactive-link-color-darktheme)
+            color: $inactive-link-color-darktheme

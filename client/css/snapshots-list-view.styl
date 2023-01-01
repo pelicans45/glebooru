@@ -1,3 +1,5 @@
+@import colors
+
 .snapshot-list
     text-align: left
 
@@ -24,36 +26,36 @@
                     padding: 0
 
             div.operation-created
-                background: var(--snapshot-created-background-color)
+                background: $snapshot-created-background-color
                 &+.details
                     background: alpha(@background, 50%)
             div.operation-modified
-                background: var(--snapshot-modified-background-color)
+                background: $snapshot-modified-background-color
                 &+.details
                     background: alpha(@background, 50%)
             div.operation-deleted
-                background: var(--snapshot-deleted-background-color)
+                background: $snapshot-deleted-background-color
                 &+.details
                     background: alpha(@background, 50%)
             div.operation-merged
-                background: var(--snapshot-merged-background-color)
+                background: $snapshot-merged-background-color
                 &+.details
                     background: alpha(@background, 50%)
 
 .darktheme .snapshot-list ul li
     div.operation-created
-        background: darken(var(--snapshot-created-background-color), 80%)
+        background: darken($snapshot-created-background-color, 80%)
         &+.details
             background: alpha(@background, 50%)
     div.operation-modified
-        background: darken(var(--snapshot-modified-background-color), 80%)
+        background: darken($snapshot-modified-background-color, 80%)
         &+.details
             background: alpha(@background, 50%)
     div.operation-deleted
-        background: darken(var(--snapshot-deleted-background-color), 80%)
+        background: darken($snapshot-deleted-background-color, 80%)
         &+.details
             background: alpha(@background, 50%)
     div.operation-merged
-        background: darken(var(--snapshot-merged-background-color), 80%)
+        background: darken($snapshot-merged-background-color, 80%)
         &+.details
             background: alpha(@background, 50%)

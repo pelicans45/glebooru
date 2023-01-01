@@ -1,3 +1,5 @@
+@import colors
+
 .expander
     &.collapsed
         margin-bottom: 1em
@@ -6,17 +8,17 @@
         &>header
             display: block
     header
-        background: var(--active-tab-background-color)
+        background: $active-tab-background-color
         line-height: 2em
         a
             padding: 0 0.5em
             display: block
-            color: mix(var(--text-color), var(--inactive-link-color))
+            color: mix($text-color, $inactive-link-color)
             span
                 font-size: 120%
             i
                 font-size: 1em
-                color: var(--inactive-link-color)
+                color: $inactive-link-color
                 float: right
                 line-height: 2em
     .expander-content
@@ -24,8 +26,8 @@
 
 .darktheme .expander
     header
-        background: var(--active-tab-background-color-darktheme)
+        background: $active-tab-background-color-darktheme
         a
-            color: mix(var(--text-color-darktheme), var(--inactive-link-color-darktheme))
+            color: mix($text-color-darktheme, $inactive-link-color-darktheme)
             i
-                color: var(--inactive-link-color-darktheme)
+                color: $inactive-link-color-darktheme

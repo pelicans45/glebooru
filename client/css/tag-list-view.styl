@@ -1,3 +1,5 @@
+@import colors
+
 .tag-list
     table
         width: 100%
@@ -5,12 +7,12 @@
         text-align: left
         line-height: 1.3em
         tr:hover td
-            background: var(--top-navigation-color)
+            background: $top-navigation-color
         th, td
             padding: 0.1em 0.5em
         th
             white-space: nowrap
-            background: var(--top-navigation-color)
+            background: $top-navigation-color
         .names
             width: 28%
         .implications
@@ -41,9 +43,9 @@
 .darktheme .tag-list
     table
         tr:hover td
-            background: var(--top-navigation-color-darktheme)
+            background: $top-navigation-color-darktheme
         th
-            background: var(--top-navigation-color-darktheme)
+            background: $top-navigation-color-darktheme
 
 .tag-list-header
     label
@@ -58,8 +60,8 @@
     .append
         vertical-align: middle
         font-size: 0.95em
-        color: var(--inactive-link-color)
+        color: $inactive-link-color
 
 .darktheme .tag-list-header
     .append
-        color: var(--inactive-link-color-darktheme)
+        color: $inactive-link-color-darktheme

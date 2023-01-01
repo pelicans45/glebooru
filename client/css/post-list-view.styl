@@ -1,3 +1,5 @@
+@import colors
+
 .post-list
     ul
         list-style-type: none
@@ -124,17 +126,17 @@
                     font-size: 1.6em
                     border: 3px solid
                     &.safety-safe
-                        background-color: darken(var(--safety-safe), 5%)
+                        background-color: darken($safety-safe, 5%)
                         border-color: @background-color
                         &:not(.active)
                             background-color: alpha(@background-color, 0.3)
                     &.safety-sketchy
-                        background-color: var(--safety-sketchy)
+                        background-color: $safety-sketchy
                         border-color: @background-color
                         &:not(.active)
                             background-color: alpha(@background-color, 0.3)
                     &.safety-unsafe
-                        background-color: var(--safety-unsafe)
+                        background-color: $safety-unsafe
                         border-color: @background-color
                         &:not(.active)
                             background-color: alpha(@background-color, 0.3)
@@ -174,16 +176,16 @@
 
             .thumbnail-wrapper.no-tags
                 .thumbnail
-                    outline: 4px solid var(--post-thumbnail-no-tags-border-color)
+                    outline: 4px solid $post-thumbnail-no-tags-border-color
 
             &:hover
-                background: var(--post-thumbnail-border-color)
+                background: $post-thumbnail-border-color
                 .thumbnail
                     opacity: .9
 
             &:hover a, a:active, a:focus
                 .thumbnail
-                    outline: 4px solid var(--main-color) !important
+                    outline: 4px solid $main-color !important
 
 .post-flow
     ul
@@ -196,10 +198,10 @@
                 outline-offset: -1px
             .thumbnail-wrapper.no-tags
                 .thumbnail
-                    outline: 2px solid var(--post-thumbnail-no-tags-border-color)
+                    outline: 2px solid $post-thumbnail-no-tags-border-color
             &:hover a, a:active, a:focus
                 .thumbnail
-                    outline: 2px solid var(--main-color) !important
+                    outline: 2px solid $main-color !important
 
 .post-list-header
     white-space: nowrap
@@ -228,7 +230,7 @@
             margin-left: 0.8em
         vertical-align: middle
         font-size: 0.95em
-        color: var(--inactive-link-color)
+        color: $inactive-link-color
     .bulk-edit-btn-holder, .metrics-btn-holder
         &:not(.opened)
             .close
@@ -260,11 +262,11 @@
                 &.selected
                     border-style: solid
                     &.tag-default
-                        background-color: var(--main-color)
+                        background-color: $main-color
                 &:not(.selected)
                     border-style: dotted
                     &.tag-default
-                        border-color: var(--main-color)
+                        border-color: $main-color
             li a
                 vertical-align: middle
                 padding: 0.2em 0.5em
@@ -349,17 +351,17 @@
         display: none
         margin-right: 0.25em
         &.safety-safe
-            background-color: var(--safety-safe)
+            background-color: $safety-safe
             border-color: @background-color
             &.disabled
                 background-color: alpha(@background-color, 0.15)
         &.safety-sketchy
-            background-color: var(--safety-sketchy)
+            background-color: $safety-sketchy
             border-color: @background-color
             &.disabled
                 background-color: alpha(@background-color, 0.15)
         &.safety-unsafe
-            background-color: var(--safety-unsafe)
+            background-color: $safety-unsafe
             border-color: @background-color
             &.disabled
                 background-color: alpha(@background-color, 0.15)
