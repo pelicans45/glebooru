@@ -7,7 +7,7 @@
             <% if (ctx.canEditName) { %>
                 <li>
                     <%= ctx.makeTextInput({
-                        text: 'User name',
+                        text: 'Username',
                         name: 'name',
                         value: ctx.user.name,
                         pattern: ctx.userNamePattern,

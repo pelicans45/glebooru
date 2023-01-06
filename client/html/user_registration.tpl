@@ -7,7 +7,7 @@
         <ul class='input'>
             <li>
                 <%= ctx.makeTextInput({
-                    text: 'User name',
+                    text: 'Username',
                     name: 'name',
                     placeholder: 'letters, digits, _, -',
                     required: true,

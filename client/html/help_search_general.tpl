@@ -72,7 +72,7 @@ take following form:</p>
     <li><code>&lt;year&gt;-&lt;month&gt;-&lt;day&gt;</code></li>
 </ul>
 
-<p>Some fields, such as user names, can take wildcards (<code>*</code>).</p>
+<p>Some fields, such as usernames, can take wildcards (<code>*</code>).</p>
 
 <p>All tokens can be negated by prepending them with <code>-</code>.</p>
 

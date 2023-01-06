@@ -28,7 +28,7 @@
         </section>
 
         <section class='upload-info'>
-            <%= ctx.makeUserLink(ctx.post.user) %>,
+            <%= ctx.makeUserLinkForSidebar(ctx.post.user) %>
             <%= ctx.makeRelativeTime(ctx.post.creationTime) %>
         </section>
 

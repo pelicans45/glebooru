@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import sqlalchemy as sa
+from szurubooru.func import auth, files, images, serialization, util
 
 from szurubooru import config, db, errors, model, rest
-from szurubooru.func import auth, files, images, serialization, util
 
 
 class UserNotFoundError(errors.NotFoundError):
@@ -232,12 +232,12 @@ def update_user_name(user: model.User, name: str) -> None:
     if not name:
         raise InvalidUserNameError("Name cannot be empty.")
     if util.value_exceeds_column_size(name, model.User.name):
-        raise InvalidUserNameError("User name is too long.")
+        raise InvalidUserNameError("Username is too long.")
     name = name.strip()
     name_regex = config.config["user_name_regex"]
     if not re.match(name_regex, name):
         raise InvalidUserNameError(
-            "User name %r must satisfy regex %r." % (name, name_regex)
+            "Username %r must satisfy regex %r." % (name, name_regex)
         )
     other_user = try_get_user_by_name(name)
     if other_user and other_user.user_id != user.user_id:
@@ -270,7 +270,7 @@ def update_user_email(user: model.User, email: str) -> None:
     if util.value_exceeds_column_size(email, model.User.email):
         raise InvalidEmailError("Email is too long.")
     if not util.is_valid_email(email):
-        raise InvalidEmailError("E-mail is invalid.")
+        raise InvalidEmailError("Email is invalid.")
     user.email = email or None
 
 

@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
+from szurubooru.func import serialization, tag_categories, util
 
 from szurubooru import config, db, errors, model, rest
-from szurubooru.func import serialization, tag_categories, util
 
 
 class TagNotFoundError(errors.NotFoundError):
@@ -62,14 +62,21 @@ def _check_name_intersection(
     return len(set(names1).intersection(names2)) > 0
 
 
+"""
+tag.category.order,
+default_category_name == tag.category.name,
+tag.category.name,
+tag.post_count,
+tag.names[0].name,
+"""
+
+
 def sort_tags(tags: List[model.Tag]) -> List[model.Tag]:
     default_category_name = tag_categories.get_default_category_name()
     return sorted(
         tags,
         key=lambda tag: (
-            tag.category.order,
-            default_category_name == tag.category.name,
-            tag.category.name,
+            tag.post_count,
             tag.names[0].name,
         ),
     )

@@ -10,6 +10,8 @@ _cache_result = None  # type: Optional[int]
 
 
 def _get_disk_usage() -> int:
+    return 0
+    """
     global _cache_time, _cache_result
     threshold = timedelta(hours=48)
     now = datetime.utcnow()
@@ -27,6 +29,7 @@ def _get_disk_usage() -> int:
     _cache_time = now
     _cache_result = total_size
     return total_size
+    """
 
 
 @rest.routes.get("/info/?")
@@ -51,6 +54,7 @@ def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             ),
         },
     }
+    """
     if auth.has_privilege(ctx.user, "posts:view:featured"):
         ret["featuredPost"] = (
             posts.serialize_post(post_feature.post, ctx.user)
@@ -63,4 +67,5 @@ def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             else None
         )
         ret["featuringTime"] = post_feature.time if post_feature else None
+    """
     return ret

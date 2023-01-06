@@ -1,13 +1,20 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
+
+const domainData = require("./hosts");
+
 
 // -------------------------------------------------
 
+
+
+const domains = Object.keys(domainData);
+
 const webapp_icons = [
-    { name: 'android-chrome-192x192.png', size: 192 },
-    { name: 'android-chrome-512x512.png', size: 512 },
-    { name: 'apple-touch-icon.png', size: 180 },
-    { name: 'mstile-150x150.png', size: 150 }
+    { name: "android-chrome-192x192.png", size: 192 },
+    { name: "android-chrome-512x512.png", size: 512 },
+    { name: "apple-touch-icon.png", size: 180 },
+    { name: "mstile-150x150.png", size: 150 },
 ];
 
 const webapp_splash_screens = [
@@ -17,21 +24,20 @@ const webapp_splash_screens = [
     { w: 1242, h: 2148, center: 625 },
     { w: 1536, h: 2048, center: 770 },
     { w: 1668, h: 2224, center: 820 },
-    { w: 2048, h: 2732, center: 1024 }
+    { w: 2048, h: 2732, center: 1024 },
 ];
 
 const external_js = [
-    'dompurify',
-    'js-cookie',
-    'marked',
-    'mousetrap',
-    'nprogress',
-    'superagent',
-    'underscore',
+    "dompurify",
+    "js-cookie",
+    "marked",
+    "mousetrap",
+    "nprogress",
+    "superagent",
+    "underscore",
 ];
 
-const app_manifest = {
-    name: "Glegle Gallery",
+const baseManifest = {
     icons: [
         {
             src: baseUrl() + "img/android-chrome-192x192.png",
@@ -45,125 +51,173 @@ const app_manifest = {
         },
     ],
     start_url: baseUrl(),
-    theme_color: "#6824dd",
     background_color: "#ffffff",
     display: "standalone",
 };
 
 // -------------------------------------------------
 
-const fs = require('fs');
-const glob = require('glob');
-const path = require('path');
-const util = require('util');
-const execSync = require('child_process').execSync;
-const browserify = require('browserify');
-const chokidar = require('chokidar');
-const WebSocket = require('ws');
-var PrettyError = require('pretty-error');
+const fs = require("fs");
+const glob = require("glob");
+const path = require("path");
+const util = require("util");
+const execSync = require("child_process").execSync;
+const browserify = require("browserify");
+const chokidar = require("chokidar");
+const WebSocket = require("ws");
+var PrettyError = require("pretty-error");
 var pe = new PrettyError();
 
 function readTextFile(path) {
-    return fs.readFileSync(path, 'utf-8');
+    return fs.readFileSync(path, "utf-8");
 }
 
 function gzipFile(file) {
     file = path.normalize(file);
-    execSync('gzip -6 -k ' + file);
+    execSync("gzip -6 -k " + file);
 }
 
 function baseUrl() {
-    return process.env.BASE_URL ? process.env.BASE_URL : '/';
+    return process.env.BASE_URL ? process.env.BASE_URL : "/";
 }
 
 // -------------------------------------------------
 
-function bundleHtml() {
-    const underscore = require('underscore');
-    const babelify = require('babelify');
+function bundleHtml(domain, data) {
+    const underscore = require("underscore");
+    const babelify = require("babelify");
 
     function minifyHtml(html) {
-        return require('html-minifier').minify(html, {
-            removeComments: true,
-            collapseWhitespace: true,
-            conservativeCollapse: true,
-        }).trim();
+        return require("html-minifier")
+            .minify(html, {
+                removeComments: true,
+                collapseWhitespace: true,
+                conservativeCollapse: true,
+            })
+            .trim();
     }
 
-    let baseHtml = readTextFile('./html/index.htm')
-        .replace('<!-- Base HTML Placeholder -->', `<base href="${baseUrl()}"/>`);
+    let baseHtml = readTextFile("./html/index.htm").replace(
+        "<!-- Base HTML Placeholder -->",
+        `<title>${data.name}</title><base href="${baseUrl()}"/>`
+    );
 
-	baseHtml = baseHtml.replaceAll("$RAND$", Math.random().toString(36).substring(7));
-    fs.writeFileSync('./public/index.htm', minifyHtml(baseHtml));
+    baseHtml = baseHtml.replaceAll(
+        "$RAND$",
+        Math.random().toString(36).substring(7)
+    );
 
+    baseHtml = baseHtml.replaceAll("$THEME_COLOR$", data.color);
+    fs.writeFileSync("./public/index.htm", minifyHtml(baseHtml));
+
+    console.info("Bundled HTML");
+}
+
+function bundleTemplates() {
     let compiledTemplateJs = [
         `'use strict';`,
         `let _ = require('underscore');`,
-        `let templates = {};`
+        `let templates = {};`,
     ];
 
-    for (const file of glob.sync('./html/**/*.tpl')) {
-        const name = path.basename(file, '.tpl').replace(/_/g, '-');
+    for (const file of glob.sync("./html/**/*.tpl")) {
+        const name = path.basename(file, ".tpl").replace(/_/g, "-");
         const placeholders = [];
         let templateText = readTextFile(file);
-        templateText = templateText.replace(
-            /<%.*?%>/ig,
-            (match) => {
-                const ret = '%%%TEMPLATE' + placeholders.length;
-                placeholders.push(match);
-                return ret;
-            });
+        templateText = templateText.replace(/<%.*?%>/gi, (match) => {
+            const ret = "%%%TEMPLATE" + placeholders.length;
+            placeholders.push(match);
+            return ret;
+        });
         templateText = minifyHtml(templateText);
         templateText = templateText.replace(
             /%%%TEMPLATE(\d+)/g,
-            (match, number) => { return placeholders[number]; });
+            (match, number) => {
+                return placeholders[number];
+            }
+        );
 
-        const functionText = underscore.template(
-            templateText, { variable: 'ctx' }).source;
+        const functionText = underscore.template(templateText, {
+            variable: "ctx",
+        }).source;
 
         compiledTemplateJs.push(`templates['${name}'] = ${functionText};`);
     }
-    compiledTemplateJs.push('module.exports = templates;');
+    compiledTemplateJs.push("module.exports = templates;");
 
-    fs.writeFileSync('./js/.templates.autogen.js', compiledTemplateJs.join('\n'));
-    console.info('Bundled HTML');
+    fs.writeFileSync(
+        "./js/.templates.autogen.js",
+        compiledTemplateJs.join("\n")
+    );
+    console.info("Bundled templates");
 }
 
 function bundleCss() {
-    const stylus = require('stylus');
+    const stylus = require("stylus");
 
     function minifyCss(css) {
-        return require('csso').minify(css).css;
+        return require("csso").minify(css).css;
     }
 
-    let css = '';
-    for (const file of glob.sync('./css/**/*.styl')) {
-        css += stylus.render(readTextFile(file), { filename: file });
-    }
-    fs.writeFileSync('./public/css/app.min.css', minifyCss(css));
-    if (process.argv.includes('--gzip')) {
-        gzipFile('./public/css/app.min.css');
+    for (const domain of domains) {
+        const outputDir = `./public/${domain}/css`;
+        const customDir = `./css/custom/${domain}`;
+        const appStylesheet = `${outputDir}/app.css`;
+
+        let css = "";
+        for (const file of glob.sync("./css/**/*.styl")) {
+            if (file.includes("/custom/")) {
+                continue;
+            }
+
+            css += stylus.render(readTextFile(file), {
+                filename: file,
+                include: `${customDir}/custom-colors.styl`,
+            });
+        }
+
+        const customStyle = `${customDir}/custom.styl`;
+        css += stylus.render(
+            readTextFile(customStyle, {
+                filename: customStyle,
+                include: [
+                    //`${customDir}/custom-colors.styl`,
+                    `./css/colors.styl`,
+                ],
+            })
+        );
+
+        fs.writeFileSync(appStylesheet, minifyCss(css));
+        if (process.argv.includes("--gzip")) {
+            gzipFile(appStylesheet);
+        }
+
+        const vendorStylesheet = `${outputDir}/vendor.css`;
+
+        fs.copyFileSync(
+            "./node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+            vendorStylesheet
+        );
+        if (process.argv.includes("--gzip")) {
+            gzipFile(vendorStylesheet);
+        }
     }
 
-    fs.copyFileSync(
-        './node_modules/@fortawesome/fontawesome-free/css/all.min.css',
-        './public/css/vendor.min.css');
-    if (process.argv.includes('--gzip')) {
-        gzipFile('./public/css/vendor.min.css');
-    }
-
-    console.info('Bundled CSS');
+    console.info("Bundled CSS");
 }
 
 function minifyJs(path) {
-    return require('terser').minify(
-        fs.readFileSync(path, 'utf-8'), { compress: { unused: false } }).code;
+    return require("terser").minify(fs.readFileSync(path, "utf-8"), {
+        compress: { unused: false },
+    }).code;
 }
 
 function writeJsBundle(b, path, compress, callback) {
     let outputFile = fs.createWriteStream(path);
-    b.bundle().on('error', (e) => console.error(pe.render(e))).pipe(outputFile);
-    outputFile.on('finish', () => {
+    b.bundle()
+        .on("error", (e) => console.error(pe.render(e)))
+        .pipe(outputFile);
+    outputFile.on("finish", () => {
         if (compress) {
             fs.writeFileSync(path, minifyJs(path));
         }
@@ -176,57 +230,64 @@ function bundleVendorJs(compress) {
     for (let lib of external_js) {
         b.require(lib);
     }
-    if (!process.argv.includes('--no-transpile')) {
-        b.add(require.resolve('babel-polyfill'));
+    if (!process.argv.includes("--no-transpile")) {
+        b.add(require.resolve("babel-polyfill"));
     }
-    const file = './public/js/vendor.min.js';
-    writeJsBundle(b, file, compress, () => {
-        if (process.argv.includes('--gzip')) {
-            gzipFile(file);
-        }
-        console.info('Bundled vendor JS');
-    });
+
+    for (const domain of domains) {
+        const file = "./public/js/vendor.js";
+        writeJsBundle(b, file, compress, () => {
+            if (process.argv.includes("--gzip")) {
+                gzipFile(file);
+            }
+            console.info("Bundled vendor JS");
+        });
+    }
 }
 
 function bundleAppJs(b, compress, callback) {
-    const file = './public/js/app.min.js';
+    const file = "./public/js/app.js";
     writeJsBundle(b, file, compress, () => {
-        if (process.argv.includes('--gzip')) {
+        if (process.argv.includes("--gzip")) {
             gzipFile(file);
         }
-        console.info('Bundled app JS');
+        console.info("Bundled app JS");
         callback();
     });
 }
 
 function bundleJs() {
-    if (!process.argv.includes('--no-vendor-js')) {
+    if (!process.argv.includes("--no-vendor-js")) {
         bundleVendorJs(true);
     }
 
-    if (!process.argv.includes('--no-app-js')) {
-        let watchify = require('watchify');
-        let b = browserify({ debug: process.argv.includes('--debug') });
-        if (!process.argv.includes('--no-transpile')) {
-            b = b.transform('babelify');
+    if (!process.argv.includes("--no-app-js")) {
+        let watchify = require("watchify");
+        let b = browserify({ debug: process.argv.includes("--debug") });
+        if (!process.argv.includes("--no-transpile")) {
+            b = b.transform("babelify");
         }
-        b = b.external(external_js).add(glob.sync('./js/**/*.js'));
-        const compress = !process.argv.includes('--debug');
-        bundleAppJs(b, compress, () => { });
+        b = b.external(external_js).add(glob.sync("./js/**/*.js"));
+        const compress = !process.argv.includes("--debug");
+        bundleAppJs(b, compress, () => {});
     }
 }
 
-const environment = process.argv.includes('--watch') ? "development" : "production";
+const environment = process.argv.includes("--watch")
+    ? "development"
+    : "production";
 
 function bundleConfig() {
     function getVersion() {
         let build_info = process.env.BUILD_INFO;
         if (!build_info) {
             try {
-                build_info = execSync('git describe --always --dirty --long --tags').toString();
+                build_info = execSync(
+                    "git describe --always --dirty --long --tags"
+                ).toString();
             } catch (e) {
-                console.warn('Cannot find build version');
-                build_info = 'unknown';
+                console.warn("Cannot find build version");
+                build_info = "unknown";
             }
         }
         return build_info.trim();
@@ -234,95 +295,132 @@ function bundleConfig() {
     const config = {
         meta: {
             version: getVersion(),
-            buildDate: new Date().toUTCString()
+            buildDate: new Date().toUTCString(),
         },
-        environment: environment
+        environment: environment,
     };
 
-    fs.writeFileSync('./js/.config.autogen.json', JSON.stringify(config));
-    console.info('Generated config file');
+    fs.writeFileSync("./js/.config.autogen.json", JSON.stringify(config));
+    console.info("Generated config file");
 }
 
-function bundleBinaryAssets() {
-    fs.copyFileSync('./img/favicon.png', './public/img/favicon.png');
-    console.info('Copied images');
+function bundleBinaryAssets(domain) {
+    const outputDir = `./public/${domain}`;
+    const imgDir = `sites/${domain}/img`;
 
-    fs.copyFileSync('./fonts/open_sans.woff2', './public/webfonts/open_sans.woff2')
-    for (let file of glob.sync('./node_modules/@fortawesome/fontawesome-free/webfonts/*.*')) {
+    fs.copyFileSync(`${imgDir}/favicon.png`, `${outputDir}/img/favicon.png`);
+    console.info("Copied images");
+
+    fs.copyFileSync(
+        "./fonts/open_sans.woff2",
+        `${outputDir}/webfonts/open_sans.woff2`
+    );
+    for (let file of glob.sync(
+        "./node_modules/@fortawesome/fontawesome-free/webfonts/*.*"
+    )) {
         if (fs.lstatSync(file).isDirectory()) {
             continue;
         }
-        fs.copyFileSync(file, path.join('./public/webfonts/', path.basename(file)));
+        fs.copyFileSync(
+            file,
+            path.join(`${outputDir}/webfonts/`, path.basename(file))
+        );
     }
-    if (process.argv.includes('--gzip')) {
-        for (let file of glob.sync('./public/webfonts/*.*')) {
-            if (file.endsWith('woff2')) {
+    if (process.argv.includes("--gzip")) {
+        for (let file of glob.sync(`${outputDir}/webfonts/*.*`)) {
+            if (file.endsWith("woff2")) {
                 continue;
             }
             gzipFile(file);
         }
     }
-    console.info('Copied fonts')
+    console.info("Copied fonts");
 }
 
-function bundleWebAppFiles() {
-    const Jimp = require('jimp');
+function bundleWebAppFiles(domain, data) {
+    const Jimp = require("jimp");
 
-    fs.writeFileSync('./public/manifest.json', JSON.stringify(app_manifest));
-    console.info('Generated app manifest');
+    const outputDir = `./public/${domain}`;
+    const imgDir = `sites/${domain}/img`;
 
-    Promise.all(webapp_icons.map(icon => {
-        return Jimp.read('./img/app.png')
-            .then(file => {
-                file.resize(icon.size, Jimp.AUTO, Jimp.RESIZE_BEZIER)
-                    .write(path.join('./public/img/', icon.name));
+    const manifest = {
+        ...baseManifest,
+        name: data.name,
+        theme_color: data.color,
+    };
+
+    fs.writeFileSync(`${outputDir}/manifest.json`, JSON.stringify(manifest));
+    console.info("Generated app manifest");
+
+    Promise.all(
+        webapp_icons.map((icon) => {
+            return Jimp.read(`${imgDir}/app.png`).then((file) => {
+                file.resize(icon.size, Jimp.AUTO, Jimp.RESIZE_BEZIER).write(
+                    path.join(`${outputDir}/img/`, `${icon.name}`)
+                );
             });
-    }))
-        .then(() => {
-            console.info('Generated webapp icons');
-        });
+        })
+    ).then(() => {
+        console.info("Generated webapp icons");
+    });
 
-    Promise.all(webapp_splash_screens.map(dim => {
-        return Jimp.read('./img/splash.png')
-            .then(file => {
+    Promise.all(
+        webapp_splash_screens.map((dim) => {
+            return Jimp.read(`${imgDir}/splash.png`).then((file) => {
                 file.resize(dim.center, Jimp.AUTO, Jimp.RESIZE_BEZIER)
-                    .background(0xFFFFFFFF)
-                    .contain(dim.w, dim.center,
-                        Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
-                    .contain(dim.w, dim.h,
-                        Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
-                    .write(path.join('./public/img/',
-                        'apple-touch-startup-image-' + dim.w + 'x' + dim.h + '.png'));
+                    .background(0xffffffff)
+                    .contain(
+                        dim.w,
+                        dim.center,
+                        Jimp.HORIZONTAL_ALIGN_CENTER |
+                            Jimp.VERTICAL_ALIGN_MIDDLE
+                    )
+                    .contain(
+                        dim.w,
+                        dim.h,
+                        Jimp.HORIZONTAL_ALIGN_CENTER |
+                            Jimp.VERTICAL_ALIGN_MIDDLE
+                    )
+                    .write(
+                        path.join(
+                            `${outputDir}/img/`,
+                            "apple-touch-startup-image-" +
+                                dim.w +
+                                "x" +
+                                dim.h +
+                                ".png"
+                        )
+                    );
             });
-    }))
-        .then(() => {
-            console.info('Generated splash screens');
-        });
+        })
+    ).then(() => {
+        console.info("Generated splash screens");
+    });
 }
 
-function makeOutputDirs() {
+function makeOutputDirs(domain) {
     const dirs = [
-        './public',
-        './public/css',
-        './public/webfonts',
-        './public/img',
-        './public/js'
+        //"./public",
+        `./public/${domain}/css`,
+        `./public/${domain}/webfonts`,
+        `./public/${domain}/img`,
+        `./public/${domain}/js`,
     ];
     for (let dir of dirs) {
         if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, 0o755);
-            console.info('Created directory: ' + dir);
+            fs.mkdirSync(dir, { mode: 0o755, recursive: true });
+            console.info("Created directory: " + dir);
         }
     }
 }
 
 function watch() {
     let wss = new WebSocket.Server({ port: 8080 });
-    const liveReload = !process.argv.includes('--no-live-reload');
+    const liveReload = !process.argv.includes("--no-live-reload");
 
     function emitReload() {
         if (liveReload) {
-            console.log("Requesting live reload.")
+            console.log("Requesting live reload.");
             wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send("reload");
@@ -331,7 +429,7 @@ function watch() {
         }
     }
 
-    chokidar.watch('./fonts/**/*').on('change', () => {
+    chokidar.watch("./fonts/**/*").on("change", () => {
         try {
             bundleBinaryAssets();
             emitReload();
@@ -339,7 +437,7 @@ function watch() {
             console.error(pe.render(e));
         }
     });
-    chokidar.watch('./img/**/*').on('change', () => {
+    chokidar.watch("./img/**/*").on("change", () => {
         try {
             bundleWebAppFiles();
             emitReload();
@@ -347,16 +445,16 @@ function watch() {
             console.error(pe.render(e));
         }
     });
-    chokidar.watch('./html/**/*.tpl').on('change', () => {
+    chokidar.watch("./html/**/*.tpl").on("change", () => {
         try {
             bundleHtml();
         } catch (e) {
             console.error(pe.render(e));
         }
     });
-    chokidar.watch('./css/**/*.styl').on('change', () => {
+    chokidar.watch("./css/**/*.styl").on("change", () => {
         try {
-            bundleCss()
+            bundleCss();
             emitReload();
         } catch (e) {
             console.error(pe.render(e));
@@ -370,20 +468,22 @@ function watch() {
 
     bundleVendorJs(true);
 
-    let watchify = require('watchify');
+    let watchify = require("watchify");
     let b = browserify({
-        debug: process.argv.includes('--debug'),
-        entries: ['js/main.js'],
+        debug: process.argv.includes("--debug"),
+        entries: ["js/main.js"],
         cache: {},
         packageCache: {},
     });
 
     b.plugin(watchify);
 
-    if (!process.argv.includes('--no-transpile')) {
-        b = b.transform('babelify');
+    if (!process.argv.includes("--no-transpile")) {
+        b = b.transform("babelify");
     }
-    b = b.external(external_js).add(glob.sync('./js/**/*.js'));
+
+    b = b.external(external_js).add(glob.sync("./js/**/*.js"));
+
     const compress = false;
 
     function bundle(id) {
@@ -391,36 +491,44 @@ function watch() {
         let start = new Date();
         bundleAppJs(b, compress, () => {
             let end = new Date() - start;
-            console.info('Rebundled in %ds.', end / 1000)
+            console.info("Rebundled in %ds.", end / 1000);
             emitReload();
         });
     }
 
-    b.on('update', bundle);
+    b.on("update", bundle);
     bundle();
 }
 
 // -------------------------------------------------
 
-console.log("Building for '" + environment + "' environment.");
-makeOutputDirs();
-bundleConfig();
-if (process.argv.includes('--watch')) {
+/*
+if (process.argv.includes("--watch")) {
     watch();
 } else {
-    if (!process.argv.includes('--no-binary-assets')) {
-        bundleBinaryAssets();
+*/
+
+console.log(`Building for "${environment}" environment.`);
+bundleConfig();
+bundleTemplates();
+
+for (const [domain, data] of Object.entries(domainData)) {
+    console.log(`Building for ${domain}`);
+    makeOutputDirs(domain);
+
+    if (!process.argv.includes("--no-binary-assets")) {
+        bundleBinaryAssets(domain);
     }
-    if (!process.argv.includes('--no-web-app-files')) {
-        bundleWebAppFiles();
+    if (!process.argv.includes("--no-web-app-files")) {
+        bundleWebAppFiles(domain, data);
     }
-    if (!process.argv.includes('--no-html')) {
-        bundleHtml();
+    if (!process.argv.includes("--no-html")) {
+        bundleHtml(domain, data);
     }
-    if (!process.argv.includes('--no-css')) {
-        bundleCss();
+    if (!process.argv.includes("--no-css")) {
+        bundleCss(domain);
     }
-    if (!process.argv.includes('--no-js')) {
-        bundleJs();
+    if (!process.argv.includes("--no-js")) {
+        bundleJs(domain);
     }
 }

@@ -55,10 +55,10 @@ class TopNavigation extends events.EventTarget {
     }
 
     setTitle(title) {
-        api.fetchConfig().then(() => {
-            document.oldTitle = null;
-            document.title = api.getName() + (title ? " – " + title : "");
-        });
+        //api.fetchConfig().then(() => {
+        document.oldTitle = null;
+        document.title = api.getName() + (title ? " – " + title : "");
+        //});
     }
 
     showAll() {
@@ -80,16 +80,16 @@ function _makeTopNavigation() {
     const ret = new TopNavigation();
     //ret.add("home", new TopNavigationItem("M", "Home", "home"));
     //ret.add("posts", new TopNavigationItem("P", "Posts", "posts"));
-	ret.add("posts", new TopNavigationItem("G", "Gallery", ""));
+    ret.add("posts", new TopNavigationItem("G", "Gallery", ""));
     ret.add("upload", new TopNavigationItem("U", "Upload", "upload"));
     ret.add("comments", new TopNavigationItem("C", "Comments", "comments"));
     ret.add("tags", new TopNavigationItem("T", "Tags", "tags"));
-    ret.add("pools", new TopNavigationItem("O", "Pools", "pools"));
-    ret.add("users", new TopNavigationItem("S", "Users", "users"));
+    ret.add("pools", new TopNavigationItem("P", "Pools", "pools"));
+    ret.add("users", new TopNavigationItem(null, "Users", "users"));
     ret.add("account", new TopNavigationItem("A", "Account", "user/{me}"));
     ret.add("register", new TopNavigationItem("R", "Register", "register"));
     ret.add("login", new TopNavigationItem("L", "Login", "login"));
-    ret.add("logout", new TopNavigationItem("O", "Logout", "logout"));
+    ret.add("logout", new TopNavigationItem(null, "Logout", "logout"));
     ret.add("help", new TopNavigationItem("H", "Help", "help"));
     ret.add(
         "settings",

@@ -5,7 +5,7 @@
         <ul class='input'>
             <li>
                 <%= ctx.makeTextInput({
-                    text: 'User name',
+                    text: 'Username',
                     name: 'name',
                     required: true,
                     pattern: ctx.userNamePattern,
@@ -19,10 +19,11 @@
                     pattern: ctx.passwordPattern,
                 }) %>
             </li>
-            <li>
+            <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Remember me',
                     name: 'remember-user',
+                    checked: true,
                 }) %>
             </li>
         </ul>
@@ -31,7 +32,7 @@
 
         <div class='buttons'>
             <input type='submit' value='Login'/>
-            <a class='append' href='<%- ctx.formatClientLink('password-reset') %>'>Forgot the password?</a>
+            <a class='append' href='<%- ctx.formatClientLink('password-reset') %>'>Forgot password?</a>
         </div>
     </form>
 </div>

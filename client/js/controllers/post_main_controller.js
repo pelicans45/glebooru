@@ -2,6 +2,7 @@
 
 const router = require("../router.js");
 const api = require("../api.js");
+const lens = require("../lens.js");
 const uri = require("../util/uri.js");
 const misc = require("../util/misc.js");
 const settings = require("../models/settings.js");
@@ -25,6 +26,10 @@ class PostMainController extends BasePostController {
         ]).then(
             (responses) => {
                 const [post, aroundResponse] = responses;
+                if (lens.checkHostnameFilterRedirect(post)) {
+                    return;
+                }
+
                 this._post = post;
                 this._view = new PostMainView({
                     post: post,

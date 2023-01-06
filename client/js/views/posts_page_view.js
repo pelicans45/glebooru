@@ -32,6 +32,15 @@ class PostsPageView extends events.EventTarget {
             const post = this._postIdToPost[postId];
             this._postIdToListItemNode[postId] = listItemNode;
 
+            listItemNode.addEventListener("click", (e) => {
+                if (!e.shiftKey) {
+                    return;
+                }
+
+                downloadURL(post.contentUrl, post.getDownloadFilename());
+                e.preventDefault();
+            });
+
             const tagFlipperNode = this._getTagFlipperNode(listItemNode);
             if (tagFlipperNode) {
                 tagFlipperNode.addEventListener("click", (e) =>
@@ -63,25 +72,6 @@ class PostsPageView extends events.EventTarget {
                 );
             }
         }
-
-		/*
-		const postList = document.querySelector(".post-list");
-        postList.addEventListener("click", function (event) {
-			if (!event.shiftKey) {
-				return
-			}
-
-            if (!event.target.classList.contains("gallery-thumb")) {
-                return;
-            }
-
-            const path = event.target.src.replace(
-                "generated-thumbnails",
-                "posts"
-            );
-            downloadURL(path);
-        });
-		*/
 
         this._syncBulkEditorsHighlights();
     }

@@ -3,7 +3,7 @@
 const api = require("../api.js");
 const router = require("../router.js");
 const uri = require("../util/uri.js");
-const filter = require("../filter.js");
+const lens = require("../lens.js");
 const misc = require("../util/misc.js");
 const progress = require("../util/progress.js");
 const settings = require("../models/settings.js");
@@ -211,7 +211,7 @@ class PostUploadController {
         post.safety = uploadable.safety;
         post.flags = uploadable.flags;
 
-        const hostnameTag = filter.getHostnameFilter();
+        const hostnameTag = lens.getHostnameFilter();
         if (hostnameTag) {
             uploadable.tags = uploadable.tags.filter(
                 (tag) => tag.toLowerCase() !== hostnameTag

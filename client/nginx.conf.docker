@@ -12,7 +12,7 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    log_format main '$remote_addr -> $request [$status] - '
+    log_format main '[$host] $remote_addr -> $request [$status] - '
                     'referer: $http_referer $http_x_forwarded_for';
     access_log /dev/stdout main;
 
@@ -70,7 +70,7 @@ http {
         }
 
         location / {
-            root /var/www;
+            root /var/www/$host;
             try_files $uri /index.htm;
 
             sendfile on;

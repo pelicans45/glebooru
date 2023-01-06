@@ -58,12 +58,10 @@
                 <% } else { %>
                     <% if (ctx.canEditPosts || ctx.canDeletePosts || ctx.canFeaturePosts) { %>
                         <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>
-                    <% } else { %>
-                        <a class='inactive'>
-                    <% } %>
                         <i class='fa fa-pencil-alt'></i>
                         <span class='vim-nav-hint'>Edit post</span>
-                    </a>
+                        </a>
+                    <% } %>
                 <% } %>
             </article>
         </nav>

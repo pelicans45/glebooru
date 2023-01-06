@@ -27,7 +27,7 @@ class PasswordResetController {
         ).then(
             () => {
                 this._passwordResetView.showSuccess(
-                    "E-mail has been sent. To finish the procedure, " +
+                    "Email has been sent. To finish the procedure, " +
                         "please click the link it contains."
                 );
             },

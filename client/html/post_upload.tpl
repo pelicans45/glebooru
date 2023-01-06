@@ -13,7 +13,7 @@
                 }) %>
             </span>
 
-            <span class='copy-tags-to-originals control-checkbox'>
+            <span class='copy-tags-to-originals control-checkbox' style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Copy tags to originals',
                     name: 'copy-tags-to-originals',
@@ -29,10 +29,6 @@
                 }) %>
             </span>
 
-            <div class='tags'>
-                <%= ctx.makeTextInput({}) %>
-            </div>
-
             <span class='pause-remain-on-error' style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Pause on error',
@@ -41,7 +37,9 @@
                 }) %>
             </span>
 
-            <%= ctx.makeTextInput({placeholder: 'Common tags', id: 'common-tags', name: 'common-tags', style: 'margin-top:1em;'}) %>
+            <div class='tags'>
+                <%= ctx.makeTextInput({}) %>
+            </div>
 
             <input type='button' value='Cancel' class='cancel'/>
         </div>

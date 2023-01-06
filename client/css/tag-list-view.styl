@@ -6,8 +6,11 @@
         border-spacing: 0
         text-align: left
         line-height: 1.3em
-        tr:hover td
-            background: $top-navigation-color
+        tr:hover
+            td
+                background: $top-navigation-color
+            .tags-list-row-search
+                display: inline
         th, td
             padding: 0.1em 0.5em
         th
@@ -26,6 +29,12 @@
             text-align: center
             width: 8%
             white-space: pre
+        .tags-list-row-search
+            display: none
+            color: $main-color
+            &:hover
+                //opacity: 0.9
+                color: lighten($main-color, 90%)
         ul
             list-style-type: none
             margin: 0

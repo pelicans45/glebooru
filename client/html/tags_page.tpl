@@ -39,12 +39,16 @@
                 </th>
             </thead>
             <tbody>
-                <% for (let tag of ctx.response.results) { %>
+                <% for (let tag of ctx.response.results) {
+                    if (ctx.hostnameExcludedTag(tag)) {
+                        continue;
+                    }
+                %>
                     <tr>
                         <td class='names'>
                             <ul>
                                 <% for (let name of tag.names) { %>
-                                    <li><%= ctx.makeTagLink(name, false, false, tag) %></li>
+                                    <li><%= ctx.makeTagLink(name, false, false, tag) %> <a class="tags-list-row-search" href="/query=<%= name %>"><i class="fa-solid fa-magnifying-glass"></i></a></li>
                                 <% } %>
                             </ul>
                         </td>

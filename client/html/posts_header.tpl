@@ -3,7 +3,7 @@
         %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.query}) %><%
         %><wbr/><%
         %><input class='mousetrap' type='submit' value='Search'/><%
-        %><button id='randomize-button' class='icon-button'><%
+        %><button title="Random sort" id='randomize-button' class='icon-button'><%
             %><i class="fa fa-random"><%
         %></button><%
         %><% if (ctx.enableSafety) { %><%

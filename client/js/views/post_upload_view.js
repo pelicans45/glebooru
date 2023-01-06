@@ -10,9 +10,6 @@ const TagInputControl = require("../controls/tag_input_control.js");
 const template = views.getTemplate("post-upload");
 const rowTemplate = views.getTemplate("post-upload-row");
 
-const misc = require("../util/misc.js");
-const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js");
-
 function _mimeTypeToPostType(mimeType) {
     return (
         {
@@ -41,7 +38,7 @@ class Uploadable extends events.EventTarget {
         this.tags = [];
         this.relations = [];
         this.anonymous = !api.isLoggedIn();
-        this.forceAnonymous = !api.isLoggedIn();
+        this.forceAnonymous = this.anonymous;
     }
 
     destroy() {}
@@ -205,6 +202,8 @@ class PostUploadView extends events.EventTarget {
                 "Type common tags…"
             );
         }
+
+        /*
         if (this._commonTagsInputNode) {
             this._autoCompleteControl = new TagAutoCompleteControl(
                 this._commonTagsInputNode,
@@ -217,6 +216,7 @@ class PostUploadView extends events.EventTarget {
                 }
             );
         }
+		*/
     }
 
     enableForm() {
@@ -353,11 +353,13 @@ class PostUploadView extends events.EventTarget {
             uploadable.tags = this._tagControl.tags.map((tag) => tag.names[0]);
         }
 
+        /*
         if (this._commonTagsInputNode) {
             var tags = this._commonTagsInputNode.value.split(" ");
             tags = tags.filter((t) => t != "");
             uploadable.tags = uploadable.tags.concat(tags);
         }
+		*/
 
         uploadable.relations = [];
         for (let [i, lookalike] of uploadable.lookalikes.entries()) {

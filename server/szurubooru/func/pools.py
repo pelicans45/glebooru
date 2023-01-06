@@ -324,7 +324,8 @@ def update_pool_posts(pool: model.Pool, post_ids: List[int]) -> None:
     dupes = _duplicates(post_ids)
     if len(dupes) > 0:
         dupes = ", ".join(list(str(x) for x in dupes))
-        raise InvalidPoolDuplicateError("Duplicate post(s) in pool: " + dupes)
+        noun = "post" if len(dupes) == 1 else "posts"
+        raise InvalidPoolDuplicateError(f"Duplicate {noun} in pool: " + dupes)
     ret = posts.get_posts_by_ids(post_ids)
     if len(post_ids) != len(ret):
         missing = set(post_ids) - set(post.post_id for post in ret)

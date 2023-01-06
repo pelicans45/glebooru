@@ -55,4 +55,4 @@
     </tbody>
 </table>
 
-<p>Additionally, press shift + the first letter of navigation header names to navigate to them. ("G" for Gallery, "U" for Upload, "T" for Tags, etc.) </p>
+<p style="display: none">Additionally, press shift + the first letter of navigation header names to navigate to them. ("G" for Gallery, "U" for Upload, "T" for Tags, etc.) </p>

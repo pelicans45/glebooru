@@ -16,7 +16,7 @@ const defaultSettings = {
     transparencyGrid: false,
     fitMode: "fit-both",
     tagSuggestions: true,
-    autoplayVideos: false,
+    autoplayVideos: true,
     postsPerPage: 58,
 	similarPosts: 5,
     tagUnderscoresAsSpaces: true,

@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='settings'>
-    <form onsubmit="setTimeout(() => location.reload(), 500)">
+    <form onsubmit="setTimeout(() => location.reload(), 200)">
         <strong style="font-size: 110%">Settings</strong>
         <p style="display: none">(These settings only apply to your browser.)</p>
         <ul class='input'>
@@ -59,7 +59,7 @@
 
             <li>
                 <%= ctx.makeCheckbox({
-                    text: 'Use dark theme',
+                    text: 'Dark theme',
                     name: 'dark-theme',
                     checked: ctx.browsingSettings.darkTheme,
                 }) %>
@@ -75,7 +75,7 @@
 
             <li>
                 <%= ctx.makeCheckbox({
-                    text: 'Enable endless scroll',
+                    text: 'Endless scroll',
                     name: 'endless-scroll',
                     checked: ctx.browsingSettings.endlessScroll,
                 }) %>

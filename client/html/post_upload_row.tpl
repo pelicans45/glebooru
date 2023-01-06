@@ -54,7 +54,7 @@
                 </div>
             <% } %>
 
-            <div class='options'>
+            <div class='options' style="display: none">
                 <% if (ctx.canUploadAnonymously) { %>
                     <div class='anonymous'>
                         <%= ctx.makeCheckbox({

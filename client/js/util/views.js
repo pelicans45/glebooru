@@ -2,6 +2,7 @@
 
 require("../util/polyfill.js");
 const api = require("../api.js");
+const lens = require("../lens.js");
 const templates = require("../templates.js");
 const domParser = new DOMParser();
 const misc = require("./misc.js");
@@ -33,9 +34,14 @@ function makeMarkdown(text) {
 }
 
 function makeRelativeTime(time) {
+    const d = new Date(time);
+    const absoluteTime = `${d.toLocaleDateString(
+        "en-CA"
+    )} ${d.toLocaleTimeString()}`;
+
     return makeElement(
         "time",
-        { datetime: time, title: time },
+        { datetime: time, title: absoluteTime },
         misc.formatRelativeTime(time)
     );
 }
@@ -310,6 +316,22 @@ function makeUserLink(user) {
     return makeElement("span", { class: "user" }, link);
 }
 
+function makeUserLinkForSidebar(user) {
+    if (!api.hasPrivilege("users:view")) {
+        return "";
+    }
+    let text = makeThumbnail(user ? user.avatarUrl : null);
+    text += user && user.name ? misc.escapeHtml(user.name) : "Anonymous";
+    const link = user
+        ? makeElement(
+              "a",
+              { href: uri.formatClientLink("user", user.name) },
+              text
+          )
+        : text;
+    return makeElement("span", { class: "user" }, link) + ",";
+}
+
 function makeFlexboxAlign(options) {
     return [...misc.range(20)]
         .map(() => '<li class="flexbox-dummy"></li>')
@@ -490,6 +512,7 @@ function getTemplate(templatePath) {
             makeTagLink: makeTagLink,
             makePoolLink: makePoolLink,
             makeUserLink: makeUserLink,
+            makeUserLinkForSidebar: makeUserLinkForSidebar,
             makeFlexboxAlign: makeFlexboxAlign,
             makeAccessKey: makeAccessKey,
             makeElement: makeElement,
@@ -497,6 +520,7 @@ function getTemplate(templatePath) {
             makeNumericInput: makeNumericInput,
             formatClientLink: uri.formatClientLink,
             escapeTagName: uri.escapeTagName,
+            hostnameExcludedTag: lens.hostnameExcludedTag,
         });
         return htmlToDom(templateFactory(ctx));
     };
