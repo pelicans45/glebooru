@@ -13,7 +13,7 @@ class TagMergeView extends events.EventTarget {
 
         this._tag = ctx.tag;
         this._hostNode = ctx.hostNode;
-        ctx.tagNamePattern = api.getTagNameRegex();
+        ctx.tagNamePattern = vars.tagNameRegex;
         views.replaceContent(this._hostNode, template(ctx));
 
         views.decorateValidator(this._formNode);

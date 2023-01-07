@@ -52,7 +52,7 @@ function makeThumbnail(url) {
         url
             ? {
                   class: "thumbnail",
-                  style: `background-image: url(\'${url}\')`,
+                  //style: `background-image: url(\'${url}\')`,
               }
             : { class: "thumbnail empty" },
         makeElement("img", {

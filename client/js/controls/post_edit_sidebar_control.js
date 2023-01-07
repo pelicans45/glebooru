@@ -3,7 +3,7 @@
 const api = require("../api.js");
 const events = require("../events.js");
 const misc = require("../util/misc.js");
-const keyboard = require('../util/keyboard.js');
+const keyboard = require("../util/keyboard.js");
 const views = require("../util/views.js");
 const Note = require("../models/note.js");
 const Point = require("../models/point.js");
@@ -31,7 +31,7 @@ class PostEditSidebarControl extends events.EventTarget {
             this._hostNode,
             template({
                 post: this._post,
-                enableSafety: api.safetyEnabled(),
+                enableSafety: vars.safetyEnabled,
                 hasClipboard: document.queryCommandSupported("copy"),
                 canEditPostSafety: api.hasPrivilege("posts:edit:safety"),
                 canEditPostSource: api.hasPrivilege("posts:edit:source"),
@@ -106,7 +106,7 @@ class PostEditSidebarControl extends events.EventTarget {
                 this._tagInputNode,
                 this._post.tags,
                 null,
-                this._post,
+                this._post
             );
         }
 
@@ -275,9 +275,12 @@ class PostEditSidebarControl extends events.EventTarget {
 
         keyboard.bind(["command+s", "ctrl+s"], (e) => this._evtSubmit(e));
         if (this._tagInputNode) {
-            const realTagInput = this._formNode.querySelector(".tag-input input");
-            keyboard.bindElement(realTagInput, ["command+s", "ctrl+s"], (e) => this._evtSubmit(e));
-            keyboard.bind('t', (e) => {
+            const realTagInput =
+                this._formNode.querySelector(".tag-input input");
+            keyboard.bindElement(realTagInput, ["command+s", "ctrl+s"], (e) =>
+                this._evtSubmit(e)
+            );
+            keyboard.bind("t", (e) => {
                 e.preventDefault();
                 realTagInput.focus();
             });

@@ -14,22 +14,16 @@ class LoginView extends events.EventTarget {
         views.replaceContent(
             this._hostNode,
             template({
-                userNamePattern: api.getUserNameRegex(),
-                passwordPattern: api.getPasswordRegex(),
+                userNamePattern: vars.userNameRegex,
+                passwordPattern: vars.passwordRegex,
                 canSendMails: api.canSendMails(),
             })
         );
         views.syncScrollPosition();
 
         views.decorateValidator(this._formNode);
-        this._userNameInputNode.setAttribute(
-            "pattern",
-            api.getUserNameRegex()
-        );
-        this._passwordInputNode.setAttribute(
-            "pattern",
-            api.getPasswordRegex()
-        );
+        this._userNameInputNode.setAttribute("pattern", vars.userNameRegex);
+        this._passwordInputNode.setAttribute("pattern", vars.passwordRegex);
         this._formNode.addEventListener("submit", (e) => {
             e.preventDefault();
             this.dispatchEvent(

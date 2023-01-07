@@ -12,7 +12,7 @@ const PostList = require("../models/post_list.js");
 const template = views.getTemplate("post-readonly-sidebar");
 const scoreTemplate = views.getTemplate("score");
 const favTemplate = views.getTemplate("fav");
-const similarItemTemplate = views.getTemplate("similar-post-item")
+const similarItemTemplate = views.getTemplate("similar-post-item");
 
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {
@@ -22,14 +22,18 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._post = ctx.post;
         this._postContentControl = postContentControl;
 
-        this._post.addEventListener("changeFavorite", (e) => this._evtChangeFav(e));
-        this._post.addEventListener("changeScore", (e) => this._evtChangeScore(e));
+        this._post.addEventListener("changeFavorite", (e) =>
+            this._evtChangeFav(e)
+        );
+        this._post.addEventListener("changeScore", (e) =>
+            this._evtChangeScore(e)
+        );
 
         views.replaceContent(
             this._hostNode,
             template({
                 post: this._post,
-                enableSafety: api.safetyEnabled(),
+                enableSafety: vars.safetyEnabled,
                 canListPosts: api.hasPrivilege("posts:list"),
                 canEditPosts: api.hasPrivilege("posts:edit"),
                 canViewTags: api.hasPrivilege("tags:view"),
@@ -46,7 +50,8 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._syncFitButton();
         if (this._metricsListNode) {
             this._metricsControl = new PostMetricListControl(
-                this._metricsListNode, this._post
+                this._metricsListNode,
+                this._post
             );
         }
         this._loadSimilarPosts();
@@ -253,9 +258,8 @@ class PostReadonlySidebarControl extends events.EventTarget {
             "similar:" + this._post.id + " -id:" + this._post.id,
             0,
             parseInt(settings.get().similarPosts),
-            ["id", "thumbnailUrl"],
-        )
-        .then((response) => {
+            ["id", "thumbnailUrl"]
+        ).then((response) => {
             const listNode = this._similarListNode;
             for (let post of response.results) {
                 let poseNode = similarItemTemplate({
@@ -271,20 +275,24 @@ class PostReadonlySidebarControl extends events.EventTarget {
         const limit = parseInt(settings.get().similarPosts);
         const fields = ["id", "thumbnailUrl"];
         const threshold = 1;
-        return PostList.reverseSearch(this._post.id, limit, threshold, fields)
-            .then((response) => {
-                if (response.results.length === 0) {
-                    this._lookalikesNode.style.display = "none";
-                }
-                const listNode = this._lookalikesListNode;
-                for (let post of response.results) {
-                    let poseNode = similarItemTemplate({
-                        id: post.id,
-                        thumbnailUrl: post.thumbnailUrl,
-                    });
-                    listNode.appendChild(poseNode);
-                }
-            });
+        return PostList.reverseSearch(
+            this._post.id,
+            limit,
+            threshold,
+            fields
+        ).then((response) => {
+            if (response.results.length === 0) {
+                this._lookalikesNode.style.display = "none";
+            }
+            const listNode = this._lookalikesListNode;
+            for (let post of response.results) {
+                let poseNode = similarItemTemplate({
+                    id: post.id,
+                    thumbnailUrl: post.thumbnailUrl,
+                });
+                listNode.appendChild(poseNode);
+            }
+        });
     }
 }
 

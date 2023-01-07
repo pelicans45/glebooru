@@ -14,7 +14,7 @@ class PoolMergeView extends events.EventTarget {
         this._pool = ctx.pool;
         this._hostNode = ctx.hostNode;
         this._targetPoolId = null;
-        ctx.poolNamePattern = api.getPoolNameRegex();
+        ctx.poolNamePattern = vars.PoolNameRegex;
         views.replaceContent(this._hostNode, template(ctx));
 
         views.decorateValidator(this._formNode);

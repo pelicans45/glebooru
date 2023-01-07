@@ -44,7 +44,7 @@ class PostListController {
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
             isLoggedIn: api.isLoggedIn(),
-            enableSafety: api.safetyEnabled(),
+            enableSafety: vars.safetyEnabled,
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),

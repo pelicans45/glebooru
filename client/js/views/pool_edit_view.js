@@ -62,7 +62,7 @@ class PoolEditView extends events.EventTarget {
     }
 
     _evtNameInput(e) {
-        const regex = new RegExp(api.getPoolNameRegex());
+        const regex = new RegExp(vars.PoolNameRegex);
         const list = misc.splitByWhitespace(this._namesFieldNode.value);
 
         if (!list.length) {

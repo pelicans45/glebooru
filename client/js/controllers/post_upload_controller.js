@@ -32,7 +32,7 @@ class PostUploadController {
         this._view = new PostUploadView({
             canUploadAnonymously: api.hasPrivilege("posts:create:anonymous"),
             canViewPosts: api.hasPrivilege("posts:view"),
-            enableSafety: api.safetyEnabled(),
+            enableSafety: vars.safetyEnabled,
             defaultSafety: settings.get().uploadSafety,
         });
         this._view.addEventListener("change", (e) => this._evtChange(e));

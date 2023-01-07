@@ -4,8 +4,6 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
-
-from szurubooru import config, db, errors, model, rest
 from szurubooru.func import (
     comments,
     files,
@@ -22,6 +20,8 @@ from szurubooru.func import (
     util,
 )
 from szurubooru.func.image_hash import NpMatrix
+
+from szurubooru import config, db, errors, model, rest
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +248,8 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
+        if self.file_size < config.config["thumbnails"]["min_file_size"]:
+            return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
 
     def serialize_flags(self) -> Any:
@@ -259,10 +261,9 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
                 "usages": tag.post_count,
-                "metric": {
-                    "min": tag.metric.min,
-                    "max": tag.metric.max
-                } if tag.metric else None,
+                "metric": {"min": tag.metric.min, "max": tag.metric.max}
+                if tag.metric
+                else None,
             }
             for tag in tags.sort_tags(self.post.tags)
         ]
@@ -356,8 +357,7 @@ class PostSerializer(serialization.BaseSerializer):
         return [
             metrics.serialize_post_metric(metric)
             for metric in sorted(
-                self.post.metrics,
-                key=lambda metric: metric.metric.tag_name
+                self.post.metrics, key=lambda metric: metric.metric.tag_name
             )
         ]
 
@@ -366,7 +366,7 @@ class PostSerializer(serialization.BaseSerializer):
             metrics.serialize_post_metric_range(metric_range)
             for metric_range in sorted(
                 self.post.metric_ranges,
-                key=lambda metric_range: metric_range.metric.tag_name
+                key=lambda metric_range: metric_range.metric.tag_name,
             )
         ]
 
@@ -705,8 +705,13 @@ def update_post_thumbnail(
 
 def generate_post_thumbnail(post: model.Post) -> None:
     assert post
-    if files.has(get_post_thumbnail_backup_path(post)):
-        content = files.get(get_post_thumbnail_backup_path(post))
+
+    if post.file_size < config.config["thumbnails"]["min_file_size"]:
+        return
+
+    backup_path = get_post_thumbnail_backup_path(post)
+    if files.has(backup_path):
+        content = files.get(backup_path)
     else:
         content = files.get(get_post_content_path(post))
     try:
@@ -980,7 +985,9 @@ def search_by_signature(
     ORDER BY score DESC LIMIT :limit;
     """
 
-    candidates = db.session.execute(dbquery, {"q": query_words, "limit": limit})
+    candidates = db.session.execute(
+        dbquery, {"q": query_words, "limit": limit}
+    )
     data = tuple(
         zip(
             *[

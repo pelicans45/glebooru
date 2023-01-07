@@ -1,15 +1,21 @@
-const hostnameFilters = {
-    "glegle.gallery": "glegle",
-    "bury.pink": "bury",
-};
+const sites = require("./config.js").sites;
 
+let universalHostname;
+
+const hostnameFilters = {};
+
+for (const [domain, data] of Object.entries(sites)) {
+    if (data.query === "") {
+        universalHostname = domain;
+    }
+    hostnameFilters[domain] = data.query;
+}
+
+const isUniversal = location.hostname === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
-
-const excludedTags = new Set(getExcludedTags());
-
 const hostnameFilter = getHostnameFilter();
-
-const universalHostname = "a.com";
+const site = sites[location.hostname];
+const excludedTags = new Set(getExcludedTags());
 
 function objectFlip(obj) {
     const ret = {};
@@ -17,10 +23,6 @@ function objectFlip(obj) {
         ret[obj[key]] = key;
     });
     return ret;
-}
-
-function isUniversalHostname() {
-    return location.hostname === universalHostname;
 }
 
 function getHostnameFilter() {
@@ -33,11 +35,11 @@ function getFilterHostname(tag) {
 
 function getExcludedTags() {
     const tags = [];
-    if (isUniversalHostname()) {
+    if (isUniversal) {
         return tags;
     }
     for (const [hostname, tag] of Object.entries(hostnameFilters)) {
-        if (hostname !== location.hostname) {
+        if (hostname !== location.hostname && tag) {
             tags.push(tag);
         }
     }
@@ -45,7 +47,6 @@ function getExcludedTags() {
 }
 
 function addHostnameFilter(text) {
-    const hostnameFilter = hostnameFilters[location.hostname];
     if (hostnameFilter) {
         text = `${hostnameFilter} ${text}`;
     }
@@ -59,7 +60,7 @@ function checkHostnameFilterRedirect(post) {
         return;
     }
 
-    if (tagNames[0] === hostnameFilter || isUniversalHostname()) {
+    if (tagNames[0] === hostnameFilter || isUniversal) {
         return;
     }
 
@@ -73,44 +74,20 @@ function checkHostnameFilterRedirect(post) {
 }
 
 function hostnameExcludedTag(tag) {
-    for (const name of tag.names) {
-        if (excludedTags.has(name)) {
-            return true;
-        }
+    if (excludedTags.has(tag.names[0])) {
+        return true;
     }
 
     for (const implication of tag.implications) {
-        for (const name of implication.names) {
-            if (excludedTags.has(name)) {
-                return true;
-            }
+        if (excludedTags.has(implication.names[0])) {
+            return true;
         }
     }
 
     return false;
 }
 
-/*
-function hostnameExcludedImplication(tag) {
-    for (const name of tag.names) {
-        if (excludedTags.has(name)) {
-            return true;
-        }
-    }
-
-    for (const implication of tag.implications) {
-        for (const name of implication.names) {
-            if (excludedTags.has(name)) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-*/
-
-function hostnamefilterTags(list) {
+function hostnameFilterTags(list) {
     const tags = [];
     for (let tag of list) {
         if (!hostnameExcludedTag(tag)) {
@@ -122,9 +99,10 @@ function hostnamefilterTags(list) {
 }
 
 module.exports = {
+    site: site,
     getHostnameFilter: getHostnameFilter,
     addHostnameFilter: addHostnameFilter,
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
-    hostnamefilterTags: hostnamefilterTags,
+    hostnameFilterTags: hostnameFilterTags,
 };

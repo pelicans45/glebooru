@@ -12,9 +12,11 @@ class HomeController {
         topNavigation.setTitle("Home");
 
         this._homeView = new HomeView({
-            name: api.getName(),
-            version: config.meta.version,
-            buildDate: config.meta.buildDate,
+            name: vars.name,
+            version: "",
+            buildDate: "",
+            //version: config.meta.version,
+            //buildDate: config.meta.buildDate,
             canListSnapshots: api.hasPrivilege("snapshots:list"),
             canListPosts: api.hasPrivilege("posts:list"),
             isDevelopmentMode: config.environment == "development",
@@ -46,7 +48,7 @@ class HomeController {
 }
 
 module.exports = (router) => {
-	/*
+    /*
     router.enter([], (ctx, next) => {
         ctx.controller = new HomeController();
     });

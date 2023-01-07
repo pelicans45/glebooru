@@ -8,7 +8,6 @@ const Tag = require("./tag.js");
 
 class TagList extends AbstractList {
     static search(text, offset, limit, fields) {
-        //text = lens.addHostnameFilter(text).trim();
         return api
             .get(
                 uri.formatApiLink("tags", {
@@ -22,7 +21,7 @@ class TagList extends AbstractList {
                 return Promise.resolve(
                     Object.assign({}, response, {
                         results: TagList.fromResponse(
-                            lens.hostnamefilterTags(response.results)
+                            lens.hostnameFilterTags(response.results)
                         ),
                     })
                 );

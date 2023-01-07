@@ -28,7 +28,7 @@ class HelpView {
 
         const sourceNode = template();
         const ctx = {
-            name: api.getName(),
+            name: vars.name,
         };
 
         section = section || "tips";

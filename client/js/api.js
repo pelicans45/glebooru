@@ -3,6 +3,7 @@
 const cookies = require("js-cookie");
 const request = require("superagent");
 const events = require("./events.js");
+const site = require("./lens.js").site;
 const progress = require("./util/progress.js");
 const uri = require("./util/uri.js");
 
@@ -76,8 +77,10 @@ class Api extends events.EventTarget {
         }
     }
 
+	/*
     getName() {
-        return remoteConfig.name;
+        //return remoteConfig.name;
+        return site.name;
     }
 
     getTagNameRegex() {
@@ -97,16 +100,20 @@ class Api extends events.EventTarget {
     }
 
     getContactEmail() {
-        return remoteConfig.contactEmail;
+        //return remoteConfig.contactEmail;
+        return "";
     }
 
-    canSendMails() {
-        return !!remoteConfig.canSendMails;
-    }
 
     safetyEnabled() {
         return !!remoteConfig.enableSafety;
     }
+
+    canSendMails() {
+        //return !!remoteConfig.canSendMails;
+        return false;
+    }
+	*/
 
     hasPrivilege(lookup) {
         let minViableRank = null;

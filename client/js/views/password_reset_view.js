@@ -15,7 +15,7 @@ class PasswordResetView extends events.EventTarget {
             this._hostNode,
             template({
                 canSendMails: api.canSendMails(),
-                contactEmail: api.getContactEmail(),
+                contactEmail: vars.contactEmail,
             })
         );
         views.syncScrollPosition();

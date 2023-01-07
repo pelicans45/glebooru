@@ -1,14 +1,36 @@
 #!/usr/bin/env node
 "use strict";
 
-const domainData = require("./hosts");
+const yaml = require("js-yaml");
+const fs = require("fs");
 
+const sharedKeys = [
+    "tag_name_regex",
+    "tag_category_name_regex",
+    "pool_name_regex",
+    "pool_category_name_regex",
+    "password_regex",
+    "user_name_regex",
+    "enable_safety",
+];
 
-// -------------------------------------------------
+const sites = require("../sites");
 
+const serverConf = yaml.load(fs.readFileSync("../server/config.yaml", "utf8"));
+const conf = {};
 
+for (const key of sharedKeys) {
+    conf[key] = serverConf[key];
+}
 
-const domains = Object.keys(domainData);
+conf.contact_email = "";
+conf.can_send_mails = false;
+
+const vars = {};
+for (const [key, value] of Object.entries(conf)) {
+    const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+    vars[camelKey] = value;
+}
 
 const webapp_icons = [
     { name: "android-chrome-192x192.png", size: 192 },
@@ -152,55 +174,49 @@ function bundleTemplates() {
     console.info("Bundled templates");
 }
 
-function bundleCss() {
+function bundleCss(domain) {
     const stylus = require("stylus");
 
     function minifyCss(css) {
         return require("csso").minify(css).css;
     }
 
-    for (const domain of domains) {
-        const outputDir = `./public/${domain}/css`;
-        const customDir = `./css/custom/${domain}`;
-        const appStylesheet = `${outputDir}/app.css`;
+    const outputDir = `./public/${domain}/css`;
+    const appStylesheet = `${outputDir}/app.css`;
+    const customDir = `./sites/${domain}/css`;
 
-        let css = "";
-        for (const file of glob.sync("./css/**/*.styl")) {
-            if (file.includes("/custom/")) {
-                continue;
-            }
+    let css = "";
+    for (const file of glob.sync("./css/**/*.styl")) {
+        css += stylus.render(readTextFile(file), {
+            filename: file,
+            include: `${customDir}/colors.styl`,
+        });
+    }
 
-            css += stylus.render(readTextFile(file), {
-                filename: file,
-                include: `${customDir}/custom-colors.styl`,
-            });
-        }
+    const customStyle = `${customDir}/site.styl`;
+    css += stylus.render(
+        readTextFile(customStyle, {
+            filename: customStyle,
+            include: [
+                //`${customDir}/custom-colors.styl`,
+                `./css/colors.styl`,
+            ],
+        })
+    );
 
-        const customStyle = `${customDir}/custom.styl`;
-        css += stylus.render(
-            readTextFile(customStyle, {
-                filename: customStyle,
-                include: [
-                    //`${customDir}/custom-colors.styl`,
-                    `./css/colors.styl`,
-                ],
-            })
-        );
+    fs.writeFileSync(appStylesheet, minifyCss(css));
+    if (process.argv.includes("--gzip")) {
+        gzipFile(appStylesheet);
+    }
 
-        fs.writeFileSync(appStylesheet, minifyCss(css));
-        if (process.argv.includes("--gzip")) {
-            gzipFile(appStylesheet);
-        }
+    const vendorStylesheet = `${outputDir}/vendor.css`;
 
-        const vendorStylesheet = `${outputDir}/vendor.css`;
-
-        fs.copyFileSync(
-            "./node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-            vendorStylesheet
-        );
-        if (process.argv.includes("--gzip")) {
-            gzipFile(vendorStylesheet);
-        }
+    fs.copyFileSync(
+        "./node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+        vendorStylesheet
+    );
+    if (process.argv.includes("--gzip")) {
+        gzipFile(vendorStylesheet);
     }
 
     console.info("Bundled CSS");
@@ -225,7 +241,7 @@ function writeJsBundle(b, path, compress, callback) {
     });
 }
 
-function bundleVendorJs(compress) {
+function bundleVendorJs(domain, compress) {
     let b = browserify();
     for (let lib of external_js) {
         b.require(lib);
@@ -234,19 +250,17 @@ function bundleVendorJs(compress) {
         b.add(require.resolve("babel-polyfill"));
     }
 
-    for (const domain of domains) {
-        const file = "./public/js/vendor.js";
-        writeJsBundle(b, file, compress, () => {
-            if (process.argv.includes("--gzip")) {
-                gzipFile(file);
-            }
-            console.info("Bundled vendor JS");
-        });
-    }
+    const file = `./public/${domain}/js/vendor.js`;
+    writeJsBundle(b, file, compress, () => {
+        if (process.argv.includes("--gzip")) {
+            gzipFile(file);
+        }
+        console.info("Bundled vendor JS");
+    });
 }
 
-function bundleAppJs(b, compress, callback) {
-    const file = "./public/js/app.js";
+function bundleAppJs(domain, b, compress, callback) {
+    const file = `./public/${domain}/js/app.js`;
     writeJsBundle(b, file, compress, () => {
         if (process.argv.includes("--gzip")) {
             gzipFile(file);
@@ -256,9 +270,9 @@ function bundleAppJs(b, compress, callback) {
     });
 }
 
-function bundleJs() {
+function bundleJs(domain) {
     if (!process.argv.includes("--no-vendor-js")) {
-        bundleVendorJs(true);
+        bundleVendorJs(domain, true);
     }
 
     if (!process.argv.includes("--no-app-js")) {
@@ -269,7 +283,7 @@ function bundleJs() {
         }
         b = b.external(external_js).add(glob.sync("./js/**/*.js"));
         const compress = !process.argv.includes("--debug");
-        bundleAppJs(b, compress, () => {});
+        bundleAppJs(domain, b, compress, () => {});
     }
 }
 
@@ -298,6 +312,8 @@ function bundleConfig() {
             buildDate: new Date().toUTCString(),
         },
         environment: environment,
+        sites: sites,
+        vars: vars,
     };
 
     fs.writeFileSync("./js/.config.autogen.json", JSON.stringify(config));
@@ -306,7 +322,7 @@ function bundleConfig() {
 
 function bundleBinaryAssets(domain) {
     const outputDir = `./public/${domain}`;
-    const imgDir = `sites/${domain}/img`;
+    const imgDir = `./sites/${domain}/img`;
 
     fs.copyFileSync(`${imgDir}/favicon.png`, `${outputDir}/img/favicon.png`);
     console.info("Copied images");
@@ -341,7 +357,7 @@ function bundleWebAppFiles(domain, data) {
     const Jimp = require("jimp");
 
     const outputDir = `./public/${domain}`;
-    const imgDir = `sites/${domain}/img`;
+    const imgDir = `./sites/${domain}/img`;
 
     const manifest = {
         ...baseManifest,
@@ -414,105 +430,13 @@ function makeOutputDirs(domain) {
     }
 }
 
-function watch() {
-    let wss = new WebSocket.Server({ port: 8080 });
-    const liveReload = !process.argv.includes("--no-live-reload");
-
-    function emitReload() {
-        if (liveReload) {
-            console.log("Requesting live reload.");
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send("reload");
-                }
-            });
-        }
-    }
-
-    chokidar.watch("./fonts/**/*").on("change", () => {
-        try {
-            bundleBinaryAssets();
-            emitReload();
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
-    chokidar.watch("./img/**/*").on("change", () => {
-        try {
-            bundleWebAppFiles();
-            emitReload();
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
-    chokidar.watch("./html/**/*.tpl").on("change", () => {
-        try {
-            bundleHtml();
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
-    chokidar.watch("./css/**/*.styl").on("change", () => {
-        try {
-            bundleCss();
-            emitReload();
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
-
-    bundleBinaryAssets();
-    bundleWebAppFiles();
-    bundleCss();
-    bundleHtml();
-
-    bundleVendorJs(true);
-
-    let watchify = require("watchify");
-    let b = browserify({
-        debug: process.argv.includes("--debug"),
-        entries: ["js/main.js"],
-        cache: {},
-        packageCache: {},
-    });
-
-    b.plugin(watchify);
-
-    if (!process.argv.includes("--no-transpile")) {
-        b = b.transform("babelify");
-    }
-
-    b = b.external(external_js).add(glob.sync("./js/**/*.js"));
-
-    const compress = false;
-
-    function bundle(id) {
-        console.info("Rebundling app JS...");
-        let start = new Date();
-        bundleAppJs(b, compress, () => {
-            let end = new Date() - start;
-            console.info("Rebundled in %ds.", end / 1000);
-            emitReload();
-        });
-    }
-
-    b.on("update", bundle);
-    bundle();
-}
-
 // -------------------------------------------------
-
-/*
-if (process.argv.includes("--watch")) {
-    watch();
-} else {
-*/
 
 console.log(`Building for "${environment}" environment.`);
 bundleConfig();
 bundleTemplates();
 
-for (const [domain, data] of Object.entries(domainData)) {
+for (const [domain, data] of Object.entries(sites)) {
     console.log(`Building for ${domain}`);
     makeOutputDirs(domain);
 

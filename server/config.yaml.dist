@@ -14,6 +14,7 @@ secret: change
 delete_source_files: no
 
 thumbnails:
+    min_file_size: 5000000
     avatar_width: 300
     avatar_height: 300
     post_width: 300

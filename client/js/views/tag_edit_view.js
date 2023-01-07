@@ -69,7 +69,7 @@ class TagEditView extends events.EventTarget {
     }
 
     _evtNameInput(e) {
-        const regex = new RegExp(api.getTagNameRegex());
+        const regex = new RegExp(vars.tagNameRegex);
         const list = misc.splitByWhitespace(this._namesFieldNode.value);
 
         if (!list.length) {

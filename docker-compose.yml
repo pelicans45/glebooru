@@ -26,6 +26,7 @@ services:
     volumes:
       - "${MOUNT_DATA}:/data"
       - "./server/config.yaml:/opt/app/config.yaml"
+      - "./sites.json:/opt/app/sites.json"
 
   client:
     #image: szurubooru/client:latest

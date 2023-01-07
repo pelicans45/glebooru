@@ -57,7 +57,7 @@ class TopNavigation extends events.EventTarget {
     setTitle(title) {
         //api.fetchConfig().then(() => {
         document.oldTitle = null;
-        document.title = api.getName() + (title ? " – " + title : "");
+        document.title = vars.name + (title ? " – " + title : "");
         //});
     }
 

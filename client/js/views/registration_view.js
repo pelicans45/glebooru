@@ -13,8 +13,8 @@ class RegistrationView extends events.EventTarget {
         views.replaceContent(
             this._hostNode,
             template({
-                userNamePattern: api.getUserNameRegex(),
-                passwordPattern: api.getPasswordRegex(),
+                userNamePattern: vars.userNameRegex,
+                passwordPattern: vars.passwordRegex,
             })
         );
         views.syncScrollPosition();
