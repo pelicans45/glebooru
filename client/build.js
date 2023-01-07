@@ -2,7 +2,6 @@
 "use strict";
 
 const yaml = require("js-yaml");
-const fs = require("fs");
 
 const sharedKeys = [
     "tag_name_regex",

@@ -6,10 +6,11 @@
     "watch": "node build.js --watch"
   },
   "dependencies": {
-    "dompurify": "^2.0.17",
     "@fortawesome/fontawesome-free": "^5.1.0",
+    "dompurify": "^2.0.17",
     "ios-inner-height": "^1.0.3",
     "js-cookie": "^2.2.0",
+    "js-yaml": "^4.1.0",
     "marked": "^4.0.10",
     "mousetrap": "^1.6.2",
     "nprogress": "^0.2.0",
