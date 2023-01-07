@@ -13,9 +13,9 @@ const sharedKeys = [
     "enable_safety",
 ];
 
-const sites = require("../sites");
+const sites = require("./sites");
 
-const serverConf = yaml.load(fs.readFileSync("../server/config.yaml", "utf8"));
+const serverConf = yaml.load(fs.readFileSync("./config.yaml", "utf8"));
 const conf = {};
 
 for (const key of sharedKeys) {

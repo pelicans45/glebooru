@@ -1,7 +1,7 @@
 FROM node:lts as builder
 WORKDIR /opt/app
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json ../sites.json ../server/config.yaml ./
 RUN npm install
 
 ARG CACHE_DATE=2016-01-01
