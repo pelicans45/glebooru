@@ -16,10 +16,6 @@
     "superagent": "^3.8.3"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babelify": "^8.0.0",
     "browserify": "^16.2.2",
     "chokidar": "^3.5.1",
     "csso": "^3.5.1",
@@ -31,7 +27,6 @@
     "stylus": "^0.54.8",
     "terser": "^3.7.7",
     "underscore": "^1.12.1",
-    "watchify": "^4.0.0",
     "ws": "^7.4.6"
   }
 }

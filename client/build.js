@@ -3,6 +3,8 @@
 
 const fs = require("fs");
 const yaml = require("js-yaml");
+const underscore = require("underscore");
+//const babelify = require("babelify");
 
 function baseUrl() {
     return process.env.BASE_URL ? process.env.BASE_URL : "/";
@@ -95,22 +97,17 @@ function gzipFile(file) {
     execSync("gzip -6 -k " + file);
 }
 
-// -------------------------------------------------
+function minifyHtml(html) {
+    return require("html-minifier")
+        .minify(html, {
+            removeComments: true,
+            collapseWhitespace: true,
+            conservativeCollapse: true,
+        })
+        .trim();
+}
 
 function bundleHtml(domain, data) {
-    const underscore = require("underscore");
-    const babelify = require("babelify");
-
-    function minifyHtml(html) {
-        return require("html-minifier")
-            .minify(html, {
-                removeComments: true,
-                collapseWhitespace: true,
-                conservativeCollapse: true,
-            })
-            .trim();
-    }
-
     let baseHtml = readTextFile("./html/index.html").replace(
         "<!-- Base HTML Placeholder -->",
         `<title>${data.name}</title><base href="${baseUrl()}"/>`
@@ -271,13 +268,15 @@ function bundleJs(domain) {
     }
 
     if (!process.argv.includes("--no-app-js")) {
-        let watchify = require("watchify");
-        let b = browserify({ debug: process.argv.includes("--debug") });
+        const debug = !process.argv.includes("--debug");
+        let b = browserify({ debug: debug });
+        /*
         if (!process.argv.includes("--no-transpile")) {
             b = b.transform("babelify");
         }
+		*/
         b = b.external(external_js).add(glob.sync("./js/**/*.js"));
-        const compress = !process.argv.includes("--debug");
+        const compress = !debug;
         bundleAppJs(domain, b, compress, () => {});
     }
 }
@@ -287,23 +286,9 @@ const environment = process.argv.includes("--watch")
     : "production";
 
 function bundleConfig() {
-    function getVersion() {
-        let build_info = process.env.BUILD_INFO;
-        if (!build_info) {
-            try {
-                build_info = execSync(
-                    "git describe --always --dirty --long --tags"
-                ).toString();
-            } catch (e) {
-                console.warn("Cannot find build version");
-                build_info = "unknown";
-            }
-        }
-        return build_info.trim();
-    }
     const config = {
         meta: {
-            version: getVersion(),
+            version: "latest",
             buildDate: new Date().toUTCString(),
         },
         environment: environment,
