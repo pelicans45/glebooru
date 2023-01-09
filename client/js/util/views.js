@@ -4,7 +4,6 @@
 const api = require("../api.js");
 const lens = require("../lens.js");
 const templates = require("../templates.js");
-const domParser = new DOMParser();
 const misc = require("./misc.js");
 const uri = require("./uri.js");
 

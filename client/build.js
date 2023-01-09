@@ -111,7 +111,7 @@ function bundleHtml(domain, data) {
             .trim();
     }
 
-    let baseHtml = readTextFile("./html/index.htm").replace(
+    let baseHtml = readTextFile("./html/index.html").replace(
         "<!-- Base HTML Placeholder -->",
         `<title>${data.name}</title><base href="${baseUrl()}"/>`
     );
@@ -122,7 +122,7 @@ function bundleHtml(domain, data) {
     );
 
     baseHtml = baseHtml.replaceAll("$THEME_COLOR$", data.color);
-    fs.writeFileSync("./public/index.htm", minifyHtml(baseHtml));
+    fs.writeFileSync("./public/index.html", minifyHtml(baseHtml));
 
     console.info("Bundled HTML");
 }
@@ -238,9 +238,12 @@ function bundleVendorJs(domain, compress) {
     for (let lib of external_js) {
         b.require(lib);
     }
+
+	/*
     if (!process.argv.includes("--no-transpile")) {
         b.add(require.resolve("babel-polyfill"));
     }
+	*/
 
     const file = `./public/${domain}/js/vendor.js`;
     writeJsBundle(b, file, compress, () => {

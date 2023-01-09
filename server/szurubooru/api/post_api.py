@@ -9,7 +9,7 @@ from szurubooru.func import (
     image_hash,
     metrics,
     mime,
-    posts as postfuncs,
+    posts,
     scores,
     serialization,
     similar,
@@ -67,10 +67,10 @@ def get_random_post(
     query_text = ctx.get_param_as_string("query", default="").strip()
     if not query_text:
         return ""
-    count, posts = _search_executor.execute(query_text, 0, 1)
+    count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return ""
-    return postfuncs.get_post_content_url(posts[0])
+    return posts.get_post_content_url(_posts[0])
 
 
 @rest.routes.post("/posts/?")

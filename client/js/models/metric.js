@@ -3,7 +3,7 @@
 const api = require('../api.js');
 const uri = require('../util/uri.js');
 const events = require('../events.js');
-const misc = require('../util/misc.js');
+//const misc = require('../util/misc.js');
 const Tag = require('./tag.js');
 
 class Metric extends events.EventTarget {
