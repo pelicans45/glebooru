@@ -1,6 +1,8 @@
 "use strict";
 
 const api = require("../api.js");
+const lens = require("../lens.js");
+const vars = require("../vars.js");
 const events = require("../events.js");
 const settings = require("../models/settings.js");
 const views = require("../util/views.js");
@@ -38,6 +40,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 canEditPosts: api.hasPrivilege("posts:edit"),
                 canViewTags: api.hasPrivilege("tags:view"),
                 canViewSimilar: api.hasPrivilege("posts:view:similar"),
+                isHostnameTag: lens.isHostnameTag,
                 escapeTagName: uri.escapeTagName,
                 extractRootDomain: uri.extractRootDomain,
                 getPrettyName: misc.getPrettyName,

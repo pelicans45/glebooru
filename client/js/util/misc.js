@@ -133,7 +133,7 @@ function enableExitConfirmation() {
     window.onbeforeunload = (e) => {
         return (
             "Are you sure you want to leave? " +
-            "Data you have entered may not be saved."
+            "Data you've entered may not be saved."
         );
     };
 }
@@ -205,10 +205,12 @@ function dataURItoBlob(dataURI) {
 }
 
 function getPrettyName(tag) {
+    /*
     if (settings.get().tagUnderscoresAsSpaces) {
         return tag.replace(/_/g, " ");
     }
-    return tag;
+	*/
+    return tag.replace(/_/g, " ");
 }
 
 module.exports = {

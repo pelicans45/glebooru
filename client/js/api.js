@@ -3,7 +3,7 @@
 const cookies = require("js-cookie");
 const request = require("superagent");
 const events = require("./events.js");
-const site = require("./lens.js").site;
+const vars = require("./vars.js");
 const progress = require("./util/progress.js");
 const uri = require("./util/uri.js");
 
@@ -77,7 +77,7 @@ class Api extends events.EventTarget {
         }
     }
 
-	/*
+    /*
     getName() {
         //return remoteConfig.name;
         return site.name;
@@ -117,13 +117,11 @@ class Api extends events.EventTarget {
 
     hasPrivilege(lookup) {
         let minViableRank = null;
-        for (let p of Object.keys(remoteConfig.privileges)) {
+        for (let p of Object.keys(vars.privileges)) {
             if (!p.startsWith(lookup)) {
                 continue;
             }
-            const rankIndex = this.allRanks.indexOf(
-                remoteConfig.privileges[p]
-            );
+            const rankIndex = this.allRanks.indexOf(vars.privileges[p]);
             if (minViableRank === null || rankIndex < minViableRank) {
                 minViableRank = rankIndex;
             }

@@ -1,6 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
+const vars = require("../vars.js");
 const router = require("../router.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");

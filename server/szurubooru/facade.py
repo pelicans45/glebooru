@@ -125,7 +125,7 @@ def purge_old_uploads_daemon() -> None:
             purge_old_uploads()
         except Exception as ex:
             logging.exception(ex)
-        time.sleep(60 * 5)
+        time.sleep(60 * 30)
 
 
 _live_migrations = (

@@ -161,6 +161,9 @@ class PoolController {
 }
 
 module.exports = (router) => {
+    router.enter(["pool", ":id"], (ctx, next) => {
+        ctx.controller = new PoolController(ctx, "summary");
+    });
     router.enter(["pool", ":id", "edit"], (ctx, next) => {
         ctx.controller = new PoolController(ctx, "edit");
     });
@@ -169,8 +172,5 @@ module.exports = (router) => {
     });
     router.enter(["pool", ":id", "delete"], (ctx, next) => {
         ctx.controller = new PoolController(ctx, "delete");
-    });
-    router.enter(["pool", ":id"], (ctx, next) => {
-        ctx.controller = new PoolController(ctx, "summary");
     });
 };

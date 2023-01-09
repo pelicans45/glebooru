@@ -1,6 +1,6 @@
 "use strict";
 
-require("../util/polyfill.js");
+//require("../util/polyfill.js");
 const api = require("../api.js");
 const lens = require("../lens.js");
 const templates = require("../templates.js");

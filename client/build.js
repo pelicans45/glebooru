@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 "use strict";
 
+const fs = require("fs");
 const yaml = require("js-yaml");
+
+function readTextFile(path) {
+    return fs.readFileSync(path, "utf-8");
+}
 
 const sharedKeys = [
     "tag_name_regex",
@@ -11,24 +16,17 @@ const sharedKeys = [
     "password_regex",
     "user_name_regex",
     "enable_safety",
+    "contact_email",
+    "can_send_mails",
+    "privileges",
 ];
 
-const sites = require("./sites");
-
-const serverConf = yaml.load(fs.readFileSync("./config.yaml", "utf8"));
-const conf = {};
+const serverConf = yaml.load(readTextFile("./config.yaml"));
+const vars = {};
 
 for (const key of sharedKeys) {
-    conf[key] = serverConf[key];
-}
-
-conf.contact_email = "";
-conf.can_send_mails = false;
-
-const vars = {};
-for (const [key, value] of Object.entries(conf)) {
     const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-    vars[camelKey] = value;
+    vars[camelKey] = serverConf[key];
 }
 
 const webapp_icons = [
@@ -78,7 +76,6 @@ const baseManifest = {
 
 // -------------------------------------------------
 
-const fs = require("fs");
 const glob = require("glob");
 const path = require("path");
 const util = require("util");
@@ -88,10 +85,6 @@ const chokidar = require("chokidar");
 const WebSocket = require("ws");
 var PrettyError = require("pretty-error");
 var pe = new PrettyError();
-
-function readTextFile(path) {
-    return fs.readFileSync(path, "utf-8");
-}
 
 function gzipFile(file) {
     file = path.normalize(file);
@@ -311,7 +304,7 @@ function bundleConfig() {
             buildDate: new Date().toUTCString(),
         },
         environment: environment,
-        sites: sites,
+        sites: serverConf.sites,
         vars: vars,
     };
 

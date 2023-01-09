@@ -21,7 +21,7 @@ class UserListController {
         }
 
         topNavigation.activate("users");
-        topNavigation.setTitle("Listing users");
+        topNavigation.setTitle("Users");
 
         this._ctx = ctx;
 

@@ -1,7 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
-const config = require("../config.js");
+const lens = require("../lens.js");
 const Info = require("../models/info.js");
 const topNavigation = require("../models/top_navigation.js");
 const HomeView = require("../views/home_view.js");
@@ -12,14 +12,14 @@ class HomeController {
         topNavigation.setTitle("Home");
 
         this._homeView = new HomeView({
-            name: vars.name,
+            name: lens.name,
             version: "",
             buildDate: "",
             //version: config.meta.version,
             //buildDate: config.meta.buildDate,
             canListSnapshots: api.hasPrivilege("snapshots:list"),
             canListPosts: api.hasPrivilege("posts:list"),
-            isDevelopmentMode: config.environment == "development",
+            isDevelopmentMode: false,
         });
 
         Info.get().then(

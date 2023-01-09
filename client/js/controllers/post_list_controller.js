@@ -2,6 +2,7 @@
 
 const router = require("../router.js");
 const api = require("../api.js");
+const vars = require("../vars.js");
 const settings = require("../models/settings.js");
 const tags = require("../tags.js");
 const uri = require("../util/uri.js");

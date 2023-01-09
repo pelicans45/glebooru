@@ -59,6 +59,11 @@ def _read_config() -> Dict:
         )
     if os.path.exists("/.dockerenv"):
         ret = _merge(ret, _docker_config())
+
+    secret = os.environ.get("SECRET")
+    if not secret:
+        raise KeyError("Missing SECRET")
+    ret["secret"] = secret
     return ret
 
 

@@ -94,6 +94,7 @@ class Executor:
         for token in search_query.sort_tokens:
             if token.name == "random":
                 disable_eager_loads = True
+                break
 
         key = (id(self.config), hash(search_query), offset, limit)
         if not disable_eager_loads and cache.has(key):

@@ -32,7 +32,7 @@ class PoolListController {
         this._ctx = ctx;
 
         topNavigation.activate("pools");
-        topNavigation.setTitle("Listing pools");
+        topNavigation.setTitle("Pools");
 
         this._headerView = new PoolsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,

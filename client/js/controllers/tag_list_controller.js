@@ -32,7 +32,7 @@ class TagListController {
         this._ctx = ctx;
 
         topNavigation.activate("tags");
-        topNavigation.setTitle("Listing tags");
+        topNavigation.setTitle("Tags");
 
         this._headerView = new TagsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,

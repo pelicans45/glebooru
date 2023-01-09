@@ -1,21 +1,26 @@
-from math import ceil
+import logging
 from datetime import datetime
+from math import ceil
 from typing import Dict, List, Optional
 
-from szurubooru import db, errors, model, rest, search
 from szurubooru.func import (
     auth,
     favorites,
+    image_hash,
     metrics,
     mime,
-    posts,
+    posts as postfuncs,
     scores,
     serialization,
     similar,
     snapshots,
     tags,
-    versions, image_hash,
+    versions,
 )
+
+from szurubooru import db, errors, model, rest, search
+
+logger = logging.getLogger(__name__)
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
@@ -52,11 +57,12 @@ def get_posts(
         ctx, lambda post: _serialize_post(ctx, post)
     )
 
+
 @rest.routes.get("/random-post/?")
 def get_random_post(
     ctx: rest.Context, _params: Dict[str, str] = {}
 ) -> rest.Response:
-    #auth.verify_privilege(ctx.user, "posts:list")
+    # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("query", default="").strip()
     if not query_text:
@@ -64,8 +70,7 @@ def get_random_post(
     count, posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return ""
-    return get_post_content_url(posts[0])
-
+    return postfuncs.get_post_content_url(posts[0])
 
 
 @rest.routes.post("/posts/?")
@@ -186,11 +191,13 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if ctx.has_param("metrics"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
         metrics.update_or_create_post_metrics(
-            post, ctx.get_param_as_list("metrics"))
+            post, ctx.get_param_as_list("metrics")
+        )
     if ctx.has_param("metricRanges"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
         metrics.update_or_create_post_metric_ranges(
-            post, ctx.get_param_as_list("metricRanges"))
+            post, ctx.get_param_as_list("metricRanges")
+        )
     post.last_edit_time = datetime.utcnow()
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
@@ -206,6 +213,7 @@ def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(post, ctx.user)
     posts.delete(post)
     ctx.session.commit()
+    logger.info("%s deleted post %d", ctx.user.name, post.id)
     return {}
 
 
@@ -338,7 +346,7 @@ def get_posts_by_image(
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/reverse-search/?")
 def get_posts_lookalikes(
-        ctx: rest.Context, params: Dict[str, str] = {}
+    ctx: rest.Context, params: Dict[str, str] = {}
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
@@ -380,7 +388,7 @@ def get_posts_median(
         "offset": offset,
         "limit": 1,
         "total": len(results),
-        "results": list([_serialize_post(ctx, post) for post in results])
+        "results": list([_serialize_post(ctx, post) for post in results]),
     }
 
 
@@ -398,7 +406,10 @@ def get_posts_similar_by_tags(
     return {
         "query": query_text,
         "limit": limit,
-        "results": list([
-            posts.serialize_micro_post(result, ctx.user) for result in results
-        ])
+        "results": list(
+            [
+                posts.serialize_micro_post(result, ctx.user)
+                for result in results
+            ]
+        ),
     }

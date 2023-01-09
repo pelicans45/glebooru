@@ -29,9 +29,10 @@ class TagList extends AbstractList {
     }
 
     findByName(testName) {
+        testName = testName.toLowerCase();
         for (let tag of this._list) {
             for (let tagName of tag.names) {
-                if (tagName.toLowerCase() === testName.toLowerCase()) {
+                if (tagName.toLowerCase() === testName) {
                     return tag;
                 }
             }

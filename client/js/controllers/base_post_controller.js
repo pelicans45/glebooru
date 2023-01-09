@@ -13,7 +13,7 @@ class BasePostController {
         }
 
         topNavigation.activate("posts");
-        topNavigation.setTitle("Post #" + ctx.parameters.id.toString());
+        topNavigation.setTitle(`#${ctx.parameters.id}`);
     }
 }
 

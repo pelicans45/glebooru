@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='user-registration'>
-    <h1>Registration</h1>
+    <h1>Register</h1>
     <form autocomplete='off'>
         <input class='anticomplete' type='text' name='fakeuser'/>
         <input class='anticomplete' type='password' name='fakepass'/>
@@ -9,7 +9,6 @@
                 <%= ctx.makeTextInput({
                     text: 'Username',
                     name: 'name',
-                    placeholder: 'letters, digits, _, -',
                     required: true,
                     pattern: ctx.userNamePattern,
                 }) %>
@@ -18,12 +17,12 @@
                 <%= ctx.makePasswordInput({
                     text: 'Password',
                     name: 'password',
-                    placeholder: '5+ characters',
+                    placeholder: '8+ characters',
                     required: true,
                     pattern: ctx.passwordPattern,
                 }) %>
             </li>
-            <li>
+            <li style="display: none">
                 <%= ctx.makeEmailInput({
                     text: 'Email',
                     name: 'email',
@@ -37,11 +36,11 @@
 
         <div class='messages'></div>
         <div class='buttons'>
-            <input type='submit' value='Create an account'/>
+            <input type='submit' value='Create account'/>
         </div>
     </form>
 
-    <div class='info'>
+    <div class='info' style="display: none">
         <p>Registered users can:</p>
         <ul>
             <li><i class='fa fa-upload'></i> upload new posts</li>

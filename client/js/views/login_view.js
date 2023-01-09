@@ -1,8 +1,8 @@
 "use strict";
 
 const events = require("../events.js");
-const api = require("../api.js");
 const views = require("../util/views.js");
+const vars = require("../vars.js");
 
 const template = views.getTemplate("login");
 
@@ -16,7 +16,7 @@ class LoginView extends events.EventTarget {
             template({
                 userNamePattern: vars.userNameRegex,
                 passwordPattern: vars.passwordRegex,
-                canSendMails: api.canSendMails(),
+                canSendMails: vars.canSendMails,
             })
         );
         views.syncScrollPosition();

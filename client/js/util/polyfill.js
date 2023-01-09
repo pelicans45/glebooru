@@ -2,6 +2,7 @@
 
 "use strict";
 
+/*
 // fix iterating over NodeList in Chrome and Opera
 NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
 
@@ -64,3 +65,4 @@ Date.prototype.addDays = function (days) {
     dat.setDate(dat.getDate() + days);
     return dat;
 };
+*/

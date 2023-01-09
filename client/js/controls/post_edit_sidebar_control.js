@@ -1,6 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
+const vars = require("../vars.js");
 const events = require("../events.js");
 const misc = require("../util/misc.js");
 const keyboard = require("../util/keyboard.js");

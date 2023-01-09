@@ -196,6 +196,9 @@ class TagController {
 }
 
 module.exports = (router) => {
+    router.enter(["tag", ":name"], (ctx, next) => {
+        ctx.controller = new TagController(ctx, "summary");
+    });
     router.enter(["tag", ":name", "edit"], (ctx, next) => {
         ctx.controller = new TagController(ctx, "edit");
     });
@@ -208,7 +211,5 @@ module.exports = (router) => {
     router.enter(["tag", ":name", "delete"], (ctx, next) => {
         ctx.controller = new TagController(ctx, "delete");
     });
-    router.enter(["tag", ":name"], (ctx, next) => {
-        ctx.controller = new TagController(ctx, "summary");
-    });
+
 };

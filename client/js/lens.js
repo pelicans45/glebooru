@@ -1,4 +1,4 @@
-const sites = require("./config.js").sites;
+const config = require("./config.js");
 
 let universalHostname;
 
@@ -11,10 +11,12 @@ for (const [domain, data] of Object.entries(sites)) {
     hostnameFilters[domain] = data.query;
 }
 
+const site = sites[location.hostname];
+const name = site.name;
+
 const isUniversal = location.hostname === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
-const site = sites[location.hostname];
 const excludedTags = new Set(getExcludedTags());
 
 function objectFlip(obj) {
@@ -27,10 +29,6 @@ function objectFlip(obj) {
 
 function getHostnameFilter() {
     return hostnameFilters[location.hostname];
-}
-
-function getFilterHostname(tag) {
-    return filterHostnames[tag];
 }
 
 function getExcludedTags() {
@@ -46,12 +44,20 @@ function getExcludedTags() {
     return tags;
 }
 
+function isHostnameTag(tag) {
+    return tag.names[0] === hostnameFilter;
+}
+
 function addHostnameFilter(text) {
     if (hostnameFilter) {
         text = `${hostnameFilter} ${text}`;
     }
 
     return text;
+}
+
+function excludeHostnameTag(tags) {
+    return tags.filter((tag) => tag.names[0] !== hostnameFilter);
 }
 
 function checkHostnameFilterRedirect(post) {
@@ -64,7 +70,7 @@ function checkHostnameFilterRedirect(post) {
         return;
     }
 
-    const hostname = getFilterHostname(tagNames[0]);
+    const hostname = filterHostnames[tagNames[0]];
     if (!hostname) {
         return;
     }
@@ -88,6 +94,10 @@ function hostnameExcludedTag(tag) {
 }
 
 function hostnameFilterTags(list) {
+    if (isUniversal) {
+        return list;
+    }
+
     const tags = [];
     for (let tag of list) {
         if (!hostnameExcludedTag(tag)) {
@@ -100,9 +110,12 @@ function hostnameFilterTags(list) {
 
 module.exports = {
     site: site,
+    name: name,
     getHostnameFilter: getHostnameFilter,
     addHostnameFilter: addHostnameFilter,
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
     hostnameFilterTags: hostnameFilterTags,
+    isHostnameTag: isHostnameTag,
+    excludeHostnameTag: excludeHostnameTag,
 };

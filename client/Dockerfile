@@ -1,16 +1,14 @@
 FROM node:lts as builder
 WORKDIR /opt/app
 
-COPY package.json package-lock.json ../sites.json ../server/config.yaml ./
+COPY package.json package-lock.json ./
 RUN npm install
 
 ARG CACHE_DATE=2016-01-01
 
 COPY . ./
 
-ARG BUILD_INFO="docker-latest"
-ARG CLIENT_BUILD_ARGS="--debug"
-RUN BASE_URL="__BASEURL__" node build.js --gzip ${CLIENT_BUILD_ARGS}
+RUN BASE_URL="__BASEURL__" node build.js --gzip
 
 
 FROM scratch as approot

@@ -1,25 +1,12 @@
 "use strict";
 
-const config = require("./config.js");
 
-if (config.environment == "development") {
-    var ws = new WebSocket("ws://" + location.hostname + ":8080");
-    ws.addEventListener("open", function (event) {
-        console.log("Live-reloading websocket connected.");
-    });
-    ws.addEventListener("message", (event) => {
-        console.log(event);
-        if (event.data == "reload") {
-            location.reload();
-        }
-    });
-}
-
-require("./util/polyfill.js");
+//require("./util/polyfill.js");
 const misc = require("./util/misc.js");
 const views = require("./util/views.js");
 const router = require("./router.js");
 
+// TODO: change?
 history.scrollRestoration = "manual";
 
 router.exit(null, (ctx, next) => {
@@ -86,7 +73,7 @@ Promise.resolve()
             }
         },
         (error) => {
-            window.alert("Could not fetch basic configuration from server");
+            window.alert("Unknown server error");
         }
     )
     .then(() => {
@@ -108,7 +95,7 @@ Promise.resolve()
             } else {
                 const ctx = router.start("/");
                 ctx.controller.showError(
-                    "An error happened while trying to log you in: " +
+                    "An error happened while trying to login: " +
                         error.message
                 );
             }

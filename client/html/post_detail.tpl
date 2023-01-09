@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='post'>
-    <h1>Post #<%- ctx.post.id %></h1>
+    <h1>#<%- ctx.post.id %></h1>
     <nav class='buttons'><!--
         --><ul><!--
             --><li><a href='<%- ctx.formatClientLink('post', ctx.post.id) %>'><i class='fa fa-reply'></i> Main view</a></li><!--

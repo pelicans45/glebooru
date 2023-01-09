@@ -2,6 +2,7 @@
 
 const settings = require("../models/settings.js");
 const api = require("../api.js");
+const vars = require("../vars.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");
 const AbstractList = require("./abstract_list.js");

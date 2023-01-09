@@ -102,6 +102,7 @@
         <% if (ctx.post.tags.length) { %>
             <ul class='compact-tags'><!--
                 --><% for (let tag of ctx.post.tags) { %><!--
+                    <% if (!ctx.isHostnameTag(tag)) { %>
                     --><li><!--
                         --><% if (ctx.canViewTags) { %><!--
                         --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
@@ -120,12 +121,13 @@
                         --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
                     --></li><!--
                 --><% } %><!--
+                --><% } %><!--
             --></ul>
         <% } else { %>
             <p>
-                No tags yet!
+                No tags yet
                 <% if (ctx.canEditPosts) { %>
-                    <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add some.</a>
+                    <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add tags</a>
                 <% } %>
             </p>
         <% } %>

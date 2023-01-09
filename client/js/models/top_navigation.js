@@ -1,6 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
+const lens = require("../lens.js");
 const api = require("../api.js");
 
 class TopNavigationItem {
@@ -57,7 +58,7 @@ class TopNavigation extends events.EventTarget {
     setTitle(title) {
         //api.fetchConfig().then(() => {
         document.oldTitle = null;
-        document.title = vars.name + (title ? " – " + title : "");
+        document.title = lens.name + (title ? " – " + title : "");
         //});
     }
 

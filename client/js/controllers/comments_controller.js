@@ -21,7 +21,7 @@ class CommentsController {
         }
 
         topNavigation.activate("comments");
-        topNavigation.setTitle("Listing comments");
+        topNavigation.setTitle("Comments");
 
         this._pageController = new PageController();
         this._pageController.run({

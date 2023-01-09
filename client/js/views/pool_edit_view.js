@@ -1,7 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
-const api = require("../api.js");
+const vars = require("../vars.js");
 const misc = require("../util/misc.js");
 const views = require("../util/views.js");
 const Post = require("../models/post.js");

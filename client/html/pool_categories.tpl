@@ -6,7 +6,7 @@
                 <thead>
                     <tr>
                         <th class='name'>Category name</th>
-                        <th class='color'>CSS color</th>
+                        <th class='color'>Color</th>
                         <th class='usages'>Usages</th>
                     </tr>
                 </thead>

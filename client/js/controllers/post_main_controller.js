@@ -268,17 +268,6 @@ class PostMainController extends BasePostController {
 }
 
 module.exports = (router) => {
-    router.enter(["", ":id", "edit"], (ctx, next) => {
-        if (!/^\d+$/.test(ctx.parameters.id)) {
-            return;
-        }
-
-        // restore parameters from history state
-        if (ctx.state.parameters) {
-            Object.assign(ctx.parameters, ctx.state.parameters);
-        }
-        ctx.controller = new PostMainController(ctx, true);
-    });
     router.enter(["", ":id"], (ctx, next) => {
         if (!/^\d+$/.test(ctx.parameters.id)) {
             return;
@@ -289,5 +278,16 @@ module.exports = (router) => {
             Object.assign(ctx.parameters, ctx.state.parameters);
         }
         ctx.controller = new PostMainController(ctx, false);
+    });
+    router.enter(["", ":id", "edit"], (ctx, next) => {
+        if (!/^\d+$/.test(ctx.parameters.id)) {
+            return;
+        }
+
+        // restore parameters from history state
+        if (ctx.state.parameters) {
+            Object.assign(ctx.parameters, ctx.state.parameters);
+        }
+        ctx.controller = new PostMainController(ctx, true);
     });
 };

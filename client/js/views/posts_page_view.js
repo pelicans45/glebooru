@@ -1,6 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
+const lens = require("../lens.js");
 const tags = require("../tags.js");
 const views = require("../util/views.js");
 
@@ -18,6 +19,7 @@ class PostsPageView extends events.EventTarget {
         super();
         this._ctx = ctx;
         this._hostNode = ctx.hostNode;
+        ctx.excludeHostnameTag = lens.excludeHostnameTag;
         views.replaceContent(this._hostNode, template(ctx));
 
         this._postIdToPost = {};

@@ -4,7 +4,7 @@
             <% for (let post of ctx.response.results) { %>
                 <li data-post-id='<%= post.id %>'>
                     <a class='thumbnail-wrapper <%= post.tags.length > 1 ? "tags" : "no-tags" %>'
-                            title='@<%- post.id %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
+                            title='@<%- post.id %><%- post.type === "image" ? "" : ` (${post.type})`%>&#10;&#10;Tags: <%- ctx.excludeHostnameTag(post.tags).map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             target="_blank"
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
