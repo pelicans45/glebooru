@@ -4,6 +4,10 @@
 const fs = require("fs");
 const yaml = require("js-yaml");
 
+function baseUrl() {
+    return process.env.BASE_URL ? process.env.BASE_URL : "/";
+}
+
 function readTextFile(path) {
     return fs.readFileSync(path, "utf-8");
 }
@@ -89,10 +93,6 @@ var pe = new PrettyError();
 function gzipFile(file) {
     file = path.normalize(file);
     execSync("gzip -6 -k " + file);
-}
-
-function baseUrl() {
-    return process.env.BASE_URL ? process.env.BASE_URL : "/";
 }
 
 // -------------------------------------------------
@@ -239,7 +239,7 @@ function bundleVendorJs(domain, compress) {
         b.require(lib);
     }
 
-	/*
+    /*
     if (!process.argv.includes("--no-transpile")) {
         b.add(require.resolve("babel-polyfill"));
     }

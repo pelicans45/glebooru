@@ -8,7 +8,7 @@ ARG CACHE_DATE=2016-01-01
 
 COPY . ./
 
-RUN BASE_URL="__BASEURL__" node build.js --gzip
+RUN node build.js --gzip
 
 
 FROM scratch as approot

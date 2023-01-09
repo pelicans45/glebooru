@@ -1,8 +1,9 @@
 from hashlib import md5
 from typing import Dict
 
-from szurubooru import config, errors, rest
 from szurubooru.func import auth, mailer, users, versions
+
+from szurubooru import config, errors, rest
 
 MAIL_SUBJECT = "Password reset for {name}"
 MAIL_BODY = (
@@ -26,7 +27,7 @@ def start_password_reset(
     token = auth.generate_authentication_token(user)
 
     if config.config["main_domain"]:
-        url = config.config["main_domain"]
+        url = f'https://{config.config["main_domain"]}'
     elif "HTTP_ORIGIN" in ctx.env:
         url = ctx.env["HTTP_ORIGIN"].rstrip("/")
     elif "HTTP_REFERER" in ctx.env:

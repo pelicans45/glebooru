@@ -71,7 +71,7 @@ http {
 
         location / {
             root /var/www/$host;
-            try_files $uri /index.htm;
+            try_files $uri /index.html;
 
             sendfile on;
             tcp_nopush on;

@@ -4,7 +4,7 @@
 sed -i "s|__BACKEND__|${BACKEND_HOST}|" \
     /etc/nginx/nginx.conf
 sed -i "s|__BASEURL__|${BASE_URL:-/}|g" \
-    /var/www/index.htm \
+    /var/www/index.html \
     /var/www/manifest.json
 
 # Start server
