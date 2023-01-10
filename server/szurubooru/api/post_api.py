@@ -67,6 +67,7 @@ def get_random_post(
     query_text = ctx.get_param_as_string("query", default="").strip()
     if not query_text:
         return ""
+    query_text = "sort:random " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return ""

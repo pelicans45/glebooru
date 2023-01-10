@@ -200,7 +200,7 @@ function getPostUrl(id, parameters) {
             ? {
                   query: parameters.query,
                   metrics: parameters.metrics,
-                  c: parameters.c,
+                  r: parameters.r,
               }
             : {}
     );
@@ -215,7 +215,7 @@ function getPostEditUrl(id, parameters) {
             ? {
                   query: parameters.query,
                   metrics: parameters.metrics,
-                  c: parameters.c,
+                  r: parameters.r,
               }
             : {}
     );

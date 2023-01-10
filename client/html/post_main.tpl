@@ -12,7 +12,7 @@
                     <a rel='prev' class='inactive'>
                 <% } %>
                     <i class='fa fa-chevron-left'></i>
-                    <span class='vim-nav-hint'>&lt; Previous post</span>
+                    <span class='vim-nav-hint'>&lt; Previous</span>
                 </a>
             </article>
             <article class='next-post'>
@@ -26,7 +26,7 @@
                     <a rel='next' class='inactive'>
                 <% } %>
                     <i class='fa fa-chevron-right'></i>
-                    <span class='vim-nav-hint'>Next post &gt;</span>
+                    <span class='vim-nav-hint'>Next &gt;</span>
                 </a>
             </article>
             <article class='random-post'>
@@ -35,18 +35,18 @@
                         <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            c: Math.round(Math.random() * 1000)}) %>'>
+                            r: Math.round(Math.random() * 1000)}) %>'>
                     <% } else { %>
                         <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            c: Math.round(Math.random() * 1000)}) %>'>
+                            r: Math.round(Math.random() * 1000)}) %>'>
                     <% } %>
                 <% } else { %>
                     <a rel='next' class='inactive'>
                 <% } %>
                     <i class='fa fa-random'></i>
-                    <span class='vim-nav-hint'>Random post</span>
+                    <span class='vim-nav-hint'>Random image</span>
                 </a>
             </article>
             <article class='edit-post'>
@@ -59,7 +59,7 @@
                     <% if (ctx.canEditPosts || ctx.canDeletePosts || ctx.canFeaturePosts) { %>
                         <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>
                         <i class='fa fa-pencil-alt'></i>
-                        <span class='vim-nav-hint'>Edit post</span>
+                        <span class='vim-nav-hint'>Edit</span>
                         </a>
                     <% } %>
                 <% } %>

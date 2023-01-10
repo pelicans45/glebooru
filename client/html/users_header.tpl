@@ -8,7 +8,7 @@
 
         <div class='buttons'>
             <input type='submit' value='Search'/>
-            <a class='append' href='<%- ctx.formatClientLink('help', 'search', 'users') %>'>Syntax help</a>
+            <a style="display: none" class='append' href='<%- ctx.formatClientLink('help', 'search', 'users') %>'>Syntax help</a>
         </div>
     </form>
 </div>

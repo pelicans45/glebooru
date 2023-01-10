@@ -280,7 +280,7 @@ class EndlessPageView {
                 );
             }
         } else if (!response.results.length) {
-            this.showInfo("No data to show");
+            this.showInfo("No results");
         }
 
         this._initialPageLoad = false;

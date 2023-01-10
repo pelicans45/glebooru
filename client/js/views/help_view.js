@@ -1,6 +1,5 @@
 "use strict";
 
-const api = require("../api.js");
 const lens = require("../lens.js");
 const views = require("../util/views.js");
 
@@ -30,6 +29,7 @@ class HelpView {
         const sourceNode = template();
         const ctx = {
             name: lens.name,
+			description: lens.site.description,
         };
 
         section = section || "tips";

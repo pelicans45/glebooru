@@ -212,7 +212,7 @@ class PostListController {
                     offset,
                     limit,
                     fields,
-                    this._ctx.parameters.c
+                    this._ctx.parameters.r
                 );
             },
             pageRenderer: (pageCtx) => {

@@ -8,7 +8,7 @@
 
         <div class='buttons'>
             <input type='submit' value='Search'/>
-            <a class='button append' href='<%- ctx.formatClientLink('help', 'search', 'tags') %>'>Syntax help</a>
+            <a style="display: none" class='button append' href='<%- ctx.formatClientLink('help', 'search', 'tags') %>'>Syntax help</a>
             <% if (ctx.canEditTagCategories) { %>
                 <a class='append' href='<%- ctx.formatClientLink('tag-categories') %>'>Tag categories</a>
             <% } %>

@@ -14,7 +14,7 @@ class PostList extends AbstractList {
             uri.formatApiLink("post", id, "around", {
                 query: PostList.decorateSearchQuery(searchQuery || ""),
                 fields: "id",
-                c: c,
+                r: r,
             })
         );
     }
@@ -27,7 +27,7 @@ class PostList extends AbstractList {
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),
-                    c: c,
+                    r: r,
                 })
             )
             .then((response) => {

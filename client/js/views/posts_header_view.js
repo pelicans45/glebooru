@@ -200,11 +200,14 @@ class PostsHeaderView extends events.EventTarget {
         this._autoCompleteControl = new TagAutoCompleteControl(
             this._queryInputNode,
             {
-                confirm: (tag) =>
+                confirm: (tag) => {
                     this._autoCompleteControl.replaceSelectedText(
                         misc.escapeSearchTerm(tag.names[0]),
                         true
-                    ),
+                    );
+					// TODO: test
+                    this._navigate();
+                },
             }
         );
 
@@ -515,7 +518,7 @@ class PostsHeaderView extends events.EventTarget {
         if (!this._queryInputNode.value.includes("sort:random")) {
             this._queryInputNode.value += " sort:random";
         }
-        this._ctx.parameters.c = Math.round(Math.random() * 1000);
+        this._ctx.parameters.r = Math.round(Math.random() * 1000);
         this._navigate();
     }
 
@@ -523,7 +526,7 @@ class PostsHeaderView extends events.EventTarget {
         this._autoCompleteControl.hide();
         let parameters = {
             query: this._queryInputNode.value,
-            c: this._ctx.parameters.c,
+            r: this._ctx.parameters.r,
             metrics: this._ctx.parameters.metrics,
         };
 

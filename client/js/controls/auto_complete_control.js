@@ -124,6 +124,9 @@ class AutoCompleteControl {
         this._sourceInputNode.addEventListener("blur", (e) =>
             this._evtBlur(e)
         );
+        this._sourceInputNode.addEventListener("focus", (e) =>
+            this._evtFocus(e)
+        );
 
         this._suggestionDiv = views.htmlToDom(
             '<div class="autocomplete"><ul></ul></div>'
@@ -195,6 +198,10 @@ class AutoCompleteControl {
         window.setTimeout(() => {
             this.hide();
         }, 50);
+    }
+
+    _evtFocus(e) {
+        return;
     }
 
     _getActiveSuggestion() {

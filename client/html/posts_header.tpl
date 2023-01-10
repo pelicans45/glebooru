@@ -22,24 +22,28 @@
             %></a><%
         %><% } %><%
         %><wbr/><%
+        <!--
         %><a class='mousetrap button append'
              href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'><%
                 if (window.innerWidth <= 500) { %>Help<%
                 } else { %>Syntax help<% }
         %></a><%
+        -->
         %><wbr/><%
-        %><span class="bulk-edit-btn-holder"><%
-            %><a href class='mousetrap button append open bulk-edit-btn'><%
-                if (window.innerWidth <= 500) { %>Mass<%
-                } else { %>Mass edit<% }
-                %><i class='fa fa-chevron-down icon-inline'></i><%
-            %></a><%
-            %><a href class='mousetrap button append close bulk-edit-btn'><%
-                if (window.innerWidth <= 500) { %>Mass<%
-                } else { %>Mass edit<% }
-                %><i class='fa fa-chevron-up icon-inline'></i><%
-            %></a><%
-        %></span><%
+        if (ctx.canBulkEditTags) {
+            %><span class="bulk-edit-btn-holder"><%
+                %><a href class='mousetrap button append open bulk-edit-btn'><%
+                    if (window.innerWidth <= 500) { %>Mass<%
+                    } else { %>Mass edit<% }
+                    %><i class='fa fa-chevron-down icon-inline'></i><%
+                %></a><%
+                %><a href class='mousetrap button append close bulk-edit-btn'><%
+                    if (window.innerWidth <= 500) { %>Mass<%
+                    } else { %>Mass edit<% }
+                    %><i class='fa fa-chevron-up icon-inline'></i><%
+                %></a><%
+            %></span><%
+        }
         %><wbr/><%
         if (ctx.canViewMetrics) {
             %><span class="metrics-btn-holder"><%

@@ -32,6 +32,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
     constructor(input, options) {
         const minLengthForPartialSearch = 3;
 
+        // TODO: change?
         options = Object.assign(
             {
                 isTaggedWith: (tag) => false,
@@ -62,6 +63,19 @@ class TagAutoCompleteControl extends AutoCompleteControl {
         };
 
         super(input, options);
+    }
+
+    _evtFocus(e) {
+        return;
+    }
+
+    _showOrHide() {
+        const textToFind = this._options.getTextToFind();
+        if (!textToFind || !textToFind.length) {
+            this.hide();
+        } else {
+            this._updateResults(textToFind);
+        }
     }
 }
 

@@ -99,7 +99,7 @@ class ManualPageView {
                 }
 
                 if (!response.results.length) {
-                    this.showInfo("No data to show");
+                    this.showInfo("No results");
                 }
 
                 response.results.addEventListener("remove", (e) => {

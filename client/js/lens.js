@@ -44,8 +44,8 @@ function getExcludedTags() {
     return tags;
 }
 
-function isHostnameTag(tag) {
-    return tag.names[0] === hostnameFilter;
+function isHostnameTagName(name) {
+    return name === hostnameFilter;
 }
 
 function addHostnameFilter(text) {
@@ -116,6 +116,6 @@ module.exports = {
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
     hostnameFilterTags: hostnameFilterTags,
-    isHostnameTag: isHostnameTag,
     excludeHostnameTag: excludeHostnameTag,
+    isHostnameTagName: isHostnameTagName,
 };

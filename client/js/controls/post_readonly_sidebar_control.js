@@ -35,12 +35,12 @@ class PostReadonlySidebarControl extends events.EventTarget {
             this._hostNode,
             template({
                 post: this._post,
+                tags: lens.excludeHostnameTag(this._post.tags),
                 enableSafety: vars.safetyEnabled,
                 canListPosts: api.hasPrivilege("posts:list"),
                 canEditPosts: api.hasPrivilege("posts:edit"),
                 canViewTags: api.hasPrivilege("tags:view"),
                 canViewSimilar: api.hasPrivilege("posts:view:similar"),
-                isHostnameTag: lens.isHostnameTag,
                 escapeTagName: uri.escapeTagName,
                 extractRootDomain: uri.extractRootDomain,
                 getPrettyName: misc.getPrettyName,

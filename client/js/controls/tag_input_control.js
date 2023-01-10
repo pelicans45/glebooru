@@ -1,6 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
+const lens = require("../lens.js");
 const tags = require("../tags.js");
 const misc = require("../util/misc.js");
 const uri = require("../util/uri.js");
@@ -426,6 +427,9 @@ class TagInputControl extends events.EventTarget {
                 for (let post of response.results) {
                     for (let tag of post.tags) {
                         const name = tag.names[0];
+                        if (lens.isHostnameTagName(name)) {
+                            continue;
+                        }
                         let count = tagOccurrences[name] || 0;
                         tagOccurrences[name] = count + 1;
                     }

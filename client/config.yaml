@@ -1,23 +1,33 @@
 sites:
   jej.lol:
     name: jej
+    description: jej, lol
     query: ""
     color: "#6824dd"
   glegle.gallery:
     name: Glegle Gallery
+    description: Gallery of Glegles
     query: glegle
     color: "#6824dd"
   bury.pink:
     name: Bury Pink
+    description: bury pink girl
     query: bury
     color: "#ff74eb"
   flube.supply:
     name: Flube Supply
+    description: Let the Flube oils seep in.
     query: flube
     color: "#ff74eb"
   spikedog.school:
     name: Spikedog School
+    description: spikedog scampering about
     query: spikedog
+    color: "#ff74eb"
+  yosho.io:
+    name: yosho dot io
+    description: yosho must travel back in time to 1999 to stop the spikeman
+    query: yosho
     color: "#ff74eb"
 
 main_domain: jej.lol
@@ -63,11 +73,11 @@ can_send_mails: false
 
 enable_safety: false
 
-tag_name_regex: ^\S+$
-tag_category_name_regex: ^[^\s%+#/]+$
+tag_name_regex: ^[a-z0-9_-]{1,80}$
+tag_category_name_regex: ^[^\s%+#/]{1,80}$
 
-pool_name_regex: ^\S+$
-pool_category_name_regex: ^[^\s%+#/]+$
+pool_name_regex: ^\S{1,80}$
+pool_category_name_regex: ^[^\s%+#/]{1,80}$
 
 # don't make these more restrictive unless you want to annoy people; if you do
 # customize them, make sure to update the instructions in the registration form

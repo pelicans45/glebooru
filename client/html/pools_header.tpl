@@ -8,7 +8,7 @@
 
         <div class='buttons'>
             <input type='submit' value='Search'/>
-            <a class='button append' href='<%- ctx.formatClientLink('help', 'search', 'pools') %>'>Syntax help</a>
+            <a style="display: none" class='button append' href='<%- ctx.formatClientLink('help', 'search', 'pools') %>'>Syntax help</a>
 
             <% if (ctx.canCreate) { %>
                 <a class='append' href='<%- ctx.formatClientLink('pool', 'create') %>'>Add new pool</a>
