@@ -178,20 +178,15 @@ function bundleCss(domain) {
     for (const file of glob.sync("./css/**/*.styl")) {
         css += stylus.render(readTextFile(file), {
             filename: file,
-            include: `${customDir}/colors.styl`,
+            paths: [customDir],
         });
     }
 
     const customStyle = `${customDir}/site.styl`;
-    css += stylus.render(
-        readTextFile(customStyle, {
-            filename: customStyle,
-            include: [
-                //`${customDir}/custom-colors.styl`,
-                `./css/colors.styl`,
-            ],
-        })
-    );
+    css += stylus.render(readTextFile(customStyle), {
+        filename: customStyle,
+        paths: ["./css"],
+    });
 
     fs.writeFileSync(appStylesheet, minifyCss(css));
     if (process.argv.includes("--gzip")) {
@@ -416,7 +411,7 @@ console.log(`Building for "${environment}" environment.`);
 bundleConfig();
 bundleTemplates();
 
-for (const [domain, data] of Object.entries(sites)) {
+for (const [domain, data] of Object.entries(serverConf.sites)) {
     console.log(`Building for ${domain}`);
     makeOutputDirs(domain);
 
@@ -435,4 +430,6 @@ for (const [domain, data] of Object.entries(sites)) {
     if (!process.argv.includes("--no-js")) {
         bundleJs(domain);
     }
+
+    break;
 }
