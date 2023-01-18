@@ -27,7 +27,7 @@
             'Your browser doesn\'t support HTML5 videos.')
         %>
 
-    <% } else { console.log(new Error('Unknown post type')); } %>
+    <% } else { console.error('Unknown post type:', ctx.post); } %>
 
     <div class='post-overlay resize-listener'>
     </div>

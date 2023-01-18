@@ -269,7 +269,6 @@ class PostMainController extends BasePostController {
 
 module.exports = (router) => {
     router.enter(["#id"], (ctx, next) => {
-        console.log("ctx", ctx);
         // restore parameters from history state
         if (ctx.state.parameters) {
             Object.assign(ctx.parameters, ctx.state.parameters);

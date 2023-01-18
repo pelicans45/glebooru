@@ -2,9 +2,9 @@
     <article class='details'>
         <section class='download'>
             <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
-                <i class='fa fa-download'></i><!--
+                <i class='fa fa-download'></i>
                 <span style="display: none">
-            --><%= ctx.makeFileSize(ctx.post.fileSize) %> <!--
+                <%= ctx.makeFileSize(ctx.post.fileSize) %> <!--
                 --><%- {
                     'image/gif': 'GIF',
                     'image/jpeg': 'JPEG',

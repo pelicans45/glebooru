@@ -71,6 +71,30 @@ http {
             error_page 404 @notfound;
         }
 
+        location /posts/ {
+            add_header 'Cache-Control' 'public, max-age=2592000, immutable';
+            alias /data/posts;
+
+            sendfile on;
+            tcp_nopush on;
+            tcp_nodelay on;
+
+            error_page 403 @unauthorized;
+            error_page 404 @notfound;
+        }
+
+        location /thumbnails/ {
+            add_header 'Cache-Control' 'public, max-age=2592000, immutable';
+            alias /data/generated-thumbnails;
+
+            sendfile on;
+            tcp_nopush on;
+            tcp_nodelay on;
+
+            error_page 403 @unauthorized;
+            error_page 404 @notfound;
+        }
+
         location / {
             root /var/www/$host;
             try_files $uri /index.html;

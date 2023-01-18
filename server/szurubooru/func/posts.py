@@ -104,13 +104,12 @@ def get_post_security_hash(id: int) -> str:
         config.config["secret"].encode("utf8"),
         msg=str(id).encode("utf-8"),
         digestmod="md5",
-    ).hexdigest()[0:16]
+    ).hexdigest()[0:8]
 
 
 def get_post_content_url(post: model.Post) -> str:
     assert post
-    return "%s/%d_%s.%s" % (
-        config.config["data_url"].rstrip("/"),
+    return "/posts/%d_%s.%s" % (
         post.post_id,
         get_post_security_hash(post.post_id),
         mime.get_extension(post.mime_type) or "dat",
@@ -119,8 +118,7 @@ def get_post_content_url(post: model.Post) -> str:
 
 def get_post_thumbnail_url(post: model.Post) -> str:
     assert post
-    return "%s/generated-thumbnails/%d_%s.jpg" % (
-        config.config["data_url"].rstrip("/"),
+    return "/thumbnails/%d_%s.jpg" % (
         post.post_id,
         get_post_security_hash(post.post_id),
     )

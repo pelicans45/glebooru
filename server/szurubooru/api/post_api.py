@@ -214,7 +214,7 @@ def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(post, ctx.user)
     posts.delete(post)
     ctx.session.commit()
-    logger.info("%s deleted post %d", ctx.user.name, post.id)
+    logger.info("%s deleted post %d", ctx.user.name, _get_post_id(params))
     return {}
 
 
