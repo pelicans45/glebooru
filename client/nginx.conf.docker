@@ -12,8 +12,8 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    log_format main '[$host] $remote_addr -> $request [$status] - '
-                    'referer: $http_referer $http_x_forwarded_for';
+    log_format main '[$host] $http_x_real_ip -> $request [$status] - '
+                    'referer: "$http_referer"';
     access_log /dev/stdout main;
 
     server_tokens off;

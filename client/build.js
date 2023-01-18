@@ -102,7 +102,7 @@ function minifyHtml(html) {
         .minify(html, {
             removeComments: true,
             collapseWhitespace: true,
-            conservativeCollapse: true,
+            //conservativeCollapse: true,
         })
         .trim();
 }
@@ -119,7 +119,7 @@ function bundleHtml(domain, data) {
     );
 
     baseHtml = baseHtml.replaceAll("$THEME_COLOR$", data.color);
-    fs.writeFileSync("./public/index.html", minifyHtml(baseHtml));
+    fs.writeFileSync(`./public/${domain}/index.html`, minifyHtml(baseHtml));
 
     console.info("Bundled HTML");
 }
@@ -431,4 +431,6 @@ for (const [domain, data] of Object.entries(serverConf.sites)) {
     if (!process.argv.includes("--no-js")) {
         bundleJs(domain);
     }
+
+	break;
 }
