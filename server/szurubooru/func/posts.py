@@ -248,7 +248,7 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
-        if self.file_size < config.config["thumbnails"]["min_file_size"]:
+        if self.post.file_size < config.config["thumbnails"]["min_file_size"]:
             return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
 
