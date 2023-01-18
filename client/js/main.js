@@ -63,42 +63,39 @@ let controllers = [
     require("./controllers/not_found_controller.js"),
 ];
 
-window.addEventListener("DOMContentLoaded", function () {
-    Promise.resolve()
-        //.then(() => api.fetchConfig())
-        .then(
-            () => {
-                for (let controller of controllers) {
-                    controller(router);
-                }
-            },
-            (error) => {
-                window.alert("Unknown server error");
+Promise.resolve()
+    //.then(() => api.fetchConfig())
+    .then(
+        () => {
+            for (let controller of controllers) {
+                controller(router);
             }
-        )
-        .then(() => {
-            if (settings.get().darkTheme) {
-                document.body.classList.add("darktheme");
-            }
-        })
-        .then(() => api.loginFromCookies())
-        .then(
-            () => {
-                tags.refreshCategoryColorMap();
-                pools.refreshCategoryColorMap();
+        },
+        (error) => {
+            window.alert("Unknown server error");
+        }
+    )
+    .then(() => {
+        if (settings.get().darkTheme) {
+            document.body.classList.add("darktheme");
+        }
+    })
+    .then(() => api.loginFromCookies())
+    .then(
+        () => {
+            tags.refreshCategoryColorMap();
+            pools.refreshCategoryColorMap();
+            router.start();
+        },
+        (error) => {
+            if (window.location.href.indexOf("login") !== -1) {
+                api.forget();
                 router.start();
-            },
-            (error) => {
-                if (window.location.href.indexOf("login") !== -1) {
-                    api.forget();
-                    router.start();
-                } else {
-                    const ctx = router.start("/");
-                    ctx.controller.showError(
-                        "An error happened while trying to login: " +
-                            error.message
-                    );
-                }
+            } else {
+                const ctx = router.start("/");
+                ctx.controller.showError(
+                    "An error happened while trying to login: " + error.message
+                );
             }
-        );
-});
+        }
+    );

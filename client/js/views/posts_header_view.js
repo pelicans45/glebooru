@@ -338,7 +338,7 @@ class PostsHeaderView extends events.EventTarget {
     }
 
     get _queryInputNode() {
-        return this._hostNode.querySelector("form[name=search-text]");
+        return this._hostNode.querySelector("form input[name=search-text]");
     }
 
     get _randomizeButtonNode() {
