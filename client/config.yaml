@@ -1,9 +1,9 @@
 sites:
   jej.lol:
     name: jej
-    description: jej, lol
+    description: jej
     query: ""
-    color: "#6824dd"
+    color: "#435dbd"
   glegle.gallery:
     name: Glegle Gallery
     description: Gallery of Glegles
@@ -18,17 +18,17 @@ sites:
     name: Flube Supply
     description: Let the Flube oils seep in.
     query: flube
-    color: "#ff74eb"
+    color: "#484848"
   spikedog.school:
     name: Spikedog School
     description: spikedog scampering about
     query: spikedog
-    color: "#ff74eb"
+    color: "#ffffff"
   yosho.io:
     name: yosho dot io
     description: yosho must travel back in time to 1999 to stop the spikeman
     query: yosho
-    color: "#ff74eb"
+    color: "#3fd104"
 
 main_domain: jej.lol
 

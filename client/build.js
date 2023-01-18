@@ -76,7 +76,7 @@ const baseManifest = {
         },
     ],
     start_url: baseUrl(),
-    background_color: "#ffffff",
+    background_color: "#1a1a1a",
     display: "standalone",
 };
 
@@ -163,7 +163,7 @@ function bundleTemplates() {
     console.info("Bundled templates");
 }
 
-function bundleCss(domain) {
+function bundleCss(domain, data) {
     const stylus = require("stylus");
 
     function minifyCss(css) {
@@ -173,10 +173,11 @@ function bundleCss(domain) {
     const outputDir = `./public/${domain}/css`;
     const appStylesheet = `${outputDir}/app.css`;
     const customDir = `./sites/${domain}/css`;
+	const mainColorLine = `$main-color = ${data.color}\n`
 
     let css = "";
     for (const file of glob.sync("./css/**/*.styl")) {
-        css += stylus.render(readTextFile(file), {
+        css += stylus.render(mainColorLine + readTextFile(file), {
             filename: file,
             paths: [customDir],
         });
@@ -425,7 +426,7 @@ for (const [domain, data] of Object.entries(serverConf.sites)) {
         bundleHtml(domain, data);
     }
     if (!process.argv.includes("--no-css")) {
-        bundleCss(domain);
+        bundleCss(domain, data);
     }
     if (!process.argv.includes("--no-js")) {
         bundleJs(domain);

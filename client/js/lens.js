@@ -1,20 +1,16 @@
 const config = require("./config.js");
 
-let universalHostname;
-
 const hostnameFilters = {};
 
-for (const [domain, data] of Object.entries(sites)) {
-    if (data.query === "") {
-        universalHostname = domain;
-    }
+for (const [domain, data] of Object.entries(config.sites)) {
     hostnameFilters[domain] = data.query;
 }
 
-const site = sites[location.hostname];
+const site = config.sites[location.hostname];
 const name = site.name;
 
-const isUniversal = location.hostname === universalHostname;
+const universalHostname = config.mainDomain;
+const isUniversal = name === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
 const excludedTags = new Set(getExcludedTags());
