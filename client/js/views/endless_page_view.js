@@ -86,9 +86,12 @@ class EndlessPageView {
             window.innerWidth / 2,
             window.innerHeight / 2
         );
+        console.log("el", element);
         while (element.parentNode !== null) {
+            console.log("el parent", element.parentNode);
             if (element.classList.contains("page")) {
                 topPageNode = element;
+                console.log("topPageNode", element);
                 break;
             }
             element = element.parentNode;
@@ -147,7 +150,8 @@ class EndlessPageView {
             );
         }
 
-        const pageBottom = this._pagesHolderNode.getBoundingClientRect().bottom;
+        const pageBottom =
+            this._pagesHolderNode.getBoundingClientRect().bottom;
         if (
             this.maxOffsetShown < this.totalRecords &&
             pageBottom < window.innerHeight + scrollThreshold
@@ -157,21 +161,28 @@ class EndlessPageView {
     }
 
     _shouldUseCache(ctx) {
-        return ctx.browserState !== undefined && ctx.browserState != null &&
-            ctx.readPageFromCache !== undefined;
+        return (
+            ctx.browserState !== undefined &&
+            ctx.browserState != null &&
+            ctx.readPageFromCache !== undefined
+        );
     }
 
     _isCacheValid(ctx) {
         if (!this._shouldUseCache(ctx)) return false;
         const cache = ctx.browserState.pageCache;
-        return cache !== null && cache !== undefined &&
+        return (
+            cache !== null &&
+            cache !== undefined &&
             cache.path == history.state.path &&
-            cache.pages !== undefined && cache.pages !== null;
+            cache.pages !== undefined &&
+            cache.pages !== null
+        );
     }
 
     _clearCache(ctx) {
         if (!this._shouldUseCache(ctx)) return;
-        ctx.browserState.pageCache = {path: history.state.path, pages: {}};
+        ctx.browserState.pageCache = { path: history.state.path, pages: {} };
     }
 
     _loadCachedPages(ctx) {
@@ -184,7 +195,7 @@ class EndlessPageView {
                     offset: data.offset,
                     limit: data.limit,
                     total: data.total,
-                    results: ctx.readPageFromCache(data.raw_data)
+                    results: ctx.readPageFromCache(data.raw_data),
                 };
                 this._renderPage(ctx, true, response);
             }
@@ -255,7 +266,7 @@ class EndlessPageView {
             }
             if (
                 response.offset + response.results.length >
-                this.maxOffsetShown ||
+                    this.maxOffsetShown ||
                 this.maxOffsetShown === null
             ) {
                 this.maxOffsetShown =

@@ -1,5 +1,11 @@
 "use strict";
 
+const settings = require("./models/settings.js");
+
+if (settings.get().darkTheme) {
+    document.body.classList.add("darktheme");
+}
+
 require("./util/polyfill.js");
 const misc = require("./util/misc.js");
 const views = require("./util/views.js");
@@ -26,7 +32,6 @@ router.enter(null, (ctx, next) => {
 const tags = require("./tags.js");
 const pools = require("./pools.js");
 const api = require("./api.js");
-const settings = require("./models/settings.js");
 
 // register controller routes
 let controllers = [
@@ -75,11 +80,13 @@ Promise.resolve()
             window.alert("Unknown server error");
         }
     )
+    /*
     .then(() => {
         if (settings.get().darkTheme) {
             document.body.classList.add("darktheme");
         }
     })
+	*/
     .then(() => api.loginFromCookies())
     .then(
         () => {
@@ -93,9 +100,7 @@ Promise.resolve()
                 router.start();
             } else {
                 const ctx = router.start("/");
-                ctx.controller.showError(
-                    "An error happened while trying to login: " + error.message
-                );
+                ctx.controller.showError(`Login error: ${error.message}`);
             }
         }
     );

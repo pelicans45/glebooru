@@ -20,10 +20,14 @@ class MetricHeaderControl extends events.EventTarget {
             this._headerNode.querySelector("ul.metric-list");
 
         //this._hostNode.style.display = "none";
+        /*
         this._hostNode.parentNode.insertBefore(
             this._headerNode,
-            this._hostNode.nextSibling
+            hostNode.nextSibling
         );
+		*/
+
+        this._hostNode.append(this._headerNode);
 
         MetricList.loadAll().then((response) => {
             this._ctx.allMetrics = response.results;

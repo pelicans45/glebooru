@@ -28,8 +28,8 @@
                 if (window.innerWidth <= 500) { %>Help<%
                 } else { %>Syntax help<% }
         %></a>
-        <wbr/>
         -->
+        <wbr/>
         <% if (ctx.canBulkEditTags) {
             %><span class="bulk-edit-btn-holder"><%
                 %><a href class='mousetrap button append open bulk-edit-btn'><%
@@ -68,17 +68,15 @@
                 %><input class='mousetrap start' type='submit' value='Start tagging'/><%
                 %><a href class='mousetrap button append close'>Stop tagging</a><%
             %></form><%
+
+            %><!--TODO: create permission--><%
+            %><form class='horizontal bulk-edit bulk-add-relation'><%
+                %><a href class='mousetrap button append open'>Mass add relation</a><%
+                %><a href class='mousetrap button append close'>Stop adding relation</a><%
+            %></form><%
         }
-        %><!--TODO: create permission--><%
-        %><form class='horizontal bulk-edit bulk-add-relation'><%
-            %><a href class='mousetrap button append open'>Mass add relation</a><%
-            %><a href class='mousetrap button append close'>Stop adding relation</a><%
-        %></form><%
-    %></div><%
-    if (ctx.canViewMetrics) {
-        %><div class='metrics-block hidden'></div><%
-    }
-    if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
+    %></div>
+    <% if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
         %><form class='horizontal bulk-edit bulk-edit-safety'><%
             %><a href class='mousetrap button append open'>Mass edit safety</a><%
             %><a href class='mousetrap button append close'>Stop editing safety</a><%
@@ -91,4 +89,7 @@
             %><a href class='mousetrap button append close'>Stop deleting</a><%
         %></form><%
     %><% } %><%
+    <% if (ctx.canViewMetrics) {
+        %><div class='metrics-block hidden'></div><%
+    }
 %></div>
