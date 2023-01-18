@@ -9,7 +9,7 @@ const AbstractList = require("./abstract_list.js");
 const Post = require("./post.js");
 
 class PostList extends AbstractList {
-    static getAround(id, searchQuery, c) {
+    static getAround(id, searchQuery, r) {
         return api.get(
             uri.formatApiLink("post", id, "around", {
                 query: PostList.decorateSearchQuery(searchQuery || ""),
@@ -19,7 +19,7 @@ class PostList extends AbstractList {
         );
     }
 
-    static search(text, offset, limit, fields, c) {
+    static search(text, offset, limit, fields, r) {
         return api
             .get(
                 uri.formatApiLink("posts", {

@@ -16,9 +16,6 @@ const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
 const excludedTags = new Set(getExcludedTags());
 
-console.log("site", site);
-console.log("isUniversal", isUniversal);
-
 function objectFlip(obj) {
     const ret = {};
     Object.keys(obj).forEach((key) => {
@@ -112,6 +109,7 @@ module.exports = {
     site: site,
     name: name,
     hostnameFilter: hostnameFilter,
+	isUniversal: isUniversal,
     addHostnameFilter: addHostnameFilter,
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
