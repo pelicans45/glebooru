@@ -93,6 +93,7 @@ function makeCheckbox(options) {
             checked: options.checked !== undefined ? options.checked : false,
             disabled: options.readonly,
             required: options.required,
+			title: options.title,
         }),
         makeElement(
             "span",

@@ -2,45 +2,6 @@
 
 "use strict";
 
-/*
-// fix iterating over NodeList in Chrome and Opera
-NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
-
-NodeList.prototype.querySelector = function (...args) {
-    for (let node of this) {
-        if (node.nodeType === 3) {
-            continue;
-        }
-        const result = node.querySelector(...args);
-        if (result) {
-            return result;
-        }
-    }
-    return null;
-};
-
-NodeList.prototype.querySelectorAll = function (...args) {
-    let result = [];
-    for (let node of this) {
-        if (node.nodeType === 3) {
-            continue;
-        }
-        for (let childNode of node.querySelectorAll(...args)) {
-            result.push(childNode);
-        }
-    }
-    return result;
-};
-
-// non standard
-Node.prototype.prependChild = function (child) {
-    if (this.firstChild) {
-        this.insertBefore(child, this.firstChild);
-    } else {
-        this.appendChild(child);
-    }
-};
-
 // non standard
 Promise.prototype.always = function (onResolveOrReject) {
     return this.then(onResolveOrReject, (reason) => {
@@ -65,4 +26,3 @@ Date.prototype.addDays = function (days) {
     dat.setDate(dat.getDate() + days);
     return dat;
 };
-*/

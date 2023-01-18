@@ -90,7 +90,7 @@ class PoolInputControl extends events.EventTarget {
         if (!pool.category) {
             listItemNode.classList.add("new");
         }
-        this._poolListNode.prependChild(listItemNode);
+        this._poolListNode.prepend(listItemNode);
         _fadeOutListItemNodeStatus(listItemNode);
 
         this.dispatchEvent(

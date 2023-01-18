@@ -20,17 +20,17 @@
                 %><i class="fa fa-heart term-selected"></i><%
                 %><i class="far fa-heart term-unselected"></i><%
             %></a><%
-        %><% } %><%
-        %><wbr/><%
+        %><% } %>
         <!--
-        %><a class='mousetrap button append'
+        <wbr/>
+        <a class='mousetrap button append'
              href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'><%
                 if (window.innerWidth <= 500) { %>Help<%
                 } else { %>Syntax help<% }
-        %></a><%
+        %></a>
+        <wbr/>
         -->
-        %><wbr/><%
-        if (ctx.canBulkEditTags) {
+        <% if (ctx.canBulkEditTags) {
             %><span class="bulk-edit-btn-holder"><%
                 %><a href class='mousetrap button append open bulk-edit-btn'><%
                     if (window.innerWidth <= 500) { %>Mass<%

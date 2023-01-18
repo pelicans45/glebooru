@@ -1,6 +1,6 @@
 "use strict";
 
-//require("./util/polyfill.js");
+require("./util/polyfill.js");
 const misc = require("./util/misc.js");
 const views = require("./util/views.js");
 const router = require("./router.js");

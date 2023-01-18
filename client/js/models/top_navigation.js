@@ -2,7 +2,6 @@
 
 const events = require("../events.js");
 const lens = require("../lens.js");
-const api = require("../api.js");
 
 class TopNavigationItem {
     constructor(accessKey, title, url, available, imageUrl) {
@@ -80,7 +79,6 @@ class TopNavigation extends events.EventTarget {
 function _makeTopNavigation() {
     const ret = new TopNavigation();
     //ret.add("home", new TopNavigationItem("M", "Home", "home"));
-    //ret.add("posts", new TopNavigationItem("P", "Posts", "posts"));
     ret.add("posts", new TopNavigationItem("G", "Gallery", ""));
     ret.add("upload", new TopNavigationItem("U", "Upload", "upload"));
     ret.add("comments", new TopNavigationItem("C", "Comments", "comments"));

@@ -272,7 +272,7 @@ class EndlessPageView {
                     window.scroll(0, pageNode.getBoundingClientRect().top);
                 }
             } else {
-                this._pagesHolderNode.prependChild(pageNode);
+                this._pagesHolderNode.prepend(pageNode);
 
                 window.scroll(
                     window.scrollX,

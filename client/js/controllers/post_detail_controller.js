@@ -99,7 +99,7 @@ class PostDetailController extends BasePostController {
 }
 
 module.exports = (router) => {
-    router.enter(["", ":id", "merge"], (ctx, next) => {
+    router.enter([":id", "merge"], (ctx, next) => {
         if (!/^\d+$/.test(ctx.parameters.id)) {
             return;
         }

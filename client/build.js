@@ -266,7 +266,7 @@ function bundleJs(domain) {
     }
 
     if (!process.argv.includes("--no-app-js")) {
-        const debug = !process.argv.includes("--debug");
+        const debug = process.argv.includes("--debug");
         let b = browserify({ debug: debug });
         /*
         if (!process.argv.includes("--no-transpile")) {

@@ -77,6 +77,7 @@ class Route {
                     parts.push(component);
                 }
             }
+			//const prefix = (parts[0] === "" && parts.length > 1) ? "^" : "^/";
             let regexString = "^/" + parts.join("/");
             regexString += "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             this.parameterNames.push("variable");

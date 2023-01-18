@@ -57,15 +57,6 @@
                 }) %>
             </li>
 
-            <li>
-                <%= ctx.makeCheckbox({
-                    text: 'Dark theme',
-                    name: 'dark-theme',
-                    checked: ctx.browsingSettings.darkTheme,
-                }) %>
-                <p style="display: none" class='hint'>Changing this setting will require you to refresh the page for it to apply.</p>
-            </li>
-
             <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Upscale small posts',
@@ -75,20 +66,29 @@
 
             <li>
                 <%= ctx.makeCheckbox({
-                    text: 'Endless scroll',
-                    name: 'endless-scroll',
-                    checked: ctx.browsingSettings.endlessScroll,
+                    text: 'Dark theme',
+                    name: 'dark-theme',
+                    checked: ctx.browsingSettings.darkTheme,
+                    title: 'Enable dark theme',
                 }) %>
-                <p class='hint' style="display: none">Rather than using a paged navigation, smoothly scrolls through the content.</p>
             </li>
 
             <li>
                 <%= ctx.makeCheckbox({
-                    text: 'Navbar follows scrolling',
+                    text: 'Endless scroll',
+                    name: 'endless-scroll',
+                    checked: ctx.browsingSettings.endlessScroll,
+                    title: 'Load gallery pages automatically when scrolling',
+                }) %>
+            </li>
+
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Always show navbar',
                     name: 'navbar-follow',
                     checked: ctx.browsingSettings.navbarFollow,
+                    title: 'Show the navbar at the top of the screen when scrolling',
                 }) %>
-                <p class='hint' style="display: none"></p>
             </li>
 
             <li style="display: none">

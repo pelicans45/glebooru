@@ -208,7 +208,7 @@ class TagInputControl extends events.EventTarget {
                 } else {
                     listItemNode.classList.add("added");
                 }
-                this._tagListNode.prependChild(listItemNode);
+                this._tagListNode.prepend(listItemNode);
                 _fadeOutListItemNodeStatus(listItemNode);
 
                 return Promise.all(

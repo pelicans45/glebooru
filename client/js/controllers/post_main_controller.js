@@ -268,7 +268,8 @@ class PostMainController extends BasePostController {
 }
 
 module.exports = (router) => {
-    router.enter(["", ":id"], (ctx, next) => {
+    router.enter([":id"], (ctx, next) => {
+		console.log("ctx", ctx)
         if (!/^\d+$/.test(ctx.parameters.id)) {
             return;
         }
@@ -279,7 +280,7 @@ module.exports = (router) => {
         }
         ctx.controller = new PostMainController(ctx, false);
     });
-    router.enter(["", ":id", "edit"], (ctx, next) => {
+    router.enter([":id", "edit"], (ctx, next) => {
         if (!/^\d+$/.test(ctx.parameters.id)) {
             return;
         }
