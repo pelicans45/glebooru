@@ -43,7 +43,7 @@ class TagList extends AbstractList {
         }
 
         if (lens.isUniversal) {
-            return TagList.search(
+            return this.search(
                 "sort:usages",
                 0,
                 config.maxSuggestedResults,
@@ -73,7 +73,7 @@ class TagList extends AbstractList {
                 }
 
                 allRelevantTags = Object.assign({}, response, {
-                    results: TagList.fromResponse(response.results),
+                    results: this.fromResponse(response.results),
                 });
 
                 return Promise.resolve(allRelevantTags);
@@ -81,7 +81,7 @@ class TagList extends AbstractList {
     }
 
     static getRelevant(query, offset, limit) {
-        return TagList.getAllRelevant().then((_tags) => {
+        return this.getAllRelevant().then((_tags) => {
             let matchFunc;
             if (query.length < tags.minLengthForPartialSearch) {
                 matchFunc = (name) => {
@@ -106,7 +106,7 @@ class TagList extends AbstractList {
             return Promise.resolve(topRelevantMatches);
         }
 
-        return TagList.getAllRelevant().then((response) => {
+        return this.getAllRelevant().then((response) => {
             topRelevantMatches = tags.tagListToMatches(
                 response.results.slice(0, config.maxSuggestedResults),
                 {
@@ -174,9 +174,11 @@ class TagList extends AbstractList {
     }
 }
 
+/*
 if (lens.isUniversal) {
     TagList.search = TagList.apiSearch;
 }
+*/
 
 TagList._itemClass = Tag;
 TagList._itemName = "tag";
