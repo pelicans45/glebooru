@@ -73,7 +73,7 @@ http {
 
         location /posts/ {
             add_header 'Cache-Control' 'public, max-age=2592000, immutable';
-            alias /data/posts;
+            alias /data/posts/;
 
             sendfile on;
             tcp_nopush on;
@@ -85,7 +85,7 @@ http {
 
         location /thumbnails/ {
             add_header 'Cache-Control' 'public, max-age=2592000, immutable';
-            alias /data/generated-thumbnails;
+            alias /data/generated-thumbnails/;
 
             sendfile on;
             tcp_nopush on;
