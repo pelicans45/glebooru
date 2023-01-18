@@ -32,6 +32,8 @@ sites:
 
 main_domain: jej.lol
 
+max_suggested_results: 10
+
 # Delete thumbnails and source files on post delete
 # Original functionality is no, to mitigate the impacts of admins going
 # on unchecked post purges.

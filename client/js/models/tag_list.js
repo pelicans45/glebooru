@@ -1,6 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
+const config = require("../config.js");
 const tags = require("../tags.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");
@@ -41,8 +42,8 @@ class TagList extends AbstractList {
             return Promise.resolve(allRelevantTags);
         }
 
-        if (isUniversal) {
-            return TagList.search("sort:usages", 0, 10, [
+        if (lens.isUniversal) {
+            return TagList.search("sort:usages", 0, config.maxSuggestedResults, [
                 "names",
                 "category",
                 "usages",
@@ -106,7 +107,7 @@ class TagList extends AbstractList {
 
         return TagList.getAllRelevant().then((response) => {
             topRelevantMatches = tags.tagListToMatches(
-                response.results.slice(0, 10),
+                response.results.slice(0, config.maxSuggestedResults),
                 {
                     isTaggedWith: () => false,
                 }

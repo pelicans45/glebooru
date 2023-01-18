@@ -1,6 +1,7 @@
 "use strict";
 
 const views = require("../util/views.js");
+const config = require("../config.js");
 
 const KEY_TAB = 9;
 const KEY_RETURN = 13;
@@ -31,7 +32,7 @@ class AutoCompleteControl {
             this._options,
             {
                 verticalShift: 2,
-                maxResults: 10,
+                maxResults: config.maxSuggestedResults,
                 getTextToFind: () => {
                     const value = sourceInputNode.value;
                     const start = _getSelectionStart(sourceInputNode);

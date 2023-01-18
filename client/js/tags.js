@@ -4,8 +4,6 @@ const misc = require("./util/misc.js");
 const TagCategoryList = require("./models/tag_category_list.js");
 const Tag = require("./models/tag.js");
 
-const minLengthForPartialSearch = 3;
-
 let _stylesheet = null;
 
 function refreshCategoryColorMap() {
