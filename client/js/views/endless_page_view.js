@@ -6,6 +6,7 @@ const views = require("../util/views.js");
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
 
+/*
 function isScrolledIntoView(element) {
     let top = 0;
     do {
@@ -14,6 +15,7 @@ function isScrolledIntoView(element) {
     } while (element);
     return top >= window.scrollY && top <= window.scrollY + window.innerHeight;
 }
+*/
 
 class EndlessPageView {
     constructor(ctx) {
@@ -51,17 +53,21 @@ class EndlessPageView {
             );
         }
 
-		/*
         this._timeout = window.setInterval(() => {
             window.requestAnimationFrame(() => {
-                this._probePageLoad(ctx);
-                this._syncUrl(ctx);
+                const topPageNode = this._topPageNode;
+                if (!topPageNode) {
+                    console.log("topPageNode is null");
+                    return;
+                }
+
+                this._probePageLoad(ctx, topPageNode);
+                this._syncUrl(ctx, topPageNode);
                 if (this._shouldUseCache(ctx)) {
                     ctx.browserState.scrollY = window.scrollY;
                 }
             });
         }, 250);
-		*/
 
         views.monitorNodeRemoval(this._pagesHolderNode, () => this._destroy());
     }
@@ -88,12 +94,9 @@ class EndlessPageView {
             window.innerWidth / 2,
             window.innerHeight / 2
         );
-        console.log("el", element);
         while (element.parentNode !== null) {
-            console.log("el parent", element.parentNode);
             if (element.classList.contains("page")) {
                 topPageNode = element;
-                console.log("topPageNode", element);
                 break;
             }
             element = element.parentNode;
@@ -106,11 +109,7 @@ class EndlessPageView {
         this._active = false;
     }
 
-    _syncUrl(ctx) {
-        const topPageNode = this._topPageNode;
-        if (!topPageNode) {
-            return;
-        }
+    _syncUrl(ctx, topPageNode) {
         let topOffset = parseInt(topPageNode.getAttribute("data-offset"));
         let topLimit = parseInt(topPageNode.getAttribute("data-limit"));
         if (topOffset !== this.currentOffset) {
@@ -133,7 +132,7 @@ class EndlessPageView {
         }
     }
 
-    _probePageLoad(ctx) {
+    _probePageLoad(ctx, topPageNode) {
         if (!this._active || this._runningRequests) {
             return;
         }
@@ -141,7 +140,8 @@ class EndlessPageView {
         if (this.totalRecords === null) {
             return;
         }
-        const scrollThreshold = this._topPageNode.scrollHeight * 0.2;
+
+        const scrollThreshold = topPageNode.scrollHeight * 0.2;
 
         if (this.minOffsetShown > 0 && window.scrollY < scrollThreshold) {
             this._loadPage(

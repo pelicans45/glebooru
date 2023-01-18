@@ -212,7 +212,7 @@ class MetricSorterController {
 }
 
 module.exports = (router) => {
-    router.enter([":id", "metric-sorter"], (ctx, next) => {
+    router.enter(["#id", "metric-sorter"], (ctx, next) => {
         ctx.controller = new MetricSorterController(ctx);
     });
 };

@@ -72,12 +72,14 @@ class Route {
                 if (component[0] === ":") {
                     parts.push("([^/]+)");
                     this.parameterNames.push(component.substr(1));
+				} else if (component[0] === "#") {
+                    parts.push("(\d+)");
+                    this.parameterNames.push(component.substr(1));
                 } else {
                     // assert [a-z]+
                     parts.push(component);
                 }
             }
-			//const prefix = (parts[0] === "" && parts.length > 1) ? "^" : "^/";
             let regexString = "^/" + parts.join("/");
             regexString += "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             this.parameterNames.push("variable");
