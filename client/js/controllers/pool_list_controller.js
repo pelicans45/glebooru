@@ -38,7 +38,7 @@ class PoolListController {
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
             canCreate: api.hasPrivilege("pools:create"),
-            canEditPoolCategories: api.hasPrivilege("poolCategories:edit"),
+            canEditPoolCategories: api.hasPrivilege("pool_categories:edit"),
         });
         this._headerView.addEventListener(
             "submit",
