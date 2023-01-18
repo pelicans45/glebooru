@@ -51,6 +51,7 @@ class EndlessPageView {
             );
         }
 
+		/*
         this._timeout = window.setInterval(() => {
             window.requestAnimationFrame(() => {
                 this._probePageLoad(ctx);
@@ -60,6 +61,7 @@ class EndlessPageView {
                 }
             });
         }, 250);
+		*/
 
         views.monitorNodeRemoval(this._pagesHolderNode, () => this._destroy());
     }
