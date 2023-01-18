@@ -88,7 +88,7 @@
             %><input class='mousetrap start' type='submit' value='Delete selected posts'/><%
             %><a href class='mousetrap button append close'>Stop deleting</a><%
         %></form><%
-    %><% } %><%
+    %><% } %>
     <% if (ctx.canViewMetrics) {
         %><div class='metrics-block hidden'></div><%
     }
