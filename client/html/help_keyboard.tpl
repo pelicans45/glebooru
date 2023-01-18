@@ -2,7 +2,7 @@
 
 <table>
     <thead>
-        <tr style="font-weight: bold">
+        <tr>
             <th>Hotkey</th>
             <th>Description</th>
         </tr>
@@ -10,7 +10,7 @@
     <tbody>
         <tr>
             <td><kbd>Q</kbd></td>
-            <td>Focus search field</td>
+            <td>Focus search bar</td>
         </tr>
 
         <tr>
@@ -24,7 +24,7 @@
         </tr>
 
         <tr>
-            <td><kbd>←</kbd> and <kbd>→</kbd> or <td><kbd>A</kbd> and <kbd>D</kbd></td>
+            <td><kbd>←</kbd> and <kbd>→</kbd> or <kbd>A</kbd> and <kbd>D</kbd></td>
             <td>Go to newer/older page or post</td>
         </tr>
 

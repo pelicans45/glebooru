@@ -73,7 +73,7 @@ class Route {
                     parts.push("([^/]+)");
                     this.parameterNames.push(component.substr(1));
 				} else if (component[0] === "#") {
-                    parts.push("(\d+)");
+                    parts.push("(\\d+)");
                     this.parameterNames.push(component.substr(1));
                 } else {
                     // assert [a-z]+

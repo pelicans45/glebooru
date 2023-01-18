@@ -1,7 +1,7 @@
 <div class='file-dropper-holder'>
     <input type='file' id='<%- ctx.id %>'/>
     <label class='file-dropper' for='<%- ctx.id %>' role='button'>
-        Click or drag and drop
+        Click or drag &amp; drop
         <% if (ctx.extraText) { %>
             <br/>
             <small><%= ctx.extraText %></small>

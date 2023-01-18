@@ -10,5 +10,5 @@
 <hr>
 
 <p>
-<a href="https://github.com/parallax4/namebooru">Source code</a>
+<a href="https://github.com/parallax4/glebooru">Source code</a>
 </p>
