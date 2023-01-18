@@ -501,7 +501,7 @@ class Post extends events.EventTarget {
         // 4 characters for the file extension
         let nameLength = this.id.length + 4;
 
-        for (const name of this.tagNames()) {
+        for (const name of this.tagNames) {
             nameLength += name.length;
             if (nameLength > maxNameLength) {
                 break;
