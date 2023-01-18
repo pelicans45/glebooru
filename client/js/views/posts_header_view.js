@@ -213,7 +213,7 @@ class PostsHeaderView extends events.EventTarget {
 
         search.searchInputNodeFocusHelper(this._queryInputNode);
 
-		// Focus search input on hover
+        // Focus search input on hover
         this._queryInputNode.addEventListener("mouseover", (e) => {
             search.focusInputNode(this._queryInputNode);
         });
@@ -272,12 +272,14 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkAddRelationEditor);
         }
 
-        this._bulkEditOpenButtonNode.addEventListener("click", (e) =>
-            this._evtOpenBulkEditBtnClick(e)
-        );
-        this._bulkEditCloseButtonNode.addEventListener("click", (e) =>
-            this._evtCloseBulkEditBtnClick(e)
-        );
+        if (this._bulkEditOpenButtonNode) {
+            this._bulkEditOpenButtonNode.addEventListener("click", (e) =>
+                this._evtOpenBulkEditBtnClick(e)
+            );
+            this._bulkEditCloseButtonNode.addEventListener("click", (e) =>
+                this._evtCloseBulkEditBtnClick(e)
+            );
+        }
 
         if (this._metricsButtonHolderNode) {
             this._metricControl = new MetricHeaderControl(

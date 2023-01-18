@@ -212,12 +212,11 @@ class PostUploadController {
         post.safety = uploadable.safety;
         post.flags = uploadable.flags;
 
-        const hostnameTag = lens.getHostnameFilter();
-        if (hostnameTag) {
+        if (lens.hostnameFilter) {
             uploadable.tags = uploadable.tags.filter(
-                (tag) => tag.toLowerCase() !== hostnameTag
+                (tag) => tag.toLowerCase() !== lens.hostnameFilter
             );
-            uploadable.tags.unshift(hostnameTag);
+            uploadable.tags.unshift(lens.hostnameFilter);
         }
 
         for (let tagName of uploadable.tags) {

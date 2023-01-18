@@ -43,11 +43,12 @@ class TagList extends AbstractList {
         }
 
         if (lens.isUniversal) {
-            return TagList.search("sort:usages", 0, config.maxSuggestedResults, [
-                "names",
-                "category",
-                "usages",
-            ]).then((response) => {
+            return TagList.search(
+                "sort:usages",
+                0,
+                config.maxSuggestedResults,
+                ["names", "category", "usages"]
+            ).then((response) => {
                 allRelevantTags = response;
                 return Promise.resolve(allRelevantTags);
             });
@@ -55,7 +56,7 @@ class TagList extends AbstractList {
 
         return api
             .get(
-                uri.formatApiLink(`tag-siblings/${lens.hostnameFilter}`),
+                uri.formatApiLink("tag-siblings", lens.hostnameFilter),
                 { noProgress: true }
                 /*
                 (response) => {
