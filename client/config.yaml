@@ -75,11 +75,11 @@ can_send_mails: false
 
 enable_safety: false
 
-tag_name_regex: ^[a-z0-9_-]{1,80}$
-tag_category_name_regex: ^[^\s%+#/]{1,80}$
+tag_name_regex: '^[a-z0-9_-]{1,80}$'
+tag_category_name_regex: '^[^\s%+#/]{1,80}$'
 
-pool_name_regex: ^\S{1,80}$
-pool_category_name_regex: ^[^\s%+#/]{1,80}$
+pool_name_regex: '^\S{1,80}$'
+pool_category_name_regex: '^[^\s%+#/]{1,80}$'
 
 # don't make these more restrictive unless you want to annoy people; if you do
 # customize them, make sure to update the instructions in the registration form
@@ -185,7 +185,7 @@ privileges:
     'pool_categories:create':       moderator
     'pool_categories:edit:name':    moderator
     'pool_categories:edit:color':   moderator
-    'pool_categories:list':         regular
+    'pool_categories:list':         anonymous
     'pool_categories:view':         anonymous
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
