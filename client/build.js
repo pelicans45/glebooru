@@ -25,6 +25,8 @@ const sharedKeys = [
     "contact_email",
     "can_send_mails",
     "privileges",
+    "main_domain",
+    "max_suggested_results",
 ];
 
 const serverConf = yaml.load(readTextFile("./config.yaml"));
@@ -173,7 +175,7 @@ function bundleCss(domain, data) {
     const outputDir = `./public/${domain}/css`;
     const appStylesheet = `${outputDir}/app.css`;
     const customDir = `./sites/${domain}/css`;
-	const mainColorLine = `$main-color = ${data.color}\n`
+    const mainColorLine = `$main-color = ${data.color}\n`;
 
     let css = "";
     for (const file of glob.sync("./css/**/*.styl")) {
@@ -432,5 +434,5 @@ for (const [domain, data] of Object.entries(serverConf.sites)) {
         bundleJs(domain);
     }
 
-	break;
+    break;
 }

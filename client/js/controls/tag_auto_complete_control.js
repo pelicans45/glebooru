@@ -74,7 +74,6 @@ class TagAutoCompleteControl extends AutoCompleteControl {
         super(input, options);
 
         this._valueEntered = false;
-        this._suggestionDiv.style.display = "none !important";
 
         // Pre-load default tag selections
         this._setDefaultTagMatches();
@@ -85,7 +84,8 @@ class TagAutoCompleteControl extends AutoCompleteControl {
     }
 
     _setDefaultTagMatches() {
-        TagList.getTopRelevantMatches().then(results, () => {
+        TagList.getTopRelevantMatches().then((results) => {
+            this._suggestionDiv.style.display = "none !important";
             this._results = results;
             this._refreshList();
             this.hide();

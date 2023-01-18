@@ -24,8 +24,6 @@ RUN apk --no-cache add \
     && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
     && chown -R app:app /opt/app /data
 
-ARG CACHE_DATE=2016-01-01
-
 COPY ./ /opt/app/
 RUN rm -rf /opt/app/szurubooru/tests
 

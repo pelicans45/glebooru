@@ -1,4 +1,5 @@
 const config = require("./config.js");
+const vars = config.vars
 
 const hostnameFilters = {};
 
@@ -9,11 +10,14 @@ for (const [domain, data] of Object.entries(config.sites)) {
 const site = config.sites[location.hostname];
 const name = site.name;
 
-const universalHostname = config.mainDomain;
+const universalHostname = vars.mainDomain;
 const isUniversal = name === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
 const excludedTags = new Set(getExcludedTags());
+
+console.log("site", site)
+console.log("isUniversal", isUniversal)
 
 function objectFlip(obj) {
     const ret = {};

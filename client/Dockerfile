@@ -4,8 +4,6 @@ WORKDIR /opt/app
 COPY package.json package-lock.json ./
 RUN npm install
 
-ARG CACHE_DATE=2016-01-01
-
 COPY . ./
 
 RUN node build.js --gzip
