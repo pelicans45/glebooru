@@ -84,17 +84,17 @@ http {
         }
 
         location @unauthorized {
-            return 403 "Unauthorized";
+            return 403 "unauthorized";
             default_type text/plain;
         }
 
         location @notfound {
-            return 404 "Not Found";
+            return 404 "not found";
             default_type text/plain;
         }
 
         location @badproxy {
-            return 502 "Failed to connect to szurubooru REST API";
+            return 502 "API connection failed";
             default_type text/plain;
         }
     }

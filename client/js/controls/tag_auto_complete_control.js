@@ -3,6 +3,7 @@
 const misc = require("../util/misc.js");
 //const views = require("../util/views.js");
 const tags = require("../tags.js");
+const lens = require("../lens.js");
 const TagList = require("../models/tag_list.js");
 const AutoCompleteControl = require("./auto_complete_control.js");
 

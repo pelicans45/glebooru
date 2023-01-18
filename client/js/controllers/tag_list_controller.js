@@ -2,6 +2,7 @@
 
 const router = require("../router.js");
 const api = require("../api.js");
+const lens = require("../lens.js");
 const uri = require("../util/uri.js");
 const TagList = require("../models/tag_list.js");
 const topNavigation = require("../models/top_navigation.js");
