@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
-const events = require('../events.js');
-const misc = require('../util/misc.js');
-const views = require('../util/views.js');
-const MetricList = require('../models/metric_list.js');
+const events = require("../events.js");
+const misc = require("../util/misc.js");
+const views = require("../util/views.js");
+const MetricList = require("../models/metric_list.js");
 
-const mainTemplate = views.getTemplate('metric-header');
-const metricItemTemplate = views.getTemplate('metric-header-item');
+const mainTemplate = views.getTemplate("metric-header");
+const metricItemTemplate = views.getTemplate("metric-header-item");
 
 class MetricHeaderControl extends events.EventTarget {
     constructor(hostNode, ctx) {
@@ -16,12 +16,16 @@ class MetricHeaderControl extends events.EventTarget {
         this._selectedMetrics = new MetricList();
 
         this._headerNode = mainTemplate(ctx);
-        this._metricListNode = this._headerNode.querySelector('ul.metric-list');
+        this._metricListNode =
+            this._headerNode.querySelector("ul.metric-list");
 
-        this._hostNode.insertBefore(
-            this._headerNode, this._hostNode.nextSibling);
+        //this._hostNode.style.display = "none";
+        this._hostNode.parentNode.insertBefore(
+            this._headerNode,
+            this._hostNode.nextSibling
+        );
 
-        MetricList.loadAll().then(response => {
+        MetricList.loadAll().then((response) => {
             this._ctx.allMetrics = response.results;
             this._addSelectedMetrics(ctx.parameters.metrics);
             this._installMetrics(response.results);
@@ -30,7 +34,7 @@ class MetricHeaderControl extends events.EventTarget {
     }
 
     _addSelectedMetrics(metricsStr) {
-        let selectedNames = (metricsStr || '').split(' ');
+        let selectedNames = (metricsStr || "").split(" ");
         for (let metric of [...this._ctx.allMetrics]) {
             if (selectedNames.includes(metric.tag.names[0])) {
                 this._selectedMetrics.add(metric);
@@ -40,40 +44,48 @@ class MetricHeaderControl extends events.EventTarget {
 
     _installMetrics(metrics) {
         for (let metric of metrics) {
-            const node = metricItemTemplate(Object.assign({},
-                {
-                    metric: metric,
-                    selected: this._selectedMetrics.includes(metric),
-                },
-                this._ctx));
-            node.addEventListener('click', e =>
-                this._evtMetricClicked(e, node, metric));
+            const node = metricItemTemplate(
+                Object.assign(
+                    {},
+                    {
+                        metric: metric,
+                        selected: this._selectedMetrics.includes(metric),
+                    },
+                    this._ctx
+                )
+            );
+            node.addEventListener("click", (e) =>
+                this._evtMetricClicked(e, node, metric)
+            );
             this._metricListNode.appendChild(node);
         }
     }
 
     _evtMetricClicked(e, node, metric) {
         e.preventDefault();
-        node.classList.toggle('selected');
-        node.querySelector('a').classList.toggle('selected');
+        node.classList.toggle("selected");
+        node.querySelector("a").classList.toggle("selected");
         if (this._selectedMetrics.includes(metric)) {
             this._selectedMetrics.remove(metric);
         } else {
             this._selectedMetrics.add(metric);
         }
-        this._ctx.parameters = Object.assign({},
-            this._ctx.parameters, {
+        this._ctx.parameters = Object.assign({}, this._ctx.parameters, {
             metrics: this._selectedMetrics
-                .map(m => m.tag.names[0]).join(' '),
+                .map((m) => m.tag.names[0])
+                .join(" "),
         });
         this._refreshStartSortingButton();
-        this.dispatchEvent(new CustomEvent('submit'));
+        this.dispatchEvent(new CustomEvent("submit"));
     }
 
     _refreshStartSortingButton() {
-        let btn = this._hostNode.querySelector('a.sorting');
+        let btn = this._hostNode.querySelector("a.sorting");
         btn.hidden = !this._selectedMetrics.length;
-        btn.setAttribute('href', views.getMetricSorterUrl('random', this._ctx.parameters));
+        btn.setAttribute(
+            "href",
+            views.getMetricSorterUrl("random", this._ctx.parameters)
+        );
     }
 
     refreshQuery(query) {

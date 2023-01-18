@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-const api = require('../api.js');
-const uri = require('../util/uri.js');
-const events = require('../events.js');
+const api = require("../api.js");
+const uri = require("../util/uri.js");
+const events = require("../events.js");
 //const misc = require('../util/misc.js');
-const Tag = require('./tag.js');
+const Tag = require("./tag.js");
 
 class Metric extends events.EventTarget {
     constructor() {
@@ -14,13 +14,25 @@ class Metric extends events.EventTarget {
         this._updateFromResponse({});
     }
 
-    get version()  { return this._version; }
-    get min()      { return this._min; }
-    get max()      { return this._max; }
-    get tag()      { return this._tag; }
+    get version() {
+        return this._version;
+    }
+    get min() {
+        return this._min;
+    }
+    get max() {
+        return this._max;
+    }
+    get tag() {
+        return this._tag;
+    }
 
-    set min(value) { this._min = value; }
-    set max(value) { this._max = value; }
+    set min(value) {
+        this._min = value;
+    }
+    set max(value) {
+        this._max = value;
+    }
 
     static fromResponse(response) {
         const ret = new Metric();
@@ -30,14 +42,13 @@ class Metric extends events.EventTarget {
 
     static get(name) {
         //TODO get metric. Or only via tag?
-        return api.get(uri.formatApiLink('metric', name))
-            .then(response => {
-                return Promise.resolve(Metric.fromResponse(response));
-            });
+        return api.get(uri.formatApiLink("metric", name)).then((response) => {
+            return Promise.resolve(Metric.fromResponse(response));
+        });
     }
 
     save() {
-        const detail = {version: this._version};
+        const detail = { version: this._version };
 
         if (this._min !== this._orig._min) {
             detail.min = this._min;
@@ -46,38 +57,44 @@ class Metric extends events.EventTarget {
             detail.max = this._max;
         }
 
-        return api.post(uri.formatApiLink('metrics'), detail)
-            .then(response => {
+        return api
+            .post(uri.formatApiLink("metrics"), detail)
+            .then((response) => {
                 this._updateFromResponse(response);
-                this.dispatchEvent(new CustomEvent('change', {
-                    detail: {
-                        metric: this,
-                    },
-                }));
+                this.dispatchEvent(
+                    new CustomEvent("change", {
+                        detail: {
+                            metric: this,
+                        },
+                    })
+                );
                 return Promise.resolve();
             });
     }
 
     delete() {
-        return api.delete(
-            uri.formatApiLink('metric', this._orig),
-            {version: this._version})
-            .then(response => {
-                this.dispatchEvent(new CustomEvent('delete', {
-                    detail: {
-                        metric: this,
-                    },
-                }));
+        return api
+            .delete(uri.formatApiLink("metric", this._orig), {
+                version: this._version,
+            })
+            .then((response) => {
+                this.dispatchEvent(
+                    new CustomEvent("delete", {
+                        detail: {
+                            metric: this,
+                        },
+                    })
+                );
                 return Promise.resolve();
             });
     }
 
     _updateFromResponse(response) {
         const map = {
-            _version:      response.version,
-            _min:          response.min,
-            _max:          response.max,
-            _tag:          Tag.fromResponse(response.tag || {}),
+            _version: response.version,
+            _min: response.min,
+            _max: response.max,
+            _tag: Tag.fromResponse(response.tag || {}),
         };
 
         Object.assign(this, map);

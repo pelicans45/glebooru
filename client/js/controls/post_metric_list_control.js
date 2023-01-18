@@ -1,10 +1,14 @@
-'use strict';
+"use strict";
 
-const events = require('../events.js');
-const views = require('../util/views.js');
+const events = require("../events.js");
+const views = require("../util/views.js");
 
-const postMetricNodeTemplate = views.getTemplate('compact-post-metric-list-item');
-const postMetricRangeNodeTemplate = views.getTemplate('compact-post-metric-range-list-item');
+const postMetricNodeTemplate = views.getTemplate(
+    "compact-post-metric-list-item"
+);
+const postMetricRangeNodeTemplate = views.getTemplate(
+    "compact-post-metric-range-list-item"
+);
 
 class PostMetricListControl extends events.EventTarget {
     constructor(listNode, post) {
@@ -16,7 +20,7 @@ class PostMetricListControl extends events.EventTarget {
     }
 
     _refreshContent() {
-        this._listNode.innerHTML = '';
+        this._listNode.innerHTML = "";
         for (let pm of this._post.metrics) {
             const postMetricNode = this._createPostMetricNode(pm);
             this._listNode.appendChild(postMetricNode);

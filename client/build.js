@@ -418,11 +418,11 @@ for (const [domain, data] of Object.entries(serverConf.sites)) {
     console.log(`Building for ${domain}`);
     makeOutputDirs(domain);
 
-    if (!process.argv.includes("--no-binary-assets")) {
-        bundleBinaryAssets(domain);
-    }
     if (!process.argv.includes("--no-web-app-files")) {
         bundleWebAppFiles(domain, data);
+    }
+    if (!process.argv.includes("--no-binary-assets")) {
+        bundleBinaryAssets(domain);
     }
     if (!process.argv.includes("--no-html")) {
         bundleHtml(domain, data);

@@ -91,14 +91,14 @@ class UserController {
                     ),
                     canEditAnything: api.hasPrivilege(`users:edit:${infix}`),
                     canListTokens: api.hasPrivilege(
-                        `userTokens:list:${infix}`
+                        `user_tokens:list:${infix}`
                     ),
                     canCreateToken: api.hasPrivilege(
-                        `userTokens:create:${infix}`
+                        `user_tokens:create:${infix}`
                     ),
-                    canEditToken: api.hasPrivilege(`userTokens:edit:${infix}`),
+                    canEditToken: api.hasPrivilege(`user_tokens:edit:${infix}`),
                     canDeleteToken: api.hasPrivilege(
-                        `userTokens:delete:${infix}`
+                        `user_tokens:delete:${infix}`
                     ),
                     canDelete: api.hasPrivilege(`users:delete:${infix}`),
                     ranks: ranks,
