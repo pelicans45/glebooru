@@ -77,7 +77,6 @@ class TagAutoCompleteControl extends AutoCompleteControl {
 
         // Pre-load default tag selections
         this._setDefaultTagMatches();
-        this.hide();
     }
 
     _evtFocus(e) {
@@ -85,8 +84,11 @@ class TagAutoCompleteControl extends AutoCompleteControl {
     }
 
     _setDefaultTagMatches() {
-        this._results = TagList.getTopRelevantMatches();
-        this._refreshList();
+        TagList.getTopRelevantMatches().then(results, () => {
+            this._results = results;
+            this._refreshList();
+            this.hide();
+        });
     }
 
     _showOrHide() {
