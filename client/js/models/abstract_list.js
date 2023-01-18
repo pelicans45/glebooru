@@ -95,6 +95,11 @@ class AbstractList extends events.EventTarget {
         return this._list.map(...args);
     }
 
+    slice(...args) {
+        this._list = this._list.slice(...args);
+        return this;
+    }
+
     filter(...args) {
         return this._list.filter(...args);
     }
