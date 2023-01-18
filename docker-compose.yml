@@ -23,6 +23,7 @@ services:
       #POSTGRES_PORT: 5432
       #LOG_SQL: 0 (1 for verbose SQL logs)
       THREADS:
+      SECRET:
     volumes:
       - "${MOUNT_DATA}:/data"
       - "./client/config.yaml:/opt/app/config.yaml"

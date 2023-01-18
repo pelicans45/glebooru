@@ -431,6 +431,4 @@ for (const [domain, data] of Object.entries(serverConf.sites)) {
     if (!process.argv.includes("--no-js")) {
         bundleJs(domain);
     }
-
-    break;
 }
