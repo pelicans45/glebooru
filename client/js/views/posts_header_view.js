@@ -113,7 +113,7 @@ class BulkTagEditor extends BulkEditor {
     }
 
     focus() {
-        this._inputNode.focus();
+        search.focusInputNode(this._inputNode);
     }
 
     blur() {
@@ -205,14 +205,20 @@ class PostsHeaderView extends events.EventTarget {
                         misc.escapeSearchTerm(tag.names[0]),
                         true
                     );
-					// TODO: test
+                    // TODO: test
                     this._navigate();
                 },
             }
         );
 
-        keyboard.bind("p", () => this._focusFirstPostNode());
         search.searchInputNodeFocusHelper(this._queryInputNode);
+
+		// Focus search input on hover
+        this._queryInputNode.addEventListener("mouseover", (e) => {
+            search.focusInputNode(this._queryInputNode);
+        });
+
+        keyboard.bind("p", () => this._focusFirstPostNode());
 
         for (let safetyButtonNode of this._safetyButtonNodes) {
             safetyButtonNode.addEventListener("click", (e) =>
@@ -319,7 +325,7 @@ class PostsHeaderView extends events.EventTarget {
 
     focusSearchInputIfSet() {
         if (this._queryInputNode.value) {
-            this._queryInputNode.focus();
+            search.focusInputNode(this._queryInputNode);
         }
     }
 
@@ -332,7 +338,7 @@ class PostsHeaderView extends events.EventTarget {
     }
 
     get _queryInputNode() {
-        return this._hostNode.querySelector("form [name=search-text]");
+        return this._hostNode.querySelector("form[name=search-text]");
     }
 
     get _randomizeButtonNode() {

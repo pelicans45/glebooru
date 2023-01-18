@@ -4,6 +4,8 @@ const misc = require("./util/misc.js");
 const TagCategoryList = require("./models/tag_category_list.js");
 const Tag = require("./models/tag.js");
 
+const minLengthForPartialSearch = 3;
+
 let _stylesheet = null;
 
 function refreshCategoryColorMap() {
@@ -33,9 +35,9 @@ function parseTagAndCategory(text) {
         // "cat:my:tag" should parse to category "cat" and tag "my:tag"
         let category = nameAndCat.shift();
         let name = nameAndCat.join(":");
-        return {name: name, category: category};
+        return { name: name, category: category };
     } else {
-        return {name: text, category: null};
+        return { name: text, category: null };
     }
 }
 
@@ -51,18 +53,50 @@ function _createTagByCategoryAndName(category, name) {
         return Promise.reject(new Error("Empty tag name"));
     }
     // if tag with this name already exists, existing category will be used
-    return Tag.get(name).then((tag) => {
-        return Promise.resolve(tag);
-    }, () => {
-        const tag = new Tag();
-        tag.names = [name];
-        tag.category = category;
-        return tag.save().then(() => Promise.resolve(tag));
-    });
+    return Tag.get(name).then(
+        (tag) => {
+            return Promise.resolve(tag);
+        },
+        () => {
+            const tag = new Tag();
+            tag.names = [name];
+            tag.category = category;
+            return tag.save().then(() => Promise.resolve(tag));
+        }
+    );
+}
+
+function tagListToMatches(tags, options) {
+    return [...tags]
+        .filter((tag) => {
+            return !options.isTaggedWith(tag.names[0]);
+        })
+        .sort((tag1, tag2) => {
+            return tag2.usages - tag1.usages;
+        })
+        .map((tag) => {
+            let cssName = misc.makeCssName(tag.category, "tag");
+            /*
+            if (options.isTaggedWith(tag.names[0])) {
+                cssName += " disabled";
+            }
+			*/
+            const caption =
+                '<span class="' +
+                cssName +
+                '">' +
+                misc.escapeHtml(tag.names[0] + " (" + tag.postCount + ")") +
+                "</span>";
+            return {
+                caption: caption,
+                value: tag,
+            };
+        });
 }
 
 module.exports = {
     refreshCategoryColorMap: refreshCategoryColorMap,
-    parseTagAndCategory:     parseTagAndCategory,
-    resolveTagAndCategory:   resolveTagAndCategory,
+    parseTagAndCategory: parseTagAndCategory,
+    resolveTagAndCategory: resolveTagAndCategory,
+    tagListToMatches: tagListToMatches,
 };

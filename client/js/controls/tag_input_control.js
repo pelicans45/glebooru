@@ -130,6 +130,7 @@ class TagInputControl extends events.EventTarget {
         this._tagInputNode.addEventListener("paste", (e) =>
             this._evtInputPaste(e)
         );
+
         this._editAreaNode
             .querySelector("a.opacity")
             .addEventListener("click", (e) =>

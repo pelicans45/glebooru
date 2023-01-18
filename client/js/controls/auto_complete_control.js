@@ -31,7 +31,7 @@ class AutoCompleteControl {
             this._options,
             {
                 verticalShift: 2,
-                maxResults: 15,
+                maxResults: 10,
                 getTextToFind: () => {
                     const value = sourceInputNode.value;
                     const start = _getSelectionStart(sourceInputNode);
@@ -52,7 +52,7 @@ class AutoCompleteControl {
     }
 
     hide() {
-        window.clearTimeout(this._showTimeout);
+        //window.clearTimeout(this._showTimeout);
         this._suggestionDiv.style.display = "none";
         this._isVisible = false;
     }
@@ -99,7 +99,8 @@ class AutoCompleteControl {
 
     _showOrHide() {
         const textToFind = this._options.getTextToFind();
-        if (!textToFind || !textToFind.length) {
+        //if (!textToFind || !textToFind.length) {
+        if (!textToFind) {
             this.hide();
         } else {
             this._updateResults(textToFind);
@@ -140,7 +141,7 @@ class AutoCompleteControl {
     }
 
     _uninstall() {
-        window.clearTimeout(this._showTimeout);
+        //window.clearTimeout(this._showTimeout);
         document.body.removeChild(this._suggestionDiv);
     }
 
@@ -149,13 +150,17 @@ class AutoCompleteControl {
         const shift = e.shiftKey;
         let func = null;
         if (this._isVisible) {
-            if (key === KEY_ESCAPE) {
-                func = this.hide;
-            } else if (key === KEY_TAB && shift) {
+            if (key === KEY_TAB) {
                 func = () => {
-                    this._selectPrevious();
+                    this._confirm(this._results[0].value);
+                    this.hide();
                 };
-            } else if (key === KEY_TAB && !shift) {
+            } else if (key === KEY_RETURN && this._activeResult >= 0) {
+                func = () => {
+                    this._confirm(this._getActiveSuggestion());
+                    this.hide();
+                };
+            } else if (key === KEY_DOWN) {
                 func = () => {
                     this._selectNext();
                 };
@@ -163,13 +168,14 @@ class AutoCompleteControl {
                 func = () => {
                     this._selectPrevious();
                 };
-            } else if (key === KEY_DOWN) {
+                /*
+            } else if (key === KEY_TAB && !shift) {
                 func = () => {
                     this._selectNext();
                 };
-            } else if (key === KEY_RETURN && this._activeResult >= 0) {
+			*/
+            } else if (key === KEY_ESCAPE) {
                 func = () => {
-                    this._confirm(this._getActiveSuggestion());
                     this.hide();
                 };
             } else if (key === KEY_DELETE && this._activeResult >= 0) {
@@ -186,18 +192,24 @@ class AutoCompleteControl {
             e.stopImmediatePropagation();
             func();
         } else {
+            this._showOrHide();
+            /*
             window.clearTimeout(this._showTimeout);
             this._showTimeout = window.setTimeout(() => {
                 this._showOrHide();
-            }, 250);
+            }, 100);
+			*/
         }
     }
 
     _evtBlur(e) {
+        /*
         window.clearTimeout(this._showTimeout);
         window.setTimeout(() => {
             this.hide();
         }, 50);
+		*/
+        this.hide();
     }
 
     _evtFocus(e) {
@@ -242,27 +254,36 @@ class AutoCompleteControl {
             const newResultsHash = JSON.stringify(this._results);
             if (oldResultsHash !== newResultsHash) {
                 this._activeResult = -1;
+                this._refreshList();
             }
-            this._refreshList();
+            // TODO: keep refresh here?
+            //this._refreshList();
         });
     }
 
     _refreshList() {
+        this.hide();
         if (this._results.length === 0) {
-            this.hide();
+            //this.hide();
             return;
         }
 
+        /*
         while (this._suggestionList.firstChild) {
             this._suggestionList.removeChild(this._suggestionList.firstChild);
         }
+		*/
+        // TODO: test
+
+        this._suggestionList.innerHTML = "";
+
         for (let [resultIndex, resultItem] of this._results.entries()) {
             let resultIndexWorkaround = resultIndex;
             const listItem = document.createElement("li");
             const link = document.createElement("a");
             link.innerHTML = resultItem.caption;
-            link.setAttribute("href", "");
-            link.setAttribute("data-key", resultItem.value);
+            //link.setAttribute("href", "");
+            //link.setAttribute("data-key", resultItem.value);
             link.addEventListener("mouseenter", (e) => {
                 e.preventDefault();
                 this._activeResult = resultIndexWorkaround;

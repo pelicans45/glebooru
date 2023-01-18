@@ -152,6 +152,14 @@ function confirmPageExit() {
     }
 }
 
+function downloadURL(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+}
+
+
 function makeCssName(text, suffix) {
     return suffix + "-" + text.replace(/[^a-z0-9]/g, "_");
 }
@@ -231,4 +239,5 @@ module.exports = {
     escapeSearchTerm: escapeSearchTerm,
     dataURItoBlob: dataURItoBlob,
     getPrettyName: getPrettyName,
+	downloadURL: downloadURL,
 };

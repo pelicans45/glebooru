@@ -4,6 +4,7 @@ const api = require("../api.js");
 const vars = require("../vars.js");
 const events = require("../events.js");
 const misc = require("../util/misc.js");
+const search = require("../util/search.js");
 const keyboard = require("../util/keyboard.js");
 const views = require("../util/views.js");
 const Note = require("../models/note.js");
@@ -283,7 +284,7 @@ class PostEditSidebarControl extends events.EventTarget {
             );
             keyboard.bind("t", (e) => {
                 e.preventDefault();
-                realTagInput.focus();
+                search.focusInputNode(realtagInput);
             });
         }
     }

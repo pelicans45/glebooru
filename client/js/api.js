@@ -38,7 +38,7 @@ class Api extends events.EventTarget {
         ]);
     }
 
-    get(url, options) {
+    get(url, options, transform) {
         if (url in this.cache) {
             return new Promise((resolve, reject) => {
                 resolve(this.cache[url]);
@@ -46,6 +46,9 @@ class Api extends events.EventTarget {
         }
         return this._wrappedRequest(url, request.get, {}, {}, options).then(
             (response) => {
+                if (transform) {
+                    transform(response);
+                }
                 this.cache[url] = response;
                 return Promise.resolve(response);
             }

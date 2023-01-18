@@ -4,15 +4,9 @@ const events = require("../events.js");
 const lens = require("../lens.js");
 const tags = require("../tags.js");
 const views = require("../util/views.js");
+const misc = require("../util/misc.js");
 
 const template = views.getTemplate("posts-page");
-
-function downloadURL(url, filename) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-}
 
 class PostsPageView extends events.EventTarget {
     constructor(ctx) {
@@ -39,7 +33,7 @@ class PostsPageView extends events.EventTarget {
                     return;
                 }
 
-                downloadURL(post.contentUrl, post.getDownloadFilename());
+                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
                 e.preventDefault();
             });
 

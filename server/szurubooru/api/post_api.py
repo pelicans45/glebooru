@@ -58,8 +58,8 @@ def get_posts(
     )
 
 
-@rest.routes.get("/random-post/?")
-def get_random_post(
+@rest.routes.get("/random-image/?")
+def get_random_image(
     ctx: rest.Context, _params: Dict[str, str] = {}
 ) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:list")
@@ -67,7 +67,7 @@ def get_random_post(
     query_text = ctx.get_param_as_string("query", default="").strip()
     if not query_text:
         return ""
-    query_text = "sort:random " + query_text
+    query_text = "sort:random type:image " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return ""

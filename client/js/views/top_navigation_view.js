@@ -1,12 +1,16 @@
 "use strict";
 
 const views = require("../util/views.js");
+const settings = require("../models/settings.js");
 
 const template = views.getTemplate("top-navigation");
 
 class TopNavigationView {
     constructor() {
         this._hostNode = document.getElementById("top-navigation-holder");
+        if (settings.get().navbarFollow) {
+            this._hostNode.classList.add("follow-scroll");
+        }
     }
 
     get _mobileNavigationToggleNode() {

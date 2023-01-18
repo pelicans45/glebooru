@@ -22,6 +22,7 @@ const defaultSettings = {
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
     postFlow: false,
+	navbarFollow: false,
 };
 
 class Settings extends events.EventTarget {

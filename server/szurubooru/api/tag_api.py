@@ -43,6 +43,24 @@ def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     )
 
 
+@rest.routes.get("/tags/all")
+def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, "tags:list")
+    return _search_executor.execute_and_serialize(
+        ctx, lambda tag: _serialize(ctx, tag)
+    )
+
+# relevant to:
+# - a given tag
+# - a given list of tags
+# - a given post?
+@rest.routes.get("/tags/relevant")
+def get_relevant_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, "tags:list")
+    return _search_executor.execute_and_serialize(
+        ctx, lambda tag: _serialize(ctx, tag)
+    )
+
 @rest.routes.post("/tags/?")
 def create_tag(
     ctx: rest.Context, _params: Dict[str, str] = {}

@@ -82,6 +82,15 @@
                 <p class='hint' style="display: none">Rather than using a paged navigation, smoothly scrolls through the content.</p>
             </li>
 
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Navbar follows scrolling',
+                    name: 'navbar-follow',
+                    checked: ctx.browsingSettings.navbarFollow,
+                }) %>
+                <p class='hint' style="display: none"></p>
+            </li>
+
             <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Use post flow',

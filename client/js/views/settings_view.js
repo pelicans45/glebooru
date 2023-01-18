@@ -47,11 +47,12 @@ class SettingsView extends events.EventTarget {
                         .checked,
                     darkTheme: this._find("dark-theme").checked,
                     postFlow: this._find("post-flow").checked,
-                    uploadSafety: this._safetyButtonNodes.length ?
-                        Array.from(this._safetyButtonNodes)
-                            .filter(node => node.checked)[0]
-                            .value.toLowerCase() :
-                        undefined,
+                    navbarFollow: this._find("navbar-follow").checked,
+                    uploadSafety: this._safetyButtonNodes.length
+                        ? Array.from(this._safetyButtonNodes)
+                              .filter((node) => node.checked)[0]
+                              .value.toLowerCase()
+                        : undefined,
                 },
             })
         );

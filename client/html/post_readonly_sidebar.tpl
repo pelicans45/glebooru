@@ -104,14 +104,14 @@
                 --><% for (let tag of ctx.tags) { %><!--
                     --><li><!--
                         --><% if (ctx.canViewTags) { %><!--
-                        --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                        --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='tag-link-info <%= ctx.makeCssName(tag.category, 'tag') %>'><!--
                             --><i class='fa fa-tag'></i><!--
                         --><% } %><!--
                         --><% if (ctx.canViewTags) { %><!--
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
                         --><% if (ctx.canListPosts) { %><!--

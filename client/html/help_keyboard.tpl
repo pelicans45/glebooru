@@ -1,8 +1,8 @@
-<p>You can use keyboard shortcuts to navigate around the site.</p>
+<p style="display: none">You can use keyboard shortcuts to navigate around the site.</p>
 
 <table>
     <thead>
-        <tr>
+        <tr style="font-weight: bold">
             <th>Hotkey</th>
             <th>Description</th>
         </tr>
@@ -14,23 +14,18 @@
         </tr>
 
         <tr>
-            <td><kbd>P</kbd></td>
-            <td>Focus first post in post list</td>
-        </tr>
-
-        <tr>
-            <td><kbd>A</kbd> and <kbd>D</kbd>, <kbd>←</kbd> and <kbd>→</kbd></td>
-            <td>Go to newer/older page or post</td>
-        </tr>
-
-        <tr>
             <td><kbd>R</kbd></td>
             <td>Go to random post</td>
         </tr>
 
         <tr>
-            <td><kbd>F</kbd></td>
-            <td>Cycle post fit mode</td>
+            <td><kbd>P</kbd></td>
+            <td>Focus first post in post list</td>
+        </tr>
+
+        <tr>
+            <td><kbd>←</kbd> and <kbd>→</kbd> or <td><kbd>A</kbd> and <kbd>D</kbd></td>
+            <td>Go to newer/older page or post</td>
         </tr>
 
         <tr>

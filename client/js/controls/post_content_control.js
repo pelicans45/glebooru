@@ -2,6 +2,7 @@
 
 const settings = require("../models/settings.js");
 const views = require("../util/views.js");
+const misc = require("../util/misc.js");
 const optimizedResize = require("../util/optimized_resize.js");
 
 class PostContentControl {
@@ -29,6 +30,17 @@ class PostContentControl {
         this._post.addEventListener("changeContent", (e) =>
             this._evtPostContentChange(e)
         );
+
+        hostNode
+            .querySelector("post-content img.resize-listener")
+            .addEventListener("click", (e) => {
+                if (!e.shiftKey) {
+                    return;
+                }
+
+                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+                e.preventDefault();
+            });
 
         // Always disable overlay, because I'm not going to use notes
         this.disableOverlay();
@@ -97,7 +109,8 @@ class PostContentControl {
 
     _resize(width, height) {
         this._resizePostContent(width, height);
-        const resizeListenerNodes = this._postContentNode.querySelectorAll(".resize-listener");
+        const resizeListenerNodes =
+            this._postContentNode.querySelectorAll(".resize-listener");
         for (let node of resizeListenerNodes) {
             node.style.width = width + "px";
             node.style.height = height + "px";

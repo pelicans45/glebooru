@@ -74,6 +74,10 @@ class TagListController {
                 return uri.formatClientLink("tags", parameters);
             },
             requestPage: (offset, limit) => {
+                if (!(lens.isUniversal || this._ctx.parameters.query)) {
+                    return TagList.getRelevant("", offset, limit);
+                }
+
                 return TagList.search(
                     this._ctx.parameters.query,
                     offset,

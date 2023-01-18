@@ -1,82 +1,124 @@
 "use strict";
 
 const misc = require("../util/misc.js");
-const views = require("../util/views.js");
+//const views = require("../util/views.js");
+const tags = require("../tags.js");
 const TagList = require("../models/tag_list.js");
 const AutoCompleteControl = require("./auto_complete_control.js");
 
-function _tagListToMatches(tags, options) {
-    return [...tags]
-        .sort((tag1, tag2) => {
-            return tag2.usages - tag1.usages;
-        })
-        .map((tag) => {
-            let cssName = misc.makeCssName(tag.category, "tag");
-            if (options.isTaggedWith(tag.names[0])) {
-                cssName += " disabled";
-            }
-            const caption =
-                '<span class="' +
-                cssName +
-                '">' +
-                misc.escapeHtml(tag.names[0] + " (" + tag.postCount + ")") +
-                "</span>";
-            return {
-                caption: caption,
-                value: tag,
-            };
-        });
-}
-
 class TagAutoCompleteControl extends AutoCompleteControl {
     constructor(input, options) {
-        const minLengthForPartialSearch = 3;
-
         // TODO: change?
         options = Object.assign(
             {
-                isTaggedWith: (tag) => false,
+                isTaggedWith: (tag) => input.split(" ").includes(tag),
             },
             options
         );
 
-        options.getMatches = (text) => {
-            const term = misc.escapeSearchTerm(text);
-            const query =
-                (text.length < minLengthForPartialSearch
-                    ? term + "*"
-                    : "*" + term + "*") + " sort:usages";
+        if (lens.isUniversal) {
+            options.getMatches = (text) => {
+                if (text.includes(":")) {
+                    return Promise.resolve([]);
+                }
+                const term = misc.escapeSearchTerm(text);
+                const query =
+                    (text.length < tags.minLengthForPartialSearch
+                        ? term + "*"
+                        : "*" + term + "*") + " sort:usages";
 
-            return new Promise((resolve, reject) => {
-                TagList.search(query, 0, this._options.maxResults, [
-                    "names",
-                    "category",
-                    "usages",
-                ]).then(
-                    (response) =>
-                        resolve(
-                            _tagListToMatches(response.results, this._options)
-                        ),
-                    reject
-                );
-            });
-        };
+                return new Promise((resolve, reject) => {
+                    TagList.search(query, 0, this._options.maxResults, [
+                        "names",
+                        "category",
+                        "usages",
+                    ]).then(
+                        (response) =>
+                            resolve(
+                                tags.tagListToMatches(
+                                    response.results,
+                                    this._options
+                                )
+                            ),
+                        reject
+                    );
+                });
+            };
+        } else {
+            options.getMatches = (text) => {
+                if (text.includes(":")) {
+                    return Promise.resolve([]);
+                }
+                const term = misc.escapeSearchTerm(text);
+
+                return new Promise((resolve, reject) => {
+                    TagList.getRelevant(
+                        term,
+                        0,
+                        this._options.maxResults
+                    ).then(
+                        (response) =>
+                            resolve(
+                                tags.tagListToMatches(
+                                    response.results,
+                                    this._options
+                                )
+                            ),
+                        reject
+                    );
+                });
+            };
+        }
 
         super(input, options);
+
+        this._valueEntered = false;
+        this._suggestionDiv.style.display = "none !important";
+
+        // Pre-load default tag selections
+        this._setDefaultTagMatches();
+        this.hide();
     }
 
     _evtFocus(e) {
         return;
     }
 
+    _setDefaultTagMatches() {
+        this._results = TagList.getTopRelevantMatches();
+        this._refreshList();
+    }
+
     _showOrHide() {
+        // Immediately show initial suggestions
+        if (!this._sourceInputNode.value) {
+            if (!this._valueEntered) {
+                this._show();
+                return;
+            }
+
+            this._activeResult = -1;
+            this._setDefaultTagMatches();
+            this._valueEntered = false;
+            return;
+        }
+
+        this._valueEntered = true;
+
         const textToFind = this._options.getTextToFind();
-        if (!textToFind || !textToFind.length) {
+        if (!textToFind) {
             this.hide();
         } else {
             this._updateResults(textToFind);
         }
     }
 }
+
+/*
+if (!lens.isUniversal) {
+    TagAutoCompleteControl.prototype._showOrHide =
+        TagAutoCompleteControl.prototype._lensShowOrHide;
+}
+*/
 
 module.exports = TagAutoCompleteControl;

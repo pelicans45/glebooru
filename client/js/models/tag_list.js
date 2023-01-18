@@ -1,10 +1,14 @@
 "use strict";
 
 const api = require("../api.js");
+const tags = require("../tags.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");
 const AbstractList = require("./abstract_list.js");
 const Tag = require("./tag.js");
+
+let allRelevantTags = null;
+let topRelevantMatches = null;
 
 class TagList extends AbstractList {
     static search(text, offset, limit, fields) {
@@ -15,17 +19,100 @@ class TagList extends AbstractList {
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),
-                })
+                }),
+                { noProgress: true },
+                (response) => {
+                    response.results = lens.hostnameFilterTags(
+                        response.results
+                    );
+                }
             )
             .then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
-                        results: TagList.fromResponse(
-                            lens.hostnameFilterTags(response.results)
-                        ),
+                        results: TagList.fromResponse(response.results),
                     })
                 );
             });
+    }
+
+    static getAllRelevant() {
+        if (allRelevantTags) {
+            return Promise.resolve(allRelevantTags);
+        }
+
+        if (isUniversal) {
+            return TagList.search("sort:usages", 0, 10, [
+                "names",
+                "category",
+                "usages",
+            ]).then((response) => {
+                allRelevantTags = response;
+                return Promise.resolve(allRelevantTags);
+            });
+        }
+
+        return api
+            .get(
+                uri.formatApiLink(`tag-siblings/${hostnameFilter}`),
+                { noProgress: true }
+                /*
+                (response) => {
+                    response.results = lens.hostnameFilterTags(
+                        response.results
+                    );
+
+                }
+				*/
+            )
+            .then((response) => {
+                for (const result of response.results) {
+                    result.tag.usages = result.occurrences;
+                }
+
+                allRelevantTags = Object.assign({}, response, {
+                    results: TagList.fromResponse(response.results),
+                });
+
+                return Promise.resolve(allRelevantTags);
+            });
+    }
+
+    static getRelevant(query, offset, limit) {
+        return TagList.getAllRelevant().then((_tags) => {
+            let matchFunc;
+            if (query.length < tags.minLengthForPartialSearch) {
+                matchFunc = (name) => {
+                    return name.startsWith(query);
+                };
+            } else {
+                matchFunc = (name) => {
+                    return name.includes(query);
+                };
+            }
+
+            return Promise.resolve(
+                _tags
+                    .filter((tag) => matchFunc(tag.names[0]))
+                    .slice(offset, offset + limit)
+            );
+        });
+    }
+
+    static getTopRelevantMatches() {
+        if (topRelevantMatches) {
+            return Promise.resolve(topRelevantMatches);
+        }
+
+        return TagList.getAllRelevant().then((response) => {
+            topRelevantMatches = tags.tagListToMatches(
+                response.results.slice(0, 10),
+                {
+                    isTaggedWith: () => false,
+                }
+            );
+            return Promise.resolve(topRelevantMatches);
+        });
     }
 
     findByName(testName) {
@@ -83,6 +170,10 @@ class TagList extends AbstractList {
     filterMetrics() {
         return this.filter((tag) => tag.metric);
     }
+}
+
+if (lens.isUniversal) {
+    TagList.search = TagList.apiSearch;
 }
 
 TagList._itemClass = Tag;
