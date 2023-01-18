@@ -55,7 +55,7 @@ class TagList extends AbstractList {
 
         return api
             .get(
-                uri.formatApiLink(`tag-siblings/${hostnameFilter}`),
+                uri.formatApiLink(`tag-siblings/${lens.hostnameFilter}`),
                 { noProgress: true }
                 /*
                 (response) => {
