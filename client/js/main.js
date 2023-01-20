@@ -67,8 +67,8 @@ let controllers = [
     require("./controllers/user_registration_controller.js"),
     require("./controllers/metric_sorter_contoller.js"),
 
-    // 404 controller needs to be registered last
-    require("./controllers/not_found_controller.js"),
+    // Wildcard controller needs to be registered last
+    require("./controllers/wildcard_controller.js"),
 ];
 
 Promise.resolve()

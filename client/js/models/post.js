@@ -517,7 +517,7 @@ class Post extends events.EventTarget {
 
     mutateContentUrl() {
         this._contentUrl =
-            this._orig._contentUrl + "?" + Math.round(Math.random() * 1000);
+            this._orig._contentUrl + "?" + Math.round(Math.random() * 998) + 1;
     }
 
     _updateFromResponse(response) {
@@ -534,7 +534,7 @@ class Post extends events.EventTarget {
             _contentUrl: response.contentUrl,
             _fullContentUrl: new URL(
                 response.contentUrl,
-                document.getElementsByTagName("base")[0].href
+                "/"
             ).href,
             _thumbnailUrl: response.thumbnailUrl,
             _source: response.source,

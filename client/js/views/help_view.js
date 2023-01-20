@@ -29,7 +29,9 @@ class HelpView {
         const sourceNode = template();
         const ctx = {
             name: lens.name,
-			description: lens.site.description,
+            isUniversal: lens.isUniversal,
+            universalHostname: lens.universalHostname,
+            description: lens.site.description,
         };
 
         section = section || "tips";

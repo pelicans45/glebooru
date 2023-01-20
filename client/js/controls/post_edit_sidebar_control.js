@@ -132,7 +132,7 @@ class PostEditSidebarControl extends events.EventTarget {
                 {
                     allowUrls: true,
                     lock: true,
-                    urlPlaceholder: "...or paste an URL here.",
+                    urlPlaceholder: "or paste URL here",
                 }
             );
             this._contentFileDropper.addEventListener("fileadd", (e) => {

@@ -1,11 +1,7 @@
 "use strict";
 
-const api = require("../api.js");
-const pools = require("../pools.js");
 const misc = require("../util/misc.js");
 const uri = require("../util/uri.js");
-const Pool = require("../models/pool.js");
-const settings = require("../models/settings.js");
 const events = require("../events.js");
 const views = require("../util/views.js");
 const PoolAutoCompleteControl = require("./pool_auto_complete_control.js");
@@ -145,7 +141,7 @@ class PoolInputControl extends events.EventTarget {
         }
         searchLinkNode.setAttribute(
             "href",
-            uri.formatClientLink("", { query: "pool:" + pool.id })
+            uri.formatPostsLink({ query: "pool:" + pool.id })
         );
         searchLinkNode.textContent = pool.names[0] + " ";
 

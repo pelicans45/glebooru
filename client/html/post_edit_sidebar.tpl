@@ -87,14 +87,14 @@
 
         <% if (ctx.canEditPostNotes) { %>
             <section class='notes'>
-                <a href class='add'>Add a note</a>
+                <a class='add'>Add a note</a>
                 <%= ctx.makeTextarea({disabled: true, text: 'Content (supports Markdown)', rows: '8'}) %>
-                <a href class='delete inactive'>Delete selected note</a>
+                <a class='delete inactive'>Delete selected note</a>
                 <% if (ctx.hasClipboard) { %>
                     <br/>
-                    <a href class='copy'>Export notes to clipboard</a>
+                    <a class='copy'>Export notes to clipboard</a>
                     <br/>
-                    <a href class='paste'>Import notes from clipboard</a>
+                    <a class='paste'>Import notes from clipboard</a>
                 <% } %>
             </section>
         <% } %>
@@ -118,13 +118,13 @@
             <section class='management'>
                 <ul>
                     <% if (ctx.canFeaturePosts) { %>
-                        <li><a href class='feature'>Feature this post on main page</a></li>
+                        <li><a class='feature'>Feature this post on main page</a></li>
                     <% } %>
                     <% if (ctx.canMergePosts) { %>
-                        <li><a href class='merge'>Merge this post with another</a></li>
+                        <li><a class='merge'>Merge this post with another</a></li>
                     <% } %>
                     <% if (ctx.canDeletePosts) { %>
-                        <li><a href class='delete'>Delete this post</a></li>
+                        <li><a class='delete'>Delete this post</a></li>
                     <% } %>
                 </ul>
             </section>

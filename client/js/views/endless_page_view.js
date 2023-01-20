@@ -165,7 +165,7 @@ class EndlessPageView {
     _shouldUseCache(ctx) {
         return (
             ctx.browserState !== undefined &&
-            ctx.browserState != null &&
+            ctx.browserState !== null &&
             ctx.readPageFromCache !== undefined
         );
     }
@@ -176,7 +176,8 @@ class EndlessPageView {
         return (
             cache !== null &&
             cache !== undefined &&
-            cache.path == history.state.path &&
+            cache.path === history.state.path &&
+			//(!cache.r || cache.r.toString() === localStorage.r) &&
             cache.pages !== undefined &&
             cache.pages !== null
         );

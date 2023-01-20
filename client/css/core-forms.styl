@@ -80,7 +80,7 @@ input[type=radio], input[type=checkbox]
     border-radius: 100%
 
 .radio:before, .checkbox:before
-    transition: border-color 0.1s linear
+    transition: border-color var(--input-transition-dur) linear
     position: absolute
     left: 0
     top: 0.15em
@@ -98,7 +98,7 @@ input[type=radio], input[type=checkbox]
 
 .radio:after
     background: $main-color
-    transition: opacity 0.1s linear
+    transition: opacity var(--input-transition-dur) linear
     position: absolute
     left: 5px
     top: 0.15em
@@ -111,7 +111,7 @@ input[type=radio], input[type=checkbox]
     opacity: 0
 
 .checkbox:after
-    transition: opacity 0.1s linear
+    transition: opacity var(--input-transition-dur) linear
     position: absolute
     top: 0.15em
     left: 6px
@@ -119,10 +119,13 @@ input[type=radio], input[type=checkbox]
     margin-top: 3px
     width: 5px
     height: 9px
-    //border-right: 3px solid $main-color
-    //border-bottom: 3px solid $main-color
-    border-right: 3px solid #f6f3fe
-    border-bottom: 3px solid #f6f3fe
+    border-right: 3px solid $checkbox-border-color
+    border-bottom: 3px solid $checkbox-border-color
+
+    .darktheme &
+        border-right: 3px solid $checkbox-border-color-darktheme
+        border-bottom: 3px solid $checkbox-border-color-darktheme
+
     content: ''
     opacity: 0
     transform: rotate(45deg)
@@ -227,7 +230,7 @@ input[type=number]
     background: $input-enabled-background-color
     color: $input-enabled-text-color
     box-shadow: none /* :-moz-submit-invalid on FF */
-    transition: border-color 0.1s linear, background-color 0.1s linear
+    transition: border-color var(--input-transition-dur) linear, background-color var(--input-transition-dur) linear
 
     &:disabled
         border: 2px solid $input-disabled-border-color
@@ -347,6 +350,8 @@ input::-moz-focus-inner
  */
 .file-dropper-holder
     .file-dropper
+        //transition: 100ms ease-in-out
+        transition: var(--selection-transition-dur) ease-in-out
         display: block
         background: $window-color
         border: 3px dashed #eee
@@ -356,6 +361,9 @@ input::-moz-focus-inner
         cursor: pointer
         overflow: hidden
         word-wrap: break-word
+        &:hover
+            opacity: 0.9
+            box-shadow: 5px 5px 3px 1px rgb(73 49 212 / 38%)
     .url-holder
         display: flex
         margin-top: 0.5em

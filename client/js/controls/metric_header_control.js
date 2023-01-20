@@ -93,7 +93,7 @@ class MetricHeaderControl extends events.EventTarget {
     }
 
     refreshQuery(query) {
-        this._ctx.parameters.query = query;
+        this._ctx.parameters.query = query.trim();
         this._refreshStartSortingButton();
     }
 }

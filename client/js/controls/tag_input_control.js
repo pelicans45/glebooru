@@ -95,7 +95,7 @@ class TagInputControl extends events.EventTarget {
 
         // dom
         const editAreaNode = template({
-            tagsPlaceholder: placeholder || "type to add...",
+            tagsPlaceholder: placeholder || "Add tags...",
         });
         this._editAreaNode = editAreaNode;
         this._tagInputNode = editAreaNode.querySelector("input");
@@ -171,7 +171,7 @@ class TagInputControl extends events.EventTarget {
     addTagByName(name, source) {
         name = name.trim();
         // Tags `.` and `..` are not allowed, see https://github.com/rr-/szurubooru/pull/390
-        if (!name || name == "." || name == "..") {
+        if (!name || name === "." || name === "..") {
             return;
         }
         return Tag.get(name).then(
@@ -314,7 +314,7 @@ class TagInputControl extends events.EventTarget {
         }
         searchLinkNode.setAttribute(
             "href",
-            uri.formatClientLink("", {
+            uri.formatPostsLink({
                 query: uri.escapeTagName(tag.names[0]),
             })
         );
@@ -334,14 +334,16 @@ class TagInputControl extends events.EventTarget {
         usagesNode.classList.add("tag-usages");
         usagesNode.setAttribute("data-pseudo-content", tag.postCount);
 
-        const removalLinkNode = document.createElement("a");
-        removalLinkNode.classList.add("remove-tag");
-        removalLinkNode.setAttribute("href", "");
-        removalLinkNode.setAttribute("data-pseudo-content", "×");
-        removalLinkNode.addEventListener("click", (e) => {
-            e.preventDefault();
-            this.deleteTag(tag);
-        });
+        if (tag.names[0] !== lens.hostnameFilter) {
+            const removalLinkNode = document.createElement("a");
+            removalLinkNode.classList.add("remove-tag");
+            removalLinkNode.setAttribute("href", "");
+            removalLinkNode.setAttribute("data-pseudo-content", "×");
+            removalLinkNode.addEventListener("click", (e) => {
+                e.preventDefault();
+                this.deleteTag(tag);
+            });
+        }
 
         const listItemNode = document.createElement("li");
         listItemNode.appendChild(removalLinkNode);

@@ -164,7 +164,8 @@ class PostMainView {
         }
         commentForm.hidden = true; // collapse by default
         addCommentButton.addEventListener("click", () => {
-            commentForm.hidden = !commentForm.hidden
+            commentForm.hidden = !commentForm.hidden;
+            this.commentControl._textareaNode.focus();
         });
     }
 

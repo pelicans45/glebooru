@@ -112,7 +112,7 @@ class PostUploadController {
                     this._view.clearMessages();
                     misc.disableExitConfirmation();
                     const ctx = router.show(uri.formatClientLink(""));
-                    ctx.controller.showSuccess("Posts uploaded.");
+                    ctx.controller.showSuccess("Uploaded.");
                 },
                 (error) => {
                     this._view.showError(genericErrorMessage);
@@ -151,7 +151,7 @@ class PostUploadController {
                             return Promise.resolve();
                         } else {
                             let error = new Error(
-                                "Post already uploaded " +
+                                "File already uploaded " +
                                     `(@${searchResult.exactPost.id})`
                             );
                             error.uploadable = uploadable;

@@ -1,9 +1,9 @@
 <% if (ctx.canFavorite) { %>
     <% if (ctx.ownFavorite) { %>
-        <a href class='remove-favorite'>
+        <a class='remove-favorite'>
             <i class='fa fa-heart'></i>
     <% } else { %>
-        <a href class='add-favorite'>
+        <a class='add-favorite'>
             <i class='far fa-heart'></i>
     <% } %>
 <% } else { %>

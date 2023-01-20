@@ -2901,7 +2901,7 @@ A result of reverse image search operation.
 # Search
 
 Search queries are built of tokens that are separated by spaces. Each token can
-be of following form:
+be of the following form:
 
 | Syntax            | Token type        | Description                                |
 | ----------------- | ----------------- | ------------------------------------------ |

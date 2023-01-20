@@ -163,3 +163,6 @@ def create_app() -> Callable[[Any, Any], Any]:
 
 
 app = create_app()
+
+from wsgi_lineprof.middleware import LineProfilerMiddleware
+app = LineProfilerMiddleware(app)

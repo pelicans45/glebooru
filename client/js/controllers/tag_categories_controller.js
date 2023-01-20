@@ -23,7 +23,7 @@ class TagCategoriesController {
             (response) => {
                 this._tagCategories = response.results;
                 this._view = new TagCategoriesView({
-                    tag_categories: this._tagCategories,
+                    tagCategories: this._tagCategories,
                     canEditName: api.hasPrivilege("tag_categories:edit:name"),
                     canEditColor: api.hasPrivilege(
                         "tag_categories:edit:color"

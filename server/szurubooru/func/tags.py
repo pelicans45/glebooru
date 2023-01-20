@@ -7,6 +7,28 @@ from szurubooru.func import serialization, tag_categories, util
 
 from szurubooru import config, db, errors, model, rest
 
+RESERVED_NAMES = {
+    "home",
+    "posts",
+    "register",
+    "login",
+    "logout",
+    "password-reset",
+    "comments",
+    "help",
+    "pool",
+    "pools",
+    "pool-categories",
+    "upload",
+    "settings",
+    "history",
+    "tag",
+    "tags",
+    "tag-categories",
+    "user",
+    "users",
+}
+
 
 class TagNotFoundError(errors.NotFoundError):
     pass
@@ -38,10 +60,19 @@ class InvalidTagDescriptionError(errors.ValidationError):
 
 def _verify_name_validity(name: str) -> None:
     if util.value_exceeds_column_size(name, model.TagName.name):
-        raise InvalidTagNameError("Name is too long.")
+        raise InvalidTagNameError("Tag name is too long.")
+
     name_regex = config.config["tag_name_regex"]
     if not re.match(name_regex, name):
-        raise InvalidTagNameError("Name must satisfy regex %r." % name_regex)
+        raise InvalidTagNameError(
+            "Tag name must satisfy regex %r." % name_regex
+        )
+
+    if name in RESERVED_NAMES:
+        raise InvalidTagNameError("Invalid tag name.")
+
+    if name.isdigit():
+        raise InvalidTagNameError("Tag name cannot contain only digits.")
 
 
 def _get_names(tag: model.Tag) -> List[str]:
@@ -72,7 +103,7 @@ tag.names[0].name,
 
 
 def sort_tags(tags: List[model.Tag]) -> List[model.Tag]:
-    default_category_name = tag_categories.get_default_category_name()
+    # default_category_name = tag_categories.get_default_category_name()
     return sorted(
         tags,
         key=lambda tag: (

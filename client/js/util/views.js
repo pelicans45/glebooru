@@ -93,7 +93,7 @@ function makeCheckbox(options) {
             checked: options.checked !== undefined ? options.checked : false,
             disabled: options.readonly,
             required: options.required,
-			title: options.title,
+            title: options.title,
         }),
         makeElement(
             "span",
@@ -199,7 +199,7 @@ function getPostUrl(id, parameters) {
         id,
         parameters
             ? {
-                  query: parameters.query,
+                  query: parameters.query.trim(),
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -214,7 +214,7 @@ function getPostEditUrl(id, parameters) {
         "edit",
         parameters
             ? {
-                  query: parameters.query,
+                  query: parameters.query.trim(),
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -229,7 +229,7 @@ function getMetricSorterUrl(id, parameters) {
         "metric-sorter",
         parameters
             ? {
-                  query: parameters.query,
+                  query: parameters.query.trim(),
                   metrics: parameters.metrics,
               }
             : {}
@@ -329,7 +329,7 @@ function makeUserLinkForSidebar(user) {
               text
           )
         : text;
-    return makeElement("span", { class: "user" }, link) + ",";
+    return makeElement("span", { class: "user" }, link) + ", ";
 }
 
 function makeFlexboxAlign(options) {
@@ -409,6 +409,10 @@ function showMessage(target, message, className) {
     wrapperNode.classList.add("message-wrapper");
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
+
+    setTimeout(() => {
+        wrapperNode.remove();
+    }, 2500);
     return true;
 }
 

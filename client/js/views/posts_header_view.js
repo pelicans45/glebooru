@@ -8,6 +8,7 @@ const search = require("../util/search.js");
 const views = require("../util/views.js");
 const TagList = require("../models/tag_list.js");
 const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js");
+const PostsListTagAutoCompleteControl = require("../controls/posts_list_tag_auto_complete_control.js");
 const MetricHeaderControl = require("../controls/metric_header_control");
 
 const template = views.getTemplate("posts-header");
@@ -112,8 +113,8 @@ class BulkTagEditor extends BulkEditor {
         return this._hostNode.querySelector("input[name=tag]");
     }
 
-    focus() {
-        search.focusInputNode(this._inputNode);
+    focusQueryInput() {
+        search.focusInputNode(this._queryInputNode);
     }
 
     blur() {
@@ -197,7 +198,7 @@ class PostsHeaderView extends events.EventTarget {
         this._hostNode = ctx.hostNode;
         views.replaceContent(this._hostNode, template(ctx));
 
-        this._autoCompleteControl = new TagAutoCompleteControl(
+        this._autoCompleteControl = new PostsListTagAutoCompleteControl(
             this._queryInputNode,
             {
                 confirm: (tag) => {
@@ -205,7 +206,6 @@ class PostsHeaderView extends events.EventTarget {
                         misc.escapeSearchTerm(tag.names[0]),
                         true
                     );
-                    // TODO: test
                     this._navigate();
                 },
             }
@@ -215,7 +215,7 @@ class PostsHeaderView extends events.EventTarget {
 
         // Focus search input on hover
         this._queryInputNode.addEventListener("mouseover", (e) => {
-            search.focusInputNode(this._queryInputNode);
+            this.focus();
         });
 
         keyboard.bind("p", () => this._focusFirstPostNode());
@@ -327,7 +327,7 @@ class PostsHeaderView extends events.EventTarget {
 
     focusSearchInputIfSet() {
         if (this._queryInputNode.value) {
-            search.focusInputNode(this._queryInputNode);
+            this.focusQueryInput();
         }
     }
 
@@ -498,7 +498,8 @@ class PostsHeaderView extends events.EventTarget {
             query = query.replace(" " + term, "");
             query = query.replace(term, "");
         } else {
-            query += " " + term;
+            const space = query ? " " : "";
+            query += space + term + " ";
         }
         this._queryInputNode.value = query;
         this.dispatchEvent(
@@ -524,24 +525,25 @@ class PostsHeaderView extends events.EventTarget {
     _evtRandomizeButtonClick(e) {
         e.preventDefault();
         if (!this._queryInputNode.value.includes("sort:random")) {
-            this._queryInputNode.value += " sort:random";
+            const space = this._queryInputNode.value ? " " : "";
+            this._queryInputNode.value += space + "sort:random ";
         }
-        this._ctx.parameters.r = Math.round(Math.random() * 1000);
+        this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
+		// localStorage.r = this._ctx.parameters.r;
         this._navigate();
     }
 
     _navigate() {
         this._autoCompleteControl.hide();
         let parameters = {
-            query: this._queryInputNode.value,
+            query: this._queryInputNode.value.trim(),
             r: this._ctx.parameters.r,
             metrics: this._ctx.parameters.metrics,
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query
-        const prevQuery = this._ctx.parameters.query
-            ? this._ctx.parameters.query
-            : "";
+        const prevQuery = this._ctx.parameters.query.trim() || "";
+
         parameters.offset =
             parameters.query === prevQuery ? this._ctx.parameters.offset : 0;
         if (this._bulkTagEditor && this._bulkTagEditor.opened) {

@@ -5,6 +5,7 @@ const TagCategoryList = require("./models/tag_category_list.js");
 const Tag = require("./models/tag.js");
 
 let _stylesheet = null;
+const minLengthForPartialSearch = 3;
 
 function refreshCategoryColorMap() {
     return TagCategoryList.get().then((response) => {
@@ -97,4 +98,5 @@ module.exports = {
     parseTagAndCategory: parseTagAndCategory,
     resolveTagAndCategory: resolveTagAndCategory,
     tagListToMatches: tagListToMatches,
+    minLengthForPartialSearch: minLengthForPartialSearch,
 };

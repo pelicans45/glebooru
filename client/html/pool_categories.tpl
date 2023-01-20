@@ -16,7 +16,7 @@
         </div>
 
         <% if (ctx.canCreate) { %>
-            <p><a href class='add'>Add new category</a></p>
+            <p><a class='add'>Add new category</a></p>
         <% } %>
 
         <div class='messages'></div>

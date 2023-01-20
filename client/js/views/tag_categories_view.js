@@ -24,7 +24,7 @@ class TagCategoriesView extends events.EventTarget {
             } else if (a.isDefault) {
                 return -1;
             }
-            return a.order == b.order
+            return a.order === b.order
                 ? a.name.localeCompare(b.name)
                 : a.order - b.order;
         });

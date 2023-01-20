@@ -33,8 +33,11 @@ function unescapeParam(text) {
 }
 
 function getPostsQuery(parameters) {
-    let normalQuery = parameters.query || "";
-    let metricQuery = (parameters.metrics || "")
+    let normalQuery = (parameters.query.trim() || "");
+	if (!parameters.metrics) {
+		return normalQuery
+	}
+    let metricQuery = parameters.metrics
         .split(" ") //see metric_header_control
         .filter(m => m)
         .map(m => m + " sort:metric-" + m)
@@ -49,6 +52,37 @@ function formatClientLink(...values) {
             // assert this is the last piece
             let variableParts = [];
             for (let key of Object.keys(value)) {
+                if (value[key]) {
+                    variableParts.push(
+                        key + "=" + escapeParam(value[key].toString())
+                    );
+                }
+            }
+            if (variableParts.length) {
+                parts.push(variableParts.join(";"));
+            }
+            break;
+        } else {
+            parts.push(escapeParam(value.toString()));
+        }
+    }
+    return parts.join("/");
+}
+
+function formatPostsLink(...values) {
+    let parts = [];
+    for (let value of values) {
+        if (value.constructor === Object) {
+            // assert this is the last piece
+            let variableParts = [];
+            for (let key of Object.keys(value)) {
+				if (key === "query") {
+					if (value[key]) {
+						parts.unshift(escapeParam(value.toString()).replace(/%20/g, "+"));
+					}
+					continue
+				}
+
                 if (value[key]) {
                     variableParts.push(
                         key + "=" + escapeParam(value[key].toString())
@@ -102,6 +136,7 @@ function escapeTagName(text) {
 module.exports = {
     getPostsQuery: getPostsQuery,
     formatClientLink: formatClientLink,
+    formatPostsLink: formatPostsLink,
     formatApiLink: formatApiLink,
     escapeTagName: escapeTagName,
     escapeParam: escapeParam,

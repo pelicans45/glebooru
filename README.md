@@ -1,6 +1,6 @@
-# wormbooru
+# glebooru
 
-Modern booru application
+glebooru is a modern booru. It's a fork of [szurubooru](https://github.com/rr-/szurubooru), with many additions implemented from [Hunternif's szurubooru fork](https://github.com/Hunternif/szurubooru).
 
 ## Features
 

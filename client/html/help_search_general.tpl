@@ -1,5 +1,5 @@
 <p>Search queries are built of tokens that are separated by spaces. Each token
-can be of following form:</p>
+can be of the following form:</p>
 
 <table>
     <thead>

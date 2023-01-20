@@ -8,8 +8,8 @@
         <div class='wrapper'>
             <p>
                 <span class='buttons'>
-                    <a href class='opacity'><i class='fa fa-eye'></i></a>
-                    <a href class='close'>×</a>
+                    <a class='opacity'><i class='fa fa-eye'></i></a>
+                    <a class='close'>×</a>
                 </span>
                 Suggested tags
             </p>

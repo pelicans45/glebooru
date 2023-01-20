@@ -196,27 +196,17 @@ class PostUploadView extends events.EventTarget {
         this._formNode.classList.add("inactive");
 
         if (this._tagInputNode) {
+            const tagList = new TagList();
+            if (lens.hostnameFilter) {
+                tagList.addByName(lens.hostnameFilter);
+            }
+
             this._tagControl = new TagInputControl(
                 this._tagInputNode,
-                new TagList(),
-                "Write tags and press space/enter"
+                tagList,
+                "Add tags (optional)"
             );
         }
-
-        /*
-        if (this._commonTagsInputNode) {
-            this._autoCompleteControl = new TagAutoCompleteControl(
-                this._commonTagsInputNode,
-                {
-                    confirm: (tag) =>
-                        this._autoCompleteControl.replaceSelectedText(
-                            misc.escapeSearchTerm(tag.names[0]),
-                            true
-                        ),
-                }
-            );
-        }
-		*/
     }
 
     enableForm() {
@@ -254,6 +244,7 @@ class PostUploadView extends events.EventTarget {
 
     addUploadables(uploadables) {
         this._formNode.classList.remove("inactive");
+        this._tagInputNode.focus();
         let duplicatesFound = 0;
         for (let uploadable of uploadables) {
             uploadable.safety = this._ctx.defaultSafety || uploadable.safety;
@@ -352,14 +343,6 @@ class PostUploadView extends events.EventTarget {
         if (this._tagControl) {
             uploadable.tags = this._tagControl.tags.map((tag) => tag.names[0]);
         }
-
-        /*
-        if (this._commonTagsInputNode) {
-            var tags = this._commonTagsInputNode.value.split(" ");
-            tags = tags.filter((t) => t != "");
-            uploadable.tags = uploadable.tags.concat(tags);
-        }
-		*/
 
         uploadable.relations = [];
         for (let [i, lookalike] of uploadable.lookalikes.entries()) {

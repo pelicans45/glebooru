@@ -4,7 +4,7 @@
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fa fa-sliders-h tag-icon'></i><!--
     --></a><!--
-    --><a href="<%- ctx.formatClientLink('posts', {
+    --><a href="<%- ctx.formatClientLink('', {
                 query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
@@ -15,8 +15,8 @@
     --><span class='metric-bounds' data-pseudo-content=
     '<%- ctx.tag.metric.min %> &mdash; <%- ctx.tag.metric.max %>'></span><!--
     --><span class='metric-controls'>Set<!--
-        --><a href class='create-exact'> exact</a><!--
-        --><a href class='create-range'> range</a><!--
+        --><a class='create-exact'> exact</a><!--
+        --><a class='create-range'> range</a><!--
         --><a href='<%= ctx.getMetricSorterUrl(ctx.post.id, {
                     metrics: ctx.tag.names[0],
                     query: ctx.query}) %>'

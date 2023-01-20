@@ -19,8 +19,7 @@ class FileDropperControl extends events.EventTarget {
             lock: options.lock,
             id: "file-" + Math.random().toString(36).substring(7),
             urlPlaceholder:
-                options.urlPlaceholder ||
-                "or paste file/URL here",
+                options.urlPlaceholder || "or paste files/URLs here",
         });
 
         this._dropperNode = source.querySelector(".file-dropper");
@@ -28,7 +27,12 @@ class FileDropperControl extends events.EventTarget {
         this._urlConfirmButtonNode = source.querySelector("button");
         this._fileInputNode = source.querySelector("input[type=file]");
         this._fileInputNode.style.display = "none";
-        this._fileInputNode.multiple = options.allowMultiple || false;
+
+        if (options.allowMultiple) {
+            this._fileInputNode.setAttribute("directory", "");
+            this._fileInputNode.setAttribute("webkitdirectory", "");
+            this._fileInputNode.setAttribute("multiple", "");
+        }
 
         this._counter = 0;
         this._dropperNode.addEventListener("dragenter", (e) =>
@@ -45,6 +49,17 @@ class FileDropperControl extends events.EventTarget {
             this._evtFileChange(e)
         );
 
+        /*
+        document.addEventListener("keydown", (e) =>
+            this._evtUrlInputKeyDown(e)
+        );
+		*/
+        document.addEventListener("paste", (e) => {
+            if (document.querySelector(".file-dropper")) {
+                this._evtPaste(e);
+            }
+        });
+        /*
         if (this._urlInputNode) {
             this._urlInputNode.addEventListener("keydown", (e) =>
                 this._evtUrlInputKeyDown(e)
@@ -58,6 +73,7 @@ class FileDropperControl extends events.EventTarget {
                 this._evtUrlConfirmButtonClick(e)
             );
         }
+		*/
 
         this._originalHtml = this._dropperNode.innerHTML;
         views.replaceContent(target, source);
@@ -84,7 +100,7 @@ class FileDropperControl extends events.EventTarget {
         urls = Array.from(urls).map((url) => url.trim());
         if (this._options.lock) {
             this._dropperNode.innerText = urls
-                .map((url) => url.split(/\//).reverse()[0])
+                .map((url) => url.split("/").reverse()[0])
                 .join(", ");
         }
         for (let url of urls) {
@@ -134,13 +150,41 @@ class FileDropperControl extends events.EventTarget {
     }
 
     _evtPaste(e) {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        const fileList = Array.from(items).map((x) => x.getAsFile());
+        const items = Array.from(
+            (e.clipboardData || e.originalEvent.clipboardData).items
+        );
 
-        if (!this._options.allowMultiple && fileList.length > 1) {
-            window.alert("Cannot select multiple files.");
-        } else if (fileList.length > 0) {
-            this._emitFiles(fileList);
+        const fileList = items
+            .filter((x) => x.kind === "file")
+            .map((x) => x.getAsFile());
+
+        if (fileList.length > 0) {
+            if (!this._options.allowMultiple && fileList.length > 1) {
+                window.alert("Cannot select multiple files.");
+            } else {
+                this._emitFiles(fileList);
+            }
+
+            return;
+        }
+
+        const urlList = items
+            .filter((x) => x.kind === "string")
+            .map((x) => x.getAsString().trim())
+            .filter((x) => /^https?:\/\/.+/i.test(x));
+
+        const urls = [];
+
+        for (const urlEntry of urlList) {
+            urls.push(...urlEntry.split(/[\r\n]/));
+        }
+
+        if (urls.length > 0) {
+            if (!this._options.allowMultiple && urlList.length > 1) {
+                window.alert("Cannot select multiple URLs.");
+            } else {
+                this._emitUrls(urls);
+            }
         }
     }
 

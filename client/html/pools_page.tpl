@@ -4,9 +4,9 @@
             <thead>
                 <th class='names'>
                     <% if (ctx.parameters.query == 'sort:name' || !ctx.parameters.query) { %>
-                        <a href='<%- ctx.formatClientLink('pools', {query: '-sort:name'}) %>'>Pool name(s)</a>
+                        <a href='<%- ctx.formatClientLink('pools', {query: '-sort:name'}) %>'>Pool name</a>
                     <% } else { %>
-                        <a href='<%- ctx.formatClientLink('pools', {query: 'sort:name'}) %>'>Pool name(s)</a>
+                        <a href='<%- ctx.formatClientLink('pools', {query: 'sort:name'}) %>'>Pool name</a>
                     <% } %>
                 </th>
                 <th class='post-count'>
@@ -35,7 +35,7 @@
                             </ul>
                         </td>
                         <td class='post-count'>
-                            <a href='<%- ctx.formatClientLink('posts', {query: 'pool:' + pool.id}) %>'><%- pool.postCount %></a>
+                            <a href='<%- ctx.formatClientLink('', {query: 'pool:' + pool.id}) %>'><%- pool.postCount %></a>
                         </td>
                         <td class='creation-time'>
                             <%= ctx.makeRelativeTime(pool.creationTime) %>

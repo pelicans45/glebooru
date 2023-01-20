@@ -1,6 +1,8 @@
 @import colors
 
 .post-overlay
+    display: none
+
     &[data-state=ready-to-draw],
     &[data-state=drawing-rectangle],
     &[data-state=drawing-polygon]
@@ -20,6 +22,8 @@
             bottom: 0
 
 .notes-overlay
+    display: none
+    
     g
         stroke-width: 1px
 

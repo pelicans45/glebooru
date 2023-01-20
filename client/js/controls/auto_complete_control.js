@@ -122,16 +122,13 @@ class AutoCompleteControl {
         this._sourceInputNode.setAttribute("autocomplete", "off");
         this._sourceInputNode.setAttribute("autocorrect", "off");
         this._sourceInputNode.setAttribute("autocapitalize", "off");
-        this._sourceInputNode.setAttribute("spellcheck", "off");
+        this._sourceInputNode.setAttribute("spellcheck", "false");
 
         this._sourceInputNode.addEventListener("keydown", (e) =>
             this._evtKeyDown(e)
         );
         this._sourceInputNode.addEventListener("blur", (e) =>
             this._evtBlur(e)
-        );
-        this._sourceInputNode.addEventListener("focus", (e) =>
-            this._evtFocus(e)
         );
 
         this._suggestionDiv = views.htmlToDom(

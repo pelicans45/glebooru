@@ -40,6 +40,7 @@ max_suggested_results: 10
 delete_source_files: no
 
 thumbnails:
+    min_file_size: 5000000
     avatar_width: 300
     avatar_height: 300
     post_width: 300
@@ -98,8 +99,8 @@ default_rank: regular
 privileges:
     'users:create:self':            anonymous # Registration permission
     'users:create:any':             administrator
-    'users:list':                   regular
-    'users:view':                   regular
+    'users:list':                   power
+    'users:view':                   power
     'users:edit:any:name':          moderator
     'users:edit:any:pass':          moderator
     'users:edit:any:email':         moderator
@@ -130,11 +131,11 @@ privileges:
     'posts:view:featured':          anonymous
     'posts:edit:content':           power
     'posts:edit:flags':             regular
-    'posts:edit:notes':             regular
-    'posts:edit:relations':         regular
+    'posts:edit:notes':             power
+    'posts:edit:relations':         anonymous
     'posts:edit:safety':            power
-    'posts:edit:source':            regular
-    'posts:edit:tags':              regular
+    'posts:edit:source':            anonymous
+    'posts:edit:tags':              anonymous
     'posts:edit:thumbnail':         power
     'posts:feature':                moderator
     'posts:delete':                 moderator
@@ -148,10 +149,10 @@ privileges:
 
     'tags:create':                  anonymous
     'tags:edit:names':              power
-    'tags:edit:category':           power
-    'tags:edit:description':        power
-    'tags:edit:implications':       power
-    'tags:edit:suggestions':        power
+    'tags:edit:category':           anonymous
+    'tags:edit:description':        anonymous
+    'tags:edit:implications':       anonymous
+    'tags:edit:suggestions':        anonymous
     'tags:list':                    anonymous
     'tags:view':                    anonymous
     'tags:merge':                   moderator

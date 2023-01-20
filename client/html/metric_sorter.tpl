@@ -18,7 +18,7 @@
                         <i class='fa fa-greater-than'></i>
                     </button>
                     <% if (window.innerWidth <= 1000) { %>
-                        <a href class='mousetrap append skip-btn'>Skip</a>
+                        <a class='mousetrap append skip-btn'>Skip</a>
                     <% } %>
                 </div>
             </div>
@@ -32,7 +32,7 @@
         <div class='buttons'>
             <% if (window.innerWidth > 1000) { %>
                 <input class='mousetrap save-btn' type='submit' value='Save'>
-                <a href class='mousetrap append skip-btn'>Skip</a>
+                <a class='mousetrap append skip-btn'>Skip</a>
             <% } %>
         </div>
     </form>

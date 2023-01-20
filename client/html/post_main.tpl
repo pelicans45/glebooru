@@ -35,17 +35,17 @@
                         <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            r: Math.round(Math.random() * 1000)}) %>'>
+                            r: Math.round(Math.random() * 998) + 1}) %>'>
                     <% } else { %>
                         <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
                             query: ctx.parameters.query,
                             metrics: ctx.parameters.metrics,
-                            r: Math.round(Math.random() * 1000)}) %>'>
+                            r: Math.round(Math.random() * 998) + 1}) %>'>
                     <% } %>
                 <% } else { %>
                     <a rel='next' class='inactive'>
                 <% } %>
-                    <i class='fa fa-random'></i>
+                    <i title='Random image' class='fa fa-random'></i>
                     <span class='vim-nav-hint'>Random image</span>
                 </a>
             </article>

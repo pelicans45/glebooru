@@ -43,10 +43,11 @@
 
     >.content
         width: 100%
+        margin-left: 2em
 
     .post-container
         @media (min-width: 800px)
-            margin-bottom: 2em
+            //margin-bottom: 2em
         @media (max-width: 800px)
             margin: -1em // to counter the padding of #content-holder
             margin-bottom: 0
@@ -86,8 +87,10 @@
             color: #9464f8
 
     .details
-        i
+        a[download]
             margin-right: 0.6em
+
+        i
             display: inline-block
             width: 1em
             text-align: center
@@ -104,6 +107,10 @@
                 width: 1em
                 height: 1em
                 margin: -0.1em 0.6em 0 0
+            time
+                font-size: 90%
+                display: block
+                margin-top: 0.5em
 
         .zoom
             display: none
@@ -120,6 +127,8 @@
             display: none
 
         .social
+            display: none
+
             margin-top: 1em
             .score-container
                 float: left
@@ -137,6 +146,9 @@
         @media (max-width: 800px)
             order: 2
             margin-top: 1em
+
+    .similar, .lookalikes
+        display: none
 
     .relations, .similar, .lookalikes
         h1
@@ -163,7 +175,7 @@
     .tags
         .tag-link-info
             &:hover
-                opacity: 0.7
+                opacity: 0.9
         .tag-link-posts
             &:hover
                 opacity: 0.95

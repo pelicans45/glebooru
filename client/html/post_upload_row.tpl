@@ -27,13 +27,13 @@
         <header>
             <nav>
                 <ul>
-                    <li><a href class='move-up'><i class='fa fa-chevron-up'></i></a></li>
-                    <li><a href class='move-down'><i class='fa fa-chevron-down'></i></a></li>
+                    <li><a class='move-up'><i class='fa fa-chevron-up'></i></a></li>
+                    <li><a class='move-down'><i class='fa fa-chevron-down'></i></a></li>
                 </ul>
             </nav>
             <nav>
                 <ul>
-                    <li><a href class='remove'><i class='fa fa-times'></i></a></li>
+                    <li><a class='remove'><i class='fa fa-times'></i></a></li>
                 </ul>
             </nav>
 

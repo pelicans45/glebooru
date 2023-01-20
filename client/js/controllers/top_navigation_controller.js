@@ -5,6 +5,17 @@ const lens = require("../lens.js");
 const topNavigation = require("../models/top_navigation.js");
 const TopNavigationView = require("../views/top_navigation_view.js");
 
+const topNavigation = document.getElementById("top-navigation");
+
+const extraNavLinkTabs = new Set([
+    "settings",
+    "help",
+    "account",
+    "login",
+    "logout",
+    "register",
+]);
+
 class TopNavigationController {
     constructor() {
         this._topNavigationView = new TopNavigationView();
@@ -25,6 +36,10 @@ class TopNavigationController {
 
     _evtActivate(e) {
         this._topNavigationView.activate(e.detail.key);
+        topNavigation.classList.toggle(
+            "show-extra-nav-links",
+            extraNavLinkTabs.has(e.detail.key)
+        );
     }
 
     _updateNavigationFromPrivileges() {
@@ -62,9 +77,11 @@ class TopNavigationController {
 			*/
             topNavigation.hide("login");
         } else {
+            /*
             if (!api.hasPrivilege("users:create:self")) {
                 topNavigation.hide("register");
             }
+			*/
             topNavigation.hide("account");
             topNavigation.hide("logout");
         }

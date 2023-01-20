@@ -1,5 +1,6 @@
 "use strict";
 
+const tags = require("../tags.js");
 const misc = require("../util/misc.js");
 const PoolList = require("../models/pool_list.js");
 const AutoCompleteControl = require("./auto_complete_control.js");
@@ -26,12 +27,10 @@ function _poolListToMatches(pools, options) {
 
 class PoolAutoCompleteControl extends AutoCompleteControl {
     constructor(input, options) {
-        const minLengthForPartialSearch = 3;
-
         options.getMatches = (text) => {
             const term = misc.escapeSearchTerm(text);
             const query =
-                (text.length < minLengthForPartialSearch
+                (text.length < tags.minLengthForPartialSearch
                     ? term + "*"
                     : "*" + term + "*") + " sort:post-count";
 

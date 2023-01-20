@@ -42,8 +42,8 @@ class PostContentControl {
                 e.preventDefault();
             });
 
-        // Always disable overlay, because I'm not going to use notes
-        this.disableOverlay();
+        // (hunternif) Always disable overlay, because I'm not going to use notes
+        //this.disableOverlay();
     }
 
     disableOverlay() {

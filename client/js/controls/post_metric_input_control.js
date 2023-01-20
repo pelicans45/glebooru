@@ -72,7 +72,7 @@ class PostMetricInputControl extends events.EventTarget {
             editMode: true,
             tag: tag,
             post: this._post,
-            query: this._ctx.parameters.query,
+            query: this._ctx.parameters.query.trim(),
         });
         const createExactNode = node.querySelector("a.create-exact");
         if (this._post.metrics.hasTagName(tag.names[0])) {

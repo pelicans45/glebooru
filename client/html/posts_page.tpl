@@ -41,23 +41,23 @@
                     </a>
                     <span class='edit-overlay'>
                         <% if (ctx.canBulkEditTags && ctx.parameters && ctx.parameters.tag) { %>
-                            <a href class='tag-flipper'>
+                            <a class='tag-flipper'>
                             </a>
                         <% } %>
                         <% if (ctx.parameters && ctx.parameters.relations) { %>
-                            <a href class='relation-flipper'>
+                            <a class='relation-flipper'>
                             </a>
                         <% } %>
                         <% if (ctx.canBulkEditSafety && ctx.parameters && ctx.parameters.safety) { %>
                             <span class='safety-flipper'>
                                 <% for (let safety of ['safe', 'sketchy', 'unsafe']) { %>
-                                    <a href data-safety='<%- safety %>' class='safety-<%- safety %><%- post.safety === safety ? ' active' : '' %>'>
+                                    <a data-safety='<%- safety %>' class='safety-<%- safety %><%- post.safety === safety ? ' active' : '' %>'>
                                     </a>
                                 <% } %>
                             </span>
                         <% } %>
                         <% if (ctx.canBulkDelete && ctx.parameters && ctx.parameters.delete) { %>
-                            <a href class='delete-flipper'>
+                            <a class='delete-flipper'>
                             </a>
                         <% } %>
                     </span>

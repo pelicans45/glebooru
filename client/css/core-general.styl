@@ -9,6 +9,11 @@
     src: local('Open Sans'), local('OpenSans'), url(../webfonts/open_sans.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 
+
+:root
+    --input-transition-dur: 55ms
+    --selection-transition-dur: 95ms
+
 /* make <body> cover entire viewport */
 html
     height: 100%
@@ -58,7 +63,7 @@ a
     //#b597e8
     color: $link-color
     text-decoration: none
-    transition: color 0.1s linear
+    transition: color var(--selection-transition-dur) linear
     &.inactive
         color: $inactive-link-color
         cursor: default
@@ -93,8 +98,8 @@ form .fa-question-circle-o
 
     &:focus
         outline: 1px solid $main-color
-        //transition: outline 0.1s linear
-        transition: outline 55ms cubic-bezier(0.39, 0.58, 0.57, 1);
+        //transition: outline var(--input-transition-dur) linear
+        transition: outline var(--input-transition-dur) cubic-bezier(0.39, 0.58, 0.57, 1);
 
 #content-holder
     padding: 1.5em
@@ -240,6 +245,24 @@ nav
             float: left
             @media (max-width: 1000px)
                 display: none
+
+    @media (min-width: 1000px)
+        &:not(.show-extra-nav-links)
+            ul li[data-name=register],
+            ul li[data-name=login],
+            ul li[data-name=logout],
+            ul li[data-name=account],
+            ul li[data-name=help]
+                display: none
+
+        &.show-extra-nav-links
+            ul li[data-name=register]:not(.active) a,
+            ul li[data-name=login]:not(.active) a,
+            ul li[data-name=logout]:not(.active) a,
+            ul li[data-name=account]:not(.active) a,
+            ul li[data-name=help]:not(.active) a
+                background: #57575c
+                color: #e9e9ea
 
 .darktheme nav
     &.buttons

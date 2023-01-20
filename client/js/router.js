@@ -13,6 +13,7 @@
 const clickEvent = document.ontouchstart ? "touchstart" : "click";
 const uri = require("./util/uri.js");
 let location = window.history.location || window.location;
+const base = _getBaseHref();
 
 function _getOrigin() {
     return (
@@ -31,13 +32,11 @@ function _getBaseHref() {
     const bases = document.getElementsByTagName("base");
     return bases.length > 0
         ? bases[0].href.replace(_getOrigin(), "").replace(/\/+$/, "")
-        : "";
+        : "/";
 }
 
 class Context {
     constructor(path, state) {
-        const base = _getBaseHref();
-        path = path.indexOf("/") !== 0 ? "/" + path : path;
         path = path.indexOf(base) !== 0 ? base + path : path;
 
         this.canonicalPath = path;
@@ -66,13 +65,14 @@ class Route {
         this.parameterNames = [];
         if (this.path === null) {
             this.regex = /.*/;
+            this.parameterNames.push("wildcard");
         } else {
             let parts = [];
             for (let component of this.path) {
                 if (component[0] === ":") {
                     parts.push("([^/]+)");
                     this.parameterNames.push(component.substr(1));
-				} else if (component[0] === "#") {
+                } else if (component[0] === "#") {
                     parts.push("(\\d+)");
                     this.parameterNames.push(component.substr(1));
                 } else {
@@ -81,7 +81,12 @@ class Route {
                 }
             }
             let regexString = "^/" + parts.join("/");
-            regexString += "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
+            if (regexString === "^/") {
+                regexString += "((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+))?$";
+            } else {
+                regexString +=
+                    "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
+            }
             this.parameterNames.push("variable");
             this.regex = new RegExp(regexString);
         }
@@ -114,8 +119,24 @@ class Route {
                 }
 
                 if (name === "variable") {
-                    for (let word of (value || "").split(/;/)) {
-                        const [key, subvalue] = word.split(/=/, 2);
+                    for (let word of (value || "").split(";")) {
+                        const [key, subvalue] = word.split("=", 2);
+                        parameters[key] = uri.unescapeParam(subvalue);
+                    }
+                } else if (name === "wildcard") {
+					console.log("wildcard match", path, value)
+                    if (!value) {
+                        continue;
+                    }
+                    const parts = value.split(";");
+                    const query = parts[0];
+                    if (!query || query.indexOf("=") !== -1) {
+                        continue;
+                    }
+					parameters["query"] = uri.unescapeParam(query.replace(/\+/g, "%20"))
+
+                    for (let word of parts.slice(1)) {
+                        const [key, subvalue] = word.split("=", 2);
                         parameters[key] = uri.unescapeParam(subvalue);
                     }
                 } else {
@@ -163,6 +184,7 @@ class Router {
         // clear cached page data, in case we are refreshing the page:
         const initialState = Object.assign({}, history.state);
         delete initialState.pageCache;
+        //localStorage.removeItem("r");
         return this.replace(url, initialState, true);
     }
 
@@ -216,7 +238,7 @@ class Router {
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
-            [this._unhandled, (ctx, next) => { }]
+            [this._unhandled, (ctx, next) => {}]
         );
 
         let i = 0;
@@ -306,11 +328,10 @@ const _onClick = (router) => {
             return;
         }
 
-        const base = _getBaseHref();
         const orig = el.pathname + el.search + (el.hash || "");
         const path = !orig.indexOf(base) ? orig.slice(base.length) : orig;
 
-        if (base && orig === path) {
+        if (orig === path) {
             return;
         }
 

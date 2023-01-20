@@ -4,9 +4,9 @@
             <thead>
                 <th class='names'>
                     <% if (ctx.parameters.query == 'sort:name' || !ctx.parameters.query) { %>
-                        <a href='<%- ctx.formatClientLink('tags', {query: '-sort:name'}) %>'>Tag name(s)</a>
+                        <a href='<%- ctx.formatClientLink('tags', {query: '-sort:name'}) %>'>Tag name</a>
                     <% } else { %>
-                        <a href='<%- ctx.formatClientLink('tags', {query: 'sort:name'}) %>'>Tag name(s)</a>
+                        <a href='<%- ctx.formatClientLink('tags', {query: 'sort:name'}) %>'>Tag name</a>
                     <% } %>
                 </th>
                 <th class='implications'>
@@ -48,9 +48,10 @@
                         <td class='names'>
                             <ul>
                                 <% for (let name of tag.names) { %>
-                                    <li><%= ctx.makeTagLink(name, false, false, tag) %> <a class="tags-list-row-search" href="/query=<%= name %>"><i class="fa-solid fa-magnifying-glass"></i></a></li>
+                                    <li><%= ctx.makeTagLink(name, false, false, tag) %></a></li>
                                 <% } %>
                             </ul>
+                            <span class='tag-page-search'><a href='<%- ctx.formatClientLink('', {query: ctx.escapeTagName(tag.names[0])}'><i class="fa-solid fa-magnifying-glass"></i></a></span>
                         </td>
                         <td class='implications'>
                             <% if (tag.implications.length) { %>

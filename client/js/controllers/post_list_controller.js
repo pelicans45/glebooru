@@ -95,7 +95,7 @@ class PostListController {
 
     _evtNavigate(e) {
         this._ctx = router.showNoDispatch(
-            uri.formatClientLink("", e.detail.parameters)
+            uri.formatPostsLink(e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._bulkEditTags.map((tagName) =>
@@ -150,11 +150,11 @@ class PostListController {
         let removedPost = e.detail.post;
         let relations = this._bulkEditRelationsIds;
         removedPost.relations = removedPost.relations.filter(
-            (id) => !relations.some((relationId) => relationId == id)
+            (id) => !relations.some((relationId) => relationId === id)
         );
         // Only save the updated post, the relationship will propagate to others automatically
         removedPost.save().catch((error) => window.alert(error.message));
-        relations = relations.filter((id) => id != removedPost.id);
+        relations = relations.filter((id) => id !== removedPost.id);
         this._updateRelationsForBulkEdit(relations);
     }
 
@@ -171,7 +171,7 @@ class PostListController {
         } else {
             // Remove item from delete list
             this._bulkEditDelete = this._bulkEditDelete.filter(
-                (x) => x != postId
+                (x) => x !== postId
             );
         }
     }
@@ -203,7 +203,7 @@ class PostListController {
                     offset: offset,
                     limit: limit,
                 });
-                return uri.formatClientLink("", parameters);
+                return uri.formatPostsLink(parameters);
             },
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);
@@ -253,8 +253,11 @@ class PostListController {
     }
 }
 
-module.exports = (router) => {
-    router.enter([], (ctx, next) => {
-        ctx.controller = new PostListController(ctx);
-    });
+module.exports = {
+    default: (router) => {
+        router.enter([], (ctx, next) => {
+            ctx.controller = new PostListController(ctx);
+        });
+    },
+    PostListController: PostListController,
 };

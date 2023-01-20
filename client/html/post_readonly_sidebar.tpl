@@ -20,7 +20,7 @@
                 }[ctx.post.mimeType] %>
                 </span>
             </a>
-            (<%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>)
+            <%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>
             <% if (ctx.post.flags.length) { %><!--
                 --><% if (ctx.post.flags.includes('loop')) { %><i class='fa fa-redo-alt'></i><% } %><!--
                 --><% if (ctx.post.flags.includes('sound')) { %><i class='fa fa-volume-up'></i><% } %>
@@ -40,10 +40,10 @@
         <% } %>
 
         <section class='zoom'>
-            <a href class='fit-original'>Original zoom</a> &middot;
-            <a href class='fit-width'>fit width</a> &middot;
-            <a href class='fit-height'>height</a> &middot;
-            <a href class='fit-both'>both</a>
+            <a class='fit-original'>Original zoom</a> &middot;
+            <a class='fit-width'>fit width</a> &middot;
+            <a class='fit-height'>height</a> &middot;
+            <a class='fit-both'>both</a>
         </section>
 
         <% if (ctx.post.source) { %>
@@ -71,7 +71,7 @@
 
     <% if (ctx.post.relations.length) { %>
         <nav class='relations'>
-            <h1>Relations (<%- ctx.post.relations.length %>)</h1>
+            <h1>Relations</h1>
             <ul><!--
                 --><% for (let post of ctx.post.relations) { %><!--
                     --><li><!--
@@ -84,21 +84,8 @@
         </nav>
     <% } %>
 
-    <% if (ctx.canViewSimilar) { %>
-        <nav class='similar'>
-            <h1>Similar</h1>
-            <ul></ul>
-            <a href='<%- ctx.formatClientLink("", {query: "similar:" + ctx.post.id}) %>'>See more</a>
-        </nav>
-
-        <nav class='lookalikes'>
-            <h1>Look-alikes</h1>
-            <ul></ul>
-        </nav>
-    <% } %>
-
     <nav class='tags'>
-        <h1>Tags (<%- ctx.tags.length %>)</h1>
+        <!-- <h1>Tags</h1> -->
         <% if (ctx.tags.length) { %>
             <ul class='compact-tags'><!--
                 --><% for (let tag of ctx.tags) { %><!--
@@ -111,7 +98,7 @@
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
+                            --><a href='<%- ctx.formatClientLink('', {query: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
                         --><% if (ctx.canListPosts) { %><!--
@@ -135,6 +122,20 @@
         <nav class='metrics'>
             <h1>Metrics (<%- ctx.post.metrics.length + ctx.post.metricRanges.length %>)</h1>
             <ul class='compact-post-metrics'></ul>
+        </nav>
+    <% } %>
+
+
+    <% if (ctx.canViewSimilar) { %>
+        <nav class='similar'>
+            <h1>Similar</h1>
+            <ul></ul>
+            <a href='<%- ctx.formatPostsLink({query: "similar:" + ctx.post.id}) %>'>See more</a>
+        </nav>
+
+        <nav class='lookalikes'>
+            <h1>Lookalikes</h1>
+            <ul></ul>
         </nav>
     <% } %>
 </div>

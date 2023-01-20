@@ -44,8 +44,9 @@ def get_avatar_url(user: model.User) -> str:
     assert user
     if user.avatar_style == user.AVATAR_GRAVATAR:
         assert user.email or user.name
+
         return "https://gravatar.com/avatar/%s?d=retro&s=%d" % (
-            util.get_md5((user.email or user.name).lower()),
+            util.get_md5(util.get_md5((user.email or user.name)).lower()),
             config.config["thumbnails"]["avatar_width"],
         )
     assert user.name

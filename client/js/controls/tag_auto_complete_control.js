@@ -12,7 +12,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
         // TODO: change?
         options = Object.assign(
             {
-                isTaggedWith: (tag) => input.split(" ").includes(tag),
+                isTaggedWith: (tag) => input.value.split(" ").includes(tag),
             },
             options
         );
@@ -70,58 +70,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
                 });
             };
         }
-
-        super(input, options);
-
-        this._valueEntered = false;
-
-        // Pre-load default tag selections
-        this._setDefaultTagMatches();
-    }
-
-    _evtFocus(e) {
-        return;
-    }
-
-    _setDefaultTagMatches() {
-        TagList.getTopRelevantMatches().then((results) => {
-            this._suggestionDiv.style.display = "none !important";
-            this._results = results;
-            this._refreshList();
-            this.hide();
-        });
-    }
-
-    _showOrHide() {
-        // Immediately show initial suggestions
-        if (!this._sourceInputNode.value) {
-            if (!this._valueEntered) {
-                this._show();
-                return;
-            }
-
-            this._activeResult = -1;
-            this._setDefaultTagMatches();
-            this._valueEntered = false;
-            return;
-        }
-
-        this._valueEntered = true;
-
-        const textToFind = this._options.getTextToFind();
-        if (!textToFind) {
-            this.hide();
-        } else {
-            this._updateResults(textToFind);
-        }
     }
 }
-
-/*
-if (!lens.isUniversal) {
-    TagAutoCompleteControl.prototype._showOrHide =
-        TagAutoCompleteControl.prototype._lensShowOrHide;
-}
-*/
 
 module.exports = TagAutoCompleteControl;

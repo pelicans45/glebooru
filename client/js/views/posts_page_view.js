@@ -204,7 +204,7 @@ class PostsPageView extends events.EventTarget {
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {
                 if (
-                    this._ctx.bulkEdit.delete.indexOf(parseInt(postId)) != -1
+                    this._ctx.bulkEdit.delete.indexOf(parseInt(postId)) !== -1
                 ) {
                     deleteFlipperNode.classList.toggle("delete", true);
                 }
