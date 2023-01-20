@@ -1,7 +1,7 @@
 <li><!--
 --><% if (ctx.editMode) { %><!--
     --><a class='remove-metric' data-pseudo-content='×'/><!--
-    --><a href="<%- ctx.formatClientLink('', {
+    --><a href="<%- ctx.formatPostsLink({
                 query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
@@ -21,7 +21,7 @@
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fas fa-angle-right tag-icon'></i><!--
     --></a><!--
-    --><a href="<%- ctx.formatClientLink('', {
+    --><a href="<%- ctx.formatPostsLink({
                 query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])

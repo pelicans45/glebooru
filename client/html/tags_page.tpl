@@ -51,7 +51,7 @@
                                     <li><%= ctx.makeTagLink(name, false, false, tag) %></a></li>
                                 <% } %>
                             </ul>
-                            <span class='tag-page-search'><a href="<%- ctx.formatClientLink('', {query: ctx.escapeTagName(tag.names[0])})"><i class="fa-solid fa-magnifying-glass"></i></a></span>
+                            <span class='tag-page-search'><a href="<%- ctx.formatPostsLink({query: ctx.escapeTagName(tag.names[0])})"><i class="fa-solid fa-magnifying-glass"></i></a></span>
                         </td>
                         <td class='implications'>
                             <% if (tag.implications.length) { %>

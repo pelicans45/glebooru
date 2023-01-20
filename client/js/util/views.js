@@ -523,6 +523,7 @@ function getTemplate(templatePath) {
             makeCssName: misc.makeCssName,
             makeNumericInput: makeNumericInput,
             formatClientLink: uri.formatClientLink,
+            formatPostsLink: uri.formatPostsLink,
             escapeTagName: uri.escapeTagName,
             hostnameExcludedTag: lens.hostnameExcludedTag,
         });

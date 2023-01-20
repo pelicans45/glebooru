@@ -1,6 +1,6 @@
 <div class='pool-delete'>
     <form>
-        <p>This pool has <a href='<%- ctx.formatClientLink('', {query: 'pool:' + ctx.pool.id}) %>'><%- ctx.pool.postCount %> <%= ctx.tag.postCount === 1 ? "post" : "posts" %></a>.</p>
+        <p>This pool has <a href='<%- ctx.formatPostsLink({query: 'pool:' + ctx.pool.id}) %>'><%- ctx.pool.postCount %> <%= ctx.tag.postCount === 1 ? "post" : "posts" %></a>.</p>
 
         <ul class='input'>
             <li>

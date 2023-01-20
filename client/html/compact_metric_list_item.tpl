@@ -4,7 +4,7 @@
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
         --><i class='fa fa-sliders-h tag-icon'></i><!--
     --></a><!--
-    --><a href="<%- ctx.formatClientLink('', {
+    --><a href="<%- ctx.formatPostsLink({
                 query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
