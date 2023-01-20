@@ -64,7 +64,7 @@ class Route {
 
         this.parameterNames = [];
         if (this.path === null) {
-            this.regex = /.*/;
+            this.regex = /.+/;
             this.parameterNames.push("wildcard");
         } else {
             let parts = [];
@@ -173,6 +173,7 @@ class Router {
 
     start() {
         if (this._running) {
+			console.log("running")
             return;
         }
         this._running = true;

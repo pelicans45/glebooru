@@ -72,7 +72,11 @@ let controllers = [
 ];
 
 Promise.resolve()
-    //.then(() => api.fetchConfig())
+    .then(() => {
+        if (settings.get().darkTheme) {
+            document.body.classList.add("darktheme");
+        }
+    })
     .then(
         () => {
             for (let controller of controllers) {
@@ -83,11 +87,6 @@ Promise.resolve()
             window.alert("Unknown server error");
         }
     )
-    .then(() => {
-        if (settings.get().darkTheme) {
-            document.body.classList.add("darktheme");
-        }
-    })
     .then(() => api.loginFromCookies())
     .then(
         () => {
