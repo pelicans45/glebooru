@@ -5,7 +5,7 @@ const lens = require("../lens.js");
 const topNavigation = require("../models/top_navigation.js");
 const TopNavigationView = require("../views/top_navigation_view.js");
 
-const topNavigation = document.getElementById("top-navigation");
+const topNavigationBar = document.getElementById("top-navigation");
 
 const extraNavLinkTabs = new Set([
     "settings",
@@ -36,7 +36,7 @@ class TopNavigationController {
 
     _evtActivate(e) {
         this._topNavigationView.activate(e.detail.key);
-        topNavigation.classList.toggle(
+        topNavigationBar.classList.toggle(
             "show-extra-nav-links",
             extraNavLinkTabs.has(e.detail.key)
         );
