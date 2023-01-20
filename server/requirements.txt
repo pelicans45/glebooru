@@ -15,4 +15,4 @@ SQLAlchemy>=1.0.12, <1.4
 youtube_dl
 setuptools
 waitress
-wsgi_lineprof
+

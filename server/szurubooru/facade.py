@@ -7,13 +7,13 @@ from typing import Any, Callable, Type
 import coloredlogs
 import sqlalchemy as sa
 import sqlalchemy.orm.exc
-
-from szurubooru import api, config, db, errors, middleware, rest
 from szurubooru.func.file_uploads import purge_old_uploads
 from szurubooru.func.posts import (
     update_all_md5_checksums,
     update_all_post_signatures,
 )
+
+from szurubooru import api, config, db, errors, middleware, rest
 
 
 def _map_error(
@@ -163,6 +163,3 @@ def create_app() -> Callable[[Any, Any], Any]:
 
 
 app = create_app()
-
-from wsgi_lineprof.middleware import LineProfilerMiddleware
-app = LineProfilerMiddleware(app)
