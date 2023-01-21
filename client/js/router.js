@@ -244,7 +244,7 @@ class Router {
             this._callbacks,
             [this._unhandled, (ctx, next) => {}]
         );
-
+		console.log("callChain", callChain)
         let i = 0;
         let fn = () => {
             // Passes old ctx into the callbacks

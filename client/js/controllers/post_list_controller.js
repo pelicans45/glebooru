@@ -256,6 +256,7 @@ class PostListController {
 module.exports = {
     default: (router) => {
         router.enter([], (ctx, next) => {
+			console.log("main postlistcontroller")
             ctx.controller = new PostListController(ctx);
         });
     },
