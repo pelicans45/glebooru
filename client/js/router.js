@@ -173,7 +173,6 @@ class Router {
 
     start() {
         if (this._running) {
-			console.log("running")
             return;
         }
         this._running = true;
@@ -228,11 +227,13 @@ class Router {
         } else {
             ctx.replaceState();
         }
+		console.log("ctx", ctx)
         return ctx;
     }
 
     dispatch(ctx, middle) {
         const swap = (_ctx, next) => {
+			console.log("dispatch - ctx", ctx)
             // replaces old ctx with the current ctx (new page + history state)
             this.ctx = ctx;
             middle();
