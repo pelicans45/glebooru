@@ -82,7 +82,9 @@ class Route {
             }
             let regexString = "^/" + parts.join("/");
             if (regexString === "^/") {
-                regexString += "((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+))?$";
+                //regexString += "((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+))?$";
+                regexString +=
+                    "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             } else {
                 regexString +=
                     "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
@@ -94,6 +96,9 @@ class Route {
 
     middleware(fn) {
         return (ctx, next) => {
+            console.log("middleware ctx", ctx);
+            console.log("middleware next", next);
+
             if (this.match(ctx.path, ctx.parameters)) {
                 return fn(ctx, next);
             }
@@ -124,7 +129,7 @@ class Route {
                         parameters[key] = uri.unescapeParam(subvalue);
                     }
                 } else if (name === "wildcard") {
-					console.log("wildcard match", path, value)
+                    console.log("wildcard match", path, value);
                     if (!value) {
                         continue;
                     }
@@ -133,7 +138,9 @@ class Route {
                     if (!query || query.indexOf("=") !== -1) {
                         continue;
                     }
-					parameters["query"] = uri.unescapeParam(query.replace(/\+/g, "%20"))
+                    parameters["query"] = uri.unescapeParam(
+                        query.replace(/\+/g, "%20")
+                    );
 
                     for (let word of parts.slice(1)) {
                         const [key, subvalue] = word.split("=", 2);
@@ -217,8 +224,8 @@ class Router {
     }
 
     replace(path, state, dispatch) {
-		console.log("path", path)
-		console.log("state", state)
+        console.log("path", path);
+        console.log("state", state);
         var ctx = new Context(path, state);
         if (dispatch) {
             this.dispatch(ctx, () => {
@@ -227,13 +234,13 @@ class Router {
         } else {
             ctx.replaceState();
         }
-		console.log("ctx", ctx)
+        console.log("ctx", ctx);
         return ctx;
     }
 
     dispatch(ctx, middle) {
         const swap = (_ctx, next) => {
-			console.log("dispatch - ctx", ctx)
+            console.log("dispatch - ctx", ctx);
             // replaces old ctx with the current ctx (new page + history state)
             this.ctx = ctx;
             middle();
@@ -244,7 +251,7 @@ class Router {
             this._callbacks,
             [this._unhandled, (ctx, next) => {}]
         );
-		console.log("callChain", callChain)
+        console.log("callChain", callChain);
         let i = 0;
         let fn = () => {
             // Passes old ctx into the callbacks
