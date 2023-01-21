@@ -1,13 +1,5 @@
 "use strict";
 
-/*
-const settings = require("./models/settings.js");
-
-if (settings.get().darkTheme) {
-    document.body.classList.add("darktheme");
-}
-*/
-
 require("./util/polyfill.js");
 const misc = require("./util/misc.js");
 const views = require("./util/views.js");
@@ -73,8 +65,8 @@ let controllers = [
 
 Promise.resolve()
     .then(() => {
-        if (settings.get().darkTheme) {
-            document.body.classList.add("darktheme");
+        if (!settings.get().darkTheme) {
+            document.body.classList.remove("darktheme");
         }
     })
     .then(

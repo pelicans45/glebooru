@@ -8,7 +8,7 @@
         <div class='wrapper'>
             <p>
                 <span class='buttons'>
-                    <a class='opacity'><i class='fa fa-eye'></i></a>
+                    <a class='opacity'><i class='la la-eye'></i></a>
                     <a class='close'>×</a>
                 </span>
                 Suggested tags

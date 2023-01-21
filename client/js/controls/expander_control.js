@@ -1,7 +1,7 @@
 "use strict";
 
-const ICON_CLASS_OPENED = "fa-chevron-down";
-const ICON_CLASS_CLOSED = "fa-chevron-up";
+const ICON_CLASS_OPENED = "la-chevron-down";
+const ICON_CLASS_CLOSED = "la-chevron-up";
 
 const views = require("../util/views.js");
 

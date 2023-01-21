@@ -18,8 +18,10 @@ module.exports = (router) => {
     router.enter(null, (ctx, next) => {
         if (postListRegex.test(ctx.canonicalPath)) {
             ctx.controller = PostListController(ctx);
+            console.log("wildcard postlist - ctx:", ctx);
         } else {
             ctx.controller = NotFoundController(ctx.canonicalPath);
+            console.log("wildcard notfound - ctx:", ctx);
         }
     });
 };

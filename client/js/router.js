@@ -218,6 +218,8 @@ class Router {
     }
 
     replace(path, state, dispatch) {
+		console.log("path", path)
+		console.log("state", state)
         var ctx = new Context(path, state);
         if (dispatch) {
             this.dispatch(ctx, () => {

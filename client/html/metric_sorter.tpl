@@ -12,10 +12,10 @@
                         <input class='mousetrap save-btn' type='submit' value='Save'>
                     <% } %>
                     <button class='compare left-lt-right'>
-                        <i class='fa fa-less-than'></i>
+                        <i class='la la-less-than'></i>
                     </button>
                     <button class='compare left-gt-right'>
-                        <i class='fa fa-greater-than'></i>
+                        <i class='la la-greater-than'></i>
                     </button>
                     <% if (window.innerWidth <= 1000) { %>
                         <a class='mousetrap append skip-btn'>Skip</a>

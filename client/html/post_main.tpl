@@ -11,7 +11,7 @@
                 <% } else { %>
                     <a rel='prev' class='inactive'>
                 <% } %>
-                    <i class='fa fa-chevron-left'></i>
+                    <i class='la la-chevron-left'></i>
                     <span class='vim-nav-hint'>&lt; Previous</span>
                 </a>
             </article>
@@ -25,7 +25,7 @@
                 <% } else { %>
                     <a rel='next' class='inactive'>
                 <% } %>
-                    <i class='fa fa-chevron-right'></i>
+                    <i class='la la-chevron-right'></i>
                     <span class='vim-nav-hint'>Next &gt;</span>
                 </a>
             </article>
@@ -45,20 +45,20 @@
                 <% } else { %>
                     <a rel='next' class='inactive'>
                 <% } %>
-                    <i title='Random image' class='fa fa-random'></i>
+                    <i title='Random image' class='la la-random'></i>
                     <span class='vim-nav-hint'>Random image</span>
                 </a>
             </article>
             <article class='edit-post'>
                 <% if (ctx.editMode) { %>
                     <a href='<%= ctx.getPostUrl(ctx.post.id, ctx.parameters) %>'>
-                        <i class='fa fa-reply'></i>
+                        <i class='la la-reply'></i>
                         <span class='vim-nav-hint'>Back to view mode</span>
                     </a>
                 <% } else { %>
                     <% if (ctx.canEditPosts || ctx.canDeletePosts || ctx.canFeaturePosts) { %>
                         <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>
-                        <i class='fa fa-pencil-alt'></i>
+                        <i class='la la-pencil-alt'></i>
                         <span class='vim-nav-hint'>Edit</span>
                         </a>
                     <% } %>

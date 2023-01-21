@@ -7,7 +7,7 @@
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
                 }) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
-        --><i class='fas fa-angle-right tag-icon'></i><!--
+        --><i class='las la-angle-right tag-icon'></i><!--
         --><%- ctx.postMetric.tagName %>:</a><!--
     --><%= ctx.makeNumericInput({
            name: 'value',
@@ -19,7 +19,7 @@
 --><% } else { %><!--
     --><a href="<%- ctx.formatClientLink('tag', ctx.tag.names[0]) %>"
           class="<%= ctx.makeCssName(ctx.tag.category, 'tag') %>"><!--
-        --><i class='fas fa-angle-right tag-icon'></i><!--
+        --><i class='las la-angle-right tag-icon'></i><!--
     --></a><!--
     --><a href="<%- ctx.formatPostsLink({
                 query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +

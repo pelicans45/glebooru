@@ -2,7 +2,7 @@
     <article class='details'>
         <section class='download'>
             <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
-                <i class='fa fa-download'></i>
+                <i class='la la-download'></i>
                 <span style="display: none">
                 <%= ctx.makeFileSize(ctx.post.fileSize) %> <!--
                 --><%- {
@@ -22,8 +22,8 @@
             </a>
             <%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>
             <% if (ctx.post.flags.length) { %><!--
-                --><% if (ctx.post.flags.includes('loop')) { %><i class='fa fa-redo-alt'></i><% } %><!--
-                --><% if (ctx.post.flags.includes('sound')) { %><i class='fa fa-volume-up'></i><% } %>
+                --><% if (ctx.post.flags.includes('loop')) { %><i class='la la-redo-alt'></i><% } %><!--
+                --><% if (ctx.post.flags.includes('sound')) { %><i class='la la-volume-up'></i><% } %>
             <% } %>
         </section>
 
@@ -34,7 +34,7 @@
 
         <% if (ctx.enableSafety) { %>
             <section class='safety'>
-                <i class='fa fa-circle safety-<%- ctx.post.safety %>'></i><!--
+                <i class='la la-circle safety-<%- ctx.post.safety %>'></i><!--
                 --><%- ctx.post.safety[0].toUpperCase() + ctx.post.safety.slice(1) %>
             </section>
         <% } %>
@@ -92,7 +92,7 @@
                     --><li><!--
                         --><% if (ctx.canViewTags) { %><!--
                         --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='tag-link-info <%= ctx.makeCssName(tag.category, 'tag') %>'><!--
-                            --><i class='fa fa-tag'></i><!--
+                            --><i class='la la-tag'></i><!--
                         --><% } %><!--
                         --><% if (ctx.canViewTags) { %><!--
                             --></a><!--

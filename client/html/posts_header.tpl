@@ -4,7 +4,7 @@
         %><wbr/><%
         %><input class='mousetrap' type='submit' value='Search'/><%
         %><button title="Random sort" id='randomize-button' class='icon-button'><%
-            %><i class="fa fa-random"><%
+            %><i class="la la-random"><%
         %></button><%
         %><% if (ctx.enableSafety) { %><%
             %><input data-safety=safe type='button' class='mousetrap safety safety-safe <%- ctx.settings.listPosts.safe ? '' : 'disabled' %>'/><%
@@ -13,12 +13,12 @@
         %><% } %><%
         %><% if (ctx.isLoggedIn) { %><%
             %><a class='mousetrap icon-button query-shortcut' data-term='special:liked'><%
-                %><i class="fa fa-thumbs-up term-selected"></i><%
-                %><i class="far fa-thumbs-up term-unselected"></i><%
+                %><i class="la la-thumbs-up term-selected"></i><%
+                %><i class="lar la-thumbs-up term-unselected"></i><%
             %></a><%
             %><a class='mousetrap icon-button query-shortcut' data-term='special:fav'><%
-                %><i class="fa fa-heart term-selected"></i><%
-                %><i class="far fa-heart term-unselected"></i><%
+                %><i class="la la-heart term-selected"></i><%
+                %><i class="lar la-heart term-unselected"></i><%
             %></a><%
         %><% } %>
         <!--
@@ -35,12 +35,12 @@
                 %><a class='mousetrap button append open bulk-edit-btn'><%
                     if (window.innerWidth <= 500) { %>Mass<%
                     } else { %>Mass edit<% }
-                    %><i class='fa fa-chevron-down icon-inline'></i><%
+                    %><i class='la la-chevron-down icon-inline'></i><%
                 %></a><%
                 %><a class='mousetrap button append close bulk-edit-btn'><%
                     if (window.innerWidth <= 500) { %>Mass<%
                     } else { %>Mass edit<% }
-                    %><i class='fa fa-chevron-up icon-inline'></i><%
+                    %><i class='la la-chevron-up icon-inline'></i><%
                 %></a><%
             %></span><%
         }
@@ -49,11 +49,11 @@
             %><span class="metrics-btn-holder"><%
                 %><a class='mousetrap button append open metrics-btn'><%
                     %>Metrics<%
-                    %><i class='fa fa-chevron-down icon-inline'></i><%
+                    %><i class='la la-chevron-down icon-inline'></i><%
                 %></a><%
                 %><a class='mousetrap button append close metrics-btn'><%
                     %>Metrics<%
-                    %><i class='fa fa-chevron-up icon-inline'></i><%
+                    %><i class='la la-chevron-up icon-inline'></i><%
                 %></a><%
             %></span><%
         }

@@ -92,7 +92,7 @@ function _makeTopNavigation() {
     ret.add("help", new TopNavigationItem("H", "Help", "help"));
     ret.add(
         "settings",
-        new TopNavigationItem(null, "<i class='fa fa-cog'></i>", "settings")
+        new TopNavigationItem(null, "<i class='la la-cog'></i>", "settings")
     );
     return ret;
 }

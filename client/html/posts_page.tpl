@@ -9,7 +9,7 @@
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
                         <span class='type' data-type='<%- post.type %>'>
                             <% if (post.type == 'video' || post.type == 'flash' || post.type == 'animation') { %>
-                                <span class='icon'><i class='fa fa-film'></i></span>
+                                <span class='icon'><i class='la la-film'></i></span>
                             <% } else { %>
                                 <%- post.type %>
                             <% } %>
@@ -19,19 +19,19 @@
                             <span class='stats'>
                                 <% if (post.score) { %>
                                     <span class='icon'>
-                                        <i class='fa fa-thumbs-up'></i>
+                                        <i class='la la-thumbs-up'></i>
                                         <%- post.score %>
                                     </span>
                                 <% } %>
                                 <% if (post.favoriteCount) { %>
                                     <span class='icon'>
-                                        <i class='fa fa-heart'></i>
+                                        <i class='la la-heart'></i>
                                         <%- post.favoriteCount %>
                                     </span>
                                 <% } %>
                                 <% if (post.commentCount) { %>
                                     <span class='icon'>
-                                        <i class='far fa-comment-dots'></i>
+                                        <i class='lar la-comment-dots'></i>
                                         <%- post.commentCount %>
                                     </span>
                                 <% } %>

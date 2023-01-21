@@ -2,7 +2,7 @@
     --><ul><!--
         --><button id="mobile-navigation-toggle"><!--
             --><span class="site-name"><%- ctx.name %></span><!--
-            --><span class="toggle-icon"><i class="fa fa-bars"></i></span><!--
+            --><span class="toggle-icon"><i class="la la-bars"></i></span><!--
         --></button><!--
         --><% for (let item of ctx.items) { %><!--
             --><% if (item.available) { %><!--

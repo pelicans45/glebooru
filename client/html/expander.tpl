@@ -2,7 +2,7 @@
     <header>
         <a href>
             <span><%- ctx.title %></span>
-            <i class='fa fa-chevron-down'></i>
+            <i class='la la-chevron-down'></i>
         </a>
     </header>
 

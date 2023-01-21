@@ -5,7 +5,7 @@
         <ul class='input'>
             <li style="display: none">
                 <%= ctx.makeCheckbox({
-                    text: "Enable keyboard shortcuts <a class='append icon' href='" + ctx.formatClientLink('help', 'keyboard') + "'><i class='fa fa-question-circle-o'></i></a>",
+                    text: "Enable keyboard shortcuts <a class='append icon' href='" + ctx.formatClientLink('help', 'keyboard') + "'><i class='la la-question-circle-o'></i></a>",
                     name: 'keyboard-shortcuts',
                     checked: ctx.browsingSettings.keyboardShortcuts,
                 }) %>

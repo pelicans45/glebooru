@@ -304,7 +304,7 @@ class TagInputControl extends events.EventTarget {
 
         const tagIconNode = document.createElement("i");
         tagIconNode.classList.add("fa");
-        tagIconNode.classList.add("fa-tag");
+        tagIconNode.classList.add("la-tag");
         tagIconNode.classList.add("tag-icon");
         tagLinkNode.appendChild(tagIconNode);
 

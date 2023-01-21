@@ -199,7 +199,7 @@ function bundleCss(domain, data) {
     const vendorStylesheet = `${outputDir}/vendor.css`;
 
     fs.copyFileSync(
-        "./node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+        "./node_modules/line-awesome/dist/line-awesome/css/line-awesome.min.css",
         vendorStylesheet
     );
     if (process.argv.includes("--gzip")) {
@@ -307,21 +307,22 @@ function bundleBinaryAssets(domain) {
 
     fs.copyFileSync(
         "./fonts/open_sans.woff2",
-        `${outputDir}/webfonts/open_sans.woff2`
+        `${outputDir}/fonts/open_sans.woff2`
     );
+
     for (let file of glob.sync(
-        "./node_modules/@fortawesome/fontawesome-free/webfonts/*.*"
+        "./node_modules/line-awesome/dist/line-awesome/fonts/*.*"
     )) {
         if (fs.lstatSync(file).isDirectory()) {
             continue;
         }
         fs.copyFileSync(
             file,
-            path.join(`${outputDir}/webfonts/`, path.basename(file))
+            path.join(`${outputDir}/fonts/`, path.basename(file))
         );
     }
     if (process.argv.includes("--gzip")) {
-        for (let file of glob.sync(`${outputDir}/webfonts/*.*`)) {
+        for (let file of glob.sync(`${outputDir}/fonts/*.*`)) {
             if (file.endsWith("woff2")) {
                 continue;
             }
@@ -396,7 +397,7 @@ function makeOutputDirs(domain) {
     const dirs = [
         //"./public",
         `./public/${domain}/css`,
-        `./public/${domain}/webfonts`,
+        `./public/${domain}/fonts`,
         `./public/${domain}/img`,
         `./public/${domain}/js`,
     ];
