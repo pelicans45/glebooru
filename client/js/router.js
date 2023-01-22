@@ -89,6 +89,8 @@ class Route {
                 regexString +=
                     "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             }
+
+			console.log("path", path, "regex", regexString)
             this.parameterNames.push("variable");
             this.regex = new RegExp(regexString);
         }
