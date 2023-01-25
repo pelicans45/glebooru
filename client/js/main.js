@@ -30,7 +30,12 @@ const settings = require("./models/settings.js");
 
 // register controller routes
 let controllers = [
-    require("./controllers/home_controller.js"),
+    require("./controllers/post_list_controller.js"),
+    require("./controllers/post_main_controller.js"),
+    require("./controllers/post_upload_controller.js"),
+    require("./controllers/post_detail_controller.js"),
+
+    //require("./controllers/home_controller.js"),
     require("./controllers/help_controller.js"),
     require("./controllers/auth_controller.js"),
 
@@ -38,11 +43,6 @@ let controllers = [
     require("./controllers/comments_controller.js"),
     require("./controllers/snapshots_controller.js"),
 
-    require("./controllers/post_detail_controller.js"),
-    require("./controllers/post_main_controller.js"),
-    require("./controllers/post_list_controller.js"),
-
-    require("./controllers/post_upload_controller.js"),
     require("./controllers/tag_controller.js"),
     require("./controllers/tag_list_controller.js"),
 
