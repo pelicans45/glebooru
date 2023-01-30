@@ -27,7 +27,7 @@ class TopNavigationView {
     }
 
     get _topNavigation() {
-        return this._hostNode.querySelector("top-navigation");
+        return this._hostNode.querySelector("#top-navigation");
     }
 
     get _navigationListNode() {
