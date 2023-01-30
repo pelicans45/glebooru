@@ -546,7 +546,9 @@ class PostsHeaderView extends events.EventTarget {
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query
-        const prevQuery = this._ctx.parameters.query.trim() || "";
+        const prevQuery = this._ctx.parameters.query
+            ? this._ctx.parameters.query.trim()
+            : "";
 
         parameters.offset =
             parameters.query === prevQuery ? this._ctx.parameters.offset : 0;

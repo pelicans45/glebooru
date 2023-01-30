@@ -33,14 +33,14 @@ function unescapeParam(text) {
 }
 
 function getPostsQuery(parameters) {
-    let normalQuery = (parameters.query.trim() || "");
-	if (!parameters.metrics) {
-		return normalQuery
-	}
+    let normalQuery = parameters.query ? parameters.query.trim() : "";
+    if (!parameters.metrics) {
+        return normalQuery;
+    }
     let metricQuery = parameters.metrics
         .split(" ") //see metric_header_control
-        .filter(m => m)
-        .map(m => m + " sort:metric-" + m)
+        .filter((m) => m)
+        .map((m) => m + " sort:metric-" + m)
         .join(" ");
     return normalQuery + " " + metricQuery;
 }
@@ -76,12 +76,14 @@ function formatPostsLink(...values) {
             // assert this is the last piece
             let variableParts = [];
             for (let key of Object.keys(value)) {
-				if (key === "query") {
-					if (value[key]) {
-						parts.unshift(escapeParam(value.toString()).replace(/%20/g, "+"));
-					}
-					continue
-				}
+                if (key === "query") {
+                    if (value[key]) {
+                        parts.unshift(
+                            escapeParam(value.toString()).replace(/%20/g, "+")
+                        );
+                    }
+                    continue;
+                }
 
                 if (value[key]) {
                     variableParts.push(
