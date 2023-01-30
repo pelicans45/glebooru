@@ -2,7 +2,7 @@
 
 const topNavigation = require("../models/top_navigation.js");
 const NotFoundView = require("../views/not_found_view.js");
-const { PostListController } = require("./post_list_controller.js");
+const PostListController = require("./post_list_controller_class.js");
 
 const postListRegex = /^\/[\w\-%=:;+]+$/;
 

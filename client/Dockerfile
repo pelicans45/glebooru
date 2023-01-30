@@ -27,7 +27,3 @@ COPY --from=approot / /
 
 CMD ["/docker-start.sh"]
 VOLUME ["/data"]
-
-ARG DOCKER_REPO
-ARG BUILD_DATE
-ARG SOURCE_COMMIT

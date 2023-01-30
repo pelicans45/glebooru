@@ -30,7 +30,7 @@ const settings = require("./models/settings.js");
 
 // register controller routes
 const controllers = [
-    require("./controllers/post_list_controller.js"),
+    require("./controllers/post_list_controller_class.js"),
     require("./controllers/post_main_controller.js"),
     require("./controllers/post_upload_controller.js"),
     require("./controllers/post_detail_controller.js"),
