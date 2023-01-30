@@ -97,9 +97,6 @@ class Route {
 
     middleware(fn) {
         return (ctx, next) => {
-            console.log("middleware ctx", ctx);
-            console.log("middleware next", next);
-
             if (this.match(ctx.path, ctx.parameters)) {
                 return fn(ctx, next);
             }
@@ -169,7 +166,6 @@ class Router {
     }
 
     enter(path) {
-		console.log("enter", path)
         const route = new Route(path);
         for (let i = 1; i < arguments.length; ++i) {
             this._callbacks.push(route.middleware(arguments[i]));
@@ -229,8 +225,6 @@ class Router {
     }
 
     replace(path, state, dispatch) {
-        console.log("path", path);
-        console.log("state", state);
         var ctx = new Context(path, state);
         if (dispatch) {
             this.dispatch(ctx, () => {
@@ -239,25 +233,21 @@ class Router {
         } else {
             ctx.replaceState();
         }
-        console.log("ctx", ctx);
         return ctx;
     }
 
     dispatch(ctx, middle) {
         const swap = (_ctx, next) => {
-            console.log("dispatch - ctx", ctx);
             // replaces old ctx with the current ctx (new page + history state)
             this.ctx = ctx;
             middle();
             next();
         };
-        console.log("callbacks", this._callbacks);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
             [this._unhandled, (ctx, next) => {}]
         );
-        console.log("callChain", callChain);
         let i = 0;
         let fn = () => {
             // Passes old ctx into the callbacks

@@ -19,11 +19,11 @@ module.exports = (router) => {
         if (postListRegex.test(ctx.canonicalPath)) {
             console.log("wildcard postlist - ctx:", ctx);
 
-            ctx.controller = PostListController(ctx);
+            ctx.controller = new PostListController(ctx);
         } else {
             console.log("wildcard notfound - ctx:", ctx);
 
-            ctx.controller = NotFoundController(ctx.canonicalPath);
+            ctx.controller = new NotFoundController(ctx.canonicalPath);
         }
     });
 };

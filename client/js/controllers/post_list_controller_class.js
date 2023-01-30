@@ -208,9 +208,10 @@ class PostListController {
     _evtDeleteSelectedPosts(e) {
         if (this._postsMarkedForDeletion.length == 0) return;
 
+		const noun = this._postsMarkedForDeletion.length === 1 ? "post" : "posts";
         if (
             confirm(
-                `Are you sure you want to delete ${this._postsMarkedForDeletion.length} posts?`
+                `Are you sure you want to delete ${this._postsMarkedForDeletion.length} ${noun}?`
             )
         ) {
             Promise.all(
