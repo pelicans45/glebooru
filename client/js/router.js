@@ -92,7 +92,6 @@ class Route {
                     "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             }
 
-            console.log("path", path, "regex", regexString);
             this.parameterNames.push("variable");
             this.regex = new RegExp(regexString);
         }
@@ -243,6 +242,7 @@ class Router {
             middle();
             next();
         };
+		console.log("ctx", ctx)
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,

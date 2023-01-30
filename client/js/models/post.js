@@ -13,6 +13,8 @@ const PostMetricList = require("./post_metric_list.js");
 const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 
+const baseUrl = document.getElementsByTagName("base")[0].href;
+
 const maxNameLength = 250;
 
 class Post extends events.EventTarget {
@@ -532,10 +534,7 @@ class Post extends events.EventTarget {
             _user: response.user,
             _safety: response.safety,
             _contentUrl: response.contentUrl,
-            _fullContentUrl: new URL(
-                response.contentUrl,
-                "/"
-            ).href,
+            _fullContentUrl: new URL(response.contentUrl, baseUrl).href,
             _thumbnailUrl: response.thumbnailUrl,
             _source: response.source,
             _canvasWidth: response.canvasWidth,
