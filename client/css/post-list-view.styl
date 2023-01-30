@@ -160,7 +160,7 @@
                         &:after
                             color: white
                             font-family: LineAwesome;
-                            content: "\f1f8"; // fa-trash
+                            content: "\f1f8"; // la-trash
                     &:not(.delete)
                         background: rgba(200, 200, 200, 0.7)
                         &:after
@@ -331,6 +331,7 @@
         .append
             @media (max-width: 1000px)
                 margin-left: 0
+    /*
     .bulk-edit-delete
         &.opened
             .start
@@ -345,6 +346,20 @@
             &.start
                 @media (max-width: 1000px)
                     margin-left: 0
+        .start
+            margin-left: 1em
+    */
+    .bulk-edit-delete
+        &.opened
+            .start
+                @media (max-width: 1000px)
+                    margin-left: 0
+        &:not(.opened)
+            .start
+                display: none
+        .append.open
+            @media (max-width: 1000px)
+                margin-left: 0
         .start
             margin-left: 1em
     .safety

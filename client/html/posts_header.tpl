@@ -85,8 +85,8 @@
     %><% if (ctx.canBulkDelete) { %><%
         %><form class='horizontal bulk-edit bulk-edit-delete'><%
             %><a class='mousetrap button append open'>Mass delete</a><%
-            %><a class='mousetrap button append close'>Stop deleting</a><%
             %><input class='mousetrap start' type='submit' value='Delete selected posts'/><%
+            %><a class='mousetrap button append close'>Stop deleting</a><%
         %></form><%
     %><% } %>
     </div>

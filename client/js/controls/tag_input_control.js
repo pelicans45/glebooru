@@ -130,6 +130,9 @@ class TagInputControl extends events.EventTarget {
         this._tagInputNode.addEventListener("paste", (e) =>
             this._evtInputPaste(e)
         );
+        this._tagInputNode.addEventListener("blur", (e) =>
+            this._evtBlur(e)
+        );
 
         this._editAreaNode
             .querySelector("a.opacity")
@@ -283,6 +286,15 @@ class TagInputControl extends events.EventTarget {
         if (e.which === KEY_RETURN || e.which === KEY_SPACE) {
             e.preventDefault();
             this._hideAutoComplete();
+            this.addTagByText(this._tagInputNode.value, SOURCE_USER_INPUT);
+            this._tagInputNode.value = "";
+        }
+    }
+
+    _evtBlur(e) {
+        //e.preventDefault();
+        this._hideAutoComplete();
+        if (this._tagInputNode.value) {
             this.addTagByText(this._tagInputNode.value, SOURCE_USER_INPUT);
             this._tagInputNode.value = "";
         }

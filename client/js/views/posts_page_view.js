@@ -161,7 +161,7 @@ class PostsPageView extends events.EventTarget {
         this.dispatchEvent(
             new CustomEvent("markForDeletion", {
                 detail: {
-                    post: post,
+                    post,
                     delete: linkNode.classList.contains("delete"),
                 },
             })
@@ -197,17 +197,18 @@ class PostsPageView extends events.EventTarget {
             const relationFlipperNode =
                 this._getRelationFlipperNode(listItemNode);
             if (relationFlipperNode) {
-                let related = this._ctx.parameters.relations.includes(post.id);
+                let related = this._ctx.parameters.relations.includes(postId);
                 relationFlipperNode.classList.toggle("related", related);
             }
 
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {
-                if (
-                    this._ctx.bulkEdit.delete.indexOf(parseInt(postId)) !== -1
-                ) {
-                    deleteFlipperNode.classList.toggle("delete", true);
-                }
+                deleteFlipperNode.classList.toggle(
+                    "delete",
+                    this._ctx.bulkEdit.markedForDeletion.some(
+                        (x) => x.id == postId
+                    )
+                );
             }
         }
     }

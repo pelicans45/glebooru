@@ -130,7 +130,7 @@ class BulkTagEditor extends BulkEditor {
     _evtOpenLinkClick(e) {
         e.preventDefault();
         this.toggleOpen(true);
-        this.focus();
+        this.focusQueryInput();
         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
     }
 
@@ -214,9 +214,13 @@ class PostsHeaderView extends events.EventTarget {
         search.searchInputNodeFocusHelper(this._queryInputNode);
 
         // Focus search input on hover
-        this._queryInputNode.addEventListener("mouseover", (e) => {
-            this.focus();
-        });
+        this._queryInputNode.addEventListener(
+            "mouseover",
+            (e) => {
+                this.focusQueryInput();
+            },
+            { passive: true }
+        );
 
         keyboard.bind("p", () => this._focusFirstPostNode());
 
@@ -529,7 +533,7 @@ class PostsHeaderView extends events.EventTarget {
             this._queryInputNode.value += space + "sort:random ";
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
-		// localStorage.r = this._ctx.parameters.r;
+        // localStorage.r = this._ctx.parameters.r;
         this._navigate();
     }
 

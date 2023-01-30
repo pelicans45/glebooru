@@ -64,7 +64,7 @@ class Route {
 
         this.parameterNames = [];
         if (this.path === null) {
-            this.regex = /.+/;
+            this.regex = /(.+)/;
             this.parameterNames.push("wildcard");
         } else {
             let parts = [];
@@ -82,15 +82,14 @@ class Route {
             }
             let regexString = "^/" + parts.join("/");
             if (regexString === "^/") {
-                //regexString += "((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+))?$";
-                regexString +=
-                    "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
+                regexString += "((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+))?$";
+                //regexString += "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             } else {
                 regexString +=
                     "(?:/*|/((?:(?:[a-z]+=[^/]+);)*(?:[a-z]+=[^/]+)))$";
             }
 
-			console.log("path", path, "regex", regexString)
+            console.log("path", path, "regex", regexString);
             this.parameterNames.push("variable");
             this.regex = new RegExp(regexString);
         }
@@ -302,13 +301,13 @@ const _onPopState = (router) => {
 
 const _onClick = (router) => {
     return (e) => {
-        if (1 !== _which(e)) {
-            return;
-        }
-        if (e.metaKey || e.ctrlKey || e.shiftKey) {
-            return;
-        }
-        if (e.defaultPrevented) {
+        if (
+            _which(e) !== 1 ||
+            e.metaKey ||
+            e.ctrlKey ||
+            e.shiftKey ||
+            e.defaultPrevented
+        ) {
             return;
         }
 
@@ -328,16 +327,11 @@ const _onClick = (router) => {
         }
 
         const link = el.getAttribute("href");
-        if (el.pathname === location.pathname && (el.hash || "#" === link)) {
-            return;
-        }
-        if (link && link.indexOf("mailto:") > -1) {
-            return;
-        }
-        if (el.target) {
-            return;
-        }
-        if (!_isSameOrigin(el.href)) {
+        if (
+            (el.pathname === location.pathname && (el.hash || link === "#")) ||
+            el.target ||
+            !_isSameOrigin(el.href)
+        ) {
             return;
         }
 

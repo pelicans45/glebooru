@@ -59,7 +59,6 @@ class PostListController {
         );
 
         if (this._headerView._bulkDeleteEditor) {
-            // This doesn't feel like the best solution
             this._headerView._bulkDeleteEditor.addEventListener(
                 "deleteSelectedPosts",
                 (e) => {
@@ -68,8 +67,7 @@ class PostListController {
             );
         }
 
-        // Contains the id of each post that we want to delete (while using the bulk delete feature).
-        this._bulkEditDelete = [];
+        this._postsMarkedForDeletion = [];
 
         this._syncPageController();
     }
@@ -163,14 +161,15 @@ class PostListController {
         this._ctx.parameters.relations = relations.join(" ") || " ";
     }
 
+    /*
     _evtMarkForDeletion(e) {
         const postId = e.detail.post.id;
 
         if (e.detail.delete) {
-            this._bulkEditDelete.push(postId);
+            this._postsMarkedForDeletion.push(postId);
         } else {
             // Remove item from delete list
-            this._bulkEditDelete = this._bulkEditDelete.filter(
+            this._postsMarkedForDeletion = this._postsMarkedForDeletion.filter(
                 (x) => x !== postId
             );
         }
@@ -179,17 +178,49 @@ class PostListController {
     async _evtDeleteSelectedPosts(e) {
         if (
             confirm(
-                `Are you sure you want to delete ${this._bulkEditDelete.length} posts?`
+                `Are you sure you want to delete ${this._postsMarkedForDeletion.length} posts?`
             )
         ) {
-            for (let postId of this._bulkEditDelete) {
+            for (let postId of this._postsMarkedForDeletion) {
                 const post = await Post.get(postId);
                 await post.delete();
             }
 
             // Reset delete list and refresh the post view
-            this._bulkEditDelete = [];
+            this._postsMarkedForDeletion = [];
             this._headerView._navigate();
+        }
+    }
+	*/
+
+    _evtMarkForDeletion(e) {
+        // Add or remove post from delete list
+        if (e.detail.delete) {
+            this._postsMarkedForDeletion.push(e.detail.post);
+        } else {
+            const postId = e.detail.post.id;
+            this._postsMarkedForDeletion = this._postsMarkedForDeletion.filter(
+                (x) => x.id != postId
+            );
+        }
+    }
+
+    _evtDeleteSelectedPosts(e) {
+        if (this._postsMarkedForDeletion.length == 0) return;
+
+        if (
+            confirm(
+                `Are you sure you want to delete ${this._postsMarkedForDeletion.length} posts?`
+            )
+        ) {
+            Promise.all(
+                this._postsMarkedForDeletion.map((post) => post.delete())
+            )
+                .catch((error) => window.alert(error.message))
+                .then(() => {
+                    this._postsMarkedForDeletion = [];
+                    this._headerView._navigate();
+                });
         }
     }
 
@@ -227,7 +258,7 @@ class PostListController {
                     bulkEdit: {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
-                        delete: this._bulkEditDelete,
+                        delete: this._postsMarkedForDeletion,
                     },
                     postFlow: settings.get().postFlow,
                 });
@@ -256,7 +287,7 @@ class PostListController {
 module.exports = {
     default: (router) => {
         router.enter([], (ctx, next) => {
-			console.log("main postlistcontroller")
+            console.log("main postlistcontroller");
             ctx.controller = new PostListController(ctx);
         });
     },
