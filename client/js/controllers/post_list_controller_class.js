@@ -284,3 +284,4 @@ class PostListController {
     }
 }
 
+module.exports = PostListController;
