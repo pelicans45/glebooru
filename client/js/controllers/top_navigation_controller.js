@@ -9,9 +9,8 @@ class TopNavigationController {
     constructor() {
         this._topNavigationView = new TopNavigationView();
 
-        this._topNavigationView._topNavigation.addEventListener(
-            "activate",
-            (e) => this._evtActivate(e)
+        topNavigation.addEventListener("activate", (e) =>
+            this._evtActivate(e)
         );
 
         api.addEventListener("login", (e) => this._evtAuthChange(e));
