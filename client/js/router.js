@@ -111,10 +111,13 @@ class Route {
         const qsIndex = path.indexOf("?");
         const pathname = ~qsIndex ? path.slice(0, qsIndex) : path;
         const match = this.regex.exec(pathname);
+        console.log("pathname", pathname, "regex", this.regex, "match", match);
 
         if (!match) {
             return false;
         }
+
+		console.log("parameterNames", this.parameterNames)
 
         try {
             for (let i = 1; i < match.length; i++) {
@@ -166,6 +169,7 @@ class Router {
     }
 
     enter(path) {
+		console.log("enter", path)
         const route = new Route(path);
         for (let i = 1; i < arguments.length; ++i) {
             this._callbacks.push(route.middleware(arguments[i]));
@@ -247,7 +251,7 @@ class Router {
             middle();
             next();
         };
-		console.log("callbacks", this._callbacks);
+        console.log("callbacks", this._callbacks);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,

@@ -29,7 +29,7 @@ const api = require("./api.js");
 const settings = require("./models/settings.js");
 
 // register controller routes
-let controllers = [
+const controllers = [
     require("./controllers/post_list_controller.js"),
     require("./controllers/post_main_controller.js"),
     require("./controllers/post_upload_controller.js"),
@@ -71,7 +71,8 @@ Promise.resolve()
     })
     .then(
         () => {
-            for (let controller of controllers) {
+            for (const controller of controllers) {
+                console.log("controller", controller);
                 controller(router);
             }
         },
