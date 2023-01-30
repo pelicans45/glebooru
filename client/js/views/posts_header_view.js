@@ -335,6 +335,10 @@ class PostsHeaderView extends events.EventTarget {
         }
     }
 
+    focusQueryInput() {
+        search.focusInputNode(this._queryInputNode);
+    }
+
     get _formNode() {
         return this._hostNode.querySelector("form.search");
     }
