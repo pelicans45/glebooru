@@ -5,6 +5,15 @@ const settings = require("../models/settings.js");
 
 const template = views.getTemplate("top-navigation");
 
+const extraNavLinkTabs = new Set([
+    "settings",
+    "help",
+    "account",
+    "login",
+    "logout",
+    "register",
+]);
+
 class TopNavigationView {
     constructor() {
         this._hostNode = document.getElementById("top-navigation-holder");
@@ -15,6 +24,10 @@ class TopNavigationView {
 
     get _mobileNavigationToggleNode() {
         return this._hostNode.querySelector("#mobile-navigation-toggle");
+    }
+
+    get _topNavigation() {
+        return this._hostNode.querySelector("top-navigation");
     }
 
     get _navigationListNode() {
@@ -38,6 +51,8 @@ class TopNavigationView {
                 itemNode.getAttribute("data-name") === key
             );
         }
+
+        this._toggleExtraNavLinks(key);
     }
 
     _bindMobileNavigationEvents() {
@@ -58,6 +73,13 @@ class TopNavigationView {
 
     _navigationLinkClick(e) {
         this._navigationListNode.classList.remove("opened");
+    }
+
+    _toggleExtraNavLinks(key) {
+        this._topNavigation.classList.toggle(
+            "show-extra-nav-links",
+            extraNavLinkTabs.has(key)
+        );
     }
 }
 

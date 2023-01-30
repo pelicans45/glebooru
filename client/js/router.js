@@ -10,9 +10,12 @@
 // - rename .save() to .replaceState()
 // - offer .url
 
-const clickEvent = document.ontouchstart ? "touchstart" : "click";
 const uri = require("./util/uri.js");
+const mousetrap = require("mousetrap");
+
 let location = window.history.location || window.location;
+
+const clickEvent = document.ontouchstart ? "touchstart" : "click";
 const base = _getBaseHref();
 
 function _getOrigin() {
@@ -64,7 +67,7 @@ class Route {
 
         this.parameterNames = [];
         if (this.path === null) {
-            this.regex = /(.+)/;
+            this.regex = /^\/(.+)/;
             this.parameterNames.push("wildcard");
         } else {
             let parts = [];
@@ -98,6 +101,7 @@ class Route {
     middleware(fn) {
         return (ctx, next) => {
             if (this.match(ctx.path, ctx.parameters)) {
+                mousetrap.reset();
                 return fn(ctx, next);
             }
             next();
@@ -108,13 +112,9 @@ class Route {
         const qsIndex = path.indexOf("?");
         const pathname = ~qsIndex ? path.slice(0, qsIndex) : path;
         const match = this.regex.exec(pathname);
-        console.log("pathname", pathname, "regex", this.regex, "match", match);
-
         if (!match) {
             return false;
         }
-
-		console.log("parameterNames", this.parameterNames)
 
         try {
             for (let i = 1; i < match.length; i++) {

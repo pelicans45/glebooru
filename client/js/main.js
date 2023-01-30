@@ -17,11 +17,14 @@ router.exit(null, (ctx, next) => {
     }
 });
 
+/*
 const mousetrap = require("mousetrap");
 router.enter(null, (ctx, next) => {
+	console.log("mousetrap reset")
     mousetrap.reset();
     next();
 });
+*/
 
 const tags = require("./tags.js");
 const pools = require("./pools.js");
@@ -33,7 +36,6 @@ const controllers = [
     require("./controllers/post_list_controller.js"),
     require("./controllers/post_main_controller.js"),
     require("./controllers/post_upload_controller.js"),
-    require("./controllers/post_detail_controller.js"),
 
     require("./controllers/tag_list_controller.js"),
     require("./controllers/settings_controller.js"),
@@ -44,6 +46,7 @@ const controllers = [
     require("./controllers/help_controller.js"),
     require("./controllers/auth_controller.js"),
 
+    require("./controllers/post_detail_controller.js"),
     require("./controllers/pool_controller.js"),
     require("./controllers/pool_list_controller.js"),
     require("./controllers/pool_categories_controller.js"),
@@ -72,7 +75,6 @@ Promise.resolve()
     .then(
         () => {
             for (const controller of controllers) {
-                console.log("controller", controller);
                 controller(router);
             }
         },
