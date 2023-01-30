@@ -501,7 +501,9 @@ class PostsHeaderView extends events.EventTarget {
     _evtToggleQueryShortcut(e) {
         e.preventDefault();
         const term = e.currentTarget.getAttribute("data-term");
-        let query = this._ctx.parameters.query || "";
+        let query = this._ctx.parameters.query
+            ? this._ctx.parameters.query.trim()
+            : "";
         if (query.includes(term)) {
             query = query.replace(" " + term, "");
             query = query.replace(term, "");
@@ -534,7 +536,7 @@ class PostsHeaderView extends events.EventTarget {
         e.preventDefault();
         if (!this._queryInputNode.value.includes("sort:random")) {
             const space = this._queryInputNode.value ? " " : "";
-            this._queryInputNode.value += space + "sort:random ";
+            this._queryInputNode.value = this._queryInputNode.value.trim() + space + "sort:random ";
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         // localStorage.r = this._ctx.parameters.r;

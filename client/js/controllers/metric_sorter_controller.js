@@ -120,7 +120,9 @@ class MetricSorterController {
         let unsetMetricsQuery = this._metricNames
             .map((m) => `${m} -metric:${m}`)
             .join(" ");
-        let filterQuery = this._ctx.parameters.query || "";
+        let filterQuery = this._ctx.parameters.query
+            ? this._ctx.parameters.query.trim()
+            : "";
         let unsetFullQuery = `${filterQuery} ${unsetMetricsQuery} sort:random`;
 
         return PostList.search(

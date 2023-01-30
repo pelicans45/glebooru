@@ -199,7 +199,7 @@ function getPostUrl(id, parameters) {
         id,
         parameters
             ? {
-                  query: parameters.query.trim(),
+                  query: parameters.query ? parameters.query.trim() : "",
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -214,7 +214,7 @@ function getPostEditUrl(id, parameters) {
         "edit",
         parameters
             ? {
-                  query: parameters.query.trim(),
+                  query: parameters.query ? parameters.query.trim() : "",
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -229,7 +229,7 @@ function getMetricSorterUrl(id, parameters) {
         "metric-sorter",
         parameters
             ? {
-                  query: parameters.query.trim(),
+                  query: parameters.query ? parameters.query.trim() : "",
                   metrics: parameters.metrics,
               }
             : {}

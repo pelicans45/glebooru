@@ -80,7 +80,9 @@ class TagListController {
                 }
 
                 return TagList.search(
-                    this._ctx.parameters.query,
+                    this._ctx.parameters.query
+                        ? this._ctx.parameters.query.trim()
+                        : "",
                     offset,
                     limit,
                     fields
