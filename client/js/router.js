@@ -247,6 +247,7 @@ class Router {
             middle();
             next();
         };
+		console.log("callbacks", this._callbacks);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
