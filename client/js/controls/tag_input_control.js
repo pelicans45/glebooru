@@ -6,7 +6,7 @@ const tags = require("../tags.js");
 const misc = require("../util/misc.js");
 const uri = require("../util/uri.js");
 const Tag = require("../models/tag.js");
-const TagList = require("../models/tag_list.js");
+//const TagList = require("../models/tag_list.js");
 const settings = require("../models/settings.js");
 const events = require("../events.js");
 const views = require("../util/views.js");
@@ -397,10 +397,13 @@ class TagInputControl extends events.EventTarget {
     }
 
     _loadSuggestions(tag) {
+		/*
         const browsingSettings = settings.get();
         if (!browsingSettings.tagSuggestions) {
             return;
         }
+		*/
+		
         api.get(uri.formatApiLink("tag-siblings", tag.names[0]), {
             noProgress: true,
         })

@@ -213,6 +213,7 @@ class PostsHeaderView extends events.EventTarget {
 
         search.searchInputNodeFocusHelper(this._queryInputNode);
 
+		/*
         // Focus search input on hover
         this._queryInputNode.addEventListener(
             "mouseover",
@@ -221,6 +222,7 @@ class PostsHeaderView extends events.EventTarget {
             },
             { passive: true }
         );
+		*/
 
         keyboard.bind("p", () => this._focusFirstPostNode());
 

@@ -30,7 +30,7 @@
                     //transition: background 0.2s linear, box-shadow 0.2s linear
                     transition: background 0.15s linear, box-shadow 0.15s linear
                     &:not(.inactive):hover
-                        background: lighten($main-color, 90%)
+                        background: darken($main-color, 90%)
                 i
                     font-size: 140%
                 text-align: center
@@ -81,10 +81,10 @@
 .post-view .readonly-sidebar
     display: grid
     .la-download
-        color: #7635fe
+        color: $download-icon-color
         font-size: 32px
         &:hover
-            color: #9464f8
+            color: darken($download-icon-color, 10%)
 
     .details
         a[download]
@@ -108,9 +108,13 @@
                 height: 1em
                 margin: -0.1em 0.6em 0 0
             time
-                font-size: 90%
+                font-size: 85%
+                //color: #b4b4b4
                 display: block
                 margin-top: 0.5em
+
+        .dims
+            display: none
 
         .zoom
             display: none
@@ -173,6 +177,7 @@
                 display: none
 
     .tags
+        margin-top: 1em
         .tag-link-info
             &:hover
                 opacity: 0.9

@@ -32,6 +32,7 @@ class HelpView {
             isUniversal: lens.isUniversal,
             universalHostname: lens.universalHostname,
             description: lens.site.description,
+			tips: lens.site.tips,
         };
 
         section = section || "tips";

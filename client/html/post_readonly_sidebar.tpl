@@ -3,9 +3,10 @@
         <section class='download'>
             <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
                 <i class='la la-download'></i>
+                <!--
                 <span style="display: none">
-                <%= ctx.makeFileSize(ctx.post.fileSize) %> <!--
-                --><%- {
+                <%= ctx.makeFileSize(ctx.post.fileSize) %>
+                <%- {
                     'image/gif': 'GIF',
                     'image/jpeg': 'JPEG',
                     'image/png': 'PNG',
@@ -19,12 +20,15 @@
                     'application/x-shockwave-flash': 'SWF',
                 }[ctx.post.mimeType] %>
                 </span>
+                -->
             </a>
-            <%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>
-            <% if (ctx.post.flags.length) { %><!--
-                --><% if (ctx.post.flags.includes('loop')) { %><i class='la la-redo-alt'></i><% } %><!--
-                --><% if (ctx.post.flags.includes('sound')) { %><i class='la la-volume-up'></i><% } %>
+            <span class='dims'><%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %></span>
+            <!--
+            <% if (ctx.post.flags.length) { %>
+                <% if (ctx.post.flags.includes('loop')) { %><i class='la la-redo-alt'></i><% } %>
+                <% if (ctx.post.flags.includes('sound')) { %><i class='la la-volume-up'></i><% } %>
             <% } %>
+            -->
         </section>
 
         <section class='upload-info'>
@@ -64,7 +68,6 @@
 
         <section class='social'>
             <div class='score-container'></div>
-
             <div class='fav-container'></div>
         </section>
     </article>

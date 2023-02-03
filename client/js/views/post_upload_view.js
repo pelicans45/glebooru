@@ -2,6 +2,7 @@
 
 const events = require("../events.js");
 const api = require("../api.js");
+const lens = require("../lens.js");
 const views = require("../util/views.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
 const TagList = require("../models/tag_list.js");

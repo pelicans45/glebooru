@@ -441,7 +441,13 @@ class Api extends events.EventTarget {
                 );
             }
 
+			/*
             if (!options.noProgress) {
+                progress.start();
+            }
+			*/
+
+            if (options.progress) {
                 progress.start();
             }
 

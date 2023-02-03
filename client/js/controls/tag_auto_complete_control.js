@@ -70,6 +70,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
             };
         }
 
+        console.log("tagautocomplete");
         super(input, options);
     }
 }
