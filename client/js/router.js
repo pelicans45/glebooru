@@ -67,8 +67,9 @@ class Route {
 
         this.parameterNames = [];
         if (this.path === null) {
-            this.regex = /^\/(.+)/;
-            this.parameterNames.push("wildcard");
+            //this.regex = /^\/(.+)/;
+            //this.parameterNames.push("wildcard");
+			this.regex = /.*/;
         } else {
             let parts = [];
             for (let component of this.path) {
@@ -100,7 +101,7 @@ class Route {
     middleware(fn) {
         return (ctx, next) => {
             if (this.match(ctx.path, ctx.parameters)) {
-                mousetrap.reset();
+                //mousetrap.reset();
                 return fn(ctx, next);
             }
             next();

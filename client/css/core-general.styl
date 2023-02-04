@@ -288,10 +288,12 @@ nav
             li:not(.active) a
                 color: $inactive-tab-text-color-darktheme
             li:hover:not(.active) a
-                color: $active-tab-text-hover-color-darktheme
+                color: $inactive-tab-text-hover-color-darktheme
             li.active a
                 background: $active-tab-background-color-darktheme
                 color: $active-tab-text-color-darktheme
+            li.active:hover a
+                color: $active-tab-text-color-color-darktheme
             :focus
                 background: $focused-tab-background-color-darktheme
     &#top-navigation

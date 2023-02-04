@@ -17,14 +17,12 @@ router.exit(null, (ctx, next) => {
     }
 });
 
-/*
 const mousetrap = require("mousetrap");
 router.enter(null, (ctx, next) => {
-	console.log("mousetrap reset")
+    console.log("mousetrap reset");
     mousetrap.reset();
     next();
 });
-*/
 
 const tags = require("./tags.js");
 const pools = require("./pools.js");
