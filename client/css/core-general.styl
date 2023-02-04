@@ -275,12 +275,12 @@ nav
             ul li[data-name=logout]:not(.active) a,
             ul li[data-name=account]:not(.active) a,
             ul li[data-name=help]:not(.active) a
-                background: #57575c
-                color: #e9e9ea
+                background: $extra-nav-link-background-color
+                color: $extra-nav-link-color !important
 
                 &:hover
-                    background: #76768f
-                    color: #f0f0f0
+                    background: lighten($extra-nav-link-background-color, 10%)
+                    color: lighten($extra-nav-link-color, 10%) !important
 
 .darktheme nav
     &.buttons
@@ -288,7 +288,7 @@ nav
             li:not(.active) a
                 color: $inactive-tab-text-color-darktheme
             li:hover:not(.active) a
-                color: $active-tab-text-color-darktheme
+                color: $active-tab-text-hover-color-darktheme
             li.active a
                 background: $active-tab-background-color-darktheme
                 color: $active-tab-text-color-darktheme

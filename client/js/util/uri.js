@@ -79,7 +79,9 @@ function formatPostsLink(...values) {
                 if (key === "query") {
                     if (value[key]) {
                         parts.unshift(
-                            escapeParam(value[key].toString()).replace(/%20/g, "+")
+                            escapeParam(value[key].toString())
+                                .replace(/%20/g, "+")
+                                .replace(/%3A/g, ":")
                         );
                     }
                     continue;

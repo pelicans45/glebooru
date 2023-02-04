@@ -29,8 +29,8 @@ class FileDropperControl extends events.EventTarget {
         this._fileInputNode.style.display = "none";
 
         if (options.allowMultiple) {
-            this._fileInputNode.setAttribute("directory", "");
-            this._fileInputNode.setAttribute("webkitdirectory", "");
+            //this._fileInputNode.setAttribute("directory", "");
+            //this._fileInputNode.setAttribute("webkitdirectory", "");
             this._fileInputNode.setAttribute("multiple", "");
         }
 

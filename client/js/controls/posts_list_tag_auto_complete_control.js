@@ -1,8 +1,9 @@
 const TagList = require("../models/tag_list.js");
-const TagAutoCompleteControl = require("./auto_complete_control.js");
+const TagAutoCompleteControl = require("./tag_auto_complete_control.js");
 
 class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
+		console.log("postslisttagautocompletecontrol")
         super(input, options);
 
 		console.log("options", options);
