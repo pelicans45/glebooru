@@ -52,10 +52,12 @@ class Context {
     }
 
     pushState() {
+        console.log("pushState", this.state);
         history.pushState(this.state, this.title, this.canonicalPath);
     }
 
     replaceState() {
+        console.log("replaceState", this.state);
         history.replaceState(this.state, this.title, this.canonicalPath);
     }
 }
@@ -67,9 +69,8 @@ class Route {
 
         this.parameterNames = [];
         if (this.path === null) {
-            //this.regex = /^\/(.+)/;
-            //this.parameterNames.push("wildcard");
-			this.regex = /.*/;
+            this.regex = /^\/(.+)/;
+            this.parameterNames.push("wildcard");
         } else {
             let parts = [];
             for (let component of this.path) {
@@ -101,7 +102,7 @@ class Route {
     middleware(fn) {
         return (ctx, next) => {
             if (this.match(ctx.path, ctx.parameters)) {
-                //mousetrap.reset();
+                mousetrap.reset();
                 return fn(ctx, next);
             }
             next();
@@ -243,7 +244,7 @@ class Router {
             middle();
             next();
         };
-		console.log("ctx", ctx)
+        console.log("ctx", ctx);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
