@@ -4,7 +4,7 @@ sites:
     description: jej; lol, even
     query: ""
     color: "#435dbd"
-    tips: ["jej de jure", "lol de ludus"]
+    tips: [jej de jure]
   glegle.gallery:
     name: Glegle Gallery
     description: Gallery of Glegles

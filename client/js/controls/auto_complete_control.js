@@ -151,7 +151,7 @@ class AutoCompleteControl {
 
     _evtKeyDown(e) {
         const key = e.which;
-        const shift = e.shiftKey;
+        //const shift = e.shiftKey;
         let func = null;
         if (this._isVisible) {
             if (key === KEY_TAB) {

@@ -226,6 +226,7 @@ class Router {
     }
 
     replace(path, state, dispatch) {
+        console.log("replace", path, state);
         var ctx = new Context(path, state);
         if (dispatch) {
             this.dispatch(ctx, () => {
@@ -245,6 +246,7 @@ class Router {
             next();
         };
         console.log("ctx", ctx);
+        console.log("exits", this._exits);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,

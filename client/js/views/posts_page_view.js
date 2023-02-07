@@ -29,6 +29,7 @@ class PostsPageView extends events.EventTarget {
             this._postIdToListItemNode[postId] = listItemNode;
 
             listItemNode.addEventListener("click", (e) => {
+				console.log("listitemnode click", e)
                 if (!e.shiftKey) {
                     return;
                 }

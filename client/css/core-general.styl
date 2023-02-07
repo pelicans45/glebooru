@@ -72,6 +72,8 @@ a
         opacity: .5
     &:focus
         outline: 2px solid $main-color
+    &:hover
+        color: lighten($link-color, 10%)
     .vim-nav-hint
         position: absolute
         visibility: hidden
@@ -301,6 +303,13 @@ nav
         ul
             #mobile-navigation-toggle
                 color: $text-color-darktheme
+
+
+.not-found
+    code
+        text-size: 120%
+    a
+        text-decoration: underline
 
 //a .access-key
 //    text-decoration: underline
