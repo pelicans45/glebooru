@@ -94,6 +94,7 @@ def apply_num_criterion_to_column(
                 expr = column <= transformer(criterion.max_value)
         else:
             #assert False
+            raise ValueError("num criterion error")
     except ValueError:
         raise errors.SearchError(
             "Criterion value %r must be a number." % (criterion,)
@@ -140,6 +141,8 @@ def apply_str_criterion_to_column(
         )
     else:
         #assert False
+        raise ValueError("str criterion error")
+
     return expr
 
 
@@ -185,6 +188,8 @@ def apply_date_criterion_to_column(
             expr = column <= max_date
     else:
         #assert False
+        raise ValueError("date criterion error")
+
     return expr
 
 
