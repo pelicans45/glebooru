@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
-from szurubooru import db, errors, model, rest
 from szurubooru.func import scores, serialization, users
+
+from szurubooru import db, errors, model, rest
 
 
 class InvalidCommentIdError(errors.ValidationError):
@@ -99,7 +100,7 @@ def create_comment(
 
 
 def update_comment_text(comment: model.Comment, text: str) -> None:
-    #assert comment
+    assert comment
     if not text:
         raise EmptyCommentTextError("Comment text cannot be empty.")
     comment.text = text

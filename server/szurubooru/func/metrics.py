@@ -1,6 +1,8 @@
+from typing import Any, Callable, Dict, List, Optional
+
 import sqlalchemy as sa
-from typing import Any, Optional, List, Dict, Callable
-from szurubooru import db, model, errors, rest
+
+from szurubooru import db, errors, model, rest
 from szurubooru.func import serialization, tags, util, versions
 
 
@@ -35,8 +37,9 @@ class MetricSerializer(serialization.BaseSerializer):
             "max": lambda: self.metric.max,
             "exact_count": lambda: self.metric.post_metric_count,
             "range_count": lambda: self.metric.post_metric_range_count,
-            "tag": lambda: tags.serialize_tag(self.metric.tag, [
-                "names", "category", "description", "usages"])
+            "tag": lambda: tags.serialize_tag(
+                self.metric.tag, ["names", "category", "description", "usages"]
+            ),
         }
 
 
@@ -66,24 +69,24 @@ class PostMetricRangeSerializer(serialization.BaseSerializer):
 
 
 def serialize_metric(
-        metric: model.Metric,
-        options: List[str] = []) -> Optional[rest.Response]:
+    metric: model.Metric, options: List[str] = []
+) -> Optional[rest.Response]:
     if not metric:
         return None
     return MetricSerializer(metric).serialize(options)
 
 
 def serialize_post_metric(
-        post_metric: model.PostMetric,
-        options: List[str] = []) -> Optional[rest.Response]:
+    post_metric: model.PostMetric, options: List[str] = []
+) -> Optional[rest.Response]:
     if not post_metric:
         return None
     return PostMetricSerializer(post_metric).serialize(options)
 
 
 def serialize_post_metric_range(
-        post_metric_range: model.PostMetricRange,
-        options: List[str] = []) -> Optional[rest.Response]:
+    post_metric_range: model.PostMetricRange, options: List[str] = []
+) -> Optional[rest.Response]:
     if not post_metric_range:
         return None
     return PostMetricRangeSerializer(post_metric_range).serialize(options)
@@ -91,10 +94,10 @@ def serialize_post_metric_range(
 
 def try_get_metric_by_tag_name(tag_name: str) -> Optional[model.Metric]:
     return (
-        db.session
-        .query(model.Metric)
+        db.session.query(model.Metric)
         .filter(sa.func.lower(model.Metric.tag_name) == tag_name.lower())
-        .one_or_none())
+        .one_or_none()
+    )
 
 
 def get_metric_by_tag_name(tag_name: str) -> model.Metric:
@@ -110,39 +113,37 @@ def get_all_metrics() -> List[model.Metric]:
 
 def get_all_metric_tag_names() -> List[str]:
     return [
-        tag_name.name for tag_name in util.flatten_list(
+        tag_name.name
+        for tag_name in util.flatten_list(
             [metric.tag.names for metric in get_all_metrics()]
         )
     ]
 
 
 def try_get_post_metric(
-        post: model.Post,
-        metric: model.Metric) -> Optional[model.PostMetric]:
+    post: model.Post, metric: model.Metric
+) -> Optional[model.PostMetric]:
     return (
-        db.session
-        .query(model.PostMetric)
+        db.session.query(model.PostMetric)
         .filter(model.PostMetric.metric == metric)
         .filter(model.PostMetric.post == post)
-        .one_or_none())
+        .one_or_none()
+    )
 
 
 def try_get_post_metric_range(
-        post: model.Post,
-        metric: model.Metric) -> Optional[model.PostMetricRange]:
+    post: model.Post, metric: model.Metric
+) -> Optional[model.PostMetricRange]:
     return (
-        db.session
-        .query(model.PostMetricRange)
+        db.session.query(model.PostMetricRange)
         .filter(model.PostMetricRange.metric == metric)
         .filter(model.PostMetricRange.post == post)
-        .one_or_none())
+        .one_or_none()
+    )
 
 
-def create_metric(
-        tag: model.Tag,
-        min: float,
-        max: float) -> model.Metric:
-    #assert tag
+def create_metric(tag: model.Tag, min: float, max: float) -> model.Metric:
+    assert tag
     if tag.metric:
         raise MetricAlreadyExistsError("Tag already has a metric.")
     if min >= max:
@@ -153,9 +154,9 @@ def create_metric(
 
 
 def update_or_create_metric(
-        tag: model.Tag,
-        metric_data: Any) -> Optional[model.Metric]:
-    #assert tag
+    tag: model.Tag, metric_data: Any
+) -> Optional[model.Metric]:
+    assert tag
     for field in ("min", "max"):
         if field not in metric_data:
             raise InvalidMetricError("Metric is missing %r field." % field)
@@ -173,17 +174,16 @@ def update_or_create_metric(
 
 
 def update_or_create_post_metric(
-        post: model.Post,
-        metric: model.Metric,
-        value: float) -> model.PostMetric:
-    #assert post
-    #assert metric
+    post: model.Post, metric: model.Metric, value: float
+) -> model.PostMetric:
+    assert post
+    assert metric
     if metric.tag not in post.tags:
-        raise PostMissingTagError(
-            "Post doesn\"t have this tag.")
+        raise PostMissingTagError('Post doesn"t have this tag.')
     if value < metric.min or value > metric.max:
         raise MetricValueOutOfRangeError(
-            "Metric value %r out of range." % value)
+            "Metric value %r out of range." % value
+        )
     post_metric = try_get_post_metric(post, metric)
     if not post_metric:
         post_metric = model.PostMetric(post=post, metric=metric, value=value)
@@ -198,7 +198,7 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
     """
     Overwrites any existing post metrics, deletes other existing post metrics.
     """
-    #assert post
+    assert post
     post.metrics = []
     for metric_data in metrics_data:
         for field in ("tag_name", "value"):
@@ -208,33 +208,32 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
         tag_name = metric_data["tag_name"]
         tag = tags.get_tag_by_name(tag_name)
         if not tag.metric:
-            raise MetricDoesNotExistsError(
-                "Tag %r has no metric." % tag_name)
+            raise MetricDoesNotExistsError("Tag %r has no metric." % tag_name)
         post_metric = update_or_create_post_metric(post, tag.metric, value)
         post.metrics.append(post_metric)
 
 
 def update_or_create_post_metric_range(
-        post: model.Post,
-        metric: model.Metric,
-        low: float,
-        high: float) -> model.PostMetricRange:
-    #assert post
-    #assert metric
+    post: model.Post, metric: model.Metric, low: float, high: float
+) -> model.PostMetricRange:
+    assert post
+    assert metric
     if metric.tag not in post.tags:
-        raise PostMissingTagError(
-            "Post doesn\"t have this tag.")
+        raise PostMissingTagError('Post doesn"t have this tag.')
     for value in (low, high):
         if value < metric.min or value > metric.max:
             raise MetricValueOutOfRangeError(
-                "Metric value %r out of range." % value)
+                "Metric value %r out of range." % value
+            )
     if low >= high:
         raise InvalidMetricError(
-            "Metric range low(%r) >= high(%r)" % (low, high))
+            "Metric range low(%r) >= high(%r)" % (low, high)
+        )
     post_metric_range = try_get_post_metric_range(post, metric)
     if not post_metric_range:
         post_metric_range = model.PostMetricRange(
-            post=post, metric=metric, low=low, high=high)
+            post=post, metric=metric, low=low, high=high
+        )
         db.session.add(post_metric_range)
     else:
         post_metric_range.low = low
@@ -244,30 +243,33 @@ def update_or_create_post_metric_range(
 
 
 def update_or_create_post_metric_ranges(
-        post: model.Post,
-        metric_ranges_data: Any) -> None:
+    post: model.Post, metric_ranges_data: Any
+) -> None:
     """
     Overwrites any existing post metrics, deletes other existing post metrics.
     """
-    #assert post
+    assert post
     post.metric_ranges = []
     for metric_data in metric_ranges_data:
         for field in ("tag_name", "low", "high"):
             if field not in metric_data:
                 raise InvalidMetricError(
-                    "Metric range is missing %r field." % field)
+                    "Metric range is missing %r field." % field
+                )
         low = float(metric_data["low"])
         high = float(metric_data["high"])
         tag_name = metric_data["tag_name"]
         tag = tags.get_tag_by_name(tag_name)
         if not tag.metric:
-            raise MetricDoesNotExistsError(
-                "Tag %r has no metric." % tag_name)
+            raise MetricDoesNotExistsError("Tag %r has no metric." % tag_name)
         post_metric_range = update_or_create_post_metric_range(
-            post, tag.metric, low, high)
+            post, tag.metric, low, high
+        )
         post.metric_ranges.append(post_metric_range)
 
 
 def delete_metric(metric: model.Metric) -> None:
-    #assert metric
+    assert metric
+    db.session.delete(metric)
+    assert metric
     db.session.delete(metric)

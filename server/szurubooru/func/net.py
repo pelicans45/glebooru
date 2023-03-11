@@ -6,11 +6,12 @@ import urllib.request
 from threading import Thread
 from typing import Any, Dict, List
 
-from szurubooru import config, errors
 from szurubooru.func import mime
 
+from szurubooru import config, errors
+
 logger = logging.getLogger(__name__)
-_dl_chunk_size = 2 ** 15
+_dl_chunk_size = 2**15
 
 
 class DownloadError(errors.ProcessingError):
@@ -22,7 +23,7 @@ class DownloadTooLargeError(DownloadError):
 
 
 def download(url: str, use_video_downloader: bool = False) -> bytes:
-    #assert url
+    assert url
     youtube_dl_error = None
     if use_video_downloader:
         try:

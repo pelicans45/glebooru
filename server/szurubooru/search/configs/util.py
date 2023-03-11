@@ -1,12 +1,12 @@
 from typing import Any, Callable, Dict, Optional, Union
 
 import sqlalchemy as sa
-
-from szurubooru import db, errors
 from szurubooru.func import util
 from szurubooru.search import criteria
 from szurubooru.search.configs.base_search_config import Filter
 from szurubooru.search.typing import SaColumn, SaQuery
+
+from szurubooru import db, errors
 
 Number = Union[int, float]
 WILDCARD = "(--wildcard--)"  # something unlikely to be used by the users
@@ -82,7 +82,7 @@ def apply_num_criterion_to_column(
         elif isinstance(criterion, criteria.ArrayCriterion):
             expr = column.in_(transformer(value) for value in criterion.values)
         elif isinstance(criterion, criteria.RangedCriterion):
-            #assert criterion.min_value or criterion.max_value
+            assert criterion.min_value or criterion.max_value
             if criterion.min_value and criterion.max_value:
                 expr = column.between(
                     transformer(criterion.min_value),
@@ -109,7 +109,7 @@ def create_num_filter(
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        #assert criterion
+        assert criterion
         expr = apply_num_criterion_to_column(column, criterion, transformer)
         if negated:
             expr = ~expr
@@ -151,7 +151,7 @@ def create_str_filter(
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        #assert criterion
+        assert criterion
         expr = apply_str_criterion_to_column(column, criterion, transformer)
         if negated:
             expr = ~expr
@@ -172,7 +172,7 @@ def apply_date_criterion_to_column(
             min_date, max_date = util.parse_time_range(value)
             expr = expr | column.between(min_date, max_date)
     elif isinstance(criterion, criteria.RangedCriterion):
-        #assert criterion.min_value or criterion.max_value
+        assert criterion.min_value or criterion.max_value
         if criterion.min_value and criterion.max_value:
             min_date = util.parse_time_range(criterion.min_value)[0]
             max_date = util.parse_time_range(criterion.max_value)[1]
@@ -194,7 +194,7 @@ def create_date_filter(column: SaColumn) -> Filter:
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        #assert criterion
+        assert criterion
         expr = apply_date_criterion_to_column(column, criterion)
         if negated:
             expr = ~expr
@@ -217,7 +217,7 @@ def create_subquery_filter(
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        #assert criterion
+        assert criterion
         subquery = db.session.query(right_id_column.label("foreign_id"))
         if subquery_decorator:
             subquery = subquery_decorator(subquery)

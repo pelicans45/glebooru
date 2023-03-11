@@ -223,13 +223,15 @@
         margin-right: 0.25em
     input[name=search-text]
         width: 25em
+        margin-right: 0.1em
+
         @media (max-width: 1000px)
             display: block
             width: 100%
             margin-bottom: 0.5em
 
         transition: none
-        caret-color: #d2d2d2
+        caret-color: #989898
 
         border-radius: 24px
         //border-radius: 8px
@@ -245,7 +247,7 @@
             font-weight: 900
 
         &:focus
-            outline: 1px solid $main-color
+            outline: 0.99px solid $main-color
             //transition: outline var(--input-transition-dur) linear
             transition: outline var(--input-transition-dur) cubic-bezier(0.39, 0.58, 0.57, 1)
 
@@ -255,11 +257,12 @@
     #randomize-button
         font-size: 24px
         cursor: pointer
-        color: lighten($main-color, 90%)
+        color: lighten($main-color, 80%)
         //color: $link-color
         position: relative
-        top: 0.1em
-        bottom: 0.1em
+        //top: 0.1em
+        //bottom: 0.1em
+        bottom: 0.175em
 
         .selected
             color: $main-color
@@ -267,7 +270,7 @@
                 color: darken($main-color, 10%)
 
         &:hover
-            color: lighten($link-color, 10%)
+            color: lighten($main-color, 85%)
 
     .append
         @media (max-width: 500px)

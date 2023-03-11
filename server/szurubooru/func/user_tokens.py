@@ -3,9 +3,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 import pytz
 from pyrfc3339 import parser as rfc3339_parser
+from szurubooru.func import auth, serialization, users, util
 
 from szurubooru import db, errors, model, rest
-from szurubooru.func import auth, serialization, users, util
 
 
 class InvalidExpirationError(errors.ValidationError):
@@ -84,7 +84,7 @@ def get_by_user_and_token(user: model.User, token: str) -> model.UserToken:
 
 
 def get_user_tokens(user: model.User) -> List[model.UserToken]:
-    #assert user
+    assert user
     return (
         db.session.query(model.UserToken)
         .filter(model.UserToken.user_id == user.user_id)
@@ -93,7 +93,7 @@ def get_user_tokens(user: model.User) -> List[model.UserToken]:
 
 
 def create_user_token(user: model.User, enabled: bool) -> model.UserToken:
-    #assert user
+    assert user
     user_token = model.UserToken()
     user_token.user = user
     user_token.token = auth.generate_authorization_token()
@@ -106,20 +106,20 @@ def create_user_token(user: model.User, enabled: bool) -> model.UserToken:
 def update_user_token_enabled(
     user_token: model.UserToken, enabled: bool
 ) -> None:
-    #assert user_token
+    assert user_token
     user_token.enabled = enabled
     update_user_token_edit_time(user_token)
 
 
 def update_user_token_edit_time(user_token: model.UserToken) -> None:
-    #assert user_token
+    assert user_token
     user_token.last_edit_time = datetime.utcnow()
 
 
 def update_user_token_expiration_time(
     user_token: model.UserToken, expiration_time_str: str
 ) -> None:
-    #assert user_token
+    assert user_token
     try:
         expiration_time = rfc3339_parser.parse(expiration_time_str, utc=True)
         expiration_time = expiration_time.astimezone(pytz.UTC)
@@ -136,7 +136,7 @@ def update_user_token_expiration_time(
 
 
 def update_user_token_note(user_token: model.UserToken, note: str) -> None:
-    #assert user_token
+    assert user_token
     note = note.strip() if note is not None else ""
     note = None if len(note) == 0 else note
     if util.value_exceeds_column_size(note, model.UserToken.note):
@@ -146,5 +146,5 @@ def update_user_token_note(user_token: model.UserToken, note: str) -> None:
 
 
 def bump_usage_time(user_token: model.UserToken) -> None:
-    #assert user_token
+    assert user_token
     user_token.last_usage_time = datetime.utcnow()
