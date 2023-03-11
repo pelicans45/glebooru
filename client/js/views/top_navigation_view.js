@@ -55,9 +55,12 @@ class TopNavigationView {
                 active.classList.remove("active");
             }
 
-            this._hostNode
-                .querySelector(`li[data-name="${key}"]`)
-                .classList.add("active");
+            const current = this._hostNode.querySelector(
+                `li[data-name="${key}"]`
+            );
+            if (current) {
+                current.classList.add("active");
+            }
 
             /*
         for (let itemNode of this._hostNode.querySelectorAll("[data-name]")) {
