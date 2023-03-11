@@ -5,7 +5,7 @@ from szurubooru.rest import middleware
 from szurubooru import db, rest
 
 logger = logging.getLogger(__name__)
-logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+#logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 
 @middleware.pre_hook
