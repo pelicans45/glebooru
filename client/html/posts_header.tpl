@@ -1,11 +1,11 @@
 <div class='post-list-header'><%
     %><form class='horizontal search'><%
-        %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.query ? ctx.parameters.query.trim() + " " : ""}) %><%
+        %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.query ? ctx.parameters.query.trim() + " " : "", placeholder: '&#xf002;'}) %><%
         %><wbr/><%
         %><input class='mousetrap' type='submit' value='Search'/><%
-        %><button title="Random sort" id='randomize-button' class='icon-button'><%
+        %><span title="Random sort" id='randomize-button' class='icon-button'><%
             %><i class="la la-random"><%
-        %></button><%
+        %></span><%
         %><% if (ctx.enableSafety) { %><%
             %><input data-safety=safe type='button' class='mousetrap safety safety-safe <%- ctx.settings.listPosts.safe ? '' : 'disabled' %>'/><%
             %><input data-safety=sketchy type='button' class='mousetrap safety safety-sketchy <%- ctx.settings.listPosts.sketchy ? '' : 'disabled' %>'/><%

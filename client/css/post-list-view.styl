@@ -24,7 +24,8 @@
             */
             &:not(.flexbox-dummy)
                 min-height: 8em
-                height: 14vw
+                //height: 14vw
+                height: 14vmax
 
             .thumbnail-wrapper
                 display: inline-block
@@ -159,7 +160,7 @@
                         background: rgba(255, 0, 0, 0.7)
                         &:after
                             color: white
-                            font-family: LineAwesome;
+                            font-family: 'Line Awesome Free';
                             content: "\f1f8"; // la-trash
                     &:not(.delete)
                         background: rgba(200, 200, 200, 0.7)
@@ -193,7 +194,7 @@
             min-width: inherit
             width: inherit
             &:not(.flexbox-dummy)
-                height: 14vw
+                height: 14vmax
             .thumbnail
                 outline-offset: -1px
             .thumbnail-wrapper.no-tags
@@ -211,7 +212,8 @@
         display: none !important
     form
         width: auto
-        margin-bottom: 0.75em
+        //margin-bottom: 0.75em
+        margin-bottom: 1em
         *
             vertical-align: top
         @media (max-width: 1000px)
@@ -225,6 +227,48 @@
             display: block
             width: 100%
             margin-bottom: 0.5em
+
+        transition: none
+        caret-color: #d2d2d2
+
+        border-radius: 24px
+        //border-radius: 8px
+        // border-radius: 500px
+        // border-radius: 40px
+        padding-left: 0.5em
+        padding-right: 0.5em
+        padding-top: 0.25em
+        padding-bottom: 0.25em
+
+        &::placeholder
+            font-family: 'Line Awesome Free'
+            font-weight: 900
+
+        &:focus
+            outline: 1px solid $main-color
+            //transition: outline var(--input-transition-dur) linear
+            transition: outline var(--input-transition-dur) cubic-bezier(0.39, 0.58, 0.57, 1)
+
+            &::placeholder
+                color: transparent
+
+    #randomize-button
+        font-size: 24px
+        cursor: pointer
+        //color: $main-color
+        color: $link-color
+        position: relative
+        top: 0.1em
+        bottom: 0.1em
+
+        .selected
+            color: $main-color
+            &:hover
+                color: darken($main-color, 10%)
+
+        &:hover
+            color: lighten($link-color, 10%)
+
     .append
         @media (max-width: 500px)
             margin-left: 0.8em

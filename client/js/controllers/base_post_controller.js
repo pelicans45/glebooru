@@ -6,14 +6,16 @@ const EmptyView = require("../views/empty_view.js");
 
 class BasePostController {
     constructor(ctx) {
+        topNavigation.setTitle(`#${ctx.parameters.id}`);
+        topNavigation.activate("posts");
+
+		/*
         if (!api.hasPrivilege("posts:view")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view posts.");
             return;
         }
-
-        topNavigation.activate("posts");
-        topNavigation.setTitle(`#${ctx.parameters.id}`);
+		*/
     }
 }
 

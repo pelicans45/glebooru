@@ -28,18 +28,20 @@ const fields = [
 
 class PostListController {
     constructor(ctx) {
+        topNavigation.activate("posts");
+        topNavigation.setTitle("");
+
         this._pageController = new PageController();
 
+		/*
         if (!api.hasPrivilege("posts:list")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view posts.");
             return;
         }
+		*/
 
         this._ctx = ctx;
-
-        topNavigation.activate("posts");
-        topNavigation.setTitle("");
 
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
@@ -103,6 +105,9 @@ class PostListController {
         );
         this._syncPageController();
         this._headerView.focusSearchInputIfSet();
+        this._headerView.toggleRandomizeButtonSelected(
+            this._ctx.parameters.query.includes("sort:random")
+        );
     }
 
     _evtTag(e) {
@@ -208,7 +213,8 @@ class PostListController {
     _evtDeleteSelectedPosts(e) {
         if (this._postsMarkedForDeletion.length == 0) return;
 
-		const noun = this._postsMarkedForDeletion.length === 1 ? "post" : "posts";
+        const noun =
+            this._postsMarkedForDeletion.length === 1 ? "post" : "posts";
         if (
             confirm(
                 `Are you sure you want to delete ${this._postsMarkedForDeletion.length} ${noun}?`

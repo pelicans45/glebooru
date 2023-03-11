@@ -22,7 +22,7 @@ class DownloadTooLargeError(DownloadError):
 
 
 def download(url: str, use_video_downloader: bool = False) -> bytes:
-    assert url
+    #assert url
     youtube_dl_error = None
     if use_video_downloader:
         try:

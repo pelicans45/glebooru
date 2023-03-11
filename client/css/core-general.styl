@@ -94,15 +94,6 @@ form .la-question-circle-o
     top: 0
     z-index: 9999999999
 
-.post-list-header #search-text
-    transition: none
-    caret-color: #d2d2d2;
-
-    &:focus
-        outline: 1px solid $main-color
-        //transition: outline var(--input-transition-dur) linear
-        transition: outline var(--input-transition-dur) cubic-bezier(0.39, 0.58, 0.57, 1);
-
 #content-holder
     padding: 1.5em
     text-align: center
@@ -229,27 +220,37 @@ nav
                         display: block
 
 
-        ul li[data-name=settings]
-            i.la
-                font-size: 24px
-                position: relative
-                //top: 2px
-                //left: 12px
-                top: 0.1em
-                //left: 0.5em
-                left: 0.75em
+        ul li
+            &[data-name=settings]
+                i.la
+                    font-size: 24px
+                    position: relative
+                    //top: 2px
+                    //left: 12px
+                    top: 0.125em
+                    //left: 0.5em
+                    left: 0.75em
 
-        ul li[data-name=account],
-        ul li[data-name=register],
-        ul li[data-name=login],
-        ul li[data-name=logout],
-        ul li[data-name=settings],
-        ul li[data-name=help],
-        ul li[data-name=tags],
-        ul li[data-name=pools]
-            float: none
-        ul li[data-name=home]
-            display: none
+            &[data-name=posts],
+            &[data-name=upload]
+                i.la
+                    font-size: 32px
+                    position: relative
+                    top: 0.125em
+
+            &[data-name=account],
+            &[data-name=register],
+            &[data-name=login],
+            &[data-name=logout],
+            &[data-name=settings],
+            &[data-name=help],
+            &[data-name=tags],
+            &[data-name=pools]
+                float: none
+            &[data-name=home],
+            &[data-name=register],
+            &[data-name=logout],
+                display: none
         .access-key
             //text-decoration: underline
         .thumbnail
@@ -264,25 +265,28 @@ nav
 
     @media (min-width: 1000px)
         &:not(.show-extra-nav-links)
-            ul li[data-name=register],
-            ul li[data-name=login],
-            ul li[data-name=logout],
-            ul li[data-name=account],
-            ul li[data-name=help]
-                display: none !important
+            ul li
+                &[data-name=register],
+                &[data-name=login],
+                &[data-name=logout],
+                &[data-name=account],
+                &[data-name=help]
+                    display: none !important
 
         &.show-extra-nav-links
-            ul li[data-name=register]:not(.active) a,
-            ul li[data-name=login]:not(.active) a,
-            ul li[data-name=logout]:not(.active) a,
-            ul li[data-name=account]:not(.active) a,
-            ul li[data-name=help]:not(.active) a
-                background: $extra-nav-link-background-color
-                color: $extra-nav-link-color !important
+            ul li
+                &[data-name=register],
+                &[data-name=login],
+                &[data-name=logout],
+                &[data-name=account],
+                &[data-name=help]
+                    &:not(.active) a
+                        background: $extra-nav-link-background-color
+                        color: $extra-nav-link-color !important
 
-                &:hover
-                    background: lighten($extra-nav-link-background-color, 10%)
-                    color: lighten($extra-nav-link-color, 10%) !important
+                        &:hover
+                            background: lighten($extra-nav-link-background-color, 10%)
+                            color: lighten($extra-nav-link-color, 10%) !important
 
 .darktheme nav
     &.buttons

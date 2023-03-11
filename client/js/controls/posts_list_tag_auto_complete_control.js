@@ -3,10 +3,10 @@ const TagAutoCompleteControl = require("./tag_auto_complete_control.js");
 
 class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
-		console.log("postslisttagautocompletecontrol")
+        console.log("postslisttagautocompletecontrol");
         super(input, options);
 
-		console.log("options", options);
+        console.log("options", options);
         this._valueEntered = false;
 
         this._sourceInputNode.addEventListener("focus", (e) => {
@@ -30,8 +30,8 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
     }
 
     _displayDefaultMatches() {
-		const val = this._sourceInputNode.value;
-        if (!val || /^sort:\S+ +$/.test(val)) {
+        const val = this._sourceInputNode.value;
+        if (!val || /^ *sort:\S+ *$/.test(val)) {
             if (!this._valueEntered) {
                 this._show();
                 console.log("no value, no prev value");
@@ -43,6 +43,7 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
             this._activeResult = -1;
             this._setDefaultMatches();
             this._valueEntered = false;
+            this._show();
             return;
         }
 

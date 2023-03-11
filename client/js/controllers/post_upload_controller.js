@@ -20,6 +20,9 @@ const genericErrorMessage =
 
 class PostUploadController {
     constructor() {
+        topNavigation.activate("upload");
+        topNavigation.setTitle("Upload");
+
         this._lastCancellablePromise = null;
 
         if (!api.hasPrivilege("posts:create")) {
@@ -28,8 +31,6 @@ class PostUploadController {
             return;
         }
 
-        topNavigation.activate("upload");
-        topNavigation.setTitle("Upload");
         this._view = new PostUploadView({
             canUploadAnonymously: api.hasPrivilege("posts:create:anonymous"),
             canViewPosts: api.hasPrivilege("posts:view"),

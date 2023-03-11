@@ -16,6 +16,9 @@ const RIGHT = "right";
 
 class MetricSorterController {
     constructor(ctx) {
+        topNavigation.activate("posts");
+        topNavigation.setTitle("Sorting metrics");
+
         if (
             !api.hasPrivilege("posts:view") ||
             !api.hasPrivilege("metrics:edit:posts")
@@ -26,9 +29,6 @@ class MetricSorterController {
             );
             return;
         }
-
-        topNavigation.activate("posts");
-        topNavigation.setTitle("Sorting metrics");
 
         this._ctx = ctx;
         this._metricNames = (ctx.parameters.metrics || "")

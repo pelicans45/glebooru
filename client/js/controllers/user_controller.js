@@ -14,6 +14,9 @@ const EmptyView = require("../views/empty_view.js");
 class UserController {
     constructor(ctx, section) {
         const userName = ctx.parameters.name;
+        topNavigation.activate("users");
+        topNavigation.setTitle("User " + userName);
+
         if (
             !api.hasPrivilege("users:view") &&
             !api.isLoggedIn({ name: userName })
@@ -42,7 +45,6 @@ class UserController {
             );
         }
 
-        topNavigation.setTitle("User " + userName);
         Promise.all([userTokenPromise, User.get(userName)]).then(
             (responses) => {
                 const [userTokens, user] = responses;
@@ -96,7 +98,9 @@ class UserController {
                     canCreateToken: api.hasPrivilege(
                         `user_tokens:create:${infix}`
                     ),
-                    canEditToken: api.hasPrivilege(`user_tokens:edit:${infix}`),
+                    canEditToken: api.hasPrivilege(
+                        `user_tokens:edit:${infix}`
+                    ),
                     canDeleteToken: api.hasPrivilege(
                         `user_tokens:delete:${infix}`
                     ),

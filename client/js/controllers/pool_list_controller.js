@@ -21,6 +21,9 @@ const fields = [
 
 class PoolListController {
     constructor(ctx) {
+        topNavigation.activate("pools");
+        topNavigation.setTitle("Pools");
+
         this._pageController = new PageController();
 
         if (!api.hasPrivilege("pools:list")) {
@@ -30,9 +33,6 @@ class PoolListController {
         }
 
         this._ctx = ctx;
-
-        topNavigation.activate("pools");
-        topNavigation.setTitle("Pools");
 
         this._headerView = new PoolsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,

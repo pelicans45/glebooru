@@ -3,8 +3,9 @@ sites:
     name: jej
     description: jej; lol, even
     query: ""
-    color: "#435dbd"
-    tips: [jej de jure]
+    #color: "#435dbd" ##6a86ea
+    color: "#6a86ea"
+    tips: []
   glegle.gallery:
     name: Glegle Gallery
     description: Gallery of Glegles
@@ -46,14 +47,14 @@ max_suggested_results: 10
 delete_source_files: no
 
 thumbnails:
-    min_file_size: 5000000
+    min_file_size: 6000000
     avatar_width: 300
     avatar_height: 300
     post_width: 300
     post_height: 300
 
 # settings used to download files from the web on behalf of the api users
-user_agent:
+user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
 max_dl_filesize: 25.0E+6 # maximum filesize limit in bytes
 
 # automatically convert animated GIF uploads to video formats
@@ -83,10 +84,10 @@ can_send_mails: false
 enable_safety: false
 
 tag_name_regex: '^[a-z0-9_-]{1,80}$'
-tag_category_name_regex: '^[^\s%+#/]{1,80}$'
+tag_category_name_regex: '^[a-zA-Z0-9_-]{1,80}$'
 
-pool_name_regex: '^\S{1,80}$'
-pool_category_name_regex: '^[^\s%+#/]{1,80}$'
+pool_name_regex: '^[a-zA-Z0-9_-]{1,80}$'
+pool_category_name_regex: '^[a-zA-Z0-9_-]{1,80}$'
 
 # don't make these more restrictive unless you want to annoy people; if you do
 # customize them, make sure to update the instructions in the registration form

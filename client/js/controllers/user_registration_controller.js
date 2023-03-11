@@ -10,14 +10,15 @@ const EmptyView = require("../views/empty_view.js");
 
 class UserRegistrationController {
     constructor() {
+        topNavigation.activate("register");
+        topNavigation.setTitle("Registration");
+
         if (!api.hasPrivilege("users:create:self")) {
             this._view = new EmptyView();
             this._view.showError("Registration is closed.");
             return;
         }
 
-        topNavigation.activate("register");
-        topNavigation.setTitle("Registration");
         this._view = new RegistrationView();
         this._view.addEventListener("submit", (e) => this._evtRegister(e));
     }

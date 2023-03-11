@@ -9,6 +9,9 @@ const EmptyView = require("../views/empty_view.js");
 
 class PoolCategoriesController {
     constructor() {
+        topNavigation.activate("pools");
+        topNavigation.setTitle("Pool Categories");
+
         if (!api.hasPrivilege("pool_categories:list")) {
             this._view = new EmptyView();
             this._view.showError(
@@ -17,8 +20,6 @@ class PoolCategoriesController {
             return;
         }
 
-        topNavigation.activate("pools");
-        topNavigation.setTitle("Pool Categories");
         PoolCategoryList.get().then(
             (response) => {
                 this._poolCategories = response.results;

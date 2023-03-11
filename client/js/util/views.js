@@ -338,14 +338,23 @@ function makeFlexboxAlign(options) {
         .join("");
 }
 
-function makeAccessKey(html, key) {
-    const regex = new RegExp("(" + key + ")", "i");
-    html = html.replace(
-        regex,
-        '<span class="access-key" data-accesskey="$1">$1</span>'
-    );
-    return html;
+/*
+const titleIcons = {
+    Gallery: "th",
+    Upload: "cloud-upload",
+    Tags: "tags",
+    Pools: "icons",
+    Login: "user",
+};
+
+function makeNavHeader(title) {
+    const icon = titleIcons[title];
+    if (icon) {
+        return `<i class="la la-${icon}"></i>;`;
+    }
+    return title;
 }
+*/
 
 function _serializeElement(name, attributes) {
     return [name]
@@ -518,7 +527,6 @@ function getTemplate(templatePath) {
             makeUserLink: makeUserLink,
             makeUserLinkForSidebar: makeUserLinkForSidebar,
             makeFlexboxAlign: makeFlexboxAlign,
-            makeAccessKey: makeAccessKey,
             makeElement: makeElement,
             makeCssName: misc.makeCssName,
             makeNumericInput: makeNumericInput,

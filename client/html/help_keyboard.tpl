@@ -45,7 +45,7 @@
 
         <tr>
             <td><kbd>Delete</kbd></td>
-            <td>(In edit mode) delete post</td>
+            <td>(In edit mode) Delete post</td>
         </tr>
     </tbody>
 </table>

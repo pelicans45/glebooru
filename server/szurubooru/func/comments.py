@@ -99,7 +99,7 @@ def create_comment(
 
 
 def update_comment_text(comment: model.Comment, text: str) -> None:
-    assert comment
+    #assert comment
     if not text:
         raise EmptyCommentTextError("Comment text cannot be empty.")
     comment.text = text

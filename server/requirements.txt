@@ -11,7 +11,8 @@ pynacl>=1.2.1
 pyRFC3339>=1.0
 pytz>=2018.3
 pyyaml>=3.11
-SQLAlchemy
+SQLAlchemy>=1.0.12, <1.4
+#SQLAlchemy
 youtube_dl
 setuptools
 waitress

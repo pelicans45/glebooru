@@ -15,4 +15,5 @@
         --></ul><!--
     --></nav>
     <div id='user-content-holder'></div>
+    <div style="margin-top: 1.3em"><a href="/logout">Logout</a></div>
 </div>

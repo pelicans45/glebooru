@@ -12,6 +12,9 @@ const fields = ["id", "comments", "commentCount", "thumbnailUrl"];
 
 class CommentsController {
     constructor(ctx) {
+        topNavigation.activate("comments");
+        topNavigation.setTitle("Comments");
+
         if (!api.hasPrivilege("comments:list")) {
             this._view = new EmptyView();
             this._view.showError(
@@ -19,9 +22,6 @@ class CommentsController {
             );
             return;
         }
-
-        topNavigation.activate("comments");
-        topNavigation.setTitle("Comments");
 
         this._pageController = new PageController();
         this._pageController.run({

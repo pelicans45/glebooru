@@ -120,7 +120,7 @@ class Api extends events.EventTarget {
 
     hasPrivilege(lookup) {
         let minViableRank = null;
-        for (let p of Object.keys(vars.privileges)) {
+        for (const p of Object.keys(vars.privileges)) {
             if (!p.startsWith(lookup)) {
                 continue;
             }

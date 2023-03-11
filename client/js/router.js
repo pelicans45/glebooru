@@ -335,11 +335,14 @@ const _onClick = (router) => {
         }
 
         const orig = el.pathname + el.search + (el.hash || "");
+
+        /*
         const path = !orig.indexOf(base) ? orig.slice(base.length) : orig;
 
         if (orig === path) {
             return;
         }
+		*/
 
         e.preventDefault();
         router.show(orig);

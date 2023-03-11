@@ -34,8 +34,9 @@ form.horizontal
     display: inline-block
     margin-bottom: 1em
 
-    .search
-        margin-left: 0.5em
+    &.search
+        //margin-left: 0.5em
+        margin-left: 0.25em
 
     .input, .buttons, ul
         display: inline-block
@@ -364,7 +365,7 @@ input::-moz-focus-inner
         &:hover
             //opacity: 0.9
             //box-shadow: 5px 5px 3px 1px rgb(73 49 212 / 38%)
-            border-color: lighten(#eee, 10%)
+            border-color: darken(#eee, 30%)
     .url-holder
         display: flex
         margin-top: 0.5em
@@ -396,6 +397,12 @@ input[type=file]:focus+.file-dropper,
     border: 2px solid $main-color
     display: none
     font-size: 0.95em
+
+    margin-top: 0.175em
+    opacity: 0.99
+    border-radius: 5px
+
+
     ul
         list-style-type: none
         margin: 0

@@ -10,14 +10,14 @@ const EmptyView = require("../views/empty_view.js");
 
 class SnapshotsController {
     constructor(ctx) {
+        topNavigation.activate("");
+        topNavigation.setTitle("History");
+
         if (!api.hasPrivilege("snapshots:list")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view history.");
             return;
         }
-
-        topNavigation.activate("");
-        topNavigation.setTitle("History");
 
         this._pageController = new PageController();
         this._pageController.run({

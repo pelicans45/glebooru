@@ -8,6 +8,7 @@ class SettingsController {
     constructor() {
         topNavigation.activate("settings");
         topNavigation.setTitle("Settings");
+		
         this._view = new SettingsView({
             settings: settings.get(),
         });

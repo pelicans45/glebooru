@@ -16,6 +16,7 @@ const extraNavLinkTabs = new Set([
 
 class TopNavigationView {
     constructor() {
+        this._key = null;
         this._hostNode = document.getElementById("top-navigation-holder");
         if (settings.get().navbarFollow) {
             this._hostNode.classList.add("follow-scroll");
@@ -40,19 +41,34 @@ class TopNavigationView {
 
     render(ctx) {
         views.replaceContent(this._hostNode, template(ctx));
-
         this._bindMobileNavigationEvents();
     }
 
     activate(key) {
+        if (this._key !== key) {
+            console.log("activate", this._key, key);
+            this._hostNode
+                .querySelector("li[data-name].active")
+                .classList.remove("active");
+
+            this._hostNode
+                .querySelector(`li[data-name="${key}"]`)
+                .classList.add("active");
+
+            /*
         for (let itemNode of this._hostNode.querySelectorAll("[data-name]")) {
             itemNode.classList.toggle(
                 "active",
                 itemNode.getAttribute("data-name") === key
             );
         }
+		*/
 
-        this._toggleExtraNavLinks(key);
+            this._toggleExtraNavLinks(key);
+        } else {
+            console.log("no activate - same key", this._key, key);
+        }
+        this._key = key;
     }
 
     _bindMobileNavigationEvents() {

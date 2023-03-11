@@ -213,7 +213,7 @@ class PostsHeaderView extends events.EventTarget {
 
         search.searchInputNodeFocusHelper(this._queryInputNode);
 
-		/*
+        /*
         // Focus search input on hover
         this._queryInputNode.addEventListener(
             "mouseover",
@@ -335,6 +335,10 @@ class PostsHeaderView extends events.EventTarget {
         if (this._queryInputNode.value) {
             this.focusQueryInput();
         }
+    }
+
+    toggleRandomizeButtonSelected(selected) {
+        this._randomizeButtonNode.classList.toggle("selected", selected);
     }
 
     focusQueryInput() {
@@ -538,7 +542,8 @@ class PostsHeaderView extends events.EventTarget {
         e.preventDefault();
         if (!this._queryInputNode.value.includes("sort:random")) {
             const space = this._queryInputNode.value ? " " : "";
-            this._queryInputNode.value = this._queryInputNode.value.trim() + space + "sort:random ";
+            this._queryInputNode.value =
+                this._queryInputNode.value.trim() + space + "sort:random ";
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         // localStorage.r = this._ctx.parameters.r;

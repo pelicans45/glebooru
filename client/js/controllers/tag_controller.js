@@ -13,6 +13,7 @@ const EmptyView = require("../views/empty_view.js");
 
 class TagController {
     constructor(ctx, section) {
+        topNavigation.activate("tags");
         if (!api.hasPrivilege("tags:view")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view tags.");
@@ -26,7 +27,6 @@ class TagController {
             (responses) => {
                 const [tagCategoriesResponse, tag] = responses;
 
-                topNavigation.activate("tags");
                 topNavigation.setTitle("Tag #" + tag.names[0]);
 
                 this._name = ctx.parameters.name;
@@ -56,7 +56,9 @@ class TagController {
                     ),
                     canCreateMetric: api.hasPrivilege("metrics:create"),
                     canDeleteMetric: api.hasPrivilege("metrics:delete"),
-                    canEditMetricBounds: api.hasPrivilege("metrics:edit:bounds"),
+                    canEditMetricBounds: api.hasPrivilege(
+                        "metrics:edit:bounds"
+                    ),
                     canMerge: api.hasPrivilege("tags:merge"),
                     canDelete: api.hasPrivilege("tags:delete"),
                     categories: categories,
@@ -134,25 +136,31 @@ class TagController {
         metric.max = e.detail.metricMax;
         e.detail.tag.metric = metric;
 
-        e.detail.tag.save().then(() => {
-            this._view.showSuccess("Metric updated.");
-            this._view.enableForm();
-        }, error => {
-            this._view.showError(error.message);
-            this._view.enableForm();
-        });
+        e.detail.tag.save().then(
+            () => {
+                this._view.showSuccess("Metric updated.");
+                this._view.enableForm();
+            },
+            (error) => {
+                this._view.showError(error.message);
+                this._view.enableForm();
+            }
+        );
     }
 
     _evtMetricDelete(e) {
         this._view.clearMessages();
         this._view.disableForm();
-        e.detail.tag.deleteMetric().then(() => {
-            this._view.showSuccess("Metric deleted.");
-            this._view.enableForm();
-        }, error => {
-            this._view.showError(error.message);
-            this._view.enableForm();
-        });
+        e.detail.tag.deleteMetric().then(
+            () => {
+                this._view.showSuccess("Metric deleted.");
+                this._view.enableForm();
+            },
+            (error) => {
+                this._view.showError(error.message);
+                this._view.enableForm();
+            }
+        );
     }
 
     _evtMerge(e) {
@@ -211,5 +219,4 @@ module.exports = (router) => {
     router.enter(["tag", ":name", "delete"], (ctx, next) => {
         ctx.controller = new TagController(ctx, "delete");
     });
-
 };

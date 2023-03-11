@@ -13,6 +13,8 @@ const EmptyView = require("../views/empty_view.js");
 
 class PoolController {
     constructor(ctx, section) {
+        topNavigation.activate("pools");
+
         if (!api.hasPrivilege("pools:view")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view pools.");
@@ -26,7 +28,6 @@ class PoolController {
             (responses) => {
                 const [poolCategoriesResponse, pool] = responses;
 
-                topNavigation.activate("pools");
                 topNavigation.setTitle("Pool #" + pool.names[0]);
 
                 this._name = ctx.parameters.name;

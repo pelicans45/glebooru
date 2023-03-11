@@ -55,10 +55,8 @@ class TopNavigation extends events.EventTarget {
     }
 
     setTitle(title) {
-        //api.fetchConfig().then(() => {
-        document.oldTitle = null;
         document.title = lens.name + (title ? " – " + title : "");
-        //});
+        document.oldTitle = null;
     }
 
     showAll() {
@@ -79,17 +77,47 @@ class TopNavigation extends events.EventTarget {
 function _makeTopNavigation() {
     const ret = new TopNavigation();
     //ret.add("home", new TopNavigationItem("M", "Home", "home"));
-    ret.add("posts", new TopNavigationItem("G", "Gallery", ""));
-    ret.add("upload", new TopNavigationItem("U", "Upload", "upload"));
-    ret.add("comments", new TopNavigationItem("C", "Comments", "comments"));
-    ret.add("tags", new TopNavigationItem("T", "Tags", "tags"));
-    ret.add("pools", new TopNavigationItem("P", "Pools", "pools"));
-    ret.add("users", new TopNavigationItem(null, "Users", "users"));
-    ret.add("account", new TopNavigationItem("A", "Account", "user/{me}"));
+    ret.add(
+        "posts",
+        new TopNavigationItem("G", "<i class='la la-th'></i>", "")
+    );
+    ret.add(
+        "upload",
+        new TopNavigationItem("U", "<i class='la la-cloud-upload'></i>", "upload")
+    );
+    ret.add(
+        "comments",
+        new TopNavigationItem("C", "<i class='la la-comments'></i>", "comments")
+    );
+    ret.add(
+        "tags",
+        new TopNavigationItem("T", "<i class='la la-tags'></i>", "tags")
+    );
+    ret.add(
+        "pools",
+        new TopNavigationItem("P", "<i class='la la-icons'></i>", "pools")
+    );
+    ret.add(
+        "users",
+        new TopNavigationItem(null, "<i class='la la-users'></i>", "users")
+    );
+    ret.add(
+        "account",
+        new TopNavigationItem("A", "<i class='la la-user'></i>", "user/{me}")
+    );
     ret.add("register", new TopNavigationItem("R", "Register", "register"));
-    ret.add("login", new TopNavigationItem("L", "Login", "login"));
-    ret.add("logout", new TopNavigationItem(null, "Logout", "logout"));
-    ret.add("help", new TopNavigationItem("H", "Help", "help"));
+    ret.add(
+        "login",
+        new TopNavigationItem("L", "<i class='la la-sign-in'></i>", "login")
+    );
+    ret.add(
+        "logout",
+        new TopNavigationItem(null, "<i class='la la-sign-out'></i>", "logout")
+    );
+    ret.add(
+        "help",
+        new TopNavigationItem("H", "<i class='la la-info'></i>", "help")
+    );
     ret.add(
         "settings",
         new TopNavigationItem(null, "<i class='la la-cog'></i>", "settings")

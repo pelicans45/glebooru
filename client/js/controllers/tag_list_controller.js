@@ -22,6 +22,9 @@ const fields = [
 
 class TagListController {
     constructor(ctx) {
+        topNavigation.activate("tags");
+        topNavigation.setTitle("Tags");
+
         this._pageController = new PageController();
 
         if (!api.hasPrivilege("tags:list")) {
@@ -31,9 +34,6 @@ class TagListController {
         }
 
         this._ctx = ctx;
-
-        topNavigation.activate("tags");
-        topNavigation.setTitle("Tags");
 
         this._headerView = new TagsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
@@ -75,7 +75,7 @@ class TagListController {
                 return uri.formatClientLink("tags", parameters);
             },
             requestPage: (offset, limit) => {
-				/*
+                /*
                 if (!(lens.isUniversal || this._ctx.parameters.query)) {
                     return TagList.getRelevant("", offset, limit);
                 }

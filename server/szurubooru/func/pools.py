@@ -53,7 +53,7 @@ def _verify_name_validity(name: str) -> None:
 
 
 def _get_names(pool: model.Pool) -> List[str]:
-    assert pool
+    #assert pool
     return [pool_name.name for pool_name in pool.names]
 
 
@@ -231,13 +231,13 @@ def get_or_create_pools_by_names(
 
 
 def delete(source_pool: model.Pool) -> None:
-    assert source_pool
+    #assert source_pool
     db.session.delete(source_pool)
 
 
 def merge_pools(source_pool: model.Pool, target_pool: model.Pool) -> None:
-    assert source_pool
-    assert target_pool
+    #assert source_pool
+    #assert target_pool
     if source_pool.pool_id == target_pool.pool_id:
         raise InvalidPoolRelationError("Cannot merge pool with itself.")
 
@@ -271,13 +271,13 @@ def create_pool(
 
 
 def update_pool_category_name(pool: model.Pool, category_name: str) -> None:
-    assert pool
+    #assert pool
     pool.category = pool_categories.get_category_by_name(category_name)
 
 
 def update_pool_names(pool: model.Pool, names: List[str]) -> None:
     # sanitize
-    assert pool
+    #assert pool
     names = util.icase_unique([name for name in names if name])
     if not len(names):
         raise InvalidPoolNameError("At least one name must be specified.")
@@ -313,14 +313,14 @@ def update_pool_names(pool: model.Pool, names: List[str]) -> None:
 
 
 def update_pool_description(pool: model.Pool, description: str) -> None:
-    assert pool
+    #assert pool
     if util.value_exceeds_column_size(description, model.Pool.description):
         raise InvalidPoolDescriptionError("Description is too long.")
     pool.description = description or None
 
 
 def update_pool_posts(pool: model.Pool, post_ids: List[int]) -> None:
-    assert pool
+    #assert pool
     dupes = _duplicates(post_ids)
     if len(dupes) > 0:
         dupes = ", ".join(list(str(x) for x in dupes))

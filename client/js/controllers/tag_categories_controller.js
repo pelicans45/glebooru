@@ -9,6 +9,9 @@ const EmptyView = require("../views/empty_view.js");
 
 class TagCategoriesController {
     constructor() {
+        topNavigation.activate("tags");
+        topNavigation.setTitle("Tag Categories");
+
         if (!api.hasPrivilege("tag_categories:list")) {
             this._view = new EmptyView();
             this._view.showError(
@@ -17,8 +20,6 @@ class TagCategoriesController {
             return;
         }
 
-        topNavigation.activate("tags");
-        topNavigation.setTitle("Tag Categories");
         TagCategoryList.get().then(
             (response) => {
                 this._tagCategories = response.results;
