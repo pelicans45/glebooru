@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
+from sqlalchemy.event import listens_for
+
 from szurubooru.func import (
     comments,
     files,
@@ -466,21 +468,21 @@ def update_post_source(post: model.Post, source: Optional[str]) -> None:
     post.source = source or None
 
 
-@sa.events.event.listens_for(model.Post, "after_insert")
+@listens_for(model.Post, "after_insert")
 def _after_post_insert(
     _mapper: Any, _connection: Any, post: model.Post
 ) -> None:
     _sync_post_content(post)
 
 
-@sa.events.event.listens_for(model.Post, "after_update")
+@listens_for(model.Post, "after_update")
 def _after_post_update(
     _mapper: Any, _connection: Any, post: model.Post
 ) -> None:
     _sync_post_content(post)
 
 
-@sa.events.event.listens_for(model.Post, "before_delete")
+@listens_for(model.Post, "before_delete")
 def _before_post_delete(
     _mapper: Any, _connection: Any, post: model.Post
 ) -> None:
