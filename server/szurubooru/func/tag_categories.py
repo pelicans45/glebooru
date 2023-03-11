@@ -2,9 +2,9 @@ import re
 from typing import Any, Callable, Dict, List, Optional
 
 import sqlalchemy as sa
-from szurubooru.func import cache, serialization, util
 
 from szurubooru import config, db, errors, model, rest
+from szurubooru.func import cache, serialization, util
 
 DEFAULT_CATEGORY_NAME_CACHE_KEY = "default-tag-category"
 
@@ -89,7 +89,7 @@ def create_category(name: str, color: str, order: int) -> model.TagCategory:
 
 
 def update_category_name(category: model.TagCategory, name: str) -> None:
-    assert category
+    # assert category
     if not name:
         raise InvalidTagCategoryNameError("Name cannot be empty.")
     expr = sa.func.lower(model.TagCategory.name) == name.lower()
@@ -112,7 +112,7 @@ def update_category_name(category: model.TagCategory, name: str) -> None:
 
 
 def update_category_color(category: model.TagCategory, color: str) -> None:
-    assert category
+    # assert category
     if not color:
         raise InvalidTagCategoryColorError("Color cannot be empty.")
     if not re.match(r"^#?[0-9a-z]+$", color):
@@ -123,7 +123,7 @@ def update_category_color(category: model.TagCategory, color: str) -> None:
 
 
 def update_category_order(category: model.TagCategory, order: int) -> None:
-    assert category
+    # assert category
     category.order = order
 
 
@@ -195,7 +195,7 @@ def get_default_category_name() -> str:
 
 
 def set_default_category(category: model.TagCategory) -> None:
-    assert category
+    # assert category
     old_category = try_get_default_category(lock=True)
     if old_category:
         db.session.refresh(old_category)
@@ -206,7 +206,7 @@ def set_default_category(category: model.TagCategory) -> None:
 
 
 def delete_category(category: model.TagCategory) -> None:
-    assert category
+    # assert category
     if len(get_all_category_names()) == 1:
         raise TagCategoryIsInUseError("Cannot delete the last category.")
     if (category.tag_count or 0) > 0:

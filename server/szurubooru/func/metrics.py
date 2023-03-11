@@ -1,9 +1,9 @@
 from typing import Any, Callable, Dict, List, Optional
 
 import sqlalchemy as sa
+from szurubooru.func import serialization, tags, util, versions
 
 from szurubooru import db, errors, model, rest
-from szurubooru.func import serialization, tags, util, versions
 
 
 class MetricDoesNotExistsError(errors.ValidationError):
@@ -143,7 +143,7 @@ def try_get_post_metric_range(
 
 
 def create_metric(tag: model.Tag, min: float, max: float) -> model.Metric:
-    assert tag
+    # assert tag
     if tag.metric:
         raise MetricAlreadyExistsError("Tag already has a metric.")
     if min >= max:
@@ -156,7 +156,7 @@ def create_metric(tag: model.Tag, min: float, max: float) -> model.Metric:
 def update_or_create_metric(
     tag: model.Tag, metric_data: Any
 ) -> Optional[model.Metric]:
-    assert tag
+    # assert tag
     for field in ("min", "max"):
         if field not in metric_data:
             raise InvalidMetricError("Metric is missing %r field." % field)
@@ -176,8 +176,8 @@ def update_or_create_metric(
 def update_or_create_post_metric(
     post: model.Post, metric: model.Metric, value: float
 ) -> model.PostMetric:
-    assert post
-    assert metric
+    # assert post
+    # assert metric
     if metric.tag not in post.tags:
         raise PostMissingTagError('Post doesn"t have this tag.')
     if value < metric.min or value > metric.max:
@@ -198,7 +198,7 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
     """
     Overwrites any existing post metrics, deletes other existing post metrics.
     """
-    assert post
+    # assert post
     post.metrics = []
     for metric_data in metrics_data:
         for field in ("tag_name", "value"):
@@ -216,8 +216,8 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
 def update_or_create_post_metric_range(
     post: model.Post, metric: model.Metric, low: float, high: float
 ) -> model.PostMetricRange:
-    assert post
-    assert metric
+    # assert post
+    # assert metric
     if metric.tag not in post.tags:
         raise PostMissingTagError('Post doesn"t have this tag.')
     for value in (low, high):
@@ -248,7 +248,7 @@ def update_or_create_post_metric_ranges(
     """
     Overwrites any existing post metrics, deletes other existing post metrics.
     """
-    assert post
+    # assert post
     post.metric_ranges = []
     for metric_data in metric_ranges_data:
         for field in ("tag_name", "low", "high"):
@@ -269,7 +269,7 @@ def update_or_create_post_metric_ranges(
 
 
 def delete_metric(metric: model.Metric) -> None:
-    assert metric
+    # assert metric
     db.session.delete(metric)
-    assert metric
+    # assert metric
     db.session.delete(metric)

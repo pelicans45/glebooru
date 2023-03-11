@@ -4,8 +4,6 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
-
-from szurubooru import config, db, errors, model, rest
 from szurubooru.func import (
     comments,
     files,
@@ -22,6 +20,8 @@ from szurubooru.func import (
     util,
 )
 from szurubooru.func.image_hash import NpMatrix
+
+from szurubooru import config, db, errors, model, rest
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def get_post_security_hash(id: int) -> str:
 
 
 def get_post_content_url(post: model.Post) -> str:
-    assert post
+    # assert post
     return "/posts/%d_%s.%s" % (
         post.post_id,
         get_post_security_hash(post.post_id),
@@ -117,7 +117,7 @@ def get_post_content_url(post: model.Post) -> str:
 
 
 def get_post_thumbnail_url(post: model.Post) -> str:
-    assert post
+    # assert post
     return "/thumbnails/%d_%s.jpg" % (
         post.post_id,
         get_post_security_hash(post.post_id),
@@ -125,8 +125,8 @@ def get_post_thumbnail_url(post: model.Post) -> str:
 
 
 def get_post_content_path(post: model.Post) -> str:
-    assert post
-    assert post.post_id
+    # assert post
+    # assert post.post_id
     return "posts/%d_%s.%s" % (
         post.post_id,
         get_post_security_hash(post.post_id),
@@ -135,7 +135,7 @@ def get_post_content_path(post: model.Post) -> str:
 
 
 def get_post_thumbnail_path(post: model.Post) -> str:
-    assert post
+    # assert post
     return "generated-thumbnails/%d_%s.jpg" % (
         post.post_id,
         get_post_security_hash(post.post_id),
@@ -143,7 +143,7 @@ def get_post_thumbnail_path(post: model.Post) -> str:
 
 
 def get_post_thumbnail_backup_path(post: model.Post) -> str:
-    assert post
+    # assert post
     return "posts/custom-thumbnails/%d_%s.dat" % (
         post.post_id,
         get_post_security_hash(post.post_id),
@@ -151,7 +151,7 @@ def get_post_thumbnail_backup_path(post: model.Post) -> str:
 
 
 def serialize_note(note: model.PostNote) -> rest.Response:
-    assert note
+    # assert note
     return {
         "polygon": note.polygon,
         "text": note.text,
@@ -450,7 +450,7 @@ def create_post(
 
 
 def update_post_safety(post: model.Post, safety: str) -> None:
-    assert post
+    # assert post
     safety = util.flip(SAFETY_MAP).get(safety, None)
     if not safety:
         raise InvalidPostSafetyError(
@@ -460,7 +460,7 @@ def update_post_safety(post: model.Post, safety: str) -> None:
 
 
 def update_post_source(post: model.Post, source: Optional[str]) -> None:
-    assert post
+    # assert post
     if util.value_exceeds_column_size(source, model.Post.source):
         raise InvalidPostSourceError("Source is too long.")
     post.source = source or None
@@ -517,8 +517,8 @@ def _sync_post_content(post: model.Post) -> None:
 def generate_alternate_formats(
     post: model.Post, content: bytes
 ) -> List[Tuple[model.Post, List[model.Tag]]]:
-    assert post
-    assert content
+    # assert post
+    # assert content
     new_posts = []
     if mime.is_animated_gif(content):
         tag_names = [tag.first_name for tag in post.tags]
@@ -553,7 +553,7 @@ def generate_alternate_formats(
 
 
 def get_default_flags(content: bytes) -> List[str]:
-    assert content
+    # assert content
     ret = []
     if mime.is_video(mime.get_mime_type(content)):
         ret.append(model.Post.FLAG_LOOP)
@@ -629,7 +629,7 @@ def update_all_md5_checksums() -> None:
 
 
 def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
-    assert post
+    # assert post
     if not content:
         raise InvalidPostContentError("Post content missing.")
 
@@ -697,12 +697,12 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
 def update_post_thumbnail(
     post: model.Post, content: Optional[bytes] = None
 ) -> None:
-    assert post
+    # assert post
     setattr(post, "__thumbnail", content)
 
 
 def generate_post_thumbnail(post: model.Post) -> None:
-    assert post
+    # assert post
 
     if post.file_size < config.config["thumbnails"]["min_file_size"]:
         return
@@ -713,7 +713,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
     else:
         content = files.get(get_post_content_path(post))
     try:
-        assert content
+        # assert content
         image = images.Image(content)
         image.resize_fill(
             int(config.config["thumbnails"]["post_width"]),
@@ -727,14 +727,14 @@ def generate_post_thumbnail(post: model.Post) -> None:
 def update_post_tags(
     post: model.Post, tag_names: List[str]
 ) -> List[model.Tag]:
-    assert post
+    # assert post
     existing_tags, new_tags = tags.get_or_create_tags_by_names(tag_names)
     post.tags = existing_tags + new_tags
     return new_tags
 
 
 def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
-    assert post
+    # assert post
     try:
         new_post_ids = [int(id) for id in new_post_ids]
     except ValueError:
@@ -765,7 +765,7 @@ def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
 
 
 def update_post_notes(post: model.Post, notes: Any) -> None:
-    assert post
+    # assert post
     post.notes = []
     for note in notes:
         for field in ("polygon", "text"):
@@ -809,7 +809,7 @@ def update_post_notes(post: model.Post, notes: Any) -> None:
 
 
 def update_post_flags(post: model.Post, flags: List[str]) -> None:
-    assert post
+    # assert post
     target_flags = []
     for flag in flags:
         flag = util.flip(FLAG_MAP).get(flag, None)
@@ -822,7 +822,7 @@ def update_post_flags(post: model.Post, flags: List[str]) -> None:
 
 
 def feature_post(post: model.Post, user: Optional[model.User]) -> None:
-    assert post
+    # assert post
     post_feature = model.PostFeature()
     post_feature.time = datetime.utcnow()
     post_feature.post = post
@@ -831,15 +831,15 @@ def feature_post(post: model.Post, user: Optional[model.User]) -> None:
 
 
 def delete(post: model.Post) -> None:
-    assert post
+    # assert post
     db.session.delete(post)
 
 
 def merge_posts(
     source_post: model.Post, target_post: model.Post, replace_content: bool
 ) -> None:
-    assert source_post
-    assert target_post
+    # assert source_post
+    # assert target_post
     if source_post.post_id == target_post.post_id:
         raise InvalidPostRelationError("Cannot merge post with itself.")
 

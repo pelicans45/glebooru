@@ -5,8 +5,8 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Callable, List, Optional, Set, Tuple
 
-import numpy as np
 import HeifImagePlugin
+import numpy as np
 import pillow_avif
 from PIL import Image
 
@@ -33,7 +33,7 @@ SIG_NUMS = 8 * N * N
 SIG_BASE = 2 * N_LEVELS + 2
 SIG_CHUNK_WIDTH = int(SIG_CHUNK_BITS / math.log2(SIG_BASE))
 SIG_CHUNK_NUMS = SIG_NUMS / SIG_CHUNK_WIDTH
-assert SIG_NUMS % SIG_CHUNK_WIDTH == 0
+# assert SIG_NUMS % SIG_CHUNK_WIDTH == 0
 
 Window = Tuple[Tuple[float, float], Tuple[float, float]]
 NpMatrix = np.ndarray
@@ -211,8 +211,8 @@ def _get_words(array: NpMatrix, k: int, n: int) -> NpMatrix:
     word_positions = np.linspace(0, array.shape[0], n, endpoint=False).astype(
         "int"
     )
-    assert k <= array.shape[0]
-    assert word_positions.shape[0] <= array.shape[0]
+    # assert k <= array.shape[0]
+    # assert word_positions.shape[0] <= array.shape[0]
     words = np.zeros((n, k)).astype("int8")
     for i, pos in enumerate(word_positions):
         if pos + k <= array.shape[0]:

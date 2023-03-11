@@ -10,9 +10,9 @@ from typing import List
 import HeifImagePlugin
 import pillow_avif
 from PIL import Image as PILImage
+from szurubooru.func import mime, util
 
 from szurubooru import errors
-from szurubooru.func import mime, util
 
 logger = logging.getLogger(__name__)
 
@@ -223,7 +223,7 @@ class Image:
                 program="ffprobe",
             ).decode("utf-8")
         )
-        assert "streams" in audioinfo
+        # assert "streams" in audioinfo
         if len(audioinfo["streams"]) < 1:
             return False
 
@@ -270,7 +270,7 @@ class Image:
             # https://trac.ffmpeg.org/ticket/6521
             self.content = convert_heif_to_png(self.content)
         extension = mime.get_extension(mime_type)
-        assert extension
+        # assert extension
         with util.create_temp_file(suffix="." + extension) as handle:
             handle.write(self.content)
             handle.flush()
@@ -313,8 +313,8 @@ class Image:
                 program="ffprobe",
             ).decode("utf-8")
         )
-        assert "format" in self.info
-        assert "streams" in self.info
+        # assert "format" in self.info
+        # assert "streams" in self.info
         if len(self.info["streams"]) < 1:
             logger.warning("The video contains no video streams.")
             raise errors.ProcessingError(

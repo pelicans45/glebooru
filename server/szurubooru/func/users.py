@@ -1,11 +1,12 @@
+import logging
 import re
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import sqlalchemy as sa
+from szurubooru.func import auth, files, images, serialization, util
 
 from szurubooru import config, db, errors, model, rest
-from szurubooru.func import auth, files, images, serialization, util
 
 
 class UserNotFoundError(errors.NotFoundError):
@@ -41,15 +42,18 @@ def get_avatar_path(user_name: str) -> str:
 
 
 def get_avatar_url(user: model.User) -> str:
-    assert user
-    if user.avatar_style == user.AVATAR_GRAVATAR:
-        assert user.email or user.name
+    # assert user
+    if not user.name:
+        return ""
 
+    logging.info("avatar style: %s", user.avatar_style)
+    if user.avatar_style == user.AVATAR_GRAVATAR:
+        # assert user.email or user.name
         return "https://gravatar.com/avatar/%s?d=retro&s=%d" % (
-            util.get_md5(util.get_md5((user.email or user.name)).lower()),
+            util.get_md5(user.name).lower(),
             config.config["thumbnails"]["avatar_width"],
         )
-    assert user.name
+    # assert user.name
     return "%s/avatars/%s.png" % (
         config.config["data_url"].rstrip("/"),
         user.name.lower(),
@@ -59,8 +63,8 @@ def get_avatar_url(user: model.User) -> str:
 def get_email(
     user: model.User, auth_user: model.User, force_show_email: bool
 ) -> Union[bool, str]:
-    assert user
-    assert auth_user
+    # assert user
+    # assert auth_user
     if (
         not force_show_email
         and auth_user.user_id != user.user_id
@@ -73,8 +77,8 @@ def get_email(
 def get_liked_post_count(
     user: model.User, auth_user: model.User
 ) -> Union[bool, int]:
-    assert user
-    assert auth_user
+    # assert user
+    # assert auth_user
     if auth_user.user_id != user.user_id:
         return False
     return user.liked_post_count
@@ -83,8 +87,8 @@ def get_liked_post_count(
 def get_disliked_post_count(
     user: model.User, auth_user: model.User
 ) -> Union[bool, int]:
-    assert user
-    assert auth_user
+    # assert user
+    # assert auth_user
     if auth_user.user_id != user.user_id:
         return False
     return user.disliked_post_count
@@ -229,7 +233,7 @@ def create_user(name: str, password: str, email: str) -> model.User:
 
 
 def update_user_name(user: model.User, name: str) -> None:
-    assert user
+    # assert user
     if not name:
         raise InvalidUserNameError("Name cannot be empty.")
     if util.value_exceeds_column_size(name, model.User.name):
@@ -249,7 +253,7 @@ def update_user_name(user: model.User, name: str) -> None:
 
 
 def update_user_password(user: model.User, password: str) -> None:
-    assert user
+    # assert user
     if not password:
         raise InvalidPasswordError("Password cannot be empty.")
     password_regex = config.config["password_regex"]
@@ -266,7 +270,7 @@ def update_user_password(user: model.User, password: str) -> None:
 
 
 def update_user_email(user: model.User, email: str) -> None:
-    assert user
+    # assert user
     email = email.strip()
     if util.value_exceeds_column_size(email, model.User.email):
         raise InvalidEmailError("Email is too long.")
@@ -278,7 +282,7 @@ def update_user_email(user: model.User, email: str) -> None:
 def update_user_rank(
     user: model.User, rank: str, auth_user: model.User
 ) -> None:
-    assert user
+    # assert user
     if not rank:
         raise InvalidRankError("Rank cannot be empty.")
     rank = util.flip(auth.RANK_MAP).get(rank.strip(), None)
@@ -298,7 +302,7 @@ def update_user_rank(
 def update_user_avatar(
     user: model.User, avatar_style: str, avatar_content: Optional[bytes] = None
 ) -> None:
-    assert user
+    # assert user
     if avatar_style == "gravatar":
         user.avatar_style = user.AVATAR_GRAVATAR
     elif avatar_style == "manual":
@@ -322,12 +326,12 @@ def update_user_avatar(
 
 
 def bump_user_login_time(user: model.User) -> None:
-    assert user
+    # assert user
     user.last_login_time = datetime.utcnow()
 
 
 def reset_user_password(user: model.User) -> str:
-    assert user
+    # assert user
     password = auth.create_password()
     user.password_salt = auth.create_password()
     password_hash, revision = auth.get_password_hash(

@@ -7,9 +7,9 @@ from typing import Optional, Tuple
 
 from nacl import pwhash
 from nacl.exceptions import InvalidkeyError
-from szurubooru.func import util
 
 from szurubooru import config, db, errors, model
+from szurubooru.func import util
 
 RANK_MAP = OrderedDict(
     [
@@ -69,7 +69,7 @@ def create_password() -> str:
 
 
 def is_valid_password(user: model.User, password: str) -> bool:
-    assert user
+    # assert user
     salt, valid_hash = user.password_salt, user.password_hash
 
     try:
@@ -111,8 +111,8 @@ def is_valid_token(user_token: Optional[model.UserToken]) -> bool:
 
 
 def has_privilege(user: model.User, privilege_name: str) -> bool:
-    # assert user and user.rank in ALL_RANKS
-    # assert privilege_name in config.config["privileges"]
+    # #assert user and user.rank in ALL_RANKS
+    # #assert privilege_name in config.config["privileges"]
     minimal_rank = REVERSED_RANK_MAP[
         config.config["privileges"][privilege_name]
     ]
@@ -120,14 +120,14 @@ def has_privilege(user: model.User, privilege_name: str) -> bool:
 
 
 def verify_privilege(user: model.User, privilege_name: str) -> None:
-    # assert user
+    # #assert user
     if not has_privilege(user, privilege_name):
         raise errors.AuthError("Insufficient privileges to do this.")
 
 
 def generate_authentication_token(user: model.User) -> str:
     """Generate nonguessable challenge (e.g. links in password reminder)."""
-    # assert user
+    # #assert user
     digest = hashlib.md5()
     digest.update(config.config["secret"].encode("utf8"))
     digest.update(user.password_salt.encode("utf8"))

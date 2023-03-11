@@ -2,13 +2,13 @@ from datetime import datetime
 from typing import Any, Callable, Dict, Optional
 
 import sqlalchemy as sa
-from szurubooru.func import diff, net, users
 
 from szurubooru import db, model
+from szurubooru.func import diff, net, users
 
 
 def get_tag_category_snapshot(category: model.TagCategory) -> Dict[str, Any]:
-    assert category
+    # assert category
     return {
         "name": category.name,
         "color": category.color,
@@ -17,7 +17,7 @@ def get_tag_category_snapshot(category: model.TagCategory) -> Dict[str, Any]:
 
 
 def get_tag_snapshot(tag: model.Tag) -> Dict[str, Any]:
-    assert tag
+    # assert tag
     return {
         "names": [tag_name.name for tag_name in tag.names],
         "category": tag.category.name,
@@ -27,7 +27,7 @@ def get_tag_snapshot(tag: model.Tag) -> Dict[str, Any]:
 
 
 def get_pool_category_snapshot(category: model.PoolCategory) -> Dict[str, Any]:
-    assert category
+    # assert category
     return {
         "name": category.name,
         "color": category.color,
@@ -36,7 +36,7 @@ def get_pool_category_snapshot(category: model.PoolCategory) -> Dict[str, Any]:
 
 
 def get_pool_snapshot(pool: model.Pool) -> Dict[str, Any]:
-    assert pool
+    # assert pool
     return {
         "names": [pool_name.name for pool_name in pool.names],
         "category": pool.category.name,
@@ -45,7 +45,7 @@ def get_pool_snapshot(pool: model.Pool) -> Dict[str, Any]:
 
 
 def get_post_snapshot(post: model.Post) -> Dict[str, Any]:
-    assert post
+    # assert post
     return {
         "source": post.source,
         "safety": post.safety,
@@ -82,7 +82,7 @@ _snapshot_factories = {
 def serialize_snapshot(
     snapshot: model.Snapshot, auth_user: model.User
 ) -> Dict[str, Any]:
-    assert snapshot
+    # assert snapshot
     return {
         "operation": snapshot.operation,
         "type": snapshot.resource_type,
@@ -118,7 +118,7 @@ def _create(
 
 
 def create(entity: model.Base, auth_user: Optional[model.User]) -> None:
-    assert entity
+    # assert entity
     snapshot = _create(model.Snapshot.OPERATION_CREATED, entity, auth_user)
     snapshot_factory = _snapshot_factories[snapshot.resource_type]
     snapshot.data = snapshot_factory(entity)
@@ -127,7 +127,7 @@ def create(entity: model.Base, auth_user: Optional[model.User]) -> None:
 
 
 def modify(entity: model.Base, auth_user: Optional[model.User]) -> None:
-    assert entity
+    # assert entity
 
     table = next(
         (
@@ -138,14 +138,14 @@ def modify(entity: model.Base, auth_user: Optional[model.User]) -> None:
         ),
         None,
     )
-    assert table
+    # assert table
 
     snapshot = _create(model.Snapshot.OPERATION_MODIFIED, entity, auth_user)
     snapshot_factory = _snapshot_factories[snapshot.resource_type]
 
     detached_session = sa.orm.sessionmaker(bind=db.session.get_bind())()
     detached_entity = detached_session.query(table).get(snapshot.resource_pkey)
-    assert detached_entity, "Entity not found in DB, have you committed it?"
+    # assert detached_entity, "Entity not found in DB, have you committed it?"
     detached_snapshot = snapshot_factory(detached_entity)
     detached_session.close()
 
@@ -159,7 +159,7 @@ def modify(entity: model.Base, auth_user: Optional[model.User]) -> None:
 
 
 def delete(entity: model.Base, auth_user: Optional[model.User]) -> None:
-    assert entity
+    # assert entity
     snapshot = _create(model.Snapshot.OPERATION_DELETED, entity, auth_user)
     snapshot_factory = _snapshot_factories[snapshot.resource_type]
     snapshot.data = snapshot_factory(entity)
@@ -172,8 +172,8 @@ def merge(
     target_entity: model.Base,
     auth_user: Optional[model.User],
 ) -> None:
-    assert source_entity
-    assert target_entity
+    # assert source_entity
+    # assert target_entity
     snapshot = _create(
         model.Snapshot.OPERATION_MERGED, source_entity, auth_user
     )

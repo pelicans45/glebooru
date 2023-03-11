@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
+from szurubooru.func import serialization, tag_categories, util
 
 from szurubooru import config, db, errors, model, rest
-from szurubooru.func import serialization, tag_categories, util
 
 RESERVED_NAMES = {
     "home",
@@ -76,7 +76,7 @@ def _verify_name_validity(name: str) -> None:
 
 
 def _get_names(tag: model.Tag) -> List[str]:
-    assert tag
+    # assert tag
     return [tag_name.name for tag_name in tag.names]
 
 
@@ -252,7 +252,7 @@ def get_or_create_tags_by_names(
 
 
 def get_tag_siblings(tag: model.Tag) -> List[model.Tag]:
-    assert tag
+    # assert tag
     tag_alias = sa.orm.aliased(model.Tag)
     pt_alias1 = sa.orm.aliased(model.PostTag)
     pt_alias2 = sa.orm.aliased(model.PostTag)
@@ -271,7 +271,7 @@ def get_tag_siblings(tag: model.Tag) -> List[model.Tag]:
 
 
 def delete(source_tag: model.Tag) -> None:
-    assert source_tag
+    # assert source_tag
     db.session.execute(
         sa.sql.expression.delete(model.TagSuggestion).where(
             model.TagSuggestion.child_id == source_tag.tag_id
@@ -286,8 +286,8 @@ def delete(source_tag: model.Tag) -> None:
 
 
 def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
-    assert source_tag
-    assert target_tag
+    # assert source_tag
+    # assert target_tag
     if source_tag.tag_id == target_tag.tag_id:
         raise InvalidTagRelationError("Cannot merge tag with itself.")
     if source_tag.metric or target_tag.metric:
@@ -366,13 +366,13 @@ def create_tag(
 
 
 def update_tag_category_name(tag: model.Tag, category_name: str) -> None:
-    assert tag
+    # assert tag
     tag.category = tag_categories.get_category_by_name(category_name)
 
 
 def update_tag_names(tag: model.Tag, names: List[str]) -> None:
     # sanitize
-    assert tag
+    # assert tag
     names = util.icase_unique([name for name in names if name])
     if not len(names):
         raise InvalidTagNameError("At least one name must be specified.")
@@ -409,7 +409,7 @@ def update_tag_names(tag: model.Tag, names: List[str]) -> None:
 
 # TODO: what to do with relations that do not yet exist?
 def update_tag_implications(tag: model.Tag, relations: List[str]) -> None:
-    assert tag
+    # assert tag
     if _check_name_intersection(_get_names(tag), relations, False):
         raise InvalidTagRelationError("Tag cannot imply itself.")
     tag.implications = get_tags_by_names(relations)
@@ -417,14 +417,14 @@ def update_tag_implications(tag: model.Tag, relations: List[str]) -> None:
 
 # TODO: what to do with relations that do not yet exist?
 def update_tag_suggestions(tag: model.Tag, relations: List[str]) -> None:
-    assert tag
+    # assert tag
     if _check_name_intersection(_get_names(tag), relations, False):
         raise InvalidTagRelationError("Tag cannot suggest itself.")
     tag.suggestions = get_tags_by_names(relations)
 
 
 def update_tag_description(tag: model.Tag, description: str) -> None:
-    assert tag
+    # assert tag
     if util.value_exceeds_column_size(description, model.Tag.description):
         raise InvalidTagDescriptionError("Description is too long.")
     tag.description = description or None

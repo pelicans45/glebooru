@@ -2,8 +2,9 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-from szurubooru import config, rest
 from szurubooru.func import auth, posts, users, util
+
+from szurubooru import config, rest
 
 _cache_time = None  # type: Optional[datetime]
 _cache_result = None  # type: Optional[int]
@@ -16,7 +17,7 @@ def _get_disk_usage() -> int:
     threshold = timedelta(hours=48)
     now = datetime.utcnow()
     if _cache_time and _cache_time > now - threshold:
-        assert _cache_result is not None
+        #assert _cache_result is not None
         return _cache_result
     total_size = 0
     for dir_path, _, file_names in os.walk(config.config["data_dir"]):

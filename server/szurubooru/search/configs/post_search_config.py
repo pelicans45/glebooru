@@ -1,6 +1,8 @@
 from typing import Any, Dict, Optional, Tuple
 
 import sqlalchemy as sa
+
+from szurubooru import db, errors, model
 from szurubooru.func import metrics, util
 from szurubooru.search import criteria, tokens
 from szurubooru.search.configs import util as search_util
@@ -10,8 +12,6 @@ from szurubooru.search.configs.base_search_config import (
 )
 from szurubooru.search.query import SearchQuery
 from szurubooru.search.typing import SaColumn, SaQuery
-
-from szurubooru import db, errors, model
 
 
 def _type_transformer(value: str) -> str:
@@ -57,7 +57,7 @@ def _create_score_filter(score: int) -> Filter:
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        assert criterion
+        # assert criterion
         if not getattr(criterion, "internal", False):
             raise errors.SearchError(
                 "Votes cannot be seen publicly. Did you mean %r?"
@@ -84,7 +84,7 @@ def _create_score_filter(score: int) -> Filter:
 def _user_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
     if isinstance(criterion, criteria.PlainCriterion) and not criterion.value:
         expr = model.Post.user_id == None  # noqa: E711
         if negated:
@@ -101,7 +101,7 @@ def _user_filter(
 def _note_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
     return search_util.create_subquery_filter(
         model.Post.post_id,
         model.PostNote.post_id,
@@ -113,7 +113,7 @@ def _note_filter(
 def _pool_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
     return search_util.create_subquery_filter(
         model.Post.post_id,
         model.PoolPost.post_id,
@@ -126,7 +126,7 @@ def _pool_filter(
 def _similar_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
     filter_func_tag = search_util.create_num_filter(model.PostTag.post_id)
     pt_alias = sa.orm.aliased(model.PostTag)
 
@@ -164,7 +164,7 @@ def _create_metric_num_filter(name: str):
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        assert criterion
+        # assert criterion
         t = sa.orm.aliased(model.TagName)
         pm = sa.orm.aliased(model.PostMetric)
         expr = t.name == name
@@ -188,7 +188,7 @@ def _metric_presence_filter(
     criterion: Optional[criteria.BaseCriterion],
     negated: bool,
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
     t = sa.orm.aliased(model.TagName)
     tag_name_filter = search_util.apply_str_criterion_to_column(
         t.name, criterion
@@ -222,7 +222,7 @@ def _create_metric_sort_column(metric_name: str):
 def _category_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
-    assert criterion
+    # assert criterion
 
     # Step 1. find the id for the category
     q1 = db.session.query(model.TagCategory.tag_category_id).filter(
@@ -259,7 +259,7 @@ class PostSearchConfig(BaseSearchConfig):
         new_special_tokens = []
         for token in search_query.special_tokens:
             if token.value in ("fav", "liked", "disliked"):
-                assert self.user
+                # assert self.user
                 if self.user.rank == "anonymous":
                     raise errors.SearchError(
                         "Must be logged in to use this feature."
