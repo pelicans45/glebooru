@@ -109,23 +109,19 @@ function _makeTopNavigation() {
     ret.add("register", new TopNavigationItem("R", "Register", "register"));
     ret.add(
         "login",
-		"Login",
         new TopNavigationItem("L", "<i class='la la-sign-in'></i>", "login")
     );
     ret.add(
         "logout",
-		"Logout",
-        new TopNavigationItem(null, "<i class='la la-sign-out'></i>", "logout")
+        new TopNavigationItem(null, "Logout", "<i class='la la-sign-out'></i>", "logout")
     );
     ret.add(
         "help",
-		"Help",
-        new TopNavigationItem("H", "<i class='la la-info'></i>", "help")
+        new TopNavigationItem("H", "Help", "<i class='la la-info'></i>", "help")
     );
     ret.add(
         "settings",
-		"Settings",
-        new TopNavigationItem(null, "<i class='la la-cog'></i>", "settings")
+        new TopNavigationItem(null, "Settings", "<i class='la la-cog'></i>", "settings")
     );
     return ret;
 }
