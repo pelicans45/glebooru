@@ -35,10 +35,7 @@ def upgrade():
     }
     conn = op.get_bind()
 
-    conn.execute(
-        text("""INSERT INTO "user" (creation_time, last_login_time, version, name, password_hash, password_salt, password_revision, email, rank, avatar_style) VALUES (%(creation_time)s, %(last_login_time)s, %(version)s, %(name)s, %(password_hash)s, %(password_salt)s, %(password_revision)s, %(email)s, %(rank)s, %(avatar_style)s)"""),
-        **anonymous_user,
-    )
+    conn.execute(text("""INSERT INTO "user" (creation_time, last_login_time, version, name, password_hash, password_salt, password_revision, email, rank, avatar_style) VALUES (:creation_time, :last_login_time, :version, :name, :password_hash, :password_salt, :password_revision, :email, :rank, :avatar_style)"""), **anonymous_user)
 
 
 def downgrade():
