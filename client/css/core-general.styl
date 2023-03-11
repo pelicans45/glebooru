@@ -34,9 +34,9 @@ body
     @media (max-width: 1200px)
         font-size: 0.95em
 
-body.darktheme
-    color: $text-color-darktheme
-    background: $window-color-darktheme
+    &.darktheme
+        color: $text-color-darktheme
+        background: $window-color-darktheme
 
 h1, h2, h3
     font-weight: normal
@@ -249,7 +249,7 @@ nav
                 float: none
             &[data-name=home],
             &[data-name=register],
-            &[data-name=logout],
+            &[data-name=logout]
                 display: none
 
         .thumbnail
