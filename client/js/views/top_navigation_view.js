@@ -47,9 +47,13 @@ class TopNavigationView {
     activate(key) {
         if (this._key !== key) {
             console.log("activate", this._key, key);
-            this._hostNode
-                .querySelector("li[data-name].active")
-                .classList.remove("active");
+            const active = this._hostNode.querySelector(
+                "li[data-name].active"
+            );
+
+            if (active) {
+                active.classList.remove("active");
+            }
 
             this._hostNode
                 .querySelector(`li[data-name="${key}"]`)

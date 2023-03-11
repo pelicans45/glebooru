@@ -9,7 +9,7 @@
                 --><li data-name='<%- item.key %>'><!--
                     --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
                         --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                        --><span class='text'><%- item.title %></span><!--
+                        --><span class='text'><%= item.text %></span><!--
                     --></a><!--
                 --></li><!--
             --><% } %><!--
