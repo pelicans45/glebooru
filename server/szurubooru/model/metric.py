@@ -123,6 +123,7 @@ class Metric(Base):
                 [sa.sql.expression.func.count(PostMetric.post_id)])
                 .where(PostMetric.tag_id == tag_id)
                 .correlate_except(PostMetric)
+                .scalar_subquery()
         ),
         deferred=True)
 
@@ -132,6 +133,7 @@ class Metric(Base):
                 [sa.sql.expression.func.count(PostMetricRange.post_id)])
                 .where(PostMetricRange.tag_id == tag_id)
                 .correlate_except(PostMetricRange)
+                .scalar_subquery()
         ),
         deferred=True)
 

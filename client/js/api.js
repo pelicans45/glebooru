@@ -385,6 +385,16 @@ class Api extends events.EventTarget {
 
         let abortFunction = () => {};
         let returnedPromise = new Promise((resolve, reject) => {
+            if (!options.noProgress) {
+                progress.start();
+            }
+
+            /*
+            if (options.progress) {
+                progress.start();
+            }
+			*/
+
             let req = requestFactory(fullUrl);
 
             req.set("Accept", "application/json");
@@ -439,16 +449,6 @@ class Api extends events.EventTarget {
                 reject(
                     new Error("Authentication error (malformed credentials)")
                 );
-            }
-
-			/*
-            if (!options.noProgress) {
-                progress.start();
-            }
-			*/
-
-            if (options.progress) {
-                progress.start();
             }
 
             abortFunction = () => {

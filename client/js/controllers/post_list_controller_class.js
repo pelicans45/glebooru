@@ -28,12 +28,12 @@ const fields = [
 
 class PostListController {
     constructor(ctx) {
-        topNavigation.activate("posts");
         topNavigation.setTitle("");
+        topNavigation.activate("posts");
 
         this._pageController = new PageController();
 
-		/*
+        /*
         if (!api.hasPrivilege("posts:list")) {
             this._view = new EmptyView();
             this._view.showError("You don't have privileges to view posts.");

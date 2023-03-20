@@ -311,6 +311,7 @@ class Post(Base):
         )
         .where(PostScore.post_id == post_id)
         .correlate_except(PostScore)
+        .scalar_subquery()
     )
 
     favorite_count = sa.orm.column_property(
@@ -319,6 +320,7 @@ class Post(Base):
         )
         .where(PostFavorite.post_id == post_id)
         .correlate_except(PostFavorite)
+        .scalar_subquery()
     )
 
     last_favorite_time = sa.orm.column_property(
@@ -327,6 +329,7 @@ class Post(Base):
         )
         .where(PostFavorite.post_id == post_id)
         .correlate_except(PostFavorite)
+        .scalar_subquery()
     )
 
     feature_count = sa.orm.column_property(
@@ -335,6 +338,7 @@ class Post(Base):
         )
         .where(PostFeature.post_id == post_id)
         .correlate_except(PostFeature)
+        .scalar_subquery()
     )
 
     last_feature_time = sa.orm.column_property(
@@ -343,6 +347,7 @@ class Post(Base):
         )
         .where(PostFeature.post_id == post_id)
         .correlate_except(PostFeature)
+        .scalar_subquery()
     )
 
     comment_count = sa.orm.column_property(
@@ -351,6 +356,7 @@ class Post(Base):
         )
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
+        .scalar_subquery()
     )
 
     last_comment_creation_time = sa.orm.column_property(
@@ -359,6 +365,7 @@ class Post(Base):
         )
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
+        .scalar_subquery()
     )
 
     last_comment_edit_time = sa.orm.column_property(
@@ -367,6 +374,7 @@ class Post(Base):
         )
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
+        .scalar_subquery()
     )
 
     note_count = sa.orm.column_property(
@@ -375,6 +383,7 @@ class Post(Base):
         )
         .where(PostNote.post_id == post_id)
         .correlate_except(PostNote)
+        .scalar_subquery()
     )
 
     relation_count = sa.orm.column_property(
@@ -386,6 +395,7 @@ class Post(Base):
             | (PostRelation.child_id == post_id)
         )
         .correlate_except(PostRelation)
+        .scalar_subquery()
     )
 
     __mapper_args__ = {

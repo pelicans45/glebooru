@@ -26,6 +26,7 @@ class PoolCategory(Base):
         )
         .where(Pool.category_id == pool_category_id)
         .correlate_except(sa.table("Pool"))
+        .scalar_subquery()
     )
 
     __mapper_args__ = {

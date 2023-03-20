@@ -1,14 +1,14 @@
 sites:
   jej.lol:
     name: jej
-    description: jej; lol, even
+    description: jej. lol.
     query: ""
     #color: "#435dbd" ##6a86ea
     color: "#6a86ea"
     tips: []
   glegle.gallery:
     name: Glegle Gallery
-    description: Gallery of Glegles
+    description: Gallery of Gles
     query: glegle
     color: "#6824dd"
     tips: [Love Glegle]

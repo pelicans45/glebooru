@@ -24,7 +24,7 @@ class TagCategory(Base):
     tag_count = sa.orm.column_property(
         sa.sql.expression.select([sa.sql.expression.func.count("Tag.tag_id")])
         .where(Tag.category_id == tag_category_id)
-        .correlate_except(sa.table("Tag"))
+        .correlate_except(sa.table("Tag").scalar_subquery())
     )
 
     __mapper_args__ = {
