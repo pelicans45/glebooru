@@ -20,8 +20,8 @@ const genericErrorMessage =
 
 class PostUploadController {
     constructor() {
-        topNavigation.setTitle("Upload");
-        topNavigation.activate("upload");
+    	topNavigation.activate("upload");
+    	topNavigation.setTitle("Upload");
 
         this._lastCancellablePromise = null;
 

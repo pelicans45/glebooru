@@ -28,8 +28,8 @@ const fields = [
 
 class PostListController {
     constructor(ctx) {
-        topNavigation.setTitle("");
         topNavigation.activate("posts");
+        topNavigation.setTitle("");
 
         this._pageController = new PageController();
 

@@ -275,6 +275,7 @@ class Post(Base):
         )
         .where(PostTag.post_id == post_id)
         .correlate_except(PostTag)
+        .scalar_subquery()
     )
 
     canvas_area = sa.orm.column_property(canvas_width * canvas_height)

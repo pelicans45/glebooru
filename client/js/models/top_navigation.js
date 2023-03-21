@@ -104,12 +104,12 @@ function _makeTopNavigation() {
     );
     ret.add(
         "account",
-        new TopNavigationItem("A", "Account", "<i class='la la-user'></i>", "user/{me}")
+        new TopNavigationItem("A", "Account", "<i class='la la-user-circle'></i>", "user/{me}")
     );
-    ret.add("register", new TopNavigationItem("R", "Register", "register"));
+    ret.add("register", new TopNavigationItem("R", "Register", "<i class='la la-user-plus'></i>", "register"));
     ret.add(
         "login",
-        new TopNavigationItem("L", "<i class='la la-sign-in'></i>", "login")
+        new TopNavigationItem("L", "Login", "<i class='la la-sign-in'></i>", "login")
     );
     ret.add(
         "logout",
