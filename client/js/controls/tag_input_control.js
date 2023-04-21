@@ -130,9 +130,7 @@ class TagInputControl extends events.EventTarget {
         this._tagInputNode.addEventListener("paste", (e) =>
             this._evtInputPaste(e)
         );
-        this._tagInputNode.addEventListener("blur", (e) =>
-            this._evtBlur(e)
-        );
+        this._tagInputNode.addEventListener("blur", (e) => this._evtBlur(e));
 
         this._editAreaNode
             .querySelector("a.opacity")
@@ -345,9 +343,10 @@ class TagInputControl extends events.EventTarget {
         const usagesNode = document.createElement("span");
         usagesNode.classList.add("tag-usages");
         usagesNode.setAttribute("data-pseudo-content", tag.postCount);
+        let removalLinkNode;
 
         if (tag.names[0] !== lens.hostnameFilter) {
-            const removalLinkNode = document.createElement("a");
+            removalLinkNode = document.createElement("a");
             removalLinkNode.classList.add("remove-tag");
             removalLinkNode.setAttribute("href", "");
             removalLinkNode.setAttribute("data-pseudo-content", "×");
@@ -358,7 +357,9 @@ class TagInputControl extends events.EventTarget {
         }
 
         const listItemNode = document.createElement("li");
-        listItemNode.appendChild(removalLinkNode);
+        if (removalLinkNode) {
+            listItemNode.appendChild(removalLinkNode);
+        }
         listItemNode.appendChild(tagLinkNode);
         listItemNode.appendChild(searchLinkNode);
         listItemNode.appendChild(usagesNode);
@@ -397,13 +398,13 @@ class TagInputControl extends events.EventTarget {
     }
 
     _loadSuggestions(tag) {
-		/*
+        /*
         const browsingSettings = settings.get();
         if (!browsingSettings.tagSuggestions) {
             return;
         }
 		*/
-		
+
         api.get(uri.formatApiLink("tag-siblings", tag.names[0]), {
             noProgress: true,
         })

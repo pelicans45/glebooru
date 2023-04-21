@@ -250,7 +250,13 @@ class Router {
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
-            [this._unhandled, (ctx, next) => {}]
+            //[this._unhandled, (ctx, next) => {}]
+            [
+                () => {
+                    this._unhandled();
+                },
+                (ctx, next) => {},
+            ]
         );
         let i = 0;
         let fn = () => {

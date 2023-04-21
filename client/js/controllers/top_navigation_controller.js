@@ -44,11 +44,15 @@ class TopNavigationController {
             topNavigation.hide("comments");
         }
 
-        const userListPrivilege = api.hasPrivilege("users:list");
-        if (!(api.hasPrivilege("tags:list") && userListPrivilege)) {
+        if (
+            !(
+                api.hasPrivilege("tags:list") &&
+                api.hasPrivilege("users:edit:self:name")
+            )
+        ) {
             topNavigation.hide("tags");
         }
-        if (!userListPrivilege) {
+        if (!api.hasPrivilege("users:list")) {
             topNavigation.hide("users");
         }
         if (!api.hasPrivilege("pools:list")) {

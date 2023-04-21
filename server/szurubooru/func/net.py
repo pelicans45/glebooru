@@ -1,4 +1,4 @@
-import json
+import orjson as json
 import logging
 import subprocess
 import urllib.error

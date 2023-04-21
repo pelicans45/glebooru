@@ -102,10 +102,6 @@ function _makeTopNavigation() {
         "users",
         new TopNavigationItem(null, "Users", "<i class='la la-users'></i>", "users")
     );
-    ret.add(
-        "account",
-        new TopNavigationItem("A", "Account", "<i class='la la-user-circle'></i>", "user/{me}")
-    );
     ret.add("register", new TopNavigationItem("R", "Register", "<i class='la la-user-plus'></i>", "register"));
     ret.add(
         "login",
@@ -119,6 +115,7 @@ function _makeTopNavigation() {
         "help",
         new TopNavigationItem("H", "Help", "<i class='la la-info'></i>", "help")
     );
+    ret.add("account", new TopNavigationItem("A", "Account", "", "user/{me}"));
     ret.add(
         "settings",
         new TopNavigationItem(null, "Settings", "<i class='la la-cog'></i>", "settings")

@@ -101,7 +101,7 @@ function formatPostsLink(...values) {
             parts.push(escapeParam(value.toString()));
         }
     }
-    return parts.join("/");
+    return "/" + parts.join("/");
 }
 
 function extractHostname(url) {

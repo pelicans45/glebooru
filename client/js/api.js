@@ -262,6 +262,7 @@ class Api extends events.EventTarget {
         this.userPassword = null;
         this.token = null;
         this.dispatchEvent(new CustomEvent("logout"));
+		location.href = "/"
     }
 
     forget() {

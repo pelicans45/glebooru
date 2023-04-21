@@ -1,5 +1,5 @@
 import cgi
-import json
+import orjson as json
 import re
 import urllib.parse
 from datetime import datetime

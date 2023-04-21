@@ -10,7 +10,7 @@ const extraNavLinkTabs = new Set([
     "help",
     "account",
     "login",
-    "logout",
+    //"logout",
     "register",
 ]);
 
