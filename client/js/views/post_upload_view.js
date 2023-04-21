@@ -25,6 +25,7 @@ function _mimeTypeToPostType(mimeType) {
             "image/heic": "image",
             "video/mp4": "video",
             "video/webm": "video",
+            "video/quicktime": "video",
         }[mimeType] || "unknown"
     );
 }
@@ -123,6 +124,7 @@ class Url extends Uploadable {
             heif: "image/heif",
             heic: "image/heic",
             mp4: "video/mp4",
+            mov: "video/quicktime",
             webm: "video/webm",
         };
         for (let extension of Object.keys(mime)) {

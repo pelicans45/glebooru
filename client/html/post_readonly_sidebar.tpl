@@ -17,6 +17,7 @@
                     'image/heic': 'HEIC',
                     'video/webm': 'WEBM',
                     'video/mp4': 'MPEG-4',
+                    'video/quicktime': 'MOV',
                     'application/x-shockwave-flash': 'SWF',
                 }[ctx.post.mimeType] %>
                 </span>
