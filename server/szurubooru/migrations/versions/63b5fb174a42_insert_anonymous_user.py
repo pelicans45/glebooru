@@ -18,6 +18,7 @@ depends_on = None
 
 
 def upgrade():
+    return
     anonymous_user = {
         "creation_time": datetime.min,
         "last_login_time": None,
@@ -41,5 +42,6 @@ def upgrade():
 
 
 def downgrade():
+    return
     conn = op.get_bind()
     conn.execute(text("""DELETE FROM "user" WHERE name = 'anonymous'"""))

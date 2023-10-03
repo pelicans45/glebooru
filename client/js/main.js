@@ -1,6 +1,32 @@
 "use strict";
 
 require("./util/polyfill.js");
+
+const settings = require("./models/settings.js");
+
+if (!settings.get().darkTheme) {
+    document.body.classList.remove("darktheme");
+}
+
+if (config.environment == "development") {
+    var ws = new WebSocket("ws://" + location.hostname + ":9999");
+    ws.addEventListener("open", function (event) {
+        console.log("Live-reloading websocket connected.");
+    });
+    ws.addEventListener("message", (event) => {
+        console.log(event);
+        const parts = event.data.split(" ");
+        if (parts[0] === "reload") {
+            location.reload();
+        } else if (
+            parts[0] === "domainreload" &&
+            parts[1] === location.hostname
+        ) {
+            location.reload();
+        }
+    });
+}
+
 const misc = require("./util/misc.js");
 const views = require("./util/views.js");
 const router = require("./router.js");
@@ -29,7 +55,6 @@ router.enter(null, (ctx, next) => {
 const tags = require("./tags.js");
 const pools = require("./pools.js");
 const api = require("./api.js");
-const settings = require("./models/settings.js");
 
 // register controller routes
 const controllers = [
@@ -67,11 +92,13 @@ const controllers = [
 ];
 
 Promise.resolve()
+    /*
     .then(() => {
-        if (!settings.get().darkTheme) {
-            document.body.classList.remove("darktheme");
+        if (settings.get().darkTheme) {
+            document.body.classList.add("darktheme");
         }
     })
+	*/
     .then(
         () => {
             for (const controller of controllers) {
@@ -85,9 +112,9 @@ Promise.resolve()
     .then(() => api.loginFromCookies())
     .then(
         () => {
+            router.start();
             tags.refreshCategoryColorMap();
             pools.refreshCategoryColorMap();
-            router.start();
         },
         (error) => {
             if (window.location.href.indexOf("login") !== -1) {

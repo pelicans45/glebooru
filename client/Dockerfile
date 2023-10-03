@@ -1,6 +1,8 @@
 FROM node:lts as builder
 WORKDIR /opt/app
 
+ENV GLEBOORU_DEV=1
+
 COPY package.json package-lock.json ./
 RUN npm install
 

@@ -19,7 +19,7 @@ class PostList extends AbstractList {
         );
     }
 
-    static search(text, offset, limit, fields, r) {
+    static search(text, offset, limit, fields, r, canSeeNewPosts) {
         return api
             .get(
                 uri.formatApiLink("posts", {
@@ -31,9 +31,38 @@ class PostList extends AbstractList {
                 })
             )
             .then((response) => {
+                let results;
+
+                if (!canSeeNewPosts) {
+                    const uploadedPostIDs = localStorage.uploadedPostIDs;
+                    const uploadedPostIDSet = new Set(
+                        uploadedPostIDs
+                            ? uploadedPostIDs.split(";").filter((id) => id)
+                            : []
+                    );
+
+                    const now = Date.now();
+                    const filteredResults = [];
+                    for (let item of response.results) {
+                        const creationDate = Date.parse(item.creationTime);
+                        if (
+                            now >
+                                creationDate +
+                                    vars.newPostVisibilityThresholdMilliseconds ||
+                            uploadedPostIDSet.has(item.id)
+                        ) {
+                            filteredResults.push(item);
+                        }
+                    }
+
+                    results = filteredResults;
+                } else {
+                    results = response.results;
+                }
+
                 return Promise.resolve(
                     Object.assign({}, response, {
-                        results: PostList.fromResponse(response.results),
+                        results: PostList.fromResponse(results),
                     })
                 );
             });

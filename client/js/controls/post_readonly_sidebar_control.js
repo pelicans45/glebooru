@@ -265,7 +265,8 @@ class PostReadonlySidebarControl extends events.EventTarget {
             "similar:" + this._post.id + " -id:" + this._post.id,
             0,
             parseInt(settings.get().similarPosts),
-            ["id", "thumbnailUrl"]
+            ["id", "thumbnailUrl"],
+			true
         ).then((response) => {
             if (response.results.length === 0) {
                 return;

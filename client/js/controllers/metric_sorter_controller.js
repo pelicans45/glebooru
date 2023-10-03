@@ -129,7 +129,8 @@ class MetricSorterController {
             unsetFullQuery,
             this._ctx.parameters.skips || 0,
             1,
-            ["id"]
+            ["id"],
+			true
         ).then((response) => {
             if (!response.results.length) {
                 return Promise.reject(new Error("No posts found"));

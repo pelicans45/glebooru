@@ -67,6 +67,11 @@ def get_random_image(
     query_text = ctx.get_param_as_string("query", default="").strip()
     if not query_text:
         return ""
+
+    if query_text.isdigit():
+        post = posts.get_post_by_id(int(query_text))
+        return _serialize_post(ctx, post)
+
     query_text = "sort:random type:image " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:

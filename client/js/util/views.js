@@ -58,6 +58,7 @@ function makeThumbnail(url) {
             alt: "thumbnail",
             class: "gallery-thumb",
             src: url,
+			draggable: "false",
         })
     );
 }
@@ -90,7 +91,10 @@ function makeCheckbox(options) {
             name: options.name,
             value: options.value,
             type: "checkbox",
-            checked: options.checked !== undefined ? options.checked : false,
+            checked:
+                options.checked !== undefined && options.checked !== null
+                    ? options.checked
+                    : false,
             disabled: options.readonly,
             required: options.required,
             title: options.title,
@@ -390,6 +394,10 @@ function emptyContent(target) {
 }
 
 function replaceContent(target, source) {
+    if (!target) {
+        return;
+    }
+
     emptyContent(target);
     if (source instanceof NodeList) {
         for (let child of [...source]) {

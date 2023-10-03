@@ -1,0 +1,16 @@
+main_domain: booru
+
+booru:
+  name: booru dev
+  description: booru dev
+  query: ""
+  #color: "#435dbd" ##6a86ea
+  color: "#6a86ea"
+  tips: []
+
+bfilter:
+  name: booru filter dev
+  description: booru filter dev
+  query: test
+  color: "#6824dd"
+  tips: [Extra site tip here]

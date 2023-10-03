@@ -13,9 +13,10 @@
 const uri = require("./util/uri.js");
 const mousetrap = require("mousetrap");
 
-let location = window.history.location || window.location;
-
 const clickEvent = document.ontouchstart ? "touchstart" : "click";
+const location = window.history.location || window.location;
+
+const origin = _getOrigin();
 const base = _getBaseHref();
 
 function _getOrigin() {
@@ -28,13 +29,13 @@ function _getOrigin() {
 }
 
 function _isSameOrigin(href) {
-    return href && href.indexOf(_getOrigin()) === 0;
+    return href && href.indexOf(origin) === 0;
 }
 
 function _getBaseHref() {
     const bases = document.getElementsByTagName("base");
     return bases.length > 0
-        ? bases[0].href.replace(_getOrigin(), "").replace(/\/+$/, "")
+        ? bases[0].href.replace(origin, "").replace(/\/+$/, "")
         : "/";
 }
 
@@ -342,13 +343,15 @@ const _onClick = (router) => {
 
         const orig = el.pathname + el.search + (el.hash || "");
 
-        /*
+
         const path = !orig.indexOf(base) ? orig.slice(base.length) : orig;
 
         if (orig === path) {
-            return;
+			console.error("orig === path", orig, path);
+            //return;
         }
-		*/
+
+		console.error("TODO: remove orig check (click home page from home page?)")
 
         e.preventDefault();
         router.show(orig);

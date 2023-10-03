@@ -1,0 +1,44 @@
+main_domain: jej.lol
+
+jej.lol:
+  name: jej
+  description: jej; lol
+  query: ""
+  #color: "#435dbd" ##6a86ea
+  color: "#6a86ea"
+  tips: []
+
+glegle.gallery:
+  name: Glegle Gallery
+  description: Gallery of Gles
+  query: glegle
+  color: "#6824dd"
+  tips: [Love Glegle]
+
+bury.pink:
+  name: bury pink
+  description: bury pink girl
+  query: bury
+  color: "#ff74eb"
+  tips: [This is nice booru]
+
+flube.supply:
+  name: Flube Supply
+  description: let the flube oils seep in
+  query: flube
+  color: "#484848"
+  tips: ["Stay in touch with your Yuji Sakai", "Call before you get memeical care", "Be sure to get care if you feel worse or you think it is an emergency"]
+
+spikedog.school:
+  name: Spikedog School
+  description: spikedog scampering about
+  query: spikedog
+  color: "#ffffff"
+  tips: ["Greed tastes like sin", "Spike dog, dog, dog, dog", "Spikes are pulling, are pull- are pull- are pull- are pull- are pull-", "Greed tastes like sin", "Spike dog, dog, dog, dog", "Massive"]
+
+yosho.io:
+  name: yosho dot io
+  description: yosho must travel back in time to 1999 to stop the spikeman
+  query: yosho
+  color: "#3fd104"
+  tips: [Yosho must travel back in time to 1999 to stop the Spikeman]

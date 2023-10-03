@@ -135,10 +135,10 @@ http {
             error_page 500 502 503 504 @badproxy;
         }
 
-        location / {
-            gzip_static on;
-            gzip_proxied expired no-cache no-store private auth;
-        }
+        #location / {
+        #    gzip_static on;
+        #    gzip_proxied expired no-cache no-store private auth;
+        #}
 
         location @unauthorized {
             return 403 "unauthorized";

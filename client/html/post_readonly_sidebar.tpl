@@ -129,7 +129,6 @@
         </nav>
     <% } %>
 
-
     <% if (ctx.canViewSimilar) { %>
         <nav class='similar'>
             <h1>Similar</h1>

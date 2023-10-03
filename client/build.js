@@ -4,7 +4,10 @@
 const fs = require("fs");
 const yaml = require("js-yaml");
 const underscore = require("underscore");
-//const babelify = require("babelify");
+
+const DEV = process.env.GLEBOORU_DEV === "1";
+
+const debug = process.argv.includes("--debug");
 
 function baseUrl() {
     return process.env.BASE_URL ? process.env.BASE_URL : "/";
@@ -27,9 +30,22 @@ const sharedKeys = [
     "privileges",
     "main_domain",
     "max_suggested_results",
+    "new_post_visibility_threshold_minutes",
 ];
 
-const serverConf = yaml.load(readTextFile("./config.yaml"));
+const configName = DEV ? "config.dev.yaml" : "config.yaml";
+const sitesName = DEV ? "sites.dev.yaml" : "sites.yaml";
+const namesName = DEV ? "names.dev.yaml" : "names.yaml";
+
+const serverConf = yaml.load(readTextFile(configName));
+const sitesConf = yaml.load(readTextFile(sitesName));
+const namesConf = yaml.load(readTextFile(namesName));
+
+serverConf.main_domain = sitesConf.main_domain;
+delete sitesConf.main_domain;
+serverConf.sites = sitesConf;
+serverConf.names = namesConf;
+
 const vars = {};
 
 for (const key of sharedKeys) {
@@ -123,7 +139,7 @@ function bundleHtml(domain, data) {
     baseHtml = baseHtml.replaceAll("$THEME_COLOR$", data.color);
     fs.writeFileSync(`./public/${domain}/index.html`, minifyHtml(baseHtml));
 
-    console.info("Bundled HTML");
+    //console.info("Built HTML");
 }
 
 function bundleTemplates() {
@@ -162,7 +178,7 @@ function bundleTemplates() {
         "./js/.templates.autogen.js",
         compiledTemplateJs.join("\n")
     );
-    console.info("Bundled templates");
+    //console.info("Built templates");
 }
 
 function bundleCss(domain, data) {
@@ -206,7 +222,7 @@ function bundleCss(domain, data) {
         gzipFile(vendorStylesheet);
     }
 
-    console.info("Bundled CSS");
+    //console.info("Built CSS");
 }
 
 function minifyJs(path) {
@@ -245,7 +261,7 @@ function bundleVendorJs(domain, compress) {
         if (process.argv.includes("--gzip")) {
             gzipFile(file);
         }
-        console.info("Bundled vendor JS");
+        //console.info("Built vendor JS");
     });
 }
 
@@ -255,7 +271,6 @@ function bundleAppJs(domain, b, compress, callback) {
         if (process.argv.includes("--gzip")) {
             gzipFile(file);
         }
-        console.info("Bundled app JS");
         callback();
     });
 }
@@ -266,22 +281,23 @@ function bundleJs(domain) {
     }
 
     if (!process.argv.includes("--no-app-js")) {
-        const debug = process.argv.includes("--debug");
         let b = browserify({ debug: debug });
+
         /*
         if (!process.argv.includes("--no-transpile")) {
             b = b.transform("babelify");
         }
 		*/
+
         b = b.external(external_js).add(glob.sync("./js/**/*.js"));
         const compress = !debug;
-        bundleAppJs(domain, b, compress, () => {});
+        bundleAppJs(domain, b, compress, () => {
+            console.info(`Built ${domain}`);
+        });
     }
 }
 
-const environment = process.argv.includes("--watch")
-    ? "development"
-    : "production";
+const environment = DEV ? "development" : "production";
 
 function bundleConfig() {
     const config = {
@@ -295,7 +311,7 @@ function bundleConfig() {
     };
 
     fs.writeFileSync("./js/.config.autogen.json", JSON.stringify(config));
-    console.info("Generated config file");
+    //console.info("Generated config file");
 }
 
 function bundleBinaryAssets(domain) {
@@ -303,7 +319,7 @@ function bundleBinaryAssets(domain) {
     const imgDir = `./sites/${domain}/img`;
 
     fs.copyFileSync(`${imgDir}/favicon.png`, `${outputDir}/img/favicon.png`);
-    console.info("Copied images");
+    //console.info("Copied images");
 
     fs.copyFileSync(
         "./fonts/open_sans.woff2",
@@ -329,7 +345,7 @@ function bundleBinaryAssets(domain) {
             gzipFile(file);
         }
     }
-    console.info("Copied fonts");
+    //console.info("Copied fonts");
 }
 
 function bundleWebAppFiles(domain, data) {
@@ -345,7 +361,7 @@ function bundleWebAppFiles(domain, data) {
     };
 
     fs.writeFileSync(`${outputDir}/manifest.json`, JSON.stringify(manifest));
-    console.info("Generated app manifest");
+    //console.info("Generated app manifest");
 
     Promise.all(
         webapp_icons.map((icon) => {
@@ -356,7 +372,7 @@ function bundleWebAppFiles(domain, data) {
             });
         })
     ).then(() => {
-        console.info("Generated webapp icons");
+        //console.info("Generated webapp icons");
     });
 
     Promise.all(
@@ -389,7 +405,7 @@ function bundleWebAppFiles(domain, data) {
             });
         })
     ).then(() => {
-        console.info("Generated splash screens");
+        //console.info("Generated splash screens");
     });
 }
 
@@ -409,31 +425,155 @@ function makeOutputDirs(domain) {
     }
 }
 
+function watch() {
+    let wss = new WebSocket.Server({ port: 9999 });
+    const liveReload = !process.argv.includes("--no-live-reload");
+
+    function emitReload(domain) {
+        if (!liveReload) {
+            return;
+        }
+        //console.log("Requesting live reload");
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                if (domain) {
+                    client.send("domainreload " + domain);
+                } else {
+                    client.send("reload");
+                }
+            }
+        });
+    }
+
+    chokidar.watch("./fonts/**/*").on("change", () => {
+        try {
+            bundleForAllDomains(bundleBinaryAssets, emitReload);
+        } catch (e) {
+            console.error(pe.render(e));
+        }
+    });
+    chokidar.watch("./img/**/*").on("change", () => {
+        try {
+            bundleForAllDomains(bundleWebAppFiles, emitReload);
+        } catch (e) {
+            console.error(pe.render(e));
+        }
+    });
+    chokidar.watch("./html/**/*.tpl").on("change", () => {
+        try {
+            bundleForAllDomains(bundleHtml, emitReload);
+        } catch (e) {
+            console.error(pe.render(e));
+        }
+    });
+    chokidar.watch("./css/**/*.styl").on("change", () => {
+        try {
+            bundleForAllDomains(bundleCss, emitReload);
+        } catch (e) {
+            console.error(pe.render(e));
+        }
+    });
+
+    const skipInit = process.argv.includes("--skip-init");
+    if (!skipInit) {
+        for (const [domain, data] of Object.entries(serverConf.sites)) {
+            console.log(`Building ${domain}`);
+
+            if (!process.argv.includes("--no-web-app-files")) {
+                bundleWebAppFiles(domain, data);
+            }
+            if (!process.argv.includes("--no-binary-assets")) {
+                bundleBinaryAssets(domain);
+            }
+            if (!process.argv.includes("--no-html")) {
+                bundleHtml(domain, data);
+            }
+            if (!process.argv.includes("--no-css")) {
+                bundleCss(domain, data);
+            }
+            if (!process.argv.includes("--no-js")) {
+                bundleVendorJs(domain, true);
+            }
+        }
+    }
+
+    let watchify = require("watchify");
+    let b = browserify({
+        debug: debug,
+        entries: ["js/main.js"],
+        cache: {},
+        packageCache: {},
+    });
+
+    b.plugin(watchify);
+
+    /*
+    if (!process.argv.includes("--no-transpile")) {
+        b = b.transform("babelify");
+    }
+	*/
+    b = b.external(external_js).add(glob.sync("./js/**/*.js"));
+    const compress = false;
+
+    function bundle(id) {
+        //console.info("Building JS...");
+        let start = new Date();
+        for (const domain of Object.keys(serverConf.sites)) {
+            bundleAppJs(domain, b, compress, () => {
+                emitReload(domain);
+                let end = new Date() - start;
+                //console.info(`JS for ${domain} rebuilt in %ds`, end / 1000);
+                console.info(`Built ${domain}`);
+            });
+        }
+    }
+
+    b.on("update", bundle);
+
+    if (!skipInit) {
+        bundle();
+    }
+}
+
+function bundleForAllDomains(fn, fn2) {
+    for (const [domain, data] of Object.entries(serverConf.sites)) {
+        fn(domain, data);
+        fn2(domain, data);
+        console.info(`Built ${domain}`);
+    }
+}
+
 // -------------------------------------------------
 
-console.log(`Building for "${environment}" environment.`);
-bundleConfig();
-bundleTemplates();
+if (process.argv.includes("--watch")) {
+    console.log(
+        `Building for ${environment} environment and watching for changes\n`
+    );
+    bundleConfig();
+    bundleTemplates();
+    watch();
+} else {
+    console.log(`Building for "${environment}" environment\n`);
+    bundleConfig();
+    bundleTemplates();
+    for (const [domain, data] of Object.entries(serverConf.sites)) {
+        console.log(`Building ${domain}`);
+        makeOutputDirs(domain);
 
-for (const [domain, data] of Object.entries(serverConf.sites)) {
-    console.log(`Building for ${domain}`);
-    makeOutputDirs(domain);
-
-    if (!process.argv.includes("--no-web-app-files")) {
-        bundleWebAppFiles(domain, data);
+        if (!process.argv.includes("--no-css")) {
+            bundleCss(domain, data);
+        }
+        if (!process.argv.includes("--no-html")) {
+            bundleHtml(domain, data);
+        }
+        if (!process.argv.includes("--no-web-app-files")) {
+            bundleWebAppFiles(domain, data);
+        }
+        if (!process.argv.includes("--no-binary-assets")) {
+            bundleBinaryAssets(domain);
+        }
+        if (!process.argv.includes("--no-js")) {
+            bundleJs(domain);
+        }
     }
-    if (!process.argv.includes("--no-binary-assets")) {
-        bundleBinaryAssets(domain);
-    }
-    if (!process.argv.includes("--no-html")) {
-        bundleHtml(domain, data);
-    }
-    if (!process.argv.includes("--no-css")) {
-        bundleCss(domain, data);
-    }
-    if (!process.argv.includes("--no-js")) {
-        bundleJs(domain);
-    }
-
-    break;
 }

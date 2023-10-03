@@ -31,6 +31,7 @@ NodeList.prototype.querySelectorAll = function (...args) {
     return result;
 };
 
+/*
 // non standard
 Node.prototype.prependChild = function (child) {
     if (this.firstChild) {
@@ -39,6 +40,7 @@ Node.prototype.prependChild = function (child) {
         this.appendChild(child);
     }
 };
+*/
 
 // non standard
 Promise.prototype.always = function (onResolveOrReject) {

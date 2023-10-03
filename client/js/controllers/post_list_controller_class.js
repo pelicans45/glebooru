@@ -17,6 +17,7 @@ const Post = require("../models/post.js");
 const fields = [
     "id",
     "thumbnailUrl",
+	"creationTime",
     "type",
     "safety",
     "score",
@@ -42,6 +43,8 @@ class PostListController {
 		*/
 
         this._ctx = ctx;
+
+		this._canSeeNewPosts = api.hasPrivilege("posts:list:new");
 
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
@@ -250,7 +253,8 @@ class PostListController {
                     offset,
                     limit,
                     fields,
-                    this._ctx.parameters.r
+                    this._ctx.parameters.r,
+					true, //this._canSeeNewPosts,
                 );
             },
             pageRenderer: (pageCtx) => {

@@ -39,7 +39,8 @@ class CommentsController {
                     "sort:comment-date comment-count-min:1",
                     offset,
                     limit,
-                    fields
+                    fields,
+					true
                 );
             },
             pageRenderer: (pageCtx) => {

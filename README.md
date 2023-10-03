@@ -1,6 +1,6 @@
 # glebooru
 
-glebooru is a modern booru. It's a fork of [szurubooru](https://github.com/rr-/szurubooru), with many additions implemented from [Hunternif's szurubooru fork](https://github.com/Hunternif/szurubooru).
+glebooru is a modern booru. It's a fork of [szurubooru](https://github.com/rr-/szurubooru), with many additions implemented from [Hunternif's fork](https://github.com/Hunternif/szurubooru) and [po5's fork](https://github.com/po5/szurubooru/tree/vb).
 
 ## Features
 
@@ -24,24 +24,14 @@ glebooru is a modern booru. It's a fork of [szurubooru](https://github.com/rr-/s
 - Browser configurable endless paging
 - Browser configurable backdrop grid for transparent images
 
-## Installation
 
-It is recommended that you use Docker for deployment.
-[See installation instructions.](doc/INSTALL.md)
+## Development
 
-More installation resources, as well as related projects can be found on the
-[GitHub project Wiki](https://github.com/rr-/szurubooru/wiki)
+Add the following to your hosts file:
 
-## Screenshots
+```
+127.0.0.1 booru
+127.0.0.1 bfilter
+```
 
-Post list:
-
-![20160908_180032_fsk](https://cloud.githubusercontent.com/assets/1045476/18356730/3f1123d6-75ee-11e6-85dd-88a7615243a0.png)
-
-Post view:
-
-![20160908_180429_lmp](https://cloud.githubusercontent.com/assets/1045476/18356731/3f1566ee-75ee-11e6-9594-e86ca7347b0f.png)
-
-## License
-
-[GPLv3](LICENSE.md).
+Run `./d` to start the development Docker containers. Pass `-w` to `./d` to live-recompile client-side files.

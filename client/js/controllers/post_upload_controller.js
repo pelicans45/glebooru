@@ -20,8 +20,8 @@ const genericErrorMessage =
 
 class PostUploadController {
     constructor() {
-    	topNavigation.activate("upload");
-    	topNavigation.setTitle("Upload");
+        topNavigation.activate("upload");
+        topNavigation.setTitle("Upload");
 
         this._lastCancellablePromise = null;
 
@@ -197,6 +197,26 @@ class PostUploadController {
             })
             .then(
                 (result) => {
+                    const idEntry = `${result.id};`;
+                    const now = Date.now();
+
+                    let lastUploadTime = localStorage.lastUploadTime;
+                    if (lastUploadTime) {
+                        if (
+                            now >
+                            parseInt(lastUploadTime) +
+                                vars.newPostVisibilityThresholdMilliseconds
+                        ) {
+                            localStorage.uploadedIDs = "";
+                        }
+                    }
+
+                    localStorage.lastUploadTime = now.toString();
+
+                    localStorage.uploadedIDs = localStorage.uploadedIDs
+                        ? localStorage.uploadedIDs + idEntry
+                        : idEntry;
+
                     progress.done();
                     return Promise.resolve(result);
                 },

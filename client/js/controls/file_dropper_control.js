@@ -55,10 +55,11 @@ class FileDropperControl extends events.EventTarget {
         );
 		*/
         document.addEventListener("paste", (e) => {
-            if (document.querySelector(".file-dropper")) {
+            if (document.getElementById("post-upload")) {
                 this._evtPaste(e);
             }
         });
+
         /*
         if (this._urlInputNode) {
             this._urlInputNode.addEventListener("keydown", (e) =>
@@ -156,7 +157,8 @@ class FileDropperControl extends events.EventTarget {
 
         const fileList = items
             .filter((x) => x.kind === "file")
-            .map((x) => x.getAsFile());
+            .map((x) => x.getAsFile())
+            .filter((f) => f);
 
         if (fileList.length > 0) {
             if (!this._options.allowMultiple && fileList.length > 1) {
