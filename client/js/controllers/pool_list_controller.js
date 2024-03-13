@@ -40,11 +40,9 @@ class PoolListController {
             canCreate: api.hasPrivilege("pools:create"),
             canEditPoolCategories: api.hasPrivilege("pool_categories:edit"),
         });
-        this._headerView.addEventListener(
-            "submit",
-            (e) => this._evtSubmit(e),
-            "navigate",
-            (e) => this._evtNavigate(e)
+        this._headerView.addEventListener("submit", (e) => this._evtSubmit(e));
+        this._headerView.addEventListener("navigate", (e) =>
+            this._evtNavigate(e)
         );
 
         this._syncPageController();

@@ -35,7 +35,7 @@ class User(Base):
         "avatar_style", sa.Unicode(32), nullable=False, default=AVATAR_GRAVATAR
     )
 
-    comments = sa.orm.relationship("Comment")
+    comments = sa.orm.relationship("Comment", overlaps="user")
 
     @property
     def post_count(self) -> int:

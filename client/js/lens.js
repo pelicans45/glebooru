@@ -8,6 +8,10 @@ for (const [domain, data] of Object.entries(config.sites)) {
 }
 
 const site = config.sites[location.hostname];
+
+if (!site) {
+	throw "Hostname error"
+}
 const name = site.name;
 
 const universalHostname = vars.mainDomain;

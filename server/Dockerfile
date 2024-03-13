@@ -24,10 +24,8 @@ RUN apk --no-cache add \
     && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
     && chown -R app:app /opt/app /data
 
-COPY ./ /opt/app/
+COPY . ./
 RUN rm -rf /opt/app/szurubooru/tests
-
-CMD ["/opt/app/docker-start.sh"]
 
 USER app
 ARG PORT=6666
@@ -37,4 +35,5 @@ EXPOSE ${PORT}
 ARG THREADS=4
 ENV THREADS=${THREADS}
 
+CMD ["/opt/app/docker-start.sh"]
 VOLUME ["/data/"]

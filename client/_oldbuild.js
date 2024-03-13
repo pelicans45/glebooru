@@ -94,7 +94,7 @@ function bundleHtml() {
 
     const baseHtml = readTextFile("./html/index.htm").replace(
         "<!-- Base HTML Placeholder -->",
-        `<base href="${baseUrl()}"/>`
+        `<base id="base" href="${baseUrl()}"/>`
     );
     fs.writeFileSync("./public/index.htm", minifyHtml(baseHtml));
 

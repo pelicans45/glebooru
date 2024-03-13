@@ -1,7 +1,11 @@
-FROM node:lts as builder
+FROM node:lts-alpine3.18
 WORKDIR /opt/app
 
 ENV GLEBOORU_DEV=1
+
+RUN apk --no-cache add nginx dumb-init
+COPY nginx.docker.conf /etc/nginx/nginx.conf
+RUN rm -rf /var/www && ln -s /opt/app/public /var/www
 
 COPY package.json package-lock.json ./
 RUN npm install
@@ -10,22 +14,7 @@ COPY . ./
 
 RUN node build.js --gzip
 
+RUN ls -ahltr /var/www/
 
-FROM scratch as approot
-
-COPY docker-start.sh /
-
-WORKDIR /etc/nginx
-COPY nginx.conf.docker ./nginx.conf
-
-WORKDIR /var/www
-COPY --from=builder /opt/app/public/ .
-
-
-FROM nginx:alpine as release
-
-RUN apk --no-cache add dumb-init
-COPY --from=approot / /
-
-CMD ["/docker-start.sh"]
+CMD ["./docker-start.sh"]
 VOLUME ["/data"]

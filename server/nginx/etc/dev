@@ -1,3 +1,7 @@
+upstream client {
+    server client:8888;
+}
+
 server {
     server_name booru bfilter;
     listen 4000;
@@ -5,7 +9,8 @@ server {
     client_body_timeout 30s;
 
     location / {
-        proxy_pass http://client:8888;
+        proxy_pass http://client;
+        #proxy_set_header X-Original-Host $host;
         include /etc/nginx/include/proxy;
     }
 

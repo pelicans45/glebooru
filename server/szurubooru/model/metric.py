@@ -24,7 +24,7 @@ class PostMetric(Base):
     version = sa.Column('version', sa.Integer, default=1, nullable=False)
     value = sa.Column('value', sa.Float, nullable=False, index=True)
 
-    post = sa.orm.relationship('Post')
+    post = sa.orm.relationship('Post', overlaps="metrics")
     metric = sa.orm.relationship('Metric', back_populates='post_metrics')
 
     __table_args__ = (sa.ForeignKeyConstraint(
@@ -67,7 +67,7 @@ class PostMetricRange(Base):
     low = sa.Column('low', sa.Float, nullable=False)
     high = sa.Column('high', sa.Float, nullable=False)
 
-    post = sa.orm.relationship('Post')
+    post = sa.orm.relationship('Post', overlaps="metric_ranges")
     metric = sa.orm.relationship('Metric', back_populates='post_metric_ranges')
 
     __table_args__ = (sa.ForeignKeyConstraint(
@@ -102,7 +102,7 @@ class Metric(Base):
     min = sa.Column('min', sa.Float, nullable=False)
     max = sa.Column('max', sa.Float, nullable=False)
 
-    tag = sa.orm.relationship('Tag')
+    tag = sa.orm.relationship('Tag', overlaps="metric")
     post_metrics = sa.orm.relationship(
         'PostMetric', back_populates='metric', cascade='all, delete-orphan')
     post_metric_ranges = sa.orm.relationship(

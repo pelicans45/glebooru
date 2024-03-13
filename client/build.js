@@ -30,7 +30,6 @@ const sharedKeys = [
     "privileges",
     "main_domain",
     "max_suggested_results",
-    "new_post_visibility_threshold_minutes",
 ];
 
 const configName = DEV ? "config.dev.yaml" : "config.yaml";
@@ -52,6 +51,9 @@ for (const key of sharedKeys) {
     const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
     vars[camelKey] = serverConf[key];
 }
+
+vars["newPostVisibilityThresholdMilliseconds"] =
+    serverConf["new_post_visibility_threshold_minutes"] * 60 * 1000;
 
 const webapp_icons = [
     { name: "android-chrome-192x192.png", size: 192 },
@@ -128,7 +130,7 @@ function minifyHtml(html) {
 function bundleHtml(domain, data) {
     let baseHtml = readTextFile("./html/index.html").replace(
         "<!-- Base HTML Placeholder -->",
-        `<title>${data.name}</title><base href="${baseUrl()}"/>`
+        `<title>${data.name}</title><base id="base" href="${baseUrl()}"/>`
     );
 
     baseHtml = baseHtml.replaceAll(
@@ -445,20 +447,23 @@ function watch() {
         });
     }
 
-    chokidar.watch("./fonts/**/*").on("change", () => {
-        try {
-            bundleForAllDomains(bundleBinaryAssets, emitReload);
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
-    chokidar.watch("./img/**/*").on("change", () => {
-        try {
-            bundleForAllDomains(bundleWebAppFiles, emitReload);
-        } catch (e) {
-            console.error(pe.render(e));
-        }
-    });
+    if (false) {
+        chokidar.watch("./fonts/**/*").on("change", () => {
+            try {
+                bundleForAllDomains(bundleBinaryAssets, emitReload);
+            } catch (e) {
+                console.error(pe.render(e));
+            }
+        });
+        chokidar.watch("./img/**/*").on("change", () => {
+            try {
+                bundleForAllDomains(bundleWebAppFiles, emitReload);
+            } catch (e) {
+                console.error(pe.render(e));
+            }
+        });
+    }
+
     chokidar.watch("./html/**/*.tpl").on("change", () => {
         try {
             bundleForAllDomains(bundleHtml, emitReload);

@@ -23,10 +23,10 @@ services:
       #POSTGRES_PORT: 5432
       #LOG_SQL: 0 (1 for verbose SQL logs)
       THREADS:
-      SECRET: jK7svgsiHlpi8ZZ5Ggrzsi8mbsWkG987
+      SECRET:
     volumes:
-      - "server_data:/data"
-      - "./client/config.dev.yaml:/opt/app/config.dev.yaml:ro"
+      - "${MOUNT_DATA}:/data"
+      - "./client/config.yaml:/opt/app/config.yaml:ro"
 
   client:
     #image: szurubooru/client:latest
@@ -36,30 +36,16 @@ services:
     environment:
       BACKEND_HOST: server
       BASE_URL:
-      GLEBOORU_DEV: 1
     volumes:
-      - "client_data:/data:ro"
+      - "${MOUNT_DATA}:/data:ro"
     ports:
-      - "8888:80"
+      - "${PORT}:80"
 
   sql:
-    image: postgres:11-alpine
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
     volumes:
-      - "db:/var/lib/postgresql/data"
-
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
-    volumes:
-      - "./server/nginx/etc:/etc/nginx:ro"
-    ports:
-      - "4000:4000"
-
-volumes:
-  server_data:
-  client_data:
-  db:
+      - "${MOUNT_SQL}:/var/lib/postgresql/data"

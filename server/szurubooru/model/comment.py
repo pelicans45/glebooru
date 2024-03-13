@@ -58,7 +58,7 @@ class Comment(Base):
     user = sa.orm.relationship("User")
     post = sa.orm.relationship("Post")
     scores = sa.orm.relationship(
-        "CommentScore", cascade="all, delete-orphan", lazy="joined"
+        "CommentScore", cascade="all, delete-orphan", lazy="joined", overlaps="comment"
     )
 
     @property

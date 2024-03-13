@@ -12,8 +12,9 @@ const Pool = require("./pool.js");
 const PostMetricList = require("./post_metric_list.js");
 const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
+const vars = require("../vars.js");
 
-const baseUrl = document.getElementsByTagName("base")[0].href;
+const baseUrl = document.getElementsById("base").href;
 
 const maxNameLength = 250;
 
@@ -514,7 +515,7 @@ class Post extends events.EventTarget {
         tagNames.push(this.id);
 
         const joinedTags = tagNames.join(" ");
-        return `${joinedTags}.${this.fileExtension}`;
+        return `( ${location.hostname} ) ${joinedTags}.${this.fileExtension}`;
     }
 
     mutateContentUrl() {
