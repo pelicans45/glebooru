@@ -16,7 +16,7 @@ class TagList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("tags", {
-                    query: text,
+                    q: text,
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),

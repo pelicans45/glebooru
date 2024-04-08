@@ -1,6 +1,6 @@
 <div class='post-list-header'><%
     %><form class='horizontal search'><%
-        %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.query ? ctx.parameters.query.trim() + " " : "", placeholder: '\uf002'}) %><%
+        %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.q ? ctx.parameters.q.trim() + " " : "", placeholder: '\uf002'}) %><%
         %><wbr/><%
         %><!--<input class='mousetrap' type='submit' value='Search'/>--><%
         %><span title="Random sort" id='randomize-button' class='icon-button'><%

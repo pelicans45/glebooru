@@ -10,7 +10,7 @@ class SnapshotList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("snapshots", {
-                    query: text,
+                    q: text,
                     offset: offset,
                     limit: limit,
                 })

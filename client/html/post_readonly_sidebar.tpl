@@ -102,7 +102,7 @@
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatPostsLink({query: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
+                            --><a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
                         --><% if (ctx.canListPosts) { %><!--
@@ -133,7 +133,7 @@
         <nav class='similar'>
             <h1>Similar</h1>
             <ul></ul>
-            <a href='<%- ctx.formatPostsLink({query: "similar:" + ctx.post.id}) %>'>See more</a>
+            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id}) %>'>See more</a>
         </nav>
 
         <nav class='lookalikes'>

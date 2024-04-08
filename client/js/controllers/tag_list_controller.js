@@ -76,14 +76,14 @@ class TagListController {
             },
             requestPage: (offset, limit) => {
                 /*
-                if (!(lens.isUniversal || this._ctx.parameters.query)) {
+                if (!(lens.isUniversal || this._ctx.parameters.q)) {
                     return TagList.getRelevant("", offset, limit);
                 }
 				*/
 
                 return TagList.search(
-                    this._ctx.parameters.query
-                        ? this._ctx.parameters.query.trim()
+                    this._ctx.parameters.q
+                        ? this._ctx.parameters.q.trim()
                         : "sort:usages",
                     offset,
                     limit,

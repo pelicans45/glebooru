@@ -141,7 +141,7 @@ class Route {
                     if (!query || query.indexOf("=") !== -1) {
                         continue;
                     }
-                    parameters["query"] = uri.unescapeParam(
+                    parameters["q"] = uri.unescapeParam(
                         query.replace(/\+/g, "%20").replace(/:/g, "%3A")
                     );
 

@@ -107,7 +107,7 @@ class HomeView {
         this._searchInputNode.blur();
         router.show(
             uri.formatPostsLink({
-                query: this._searchInputNode.value.trim(),
+                q: this._searchInputNode.value.trim(),
             })
         );
     }

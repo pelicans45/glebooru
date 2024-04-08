@@ -12,7 +12,7 @@ class PostList extends AbstractList {
     static getAround(id, searchQuery, r) {
         return api.get(
             uri.formatApiLink("post", id, "around", {
-                query: PostList.decorateSearchQuery(searchQuery || ""),
+                q: PostList.decorateSearchQuery(searchQuery || ""),
                 fields: "id",
                 r: r,
             })
@@ -23,7 +23,7 @@ class PostList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("posts", {
-                    query: PostList.decorateSearchQuery(text || ""),
+                    q: PostList.decorateSearchQuery(text || ""),
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),
@@ -72,7 +72,7 @@ class PostList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("posts", "median", {
-                    query: PostList.decorateSearchQuery(text || ""),
+                    q: PostList.decorateSearchQuery(text || ""),
                     fields: fields.join(","),
                 })
             )

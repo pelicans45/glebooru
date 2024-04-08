@@ -239,14 +239,14 @@ class PostsHeaderView extends events.EventTarget {
         );
 
         for (let shortcut of this._shortcutButtonNodes) {
-            this._setupQueryShortcutButton(shortcut, ctx.parameters.query);
+            this._setupQueryShortcutButton(shortcut, ctx.parameters.q);
             shortcut.addEventListener("click", (e) =>
                 this._evtToggleQueryShortcut(e)
             );
             this.addEventListener("navigate", (e) =>
                 this._setupQueryShortcutButton(
                     shortcut,
-                    e.detail.parameters.query
+                    e.detail.parameters.q
                 )
             );
         }
@@ -507,8 +507,8 @@ class PostsHeaderView extends events.EventTarget {
     _evtToggleQueryShortcut(e) {
         e.preventDefault();
         const term = e.currentTarget.getAttribute("data-term");
-        let query = this._ctx.parameters.query
-            ? this._ctx.parameters.query.trim()
+        let query = this._ctx.parameters.q
+            ? this._ctx.parameters.q.trim()
             : "";
         if (query.includes(term)) {
             query = query.replace(" " + term, "");
@@ -522,7 +522,7 @@ class PostsHeaderView extends events.EventTarget {
             new CustomEvent("navigate", {
                 detail: {
                     parameters: Object.assign({}, this._ctx.parameters, {
-                        query: query,
+                        q: query,
                         tag: null,
                         offset: 0,
                     }),
@@ -553,18 +553,18 @@ class PostsHeaderView extends events.EventTarget {
     _navigate() {
         this._autoCompleteControl.hide();
         let parameters = {
-            query: this._queryInputNode.value.trim(),
+            q: this._queryInputNode.value.trim(),
             r: this._ctx.parameters.r,
             metrics: this._ctx.parameters.metrics,
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query
-        const prevQuery = this._ctx.parameters.query
-            ? this._ctx.parameters.query.trim()
+        const prevQuery = this._ctx.parameters.q
+            ? this._ctx.parameters.q.trim()
             : "";
 
         parameters.offset =
-            parameters.query === prevQuery ? this._ctx.parameters.offset : 0;
+            parameters.q === prevQuery ? this._ctx.parameters.offset : 0;
         if (this._bulkTagEditor && this._bulkTagEditor.opened) {
             parameters.tag = this._bulkTagEditor.value;
             this._bulkTagEditor.blur();

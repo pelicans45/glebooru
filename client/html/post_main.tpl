@@ -33,12 +33,12 @@
                 <% if (ctx.randomPostId) { %>
                     <% if (ctx.editMode) { %>
                         <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
-                            query: ctx.parameters.query,
+                            q: ctx.parameters.q,
                             metrics: ctx.parameters.metrics,
                             r: Math.round(Math.random() * 998) + 1}) %>'>
                     <% } else { %>
                         <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
-                            query: ctx.parameters.query,
+                            q: ctx.parameters.q,
                             metrics: ctx.parameters.metrics,
                             r: Math.round(Math.random() * 998) + 1}) %>'>
                     <% } %>

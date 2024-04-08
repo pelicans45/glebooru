@@ -48,7 +48,7 @@ class TagsHeaderView extends events.EventTarget {
             new CustomEvent("navigate", {
                 detail: {
                     parameters: {
-                        query: this._queryInputNode.value.trim(),
+                        q: this._queryInputNode.value.trim(),
                         page: 1,
                     },
                 },

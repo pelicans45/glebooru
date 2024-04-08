@@ -5,7 +5,7 @@
         --><i class='la la-sliders-h tag-icon'></i><!--
     --></a><!--
     --><a href="<%- ctx.formatPostsLink({
-                query: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
+                q: 'metric-' + ctx.escapeTagName(ctx.tag.names[0]) +
                     ':' + ctx.tag.metric.min + '..' + ctx.tag.metric.max +
                     ' sort:metric-' + ctx.escapeTagName(ctx.tag.names[0])
                 }) %>"
@@ -19,7 +19,7 @@
         --><a class='create-range'> range</a><!--
         --><a href='<%= ctx.getMetricSorterUrl(ctx.post.id, {
                     metrics: ctx.tag.names[0],
-                    query: ctx.query}) %>'
+                    q: ctx.q}) %>'
                class='sort'> sort</a><!--
     --></span><!--
 --><% } %><!--

@@ -10,7 +10,7 @@ class UserList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("users", {
-                    query: text,
+                    q: text,
                     offset: offset,
                     limit: limit,
                 })

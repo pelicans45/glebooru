@@ -32,7 +32,7 @@ class UsersHeaderView extends events.EventTarget {
             new CustomEvent("navigate", {
                 detail: {
                     parameters: {
-                        query: this._queryInputNode.value,
+                        q: this._queryInputNode.value,
                         page: 1,
                     },
                 },

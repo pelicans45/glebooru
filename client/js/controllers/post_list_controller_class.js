@@ -109,7 +109,7 @@ class PostListController {
         this._syncPageController();
         this._headerView.focusSearchInputIfSet();
         this._headerView.toggleRandomizeButtonSelected(
-            this._ctx.parameters.query.includes("sort:random")
+            this._ctx.parameters.q.includes("sort:random")
         );
     }
 

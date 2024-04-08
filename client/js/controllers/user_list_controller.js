@@ -61,7 +61,7 @@ class UserListController {
             },
             requestPage: (offset, limit) => {
                 return UserList.search(
-                    this._ctx.parameters.query,
+                    this._ctx.parameters.q,
                     offset,
                     limit
                 );

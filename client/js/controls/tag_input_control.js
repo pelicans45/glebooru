@@ -325,7 +325,7 @@ class TagInputControl extends events.EventTarget {
         searchLinkNode.setAttribute(
             "href",
             uri.formatPostsLink({
-                query: uri.escapeTagName(tag.names[0]),
+                q: uri.escapeTagName(tag.names[0]),
             })
         );
         searchLinkNode.textContent = tag.names[0] + " ";

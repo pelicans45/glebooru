@@ -82,7 +82,7 @@ class EntityPermalinkWrapper extends BaseMarkdownWrapper {
         );
         text = text.replace(/\]\(@(\d+)\)/g, "](/$1)");
         text = text.replace(/\]\(\+([a-zA-Z0-9_-]+)\)/g, "](/user/$1)");
-        text = text.replace(/\]\(#([a-zA-Z0-9_-]+)\)/g, "](/query=$1)");
+        text = text.replace(/\]\(#([a-zA-Z0-9_-]+)\)/g, "](/q=$1)");
         return text;
     }
 }
@@ -91,7 +91,7 @@ class SearchPermalinkWrapper extends BaseMarkdownWrapper {
     postprocess(text) {
         return text.replace(
             /\[search\]((?:[^\[]|\[(?!\/?search\]))+)\[\/search\]/gi,
-            '<a href="/query=$1"><code>$1</code></a>'
+            '<a href="/q=$1"><code>$1</code></a>'
         );
     }
 }

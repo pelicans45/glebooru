@@ -10,7 +10,7 @@ class PoolList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("pools", {
-                    query: text,
+                    q: text,
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),

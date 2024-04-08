@@ -141,7 +141,7 @@ class PoolInputControl extends events.EventTarget {
         }
         searchLinkNode.setAttribute(
             "href",
-            uri.formatPostsLink({ query: "pool:" + pool.id })
+            uri.formatPostsLink({ q: "pool:" + pool.id })
         );
         searchLinkNode.textContent = pool.names[0] + " ";
 

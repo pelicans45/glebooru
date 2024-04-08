@@ -70,7 +70,7 @@ class Executor:
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
         entities = self.get_around(
-            ctx.get_param_as_string("query", default=""), entity_id
+            ctx.get_param_as_string("q", default=""), entity_id
         )
         return {
             "prev": serializer(entities[0]),
@@ -120,12 +120,12 @@ class Executor:
         ctx: rest.Context,
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
-        query = ctx.get_param_as_string("query", default="")
+        query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=100)
         count, entities = self.execute(query, offset, limit)
         return {
-            "query": query,
+            "q": query,
             "offset": offset,
             "limit": limit,
             "total": count,

@@ -64,7 +64,7 @@ def get_random_image(
 ) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("query", default="").strip()
+    query_text = ctx.get_param_as_string("q", default="").strip()
     if not query_text:
         return ""
 
@@ -385,12 +385,12 @@ def get_posts_median(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("query", default="")
+    query_text = ctx.get_param_as_string("q", default="")
     total_count = _search_executor.count(query_text)
     offset = ceil(total_count / 2) - 1
     _, results = _search_executor.execute(query_text, offset, 1)
     return {
-        "query": query_text,
+        "q": query_text,
         "offset": offset,
         "limit": 1,
         "total": len(results),
@@ -404,13 +404,13 @@ def get_posts_similar_by_tags(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:similar")
     _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("query", default="")
+    query_text = ctx.get_param_as_string("q", default="")
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
     results = similar.find_similar_posts(post, limit, query_text)
     return {
-        "query": query_text,
+        "q": query_text,
         "limit": limit,
         "results": list(
             [

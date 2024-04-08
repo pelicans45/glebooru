@@ -19,7 +19,7 @@
     </td>
     <td class='usages'>
         <% if (ctx.poolCategory.name) { %>
-            <a href='<%- ctx.formatClientLink('pools', {query: 'category:' + ctx.poolCategory.name}) %>'>
+            <a href='<%- ctx.formatClientLink('pools', {q: 'category:' + ctx.poolCategory.name}) %>'>
                 <%- ctx.poolCategory.poolCount %>
             </a>
         <% } else { %>

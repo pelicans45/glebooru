@@ -97,7 +97,7 @@ class PoolListController {
             },
             requestPage: (offset, limit) => {
                 return PoolList.search(
-                    this._ctx.parameters.query,
+                    this._ctx.parameters.q,
                     offset,
                     limit,
                     fields
