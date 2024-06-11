@@ -3,11 +3,14 @@
 
 const fs = require("fs");
 const yaml = require("js-yaml");
+const terser = require("terser");
 const underscore = require("underscore");
 
 const DEV = process.env.GLEBOORU_DEV === "1";
 
 const debug = process.argv.includes("--debug");
+
+const outputPath = "/var/www";
 
 function baseUrl() {
     return process.env.BASE_URL ? process.env.BASE_URL : "/";
@@ -113,8 +116,9 @@ var PrettyError = require("pretty-error");
 var pe = new PrettyError();
 
 function gzipFile(file) {
+    return;
     file = path.normalize(file);
-    execSync("gzip -6 -k " + file);
+    execSync(`rm -f ${file}.gz && gzip -6 -k ${file}`);
 }
 
 function minifyHtml(html) {
@@ -139,7 +143,10 @@ function bundleHtml(domain, data) {
     );
 
     baseHtml = baseHtml.replaceAll("$THEME_COLOR$", data.color);
-    fs.writeFileSync(`./public/${domain}/index.html`, minifyHtml(baseHtml));
+    fs.writeFileSync(
+        `${outputPath}/${domain}/index.html`,
+        minifyHtml(baseHtml)
+    );
 
     //console.info("Built HTML");
 }
@@ -190,7 +197,7 @@ function bundleCss(domain, data) {
         return require("csso").minify(css).css;
     }
 
-    const outputDir = `./public/${domain}/css`;
+    const outputDir = `${outputPath}/${domain}/css`;
     const appStylesheet = `${outputDir}/app.css`;
     const customDir = `./sites/${domain}/css`;
     const mainColorLine = `$main-color = ${data.color}\n`;
@@ -228,8 +235,9 @@ function bundleCss(domain, data) {
 }
 
 function minifyJs(path) {
-    return require("terser").minify(fs.readFileSync(path, "utf-8"), {
+    return terser.minify(fs.readFileSync(path, "utf-8"), {
         compress: { unused: false },
+        sourceMap: true,
     }).code;
 }
 
@@ -240,7 +248,11 @@ function writeJsBundle(b, path, compress, callback) {
         .pipe(outputFile);
     outputFile.on("finish", () => {
         if (compress) {
-            fs.writeFileSync(path, minifyJs(path));
+			const d = minifyJs(path);
+			if (d === undefined) {
+				return;
+			}
+            fs.writeFileSync(path, d);
         }
         callback();
     });
@@ -258,7 +270,7 @@ function bundleVendorJs(domain, compress) {
     }
 	*/
 
-    const file = `./public/${domain}/js/vendor.js`;
+    const file = `${outputPath}/${domain}/js/vendor.js`;
     writeJsBundle(b, file, compress, () => {
         if (process.argv.includes("--gzip")) {
             gzipFile(file);
@@ -268,7 +280,7 @@ function bundleVendorJs(domain, compress) {
 }
 
 function bundleAppJs(domain, b, compress, callback) {
-    const file = `./public/${domain}/js/app.js`;
+    const file = `${outputPath}/${domain}/js/app.js`;
     writeJsBundle(b, file, compress, () => {
         if (process.argv.includes("--gzip")) {
             gzipFile(file);
@@ -317,7 +329,7 @@ function bundleConfig() {
 }
 
 function bundleBinaryAssets(domain) {
-    const outputDir = `./public/${domain}`;
+    const outputDir = `${outputPath}/${domain}`;
     const imgDir = `./sites/${domain}/img`;
 
     fs.copyFileSync(`${imgDir}/favicon.png`, `${outputDir}/img/favicon.png`);
@@ -353,7 +365,7 @@ function bundleBinaryAssets(domain) {
 function bundleWebAppFiles(domain, data) {
     const Jimp = require("jimp");
 
-    const outputDir = `./public/${domain}`;
+    const outputDir = `${outputPath}/${domain}`;
     const imgDir = `./sites/${domain}/img`;
 
     const manifest = {
@@ -413,11 +425,10 @@ function bundleWebAppFiles(domain, data) {
 
 function makeOutputDirs(domain) {
     const dirs = [
-        //"./public",
-        `./public/${domain}/css`,
-        `./public/${domain}/fonts`,
-        `./public/${domain}/img`,
-        `./public/${domain}/js`,
+        `${outputPath}/${domain}/css`,
+        `${outputPath}/${domain}/fonts`,
+        `${outputPath}/${domain}/img`,
+        `${outputPath}/${domain}/js`,
     ];
     for (let dir of dirs) {
         if (!fs.existsSync(dir)) {
@@ -432,6 +443,8 @@ function watch() {
     const liveReload = !process.argv.includes("--no-live-reload");
 
     function emitReload(domain) {
+        return;
+
         if (!liveReload) {
             return;
         }
@@ -478,6 +491,13 @@ function watch() {
             console.error(pe.render(e));
         }
     });
+    chokidar.watch("./js/**/*.js").on("change", () => {
+        try {
+            bundleForAllDomains(bundleJs, emitReload);
+        } catch (e) {
+            console.error(pe.render(e));
+        }
+    });
 
     const skipInit = process.argv.includes("--skip-init");
     if (!skipInit) {
@@ -497,11 +517,13 @@ function watch() {
                 bundleCss(domain, data);
             }
             if (!process.argv.includes("--no-js")) {
-                bundleVendorJs(domain, true);
+                //bundleVendorJs(domain, true);
+                bundleJs(domain);
             }
         }
     }
 
+    /*
     let watchify = require("watchify");
     let b = browserify({
         debug: debug,
@@ -517,7 +539,8 @@ function watch() {
         b = b.transform("babelify");
     }
 	*/
-    b = b.external(external_js).add(glob.sync("./js/**/*.js"));
+    //b = b.external(external_js).add(glob.sync("./js/**/*.js"));
+
     const compress = false;
 
     function bundle(id) {
@@ -533,7 +556,7 @@ function watch() {
         }
     }
 
-    b.on("update", bundle);
+    //b.on("update", bundle);
 
     if (!skipInit) {
         bundle();
@@ -554,8 +577,8 @@ if (process.argv.includes("--watch")) {
     console.log(
         `Building for ${environment} environment and watching for changes\n`
     );
-    bundleConfig();
-    bundleTemplates();
+    //bundleConfig();
+    //bundleTemplates();
     watch();
 } else {
     console.log(`Building for "${environment}" environment\n`);

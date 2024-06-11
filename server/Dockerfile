@@ -14,11 +14,10 @@ RUN apk --no-cache add \
     libavif \
     libavif-dev \
     ffmpeg \
+    dumb-init \
     && pip3 install --no-cache-dir -r /tmp/requirements.txt \
     && apk --no-cache del py3-pip \
     && rm /tmp/requirements.txt \
-    && apk --no-cache add \
-    dumb-init \
     && mkdir -p /opt/app /data \
     && addgroup -g ${PGID} app \
     && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \

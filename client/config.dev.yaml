@@ -1,3 +1,4 @@
+dev: true
 max_suggested_results: 10
 new_post_visibility_threshold_minutes: 15
 
@@ -53,7 +54,7 @@ pool_category_name_regex: '^[a-zA-Z0-9_-]{1,80}$'
 # customize them, make sure to update the instructions in the registration form
 # template as well.
 password_regex: '^.{8,100}$'
-user_name_regex: '^[a-zA-Z0-9_-]{1,32}$'
+user_name_regex: '^[a-zA-Z0-9_]{1,32}$'
 
 # webhooks to call when events occur (such as post/tag/user/etc. changes)
 # the listed urls will be called with a HTTP POST request with a payload

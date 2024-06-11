@@ -72,6 +72,7 @@ class PostUploadController {
                             e.detail.alwaysUploadSimilar,
                             e.detail.copyTagsToOriginals
                         ).catch((error) => {
+                            console.error(error);
                             anyFailures = true;
                             if (error.uploadable) {
                                 if (error.similarPosts) {
@@ -197,6 +198,20 @@ class PostUploadController {
             })
             .then(
                 (result) => {
+                    progress.done();
+                    return Promise.resolve(result);
+                },
+                (error) => {
+                    error.uploadable = uploadable;
+                    progress.done();
+                    return Promise.reject(error);
+                }
+            );
+    }
+
+    /*
+            .then(
+                (result) => {
                     const idEntry = `${result.id};`;
                     const now = Date.now();
 
@@ -220,13 +235,8 @@ class PostUploadController {
                     progress.done();
                     return Promise.resolve(result);
                 },
-                (error) => {
-                    error.uploadable = uploadable;
-                    progress.done();
-                    return Promise.reject(error);
-                }
-            );
-    }
+
+*/
 
     _uploadableToPost(uploadable) {
         let post = new Post();

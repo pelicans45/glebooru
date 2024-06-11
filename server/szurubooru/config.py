@@ -53,10 +53,9 @@ def _read_config() -> Dict:
     ret = _file_config("config.yaml.dist")
     if os.path.isfile("config.yaml"):
         ret = _merge(ret, _file_config("config.yaml"))
-    elif os.path.isdir("config.yaml"):
-        logger.warning(
-            "'config.yaml' should be a file, not a directory, skipping"
-        )
+    else:
+        raise errors.ConfigError("Missing config.yaml")
+
     if os.path.exists("/.dockerenv"):
         ret = _merge(ret, _docker_config())
 

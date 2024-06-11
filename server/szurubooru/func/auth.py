@@ -30,13 +30,14 @@ ALL_RANKS = list(RANK_MAP.keys())
 
 def get_password_hash(salt: str, password: str) -> Tuple[str, int]:
     """Retrieve argon2id password hash."""
+    if config.config.get("dev"):
+        return get_sha256_legacy_password_hash(salt, password)
     return (
         pwhash.argon2id.str(
             (config.config["secret"] + salt + password).encode("utf8")
         ).decode("utf8"),
         3,
     )
-
 
 def get_sha256_legacy_password_hash(
     salt: str, password: str
@@ -71,6 +72,9 @@ def create_password() -> str:
 def is_valid_password(user: model.User, password: str) -> bool:
     # assert user
     salt, valid_hash = user.password_salt, user.password_hash
+
+    if config.config.get("dev"):
+        return valid_hash == get_sha256_legacy_password_hash(salt, password)[0]
 
     try:
         return pwhash.verify(

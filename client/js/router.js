@@ -36,11 +36,12 @@ function _getBaseHref() {
     const bases = document.getElementById("base");
     return bases.length > 0
         ? bases[0].href.replace(origin, "").replace(/\/+$/, "")
-        : "/";
+        : "";
 }
 
 class Context {
     constructor(path, state) {
+        path = path.indexOf("/") !== 0 ? "/" + path : path;
         path = path.indexOf(base) !== 0 ? base + path : path;
 
         this.canonicalPath = path;
@@ -53,12 +54,12 @@ class Context {
     }
 
     pushState() {
-        console.log("pushState", this.state);
+        //console.log("pushState", this.state);
         history.pushState(this.state, this.title, this.canonicalPath);
     }
 
     replaceState() {
-        console.log("replaceState", this.state);
+        //console.log("replaceState", this.state);
         history.replaceState(this.state, this.title, this.canonicalPath);
     }
 }
@@ -132,7 +133,7 @@ class Route {
                         parameters[key] = uri.unescapeParam(subvalue);
                     }
                 } else if (name === "wildcard") {
-                    console.log("wildcard match", path, value);
+                    //console.log("wildcard match", path, value);
                     if (!value) {
                         continue;
                     }
@@ -227,7 +228,7 @@ class Router {
     }
 
     replace(path, state, dispatch) {
-        console.log("replace", path, state);
+        //console.log("replace", path, state);
         var ctx = new Context(path, state);
         if (dispatch) {
             this.dispatch(ctx, () => {
@@ -246,18 +247,20 @@ class Router {
             middle();
             next();
         };
-        console.log("ctx", ctx);
-        console.log("exits", this._exits);
+        //console.log("ctx", ctx);
+        //console.log("exits", this._exits);
         const callChain = (this.ctx ? this._exits : []).concat(
             [swap],
             this._callbacks,
-            //[this._unhandled, (ctx, next) => {}]
+            [this._unhandled, (ctx, next) => {}]
+            /*
             [
                 () => {
                     this._unhandled();
                 },
                 (ctx, next) => {},
             ]
+			*/
         );
         let i = 0;
         let fn = () => {
@@ -343,16 +346,19 @@ const _onClick = (router) => {
 
         const orig = el.pathname + el.search + (el.hash || "");
 
-
+		/*
         const path = !orig.indexOf(base) ? orig.slice(base.length) : orig;
 
         if (orig === path) {
-			console.error("orig === path", orig, path);
+            console.error("orig === path", orig, path);
             //return;
         }
 
-		console.error("TODO: remove orig check (click home page from home page?)")
-
+        console.error(
+            "TODO: remove orig check (click home page from home page?)"
+        );
+		*/
+		
         e.preventDefault();
         router.show(orig);
     };

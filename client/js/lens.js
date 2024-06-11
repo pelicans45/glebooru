@@ -10,7 +10,7 @@ for (const [domain, data] of Object.entries(config.sites)) {
 const site = config.sites[location.hostname];
 
 if (!site) {
-	throw "Hostname error"
+    throw "Hostname error";
 }
 const name = site.name;
 
@@ -113,7 +113,7 @@ module.exports = {
     site: site,
     name: name,
     hostnameFilter: hostnameFilter,
-	isUniversal: isUniversal,
+    isUniversal: isUniversal,
     addHostnameFilter: addHostnameFilter,
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,

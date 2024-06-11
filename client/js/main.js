@@ -1,15 +1,15 @@
 "use strict";
 
-require("./util/polyfill.js");
-
 const settings = require("./models/settings.js");
 
 if (!settings.get().darkTheme) {
     document.body.classList.remove("darktheme");
 }
 
+require("./util/polyfill.js");
+
 const misc = require("./util/misc.js");
-const views = require("./util/views.js");
+//const views = require("./util/views.js");
 const router = require("./router.js");
 
 // TODO: change?
@@ -99,6 +99,7 @@ Promise.resolve()
         },
         (error) => {
             if (window.location.href.indexOf("login") !== -1) {
+                alert("here");
                 api.forget();
                 router.start();
             } else {
@@ -108,6 +109,7 @@ Promise.resolve()
         }
     );
 
+/*
 if (config.environment === "development") {
     const ws = new WebSocket(`ws://${location.hostname}:9999`);
     ws.addEventListener("open", function (event) {
@@ -126,3 +128,4 @@ if (config.environment === "development") {
         }
     });
 }
+*/

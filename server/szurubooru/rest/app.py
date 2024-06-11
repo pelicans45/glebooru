@@ -1,7 +1,10 @@
 import cgi
+import json as orig_json
 import orjson as json
 import re
 import urllib.parse
+import logging
+import numpy as np
 from datetime import datetime
 from typing import Any, Callable, Dict, Tuple
 
@@ -15,11 +18,16 @@ def _json_serializer(obj: Any) -> str:
     if isinstance(obj, datetime):
         serial = obj.isoformat("T") + "Z"
         return serial
+    if isinstance(obj, np.float64):
+        return json.dumps(obj.item())
+    if isinstance(obj, bytes):
+        return obj.decode("utf-8")
     raise TypeError("Type not serializable")
 
 
 def _dump_json(obj: Any) -> str:
-    return json.dumps(obj, default=_json_serializer, indent=2)
+    #return orig_json.dumps(obj, default=_json_serializer, indent=2)
+    return json.dumps(obj, default=_json_serializer)
 
 
 def _get_headers(env: Dict[str, Any]) -> Dict[str, str]:
@@ -112,7 +120,7 @@ def application(
                 db.session.remove()
 
             start_response("200", [("content-type", "application/json")])
-            return (_dump_json(response).encode("utf-8"),)
+            return (_dump_json(response),)
 
         except Exception as ex:
             for exception_type, ex_handler in errors.error_handlers.items():
@@ -133,4 +141,6 @@ def application(
         if ex.extra_fields is not None:
             for key, value in ex.extra_fields.items():
                 blob[key] = value
-        return (_dump_json(blob).encode("utf-8"),)
+
+        logging.exception(ex)
+        return (_dump_json(blob),)

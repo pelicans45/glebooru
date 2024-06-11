@@ -17,3 +17,5 @@ __pycache__/
 .idea
 *.iml
 .DS_Store
+
+docker-compose.dev.windows.yml

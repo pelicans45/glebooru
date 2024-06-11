@@ -59,7 +59,10 @@ function formatRelativeTime(timeString) {
     }
 
     const then = Date.parse(timeString);
-    const now = Date.now();
+    ///const now = Date.now();
+
+	//
+	const now = new Date().getUTCTime();
     const difference = Math.abs(now - then) / 1000.0;
     const future = now < then;
 

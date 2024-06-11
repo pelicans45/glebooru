@@ -34,7 +34,7 @@ def _get_disk_usage() -> int:
 
 
 @rest.routes.get("/names")
-def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+def get_name_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     return config.config["names"]
 
 @rest.routes.get("/info/?")

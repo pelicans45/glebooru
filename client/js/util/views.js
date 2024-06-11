@@ -333,7 +333,8 @@ function makeUserLinkForSidebar(user) {
               text
           )
         : text;
-    return makeElement("span", { class: "user" }, link) + ", ";
+    return makeElement("span", { class: "user" }, link);
+    // + ", ";
 }
 
 function makeFlexboxAlign(options) {

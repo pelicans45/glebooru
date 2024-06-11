@@ -238,7 +238,7 @@ class Api extends events.EventTarget {
                 },
                 (error) => {
                     reject(error);
-                    this.logout();
+                    //this.logout();
                 }
             );
         });

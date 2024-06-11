@@ -76,7 +76,7 @@
                             <% } %>
                         </td>
                         <td class='usages'>
-                            <%- tag.postCount %>
+                            <a href='<%- ctx.formatClientLink('posts', {q: tag.names[0]}) %>'><%- tag.postCount %></a>
                         </td>
                         <td class='creation-time'>
                             <%= ctx.makeRelativeTime(tag.creationTime) %>

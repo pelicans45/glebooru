@@ -1,5 +1,5 @@
 upstream client {
-    server client:8888;
+    server client:80;
 }
 
 server {

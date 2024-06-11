@@ -54,12 +54,12 @@ class EndlessPageView {
         }
 
 		// TODO: replace with scroll listener?
-		
+
         this._timeout = window.setInterval(() => {
             window.requestAnimationFrame(() => {
                 const topPageNode = this._topPageNode;
                 if (!topPageNode) {
-                    console.log("topPageNode is null");
+                    //console.log("topPageNode is null");
                     return;
                 }
 

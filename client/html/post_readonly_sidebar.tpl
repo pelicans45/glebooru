@@ -115,6 +115,7 @@
         <% } else { %>
             <p>
                 No tags yet
+                <br>
                 <% if (ctx.canEditPosts) { %>
                     <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add tags</a>
                 <% } %>

@@ -70,10 +70,10 @@ a
     &.icon
         color: $inactive-link-color
         opacity: .5
-    &:focus
-        outline: 2px solid $main-color
+    //&:focus
+    //    outline: 2px solid $main-color
     &:hover
-        color: lighten($link-color, 15%)
+        color: lighten($link-color, 20%)
     .vim-nav-hint
         position: absolute
         visibility: hidden
@@ -223,7 +223,7 @@ nav
         ul li
             &[data-name=settings]
                 i.la
-                    font-size: 24px
+                    font-size: 24px !important
                     position: relative
                     //top: 2px
                     //left: 12px
@@ -232,7 +232,8 @@ nav
                     left: 0.75em
 
             &[data-name=posts],
-            &[data-name=upload]
+            &[data-name=upload],
+            &[data-name=users]
                 i.la
                     font-size: 32px
                     position: relative
@@ -247,10 +248,13 @@ nav
             &[data-name=tags],
             &[data-name=pools],
             &[data-name=comments]
-                font-size: 32px
-                position: relative
-                top: 0.125em
                 float: none
+
+                i.la
+                    font-size: 32px
+                    position: relative
+                    top: 0.125em
+
             &[data-name=home],
             &[data-name=register],
             &[data-name=logout]
@@ -288,8 +292,8 @@ nav
                         color: $extra-nav-link-color !important
 
                         &:hover
-                            background: lighten($extra-nav-link-background-color, 10%)
-                            color: lighten($extra-nav-link-color, 10%) !important
+                            background: lighten($extra-nav-link-background-color, 20%)
+                            color: lighten($extra-nav-link-color, 20%) !important
 
 .darktheme nav
     &.buttons
@@ -407,3 +411,7 @@ nav
 [data-pseudo-content]:before {
     content: attr(data-pseudo-content)
 }
+
+
+.user .thumbnail
+    display: none

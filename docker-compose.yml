@@ -1,14 +1,7 @@
-## Example Docker Compose configuration
-##
-## Use this as a template to set up docker-compose, or as guide to set up other
-## orchestration services
-version: '3'
-
 services:
-
   server:
-    #image: szurubooru/server:latest
     build: server
+    restart: unless-stopped
     depends_on:
       - sql
     environment:
@@ -29,8 +22,8 @@ services:
       - "./client/config.yaml:/opt/app/config.yaml:ro"
 
   client:
-    #image: szurubooru/client:latest
     build: client
+    restart: unless-stopped
     depends_on:
       - server
     environment:

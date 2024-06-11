@@ -14,7 +14,7 @@ const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 const vars = require("../vars.js");
 
-const baseUrl = document.getElementsById("base").href;
+const baseUrl = document.getElementById("base").href;
 
 const maxNameLength = 250;
 
@@ -313,6 +313,8 @@ class Post extends events.EventTarget {
             detail.source = this._source;
         }
 
+        const newFile = !this._id;
+
         let apiPromise = this._id
             ? api.put(uri.formatApiLink("post", this.id), detail, files)
             : api.post(uri.formatApiLink("posts"), detail, files);
@@ -345,6 +347,28 @@ class Post extends events.EventTarget {
                                 detail: { post: this },
                             })
                         );
+                    }
+
+                    if (newFile) {
+                        const idEntry = `${this.id};`;
+                        const now = Date.now();
+
+                        let lastUploadTime = localStorage.lastUploadTime;
+                        if (lastUploadTime) {
+                            if (
+                                now >
+                                parseInt(lastUploadTime) +
+                                    vars.newPostVisibilityThresholdMilliseconds
+                            ) {
+                                localStorage.uploadedIDs = "";
+                            }
+                        }
+
+                        localStorage.lastUploadTime = now.toString();
+
+                        localStorage.uploadedIDs = localStorage.uploadedIDs
+                            ? localStorage.uploadedIDs + idEntry
+                            : idEntry;
                     }
 
                     return Promise.resolve();
