@@ -46,7 +46,7 @@ def get_avatar_url(user: model.User) -> str:
     if not user.name:
         return ""
 
-    logging.info("avatar style: %s", user.avatar_style)
+    #logging.info("avatar style: %s", user.avatar_style)
     if user.avatar_style == user.AVATAR_GRAVATAR:
         # assert user.email or user.name
         return "https://gravatar.com/avatar/%s?d=retro&s=%d" % (

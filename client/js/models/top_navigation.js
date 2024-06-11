@@ -7,7 +7,7 @@ class TopNavigationItem {
     constructor(accessKey, title, text, url, available, imageUrl) {
         this.accessKey = accessKey;
         this.title = title;
-		this.text = text;
+        this.text = text;
         this.url = url;
         this.available = available === undefined ? true : available;
         this.imageUrl = imageUrl === undefined ? null : imageUrl;
@@ -84,41 +84,95 @@ function _makeTopNavigation() {
     );
     ret.add(
         "upload",
-        new TopNavigationItem("U", "Upload", "<i class='la la-cloud-upload'></i>", "upload")
-    );
-    ret.add(
-        "comments",
-        new TopNavigationItem("C", "Comments", "<i class='la la-comments'></i>", "comments")
+        new TopNavigationItem(
+            "U",
+            "Upload",
+            "<i class='la la-cloud-upload'></i>",
+            "upload"
+        )
     );
     ret.add(
         "tags",
-        new TopNavigationItem("T", "Tags", "<i class='la la-tags'></i>", "tags")
+        new TopNavigationItem(
+            "T",
+            "Tags",
+            "<i class='la la-tags'></i>",
+            "tags"
+        )
     );
     ret.add(
+        "comments",
+        new TopNavigationItem(
+            "C",
+            "Comments",
+            "<i class='la la-comments'></i>",
+            "comments"
+        )
+    );
+
+    ret.add(
         "pools",
-        new TopNavigationItem("P", "Pools", "<i class='la la-icons'></i>", "pools")
+        new TopNavigationItem(
+            "P",
+            "Pools",
+            "<i class='la la-icons'></i>",
+            "pools"
+        )
     );
     ret.add(
         "users",
-        new TopNavigationItem(null, "Users", "<i class='la la-users'></i>", "users")
+        new TopNavigationItem(
+            null,
+            "Users",
+            "<i class='la la-users'></i>",
+            "users"
+        )
     );
-    ret.add("register", new TopNavigationItem("R", "Register", "<i class='la la-user-plus'></i>", "register"));
+    ret.add(
+        "register",
+        new TopNavigationItem(
+            "R",
+            "Register",
+            "<i class='la la-user-plus'></i>",
+            "register"
+        )
+    );
     ret.add(
         "login",
-        new TopNavigationItem("L", "Login", "<i class='la la-sign-in'></i>", "login")
+        new TopNavigationItem(
+            "L",
+            "Login",
+            "<i class='la la-sign-in'></i>",
+            "login"
+        )
     );
     ret.add(
         "logout",
-        new TopNavigationItem(null, "Logout", "<i class='la la-sign-out'></i>", "logout")
+        new TopNavigationItem(
+            null,
+            "Logout",
+            "<i class='la la-sign-out'></i>",
+            "logout"
+        )
     );
     ret.add(
         "help",
-        new TopNavigationItem("H", "Help", "<i class='la la-info'></i>", "help")
+        new TopNavigationItem(
+            "H",
+            "Help",
+            "<i class='la la-info'></i>",
+            "help"
+        )
     );
     ret.add("account", new TopNavigationItem("A", "Account", "", "user/{me}"));
     ret.add(
         "settings",
-        new TopNavigationItem(null, "Settings", "<i class='la la-cog'></i>", "settings")
+        new TopNavigationItem(
+            null,
+            "Settings",
+            "<i class='la la-cog'></i>",
+            "settings"
+        )
     );
     return ret;
 }

@@ -30,6 +30,12 @@
             </section>
         <% } %>
 
+        <% if (ctx.canEditPostTags) { %>
+            <section class='tags'>
+                <%= ctx.makeTextInput({}) %>
+            </section>
+        <% } %>
+
         <% if (ctx.canEditPostRelations) { %>
             <section class='relations'>
                 <%= ctx.makeTextInput({
@@ -64,12 +70,6 @@
                     text: 'Source',
                     value: ctx.post.source,
                 }) %>
-            </section>
-        <% } %>
-
-        <% if (ctx.canEditPostTags) { %>
-            <section class='tags'>
-                <%= ctx.makeTextInput({}) %>
             </section>
         <% } %>
 

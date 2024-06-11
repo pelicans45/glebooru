@@ -110,6 +110,11 @@ class PostEditSidebarControl extends events.EventTarget {
                 null,
                 this._post
             );
+
+			console.log(this._tagInputNode);
+            this._tagInputNode.focus();
+			//test
+			
         }
 
         if (this._poolInputNode) {
