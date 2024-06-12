@@ -51,6 +51,7 @@ def _serialize_post(
 def get_posts(
     ctx: rest.Context, _params: Dict[str, str] = {}
 ) -> rest.Response:
+    logging.info("params: %r - ctx: %r", _params, ctx)
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(

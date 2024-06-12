@@ -35,7 +35,7 @@ services:
       GLEBOORU_WATCH: ${GLEBOORU_WATCH}
     volumes:
       - "server_data:/data:ro"
-      - "./client:/opt/app:ro"
+      - "./client:/opt/app"
     ports:
       - "8888:80"
     expose:

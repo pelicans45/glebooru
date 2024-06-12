@@ -8,7 +8,7 @@ COPY nginx.docker.conf /etc/nginx/nginx.conf
 RUN rm -rf /var/www && mkdir /var/www
 
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --include=dev
 
 COPY . ./
 

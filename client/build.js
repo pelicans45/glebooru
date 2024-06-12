@@ -577,8 +577,8 @@ if (process.argv.includes("--watch")) {
     console.log(
         `Building for ${environment} environment and watching for changes\n`
     );
-    //bundleConfig();
-    //bundleTemplates();
+    bundleConfig();
+    bundleTemplates();
     watch();
 } else {
     console.log(`Building for "${environment}" environment\n`);

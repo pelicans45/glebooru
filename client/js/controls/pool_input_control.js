@@ -131,7 +131,7 @@ class PoolInputControl extends events.EventTarget {
         );
 
         const poolIconNode = document.createElement("i");
-        poolIconNode.classList.add("fa");
+        poolIconNode.classList.add("la");
         poolIconNode.classList.add("la-pool");
         poolLinkNode.appendChild(poolIconNode);
 

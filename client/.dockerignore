@@ -2,3 +2,5 @@ node_modules/*
 Dockerfile
 .dockerignore
 **/.gitignore
+
+js/.*
