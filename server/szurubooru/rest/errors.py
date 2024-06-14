@@ -64,3 +64,10 @@ def handle(
     exception_type: Type[Exception], handler: Callable[[Exception], None]
 ) -> None:
     error_handlers[exception_type] = handler
+
+def can_ignore_error(ex):
+    ignored_names = ["HttpNotFound"]
+    for name in ignored_names:
+        if name in ex.__class__.__name__:
+            return True
+    return False

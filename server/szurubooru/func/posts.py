@@ -23,9 +23,8 @@ from szurubooru.func import (
 )
 from szurubooru.func.image_hash import NpMatrix
 
+from szurubooru.log import logger
 from szurubooru import config, db, errors, model, rest
-
-logger = logging.getLogger(__name__)
 
 
 EMPTY_PIXEL = (

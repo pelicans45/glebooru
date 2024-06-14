@@ -18,9 +18,8 @@ from szurubooru.func import (
     versions,
 )
 
+from szurubooru.log import logger
 from szurubooru import db, errors, model, rest, search
-
-logger = logging.getLogger(__name__)
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)

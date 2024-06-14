@@ -1,5 +1,4 @@
 import json
-import logging
 import math
 import re
 import shlex
@@ -13,8 +12,7 @@ from PIL import Image as PILImage
 from szurubooru.func import mime, util
 
 from szurubooru import errors
-
-logger = logging.getLogger(__name__)
+from szurubooru.log import logger
 
 
 def convert_heif_to_png(content: bytes) -> bytes:

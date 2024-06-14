@@ -1,13 +1,9 @@
-import logging
 import os
 from typing import Dict
 
 import yaml
 
 from szurubooru import errors
-
-logger = logging.getLogger(__name__)
-
 
 def _merge(left: Dict, right: Dict) -> Dict:
     for key in right:

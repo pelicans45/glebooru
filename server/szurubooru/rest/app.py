@@ -2,7 +2,6 @@ import cgi
 import orjson as json
 import re
 import urllib.parse
-import logging
 import numpy as np
 from datetime import datetime
 from typing import Any, Callable, Dict, Tuple
@@ -10,7 +9,7 @@ from typing import Any, Callable, Dict, Tuple
 from szurubooru import db
 from szurubooru.func import util
 from szurubooru.rest import context, errors, middleware, routes
-
+from szurubooru.log import logger
 
 def _json_serializer(obj: Any) -> str:
     """JSON serializer for objects not serializable by default JSON code"""
@@ -121,8 +120,6 @@ def application(
             return (_dump_json(response),)
 
         except Exception as ex:
-            #if isinstance(ex, tags.TagNotFoundError):
-            #    return
             for exception_type, ex_handler in errors.error_handlers.items():
                 if isinstance(ex, exception_type):
                     ex_handler(ex)
@@ -142,5 +139,6 @@ def application(
             for key, value in ex.extra_fields.items():
                 blob[key] = value
 
-        logging.exception(ex)
+        if not errors.can_ignore_error(ex):
+            logger.exception(ex)
         return (_dump_json(blob),)

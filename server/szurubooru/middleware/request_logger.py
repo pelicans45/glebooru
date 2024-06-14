@@ -1,14 +1,13 @@
-import logging
+"""
 
 from szurubooru.rest import middleware
 
+from szurubooru.log import logger
 from szurubooru import db, rest
 
-logger = logging.getLogger(__name__)
 #logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 
-"""
 @middleware.pre_hook
 def process_request(_ctx: rest.Context) -> None:
     db.reset_query_count()

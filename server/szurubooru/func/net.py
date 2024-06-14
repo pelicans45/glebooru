@@ -8,8 +8,8 @@ from typing import Any, Dict, List
 
 from szurubooru import config, errors
 from szurubooru.func import mime
+from szurubooru.log import logger
 
-logger = logging.getLogger(__name__)
 _dl_chunk_size = 2**15
 
 

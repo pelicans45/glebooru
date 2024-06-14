@@ -1,4 +1,3 @@
-import logging
 import math
 import sys
 from datetime import datetime
@@ -11,8 +10,6 @@ import pillow_avif
 from PIL import Image
 
 from szurubooru import config, errors
-
-logger = logging.getLogger(__name__)
 
 # Math based on paper from H. Chi Wong, Marshall Bern and David Goldberg
 # Math code taken from https://github.com/ascribe/image-match
