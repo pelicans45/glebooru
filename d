@@ -14,4 +14,5 @@ if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "cygwin" ] || [ "$OSTYPE" == "win32
     dockercompose=$windowsdockercompose
 fi
 
-docker compose -f $dockercompose up -d sql nginx && docker compose -f $dockercompose up --build --force-recreate server client
+#docker compose -f $dockercompose up -d sql nginx && docker compose -f $dockercompose up --build --force-recreate server client
+docker compose -f $dockercompose up -d sql && docker compose -f $dockercompose up --build --force-recreate server client nginx
