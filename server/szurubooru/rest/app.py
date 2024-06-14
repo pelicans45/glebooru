@@ -1,5 +1,4 @@
 import cgi
-import json as orig_json
 import orjson as json
 import re
 import urllib.parse
@@ -16,8 +15,7 @@ from szurubooru.rest import context, errors, middleware, routes
 def _json_serializer(obj: Any) -> str:
     """JSON serializer for objects not serializable by default JSON code"""
     if isinstance(obj, datetime):
-        serial = obj.isoformat("T") + "Z"
-        return serial
+        return obj.isoformat("T") + "Z"
     if isinstance(obj, np.float64):
         return json.dumps(obj.item())
     if isinstance(obj, bytes):
@@ -123,6 +121,8 @@ def application(
             return (_dump_json(response),)
 
         except Exception as ex:
+            #if isinstance(ex, tags.TagNotFoundError):
+            #    return
             for exception_type, ex_handler in errors.error_handlers.items():
                 if isinstance(ex, exception_type):
                     ex_handler(ex)

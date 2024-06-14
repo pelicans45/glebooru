@@ -250,7 +250,7 @@ def create_nested_filter(
         criterion: Optional[criteria.BaseCriterion],
         negated: bool,
     ) -> SaQuery:
-        assert criterion
+        #assert criterion
         nested = db.session.query(nested_id_column.label("foreign_id"))
         nested = nested.options(sa.orm.lazyload("*"))
         nested = filter_func(nested, criterion, False)

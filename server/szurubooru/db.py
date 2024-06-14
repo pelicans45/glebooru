@@ -22,6 +22,7 @@ def set_sesssion(new_session: Any) -> None:
     session = new_session
 
 
+"""
 def reset_query_count() -> None:
     _data.query_count = 0
 
@@ -35,3 +36,4 @@ def _bump_query_count() -> None:
 
 
 sa.event.listen(_engine, "after_execute", lambda *args: _bump_query_count())
+"""

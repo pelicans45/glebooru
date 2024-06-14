@@ -1,0 +1,38 @@
+#FROM python:3.11.1-alpine3.17
+FROM mgesoftware/python3.11-base:latest
+WORKDIR /opt/app
+
+ARG PUID=1000
+ARG PGID=1000
+
+COPY requirements.txt /tmp/
+
+RUN apk --no-cache add \
+    build-base \
+    libheif \
+    libheif-dev \
+    libavif \
+    libavif-dev \
+    ffmpeg \
+    dumb-init \
+    && pip3 install --no-cache-dir -r /tmp/requirements.txt \
+    && apk --no-cache del py3-pip \
+    && rm /tmp/requirements.txt \
+    && mkdir -p /opt/app /data \
+    && addgroup -g ${PGID} app \
+    && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
+    && chown -R app:app /opt/app /data
+
+COPY . ./
+RUN rm -rf /opt/app/szurubooru/tests
+
+USER app
+ARG PORT=6666
+ENV PORT=${PORT}
+EXPOSE ${PORT}
+
+ARG THREADS=4
+ENV THREADS=${THREADS}
+
+CMD ["/opt/app/docker-start.sh"]
+VOLUME ["/data/"]

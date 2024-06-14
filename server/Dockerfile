@@ -1,5 +1,4 @@
-#FROM python:3.11.1-alpine3.17
-FROM mgesoftware/python3.11-base:latest
+FROM python:3.12.4-slim-bookworm
 WORKDIR /opt/app
 
 ARG PUID=1000
@@ -7,20 +6,24 @@ ARG PGID=1000
 
 COPY requirements.txt /tmp/
 
-RUN apk --no-cache add \
-    build-base \
-    libheif \
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libheif1 \
     libheif-dev \
-    libavif \
+    libavif15 \
     libavif-dev \
     ffmpeg \
-    dumb-init \
-    && pip3 install --no-cache-dir -r /tmp/requirements.txt \
-    && apk --no-cache del py3-pip \
-    && rm /tmp/requirements.txt \
-    && mkdir -p /opt/app /data \
-    && addgroup -g ${PGID} app \
-    && adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists
+
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt \
+    && rm /tmp/requirements.txt
+
+RUN mkdir -p /opt/app /data \
+    && addgroup --gid ${PGID} app \
+    #&& adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
+    && useradd -u ${PUID} -g app -d /opt/app app \
+    #&& adduser app app \
     && chown -R app:app /opt/app /data
 
 COPY . ./
@@ -35,4 +38,4 @@ ARG THREADS=4
 ENV THREADS=${THREADS}
 
 CMD ["/opt/app/docker-start.sh"]
-VOLUME ["/data/"]
+VOLUME ["/data"]

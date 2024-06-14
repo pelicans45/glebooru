@@ -46,7 +46,6 @@ def get_avatar_url(user: model.User) -> str:
     if not user.name:
         return ""
 
-    #logging.info("avatar style: %s", user.avatar_style)
     if user.avatar_style == user.AVATAR_GRAVATAR:
         # assert user.email or user.name
         return "https://gravatar.com/avatar/%s?d=retro&s=%d" % (
@@ -220,18 +219,13 @@ def get_user_by_name_or_email(name_or_email: str) -> model.User:
 
 def create_user(name: str, password: str, email: str) -> model.User:
     user = model.User()
-    logging.info("create user 1")
     update_user_name(user, name)
-    logging.info("create user 2")
     update_user_password(user, password)
-    logging.info("create user 3")
     update_user_email(user, email)
-    logging.info("create user 4")
     if get_user_count() > 0:
         user.rank = util.flip(auth.RANK_MAP)[config.config["default_rank"]]
     else:
         user.rank = model.User.RANK_ADMINISTRATOR
-    logging.info("here 2")
 
     user.creation_time = datetime.utcnow()
     user.avatar_style = model.User.AVATAR_GRAVATAR

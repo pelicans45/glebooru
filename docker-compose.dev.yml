@@ -42,7 +42,7 @@ services:
       - "80"
 
   sql:
-    image: postgres:16-alpine
+    image: postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_USER:
@@ -51,7 +51,7 @@ services:
       - "db:/var/lib/postgresql/data"
 
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27.0
     depends_on:
       - client
     restart: unless-stopped

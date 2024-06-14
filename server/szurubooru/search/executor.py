@@ -122,7 +122,6 @@ class Executor:
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
         query = ctx.get_param_as_string("q", default="")
-        logging.info("query: %s", query)
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=100)
         count, entities = self.execute(query, offset, limit)

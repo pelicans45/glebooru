@@ -539,7 +539,11 @@ class Post extends events.EventTarget {
         tagNames.push(this.id);
 
         const joinedTags = tagNames.join(" ");
-        return `( ${location.hostname} ) ${joinedTags}.${this.fileExtension}`;
+		let hostname = location.hostname;
+		if (!hostname.includes("www.")) {
+			hostname = "www." + hostname;
+		}
+        return `(${hostname}) ${joinedTags}.${this.fileExtension}`;
     }
 
     mutateContentUrl() {

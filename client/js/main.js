@@ -99,7 +99,6 @@ Promise.resolve()
         },
         (error) => {
             if (window.location.href.indexOf("login") !== -1) {
-                alert("here");
                 api.forget();
                 router.start();
             } else {

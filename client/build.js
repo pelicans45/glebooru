@@ -8,7 +8,7 @@ const underscore = require("underscore");
 
 const DEV = process.env.GLEBOORU_DEV === "1";
 
-const debug = process.argv.includes("--debug");
+//const debug = process.argv.includes("--debug");
 
 const outputPath = "/var/www";
 
@@ -193,33 +193,51 @@ function bundleTemplates() {
 function bundleCss(domain, data) {
     const stylus = require("stylus");
 
-    function minifyCss(css) {
-        return require("csso").minify(css).css;
+    function readFile(file) {
+        return readTextFile(file)
+            .replace("$THEME_COLOR", data.color)
+            .replace("$SITE", domain);
     }
 
+    const mainStylesheet = "./main.styl";
     const outputDir = `${outputPath}/${domain}/css`;
     const appStylesheet = `${outputDir}/app.css`;
-    const customDir = `./sites/${domain}/css`;
-    const mainColorLine = `$main-color = ${data.color}\n`;
 
-    let css = "";
-    for (const file of glob.sync("./css/**/*.styl")) {
-        css += stylus.render(mainColorLine + readTextFile(file), {
+	let sourcemap = DEV ? {inline: true} : false;
+
+    const css = stylus.render(readFile(mainStylesheet), {
+        filename: mainStylesheet,
+        sourcemap: sourcemap,
+		compress: true,
+    });
+
+	fs.writeFileSync(appStylesheet, css);
+
+    //let css = "";
+    //for (const file of glob.sync("./css/**/*.styl")) {
+    /*
+        css += stylus.render(readFile(file), {
             filename: file,
             paths: [customDir],
+			sourcemap: {inline: true},
         });
     }
 
     const customStyle = `${customDir}/site.styl`;
-    css += stylus.render(readTextFile(customStyle), {
+    css += stylus.render(readFile(customStyle), {
         filename: customStyle,
         paths: ["./css"],
+		sourcemap: {inline: true},
     });
 
-    fs.writeFileSync(appStylesheet, minifyCss(css));
+	if (!DEV) {
+		css = minifyCss(css);
+	}
+    fs.writeFileSync(appStylesheet, css);
     if (process.argv.includes("--gzip")) {
         gzipFile(appStylesheet);
     }
+	*/
 
     const vendorStylesheet = `${outputDir}/vendor.css`;
 
@@ -237,7 +255,7 @@ function bundleCss(domain, data) {
 function minifyJs(path) {
     return terser.minify(fs.readFileSync(path, "utf-8"), {
         compress: { unused: false },
-        sourceMap: true,
+        //sourceMap: true,
     }).code;
 }
 
@@ -248,10 +266,10 @@ function writeJsBundle(b, path, compress, callback) {
         .pipe(outputFile);
     outputFile.on("finish", () => {
         if (compress) {
-			const d = minifyJs(path);
-			if (d === undefined) {
-				return;
-			}
+            const d = minifyJs(path);
+            if (d === undefined) {
+                return;
+            }
             fs.writeFileSync(path, d);
         }
         callback();
@@ -295,7 +313,7 @@ function bundleJs(domain) {
     }
 
     if (!process.argv.includes("--no-app-js")) {
-        let b = browserify({ debug: debug });
+        let b = browserify({ debug: DEV });
 
         /*
         if (!process.argv.includes("--no-transpile")) {
@@ -304,7 +322,7 @@ function bundleJs(domain) {
 		*/
 
         b = b.external(external_js).add(glob.sync("./js/**/*.js"));
-        const compress = !debug;
+        const compress = !DEV;
         bundleAppJs(domain, b, compress, () => {
             console.info(`Built ${domain}`);
         });
@@ -526,7 +544,7 @@ function watch() {
     /*
     let watchify = require("watchify");
     let b = browserify({
-        debug: debug,
+        debug: DEV,
         entries: ["js/main.js"],
         cache: {},
         packageCache: {},

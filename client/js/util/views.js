@@ -421,8 +421,7 @@ function showMessage(target, message, className) {
     }
     const textNode = document.createElement("div");
     textNode.innerHTML = message.replace(/\n/g, "<br/>");
-    textNode.classList.add("message");
-    textNode.classList.add(className);
+    textNode.classList.add("message", className);
     const wrapperNode = document.createElement("div");
     wrapperNode.classList.add("message-wrapper");
     wrapperNode.appendChild(textNode);

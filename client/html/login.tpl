@@ -32,7 +32,7 @@
 
         <div class='buttons'>
             <input type='submit' value='Login'/>
-            <a class='append' href='<%- ctx.formatClientLink('password-reset') %>'>Forgot password?</a>
+            <a class='append password-reset' href='<%- ctx.formatClientLink('password-reset') %>'>Forgot password?</a>
         </div>
     </form>
 </div>
