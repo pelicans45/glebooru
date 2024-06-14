@@ -9,7 +9,6 @@ RUN rm -rf /var/www && mkdir /var/www
 
 COPY package.json package-lock.json ./
 RUN npm install --include=dev
-RUN npm install -g js-yaml
 
 COPY . ./
 
