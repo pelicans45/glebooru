@@ -33,6 +33,7 @@ services:
       BASE_URL:
       GLEBOORU_DEV: 1
       GLEBOORU_WATCH: ${GLEBOORU_WATCH}
+      GLEBOORU_WATCH_POLL: ${GLEBOORU_WATCH_POLL}
     volumes:
       - "server_data:/data:ro"
       - "./client:/opt/app"

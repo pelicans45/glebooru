@@ -44,18 +44,22 @@ class PostContentControl {
                 e.preventDefault();
             });
 
-		if (downloadListener) {
-			document.removeEventListener("keydown", downloadListener);
-		}
+        if (downloadListener) {
+            document.removeEventListener("keydown", downloadListener);
+        }
 
-		downloadListener = (e) => {
-			if (e.key === "s" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
-				misc.downloadURL(post.contentUrl, post.getDownloadFilename());
-				e.preventDefault();
-			}
-		};
+        downloadListener = (e) => {
+            if (
+                e.key === "s" &&
+                !["INPUT", "TEXTAREA"].includes(e.target.tagName)
+            ) {
+                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        };
 
-		document.addEventListener("keydown", downloadListener);
+        document.addEventListener("keydown", downloadListener);
 
         // (hunternif) Always disable overlay, because I'm not going to use notes
         //this.disableOverlay();

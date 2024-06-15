@@ -7,6 +7,7 @@ const terser = require("terser");
 const underscore = require("underscore");
 
 const DEV = process.env.GLEBOORU_DEV === "1";
+const WATCH_POLL = process.env.GLEBOORU_WATCH_POLL === "1";
 
 //const debug = process.argv.includes("--debug");
 
@@ -495,21 +496,27 @@ function watch() {
         });
     }
 
-    chokidar.watch("./html/**/*.tpl").on("change", () => {
+	const options = {};
+	if (WATCH_POLL) {
+		options.usePolling = true;
+		console.log("Using polling");
+	}
+
+    chokidar.watch("./html/**/*.tpl", options).on("change", () => {
         try {
             bundleForAllDomains(bundleTemplates, emitReload);
         } catch (e) {
             console.error(pe.render(e));
         }
     });
-    chokidar.watch("./css/**/*.styl").on("change", () => {
+    chokidar.watch("./css/**/*.styl", options).on("change", () => {
         try {
             bundleForAllDomains(bundleCss, emitReload);
         } catch (e) {
             console.error(pe.render(e));
         }
     });
-    chokidar.watch("./js/**/*.js").on("change", () => {
+    chokidar.watch("./js/**/*.js", options).on("change", () => {
         try {
             bundleForAllDomains(bundleJs, emitReload);
         } catch (e) {

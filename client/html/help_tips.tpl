@@ -3,7 +3,7 @@
 <li>
 When viewing an image:
     <ul>
-    <li>Click the arrow buttons, press the arrow keys (or <code>A</code> and <code>D</code>), or swipe on mobile to view neighboring images</li>
+    <li>Click the previous/next buttons, press the left/right arrow keys (or <code>A</code> and <code>D</code>), or swipe on mobile to view neighboring images</li>
     <li>Click the random image button or press <code>R</code> to view a random image</li>
     <li>If you've searched for tags, these will navigate to other images matched by those tags</li>
     </ul>
