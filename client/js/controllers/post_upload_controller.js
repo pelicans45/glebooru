@@ -154,7 +154,7 @@ class PostUploadController {
                         } else {
                             let error = new Error(
                                 "File already uploaded " +
-                                    `(@${searchResult.exactPost.id})`
+                                    `(#${searchResult.exactPost.id})`
                             );
                             error.uploadable = uploadable;
                             error.similarPosts = [

@@ -5,6 +5,8 @@ const views = require("../util/views.js");
 const misc = require("../util/misc.js");
 const optimizedResize = require("../util/optimized_resize.js");
 
+let downloadListener = null;
+
 class PostContentControl {
     constructor(hostNode, post, viewportSizeCalculator, fitFunctionOverride) {
         this._post = post;
@@ -41,6 +43,19 @@ class PostContentControl {
                 misc.downloadURL(post.contentUrl, post.getDownloadFilename());
                 e.preventDefault();
             });
+
+		if (downloadListener) {
+			document.removeEventListener("keydown", downloadListener);
+		}
+
+		downloadListener = (e) => {
+			if (e.key === "s" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+				misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+				e.preventDefault();
+			}
+		};
+
+		document.addEventListener("keydown", downloadListener);
 
         // (hunternif) Always disable overlay, because I'm not going to use notes
         //this.disableOverlay();

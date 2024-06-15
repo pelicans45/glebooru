@@ -61,7 +61,7 @@ class TopNavigation extends events.EventTarget {
     }
 
     showAll() {
-        for (let item of this._items) {
+        for (const item of this._items) {
             item.available = true;
         }
     }

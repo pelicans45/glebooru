@@ -14,38 +14,43 @@
         </tr>
 
         <tr>
-            <td><kbd>R</kbd></td>
-            <td>Go to random post</td>
-        </tr>
-
-        <tr>
-            <td><kbd>P</kbd></td>
-            <td>Focus first post in post list</td>
+            <td><kbd>Tab</kbd></td>
+            <td>Select first tag suggestion</td>
         </tr>
 
         <tr>
             <td><kbd>←</kbd> and <kbd>→</kbd> or <kbd>A</kbd> and <kbd>D</kbd></td>
-            <td>Go to newer/older page or post</td>
+            <td>Go to previous/next image</td>
         </tr>
 
         <tr>
-            <td><kbd>E</kbd></td>
-            <td>Edit post</td>
+            <td><kbd>R</kbd></td>
+            <td>Go to random image</td>
+        </tr>
+
+        <tr>
+            <td><kbd>S</kbd></td>
+            <td>Download image</td>
         </tr>
 
         <tr>
             <td><kbd>T</kbd></td>
-            <td>(In edit mode) Focus tag input</td>
+            <td>Add tags to image</td>
+        </tr>
+
+        <tr>
+            <td><kbd>P</kbd></td>
+            <td>Focus first image in list</td>
         </tr>
 
         <tr>
             <td><kbd>Command/Ctrl+S</kbd></td>
-            <td>(In edit mode) Save post</td>
+            <td>(In edit mode) Save changes</td>
         </tr>
 
         <tr>
             <td><kbd>Delete</kbd></td>
-            <td>(In edit mode) Delete post</td>
+            <td>(In edit mode) Delete image</td>
         </tr>
     </tbody>
 </table>

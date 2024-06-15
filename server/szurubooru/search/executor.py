@@ -58,6 +58,8 @@ class Executor:
         if "sort:random" not in query_text:
             query_text = "sort:random " + query_text
         count, random_entities = self.execute(query_text, 0, 1)
+        if len(random_entities) == 1:
+            random_entities = None
         return (
             prev_filter_query.one_or_none(),
             next_filter_query.one_or_none(),
@@ -287,3 +289,7 @@ class Executor:
             return db_query
 
         return db_query
+
+class PostSearchExecutor(Executor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

@@ -295,8 +295,8 @@ class PostSearchConfig(BaseSearchConfig):
             # sa.orm.defer(model.Post.favorite_count),
             # sa.orm.defer(model.Post.comment_count),
             sa.orm.defer(model.Post.last_favorite_time),
-            sa.orm.defer(model.Post.feature_count),
-            sa.orm.defer(model.Post.last_feature_time),
+            #sa.orm.defer(model.Post.feature_count),
+            #sa.orm.defer(model.Post.last_feature_time),
             sa.orm.defer(model.Post.last_comment_creation_time),
             sa.orm.defer(model.Post.last_comment_edit_time),
             sa.orm.defer(model.Post.note_count),
@@ -329,10 +329,13 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
+        """
         filters = {
             "metric-" + name: _create_metric_num_filter(name)
             for name in self.all_metric_names
         }
+        """
+        filters = {}
         filters.update(
             util.unalias_dict(
                 [
@@ -352,7 +355,7 @@ class PostSearchConfig(BaseSearchConfig):
                             ),
                         ),
                     ),
-                    (["metric"], _metric_presence_filter),
+                    #(["metric"], _metric_presence_filter),
                     (
                         ["score"],
                         search_util.create_num_filter(model.Post.score),
@@ -412,12 +415,12 @@ class PostSearchConfig(BaseSearchConfig):
                             model.Post.relation_count
                         ),
                     ),
-                    (
-                        ["feature-count"],
-                        search_util.create_num_filter(
-                            model.Post.feature_count
-                        ),
-                    ),
+                    #(
+                    #    ["feature-count"],
+                    #    search_util.create_num_filter(
+                    #        model.Post.feature_count
+                    #    ),
+                    #),
                     (
                         ["type"],
                         search_util.create_str_filter(
@@ -491,12 +494,12 @@ class PostSearchConfig(BaseSearchConfig):
                             model.Post.last_favorite_time
                         ),
                     ),
-                    (
-                        ["feature-date", "feature-time"],
-                        search_util.create_date_filter(
-                            model.Post.last_feature_time
-                        ),
-                    ),
+                    #(
+                    #    ["feature-date", "feature-time"],
+                    #    search_util.create_date_filter(
+                    #        model.Post.last_feature_time
+                    #    ),
+                    #),
                     (
                         ["safety", "rating"],
                         search_util.create_str_filter(
@@ -520,10 +523,13 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def sort_columns(self) -> Dict[str, Tuple[SaColumn, str]]:
+        """
         filters = {
             "metric-" + name: (_create_metric_sort_column(name), self.SORT_ASC)
             for name in self.all_metric_names
         }
+        """
+        filters = {}
         filters.update(
             util.unalias_dict(
                 [
@@ -547,10 +553,10 @@ class PostSearchConfig(BaseSearchConfig):
                         ["relation-count"],
                         (model.Post.relation_count, self.SORT_DESC),
                     ),
-                    (
-                        ["feature-count"],
-                        (model.Post.feature_count, self.SORT_DESC),
-                    ),
+                    #(
+                    #    ["feature-count"],
+                    #    (model.Post.feature_count, self.SORT_DESC),
+                    #),
                     (["file-size"], (model.Post.file_size, self.SORT_DESC)),
                     (
                         ["image-width", "width"],
@@ -588,10 +594,10 @@ class PostSearchConfig(BaseSearchConfig):
                         ["fav-date", "fav-time"],
                         (model.Post.last_favorite_time, self.SORT_DESC),
                     ),
-                    (
-                        ["feature-date", "feature-time"],
-                        (model.Post.last_feature_time, self.SORT_DESC),
-                    ),
+                    #(
+                    #    ["feature-date", "feature-time"],
+                    #    (model.Post.last_feature_time, self.SORT_DESC),
+                    #),
                 ]
             )
         )

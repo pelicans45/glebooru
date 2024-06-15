@@ -497,7 +497,7 @@ function watch() {
 
     chokidar.watch("./html/**/*.tpl").on("change", () => {
         try {
-            bundleForAllDomains(bundleHtml, emitReload);
+            bundleForAllDomains(bundleTemplates, emitReload);
         } catch (e) {
             console.error(pe.render(e));
         }

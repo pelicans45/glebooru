@@ -108,9 +108,9 @@ privileges:
     'posts:edit:relations':         regular
     'posts:edit:safety':            power
     'posts:edit:source':            regular
-    'posts:edit:tags':              regular
+    'posts:edit:tags':              anonymous
     'posts:edit:thumbnail':         power
-    'posts:feature':                moderator
+    'posts:feature':                administrator
     'posts:delete':                 moderator
     'posts:score':                  regular
     'posts:merge':                  moderator
@@ -123,7 +123,7 @@ privileges:
     # Can see new posts in gallery
     'posts:list:new':               anonymous
 
-    'tags:create':                  regular
+    'tags:create':                  anonymous
     'tags:edit:names':              power
     'tags:edit:category':           power
     'tags:edit:description':        power
@@ -143,10 +143,10 @@ privileges:
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
 
-    'metrics:create':               power
-    'metrics:edit:bounds':          power
-    'metrics:edit:posts':           regular
-    'metrics:list':                 regular
+    'metrics:create':               moderator
+    'metrics:edit:bounds':          moderator
+    'metrics:edit:posts':           moderator
+    'metrics:list':                 moderator
     'metrics:delete':               moderator
 
     'pools:create':                 regular
@@ -167,7 +167,7 @@ privileges:
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
 
-    'comments:create':              regular
+    'comments:create':              anonymous
     'comments:delete:any':          moderator
     'comments:delete:own':          regular
     'comments:edit:any':            moderator
@@ -179,7 +179,7 @@ privileges:
     'snapshots:list':               power
 
     'uploads:create':               anonymous
-    'uploads:use_downloader':       power
+    'uploads:use_downloader':       administrator
 
 ## ONLY SET THESE IF DEPLOYING OUTSIDE OF DOCKER
 #debug: 0 # generate server logs?

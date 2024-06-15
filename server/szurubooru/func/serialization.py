@@ -13,17 +13,9 @@ class BaseSerializer:
     def serialize(self, options: List[str]) -> Any:
         field_factories = self._serializers()
         if not options:
-            options = list(field_factories.keys())
-        ret = {}
-        for key in options:
-            if key not in field_factories:
-                raise errors.ValidationError(
-                    "Invalid key: %r. Valid keys: %r."
-                    % (key, list(sorted(field_factories.keys())))
-                )
-            factory = field_factories[key]
-            ret[key] = factory()
-        return ret
+            options = field_factories.keys()
+
+        return {key: field_factories[key]() for key in options}
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         raise NotImplementedError()

@@ -9,14 +9,14 @@ const NoteList = require("./note_list.js");
 const CommentList = require("./comment_list.js");
 const PoolList = require("./pool_list.js");
 const Pool = require("./pool.js");
-const PostMetricList = require("./post_metric_list.js");
-const PostMetricRangeList = require("./post_metric_range_list.js");
+//const PostMetricList = require("./post_metric_list.js");
+//const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 const vars = require("../vars.js");
 
 const baseUrl = document.getElementById("base").href;
 
-const maxNameLength = 250;
+const maxNameLength = 230;
 
 class Post extends events.EventTarget {
     constructor() {
@@ -28,8 +28,8 @@ class Post extends events.EventTarget {
             obj._notes = new NoteList();
             obj._comments = new CommentList();
             obj._pools = new PoolList();
-            obj._metrics = new PostMetricList();
-            obj._metricRanges = new PostMetricRangeList();
+            //obj._metrics = new PostMetricList();
+            //obj._metricRanges = new PostMetricRangeList();
         }
 
         this._updateFromResponse({});
@@ -222,7 +222,7 @@ class Post extends events.EventTarget {
     }
 
     static get(id) {
-        return api.get(uri.formatApiLink("post", id)).then((response) => {
+        return api.get(uri.formatApiLink("post", id), {noProgress: true}).then((response) => {
             return Promise.resolve(Post.fromResponse(response));
         });
     }
@@ -290,6 +290,7 @@ class Post extends events.EventTarget {
                 text: note.text,
             }));
         }
+		/*
         if (misc.arraysDiffer(this._metrics, this._orig._metrics)) {
             detail.metrics = this._metrics.map((metric) => ({
                 tag_name: metric.tagName,
@@ -303,6 +304,7 @@ class Post extends events.EventTarget {
                 high: metricRange.high,
             }));
         }
+		*/
         if (this._newContent) {
             files.content = this._newContent;
         }
@@ -378,7 +380,7 @@ class Post extends events.EventTarget {
                         error.response &&
                         error.response.name === "PostAlreadyUploadedError"
                     ) {
-                        error.message = `Post already uploaded (@${error.response.otherPostId})`;
+                        error.message = `File already uploaded (#${error.response.otherPostId})`;
                     }
                     return Promise.reject(error);
                 }
@@ -543,7 +545,7 @@ class Post extends events.EventTarget {
 		if (!hostname.includes("www.")) {
 			hostname = "www." + hostname;
 		}
-        return `(${hostname}) ${joinedTags}.${this.fileExtension}`;
+        return `[${hostname}] ${joinedTags}.${this.fileExtension}`;
     }
 
     mutateContentUrl() {
@@ -586,8 +588,10 @@ class Post extends events.EventTarget {
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
             obj._pools.sync(response.pools);
+			/*
             obj._metrics.sync(response.metrics);
             obj._metricRanges.sync(response.metricRanges);
+			*/
         }
 
         Object.assign(this, map());

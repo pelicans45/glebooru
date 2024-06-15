@@ -434,14 +434,16 @@ function showMessage(target, message, className) {
 }
 
 function appendExclamationMark() {
-    if (!document.title.startsWith("!")) {
+	const prefix = "! ERROR ! ";
+    if (!document.title.startsWith(prefix)) {
         document.oldTitle = document.title;
-        document.title = `! ${document.title}`;
+        document.title = `${prefix} ${document.title}`;
     }
 }
 
 function showError(target, message) {
     appendExclamationMark();
+	console.error(message);
     return showMessage(target, misc.formatInlineMarkdown(message), "error");
 }
 

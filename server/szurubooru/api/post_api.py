@@ -1,8 +1,10 @@
 import logging
+import time
 from datetime import datetime
 from math import ceil
 from typing import Dict, List, Optional
 
+from szurubooru import db, errors, model, rest, search
 from szurubooru.func import (
     auth,
     favorites,
@@ -18,9 +20,6 @@ from szurubooru.func import (
     versions,
 )
 
-from szurubooru.log import logger
-from szurubooru import db, errors, model, rest, search
-
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
 
@@ -29,27 +28,21 @@ def _get_post_id(params: Dict[str, str]) -> int:
     try:
         return int(params["post_id"])
     except TypeError:
-        raise posts.InvalidPostIdError(
-            "Invalid post ID: %r." % params["post_id"]
-        )
+        raise posts.InvalidPostIdError("Invalid post ID: %r." % params["post_id"])
 
 
 def _get_post(params: Dict[str, str]) -> model.Post:
     return posts.get_post_by_id(_get_post_id(params))
 
 
-def _serialize_post(
-    ctx: rest.Context, post: Optional[model.Post]
-) -> rest.Response:
+def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Response:
     return posts.serialize_post(
         post, ctx.user, options=serialization.get_serialization_options(ctx)
     )
 
 
 @rest.routes.get("/posts/?")
-def get_posts(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(
@@ -58,9 +51,7 @@ def get_posts(
 
 
 @rest.routes.get("/random-image/?")
-def get_random_image(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("q", default="").strip()
@@ -79,9 +70,7 @@ def get_random_image(
 
 
 @rest.routes.post("/posts/?")
-def create_post(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     anonymous = ctx.get_param_as_bool("anonymous", default=False)
     if anonymous:
         auth.verify_privilege(ctx.user, "posts:create:anonymous")
@@ -89,9 +78,7 @@ def create_post(
         auth.verify_privilege(ctx.user, "posts:create:identified")
     content = ctx.get_file(
         "content",
-        use_video_downloader=auth.has_privilege(
-            ctx.user, "uploads:use_downloader"
-        ),
+        use_video_downloader=auth.has_privilege(ctx.user, "uploads:use_downloader"),
     )
     tag_names = ctx.get_param_as_string_list("tags", default=[])
     safety = ctx.get_param_as_string("safety")
@@ -163,9 +150,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         )
     if ctx.has_param("tags"):
         auth.verify_privilege(ctx.user, "posts:edit:tags")
-        new_tags = posts.update_post_tags(
-            post, ctx.get_param_as_string_list("tags")
-        )
+        new_tags = posts.update_post_tags(post, ctx.get_param_as_string_list("tags"))
         if len(new_tags):
             auth.verify_privilege(ctx.user, "tags:create")
             db.session.flush()
@@ -181,9 +166,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         posts.update_post_source(post, ctx.get_param_as_string("contentUrl"))
     if ctx.has_param("relations"):
         auth.verify_privilege(ctx.user, "posts:edit:relations")
-        posts.update_post_relations(
-            post, ctx.get_param_as_int_list("relations")
-        )
+        posts.update_post_relations(post, ctx.get_param_as_int_list("relations"))
     if ctx.has_param("notes"):
         auth.verify_privilege(ctx.user, "posts:edit:notes")
         posts.update_post_notes(post, ctx.get_param_as_list("notes"))
@@ -195,9 +178,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
     if ctx.has_param("metrics"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
-        metrics.update_or_create_post_metrics(
-            post, ctx.get_param_as_list("metrics")
-        )
+        metrics.update_or_create_post_metrics(post, ctx.get_param_as_list("metrics"))
     if ctx.has_param("metricRanges"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
         metrics.update_or_create_post_metric_ranges(
@@ -218,14 +199,12 @@ def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(post, ctx.user)
     posts.delete(post)
     ctx.session.commit()
-    logger.info("%s deleted post %d", ctx.user.name, _get_post_id(params))
+    logging.info("%s deleted post %d", ctx.user.name, _get_post_id(params))
     return {}
 
 
 @rest.routes.post("/post-merge/?")
-def merge_posts(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def merge_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     source_post_id = ctx.get_param_as_int("remove")
     target_post_id = ctx.get_param_as_int("mergeTo")
     source_post = posts.get_post_by_id(source_post_id)
@@ -242,26 +221,20 @@ def merge_posts(
 
 
 @rest.routes.get("/featured-post/?")
-def get_featured_post(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def get_featured_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:featured")
     post = posts.try_get_featured_post()
     return _serialize_post(ctx, post)
 
 
 @rest.routes.post("/featured-post/?")
-def set_featured_post(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def set_featured_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:feature")
     post_id = ctx.get_param_as_int("id")
     post = posts.get_post_by_id(post_id)
     featured_post = posts.try_get_featured_post()
     if featured_post and featured_post.post_id == post.post_id:
-        raise posts.PostAlreadyFeaturedError(
-            "Post %r is already featured." % post_id
-        )
+        raise posts.PostAlreadyFeaturedError("Post %r is already featured." % post_id)
     posts.feature_post(post, ctx.user)
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
@@ -279,9 +252,7 @@ def set_post_score(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 
 
 @rest.routes.delete("/post/(?P<post_id>[^/]+)/score/?")
-def delete_post_score(
-    ctx: rest.Context, params: Dict[str, str]
-) -> rest.Response:
+def delete_post_score(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:score")
     post = _get_post(params)
     scores.delete_score(post, ctx.user)
@@ -290,9 +261,7 @@ def delete_post_score(
 
 
 @rest.routes.post("/post/(?P<post_id>[^/]+)/favorite/?")
-def add_post_to_favorites(
-    ctx: rest.Context, params: Dict[str, str]
-) -> rest.Response:
+def add_post_to_favorites(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:favorite")
     post = _get_post(params)
     favorites.set_favorite(post, ctx.user)
@@ -312,9 +281,7 @@ def delete_post_from_favorites(
 
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/around/?")
-def get_posts_around(
-    ctx: rest.Context, params: Dict[str, str]
-) -> rest.Response:
+def get_posts_around(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     post_id = _get_post_id(params)
@@ -336,9 +303,7 @@ def get_posts_by_image(
         lookalikes = []
 
     return {
-        "exactPost": _serialize_post(
-            ctx, posts.search_by_image_exact(content)
-        ),
+        "exactPost": _serialize_post(ctx, posts.search_by_image_exact(content)),
         "similarPosts": [
             {
                 "distance": distance,
@@ -379,9 +344,7 @@ def get_posts_lookalikes(
 
 
 @rest.routes.get("/posts/median/?")
-def get_posts_median(
-    ctx: rest.Context, _params: Dict[str, str] = {}
-) -> rest.Response:
+def get_posts_median(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("q", default="")
@@ -412,9 +375,6 @@ def get_posts_similar_by_tags(
         "q": query_text,
         "limit": limit,
         "results": list(
-            [
-                posts.serialize_micro_post(result, ctx.user)
-                for result in results
-            ]
+            [posts.serialize_micro_post(result, ctx.user) for result in results]
         ),
     }

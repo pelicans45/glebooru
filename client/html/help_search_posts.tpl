@@ -70,10 +70,12 @@
             <td><code>relation-count</code></td>
             <td>having given number of relations</td>
         </tr>
+        <!--
         <tr>
             <td><code>feature-count</code></td>
             <td>having been featured given number of times</td>
         </tr>
+        -->
         <tr>
             <td><code>type</code></td>
             <td>given type of posts. <code>&lt;value&gt;</code> can be either <code>image</code>, <code>animation</code> (or <code>animated</code> or <code>anim</code>), <code>flash</code> (or <code>swf</code>) or <code>video</code> (or <code>webm</code>).</td>
@@ -186,6 +188,7 @@
             <td><code>fav-time</code></td>
             <td>alias of <code>fav-date</code></td>
         </tr>
+        <!--
         <tr>
             <td><code>feature-date</code></td>
             <td>featured at given date</td>
@@ -194,6 +197,7 @@
             <td><code>feature-time</code></td>
             <td>alias of <code>feature-time</code></td>
         </tr>
+        -->
         <tr>
             <td><code>safety</code></td>
             <td>having given safety</td>

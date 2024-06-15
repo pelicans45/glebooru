@@ -1,4 +1,3 @@
-import orjson as json
 import logging
 import subprocess
 import urllib.error
@@ -6,9 +5,11 @@ import urllib.request
 from threading import Thread
 from typing import Any, Dict, List
 
+import orjson as json
+import orjson as json
+
 from szurubooru import config, errors
 from szurubooru.func import mime
-from szurubooru.log import logger
 
 _dl_chunk_size = 2**15
 
@@ -101,10 +102,8 @@ def _post_to_webhook(webhook: str, payload: Dict[str, Any]) -> int:
     try:
         res = urllib.request.urlopen(req)
         if not 200 <= res.status <= 299:
-            logger.warning(
-                f"Webhook {webhook} returned {res.status} {res.reason}"
-            )
+            logging.warning(f"Webhook {webhook} returned {res.status} {res.reason}")
         return res.status
     except urllib.error.URLError as ex:
-        logger.warning(f"Unable to call webhook {webhook}: {ex}")
+        logging.warning(f"Unable to call webhook {webhook}: {ex}")
         return 400

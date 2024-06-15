@@ -123,12 +123,12 @@
         <% } %>
     </nav>
 
-    <% if (ctx.post.metrics.length + ctx.post.metricRanges.length) { %>
+    <% /* if (ctx.post.metrics.length + ctx.post.metricRanges.length) { %>
         <nav class='metrics'>
             <h1>Metrics (<%- ctx.post.metrics.length + ctx.post.metricRanges.length %>)</h1>
             <ul class='compact-post-metrics'></ul>
         </nav>
-    <% } %>
+    <% } */ %>
 
     <% if (ctx.canViewSimilar) { %>
         <nav class='similar'>

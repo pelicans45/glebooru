@@ -17,14 +17,15 @@ const Post = require("../models/post.js");
 const fields = [
     "id",
     "thumbnailUrl",
+	"contentUrl",
 	"creationTime",
     "type",
-    "safety",
+    //"safety",
     "score",
     "favoriteCount",
     "commentCount",
     "tags",
-    "version",
+    //"version",
 ];
 
 class PostListController {

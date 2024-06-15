@@ -15,7 +15,7 @@ def process_request(_ctx: rest.Context) -> None:
 
 @middleware.post_hook
 def process_response(ctx: rest.Context) -> None:
-    logger.info(
+    logging.info(
         "%s %s (user=%s, queries=%d)",
         ctx.method,
         ctx.url,

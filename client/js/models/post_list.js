@@ -28,7 +28,7 @@ class PostList extends AbstractList {
                     limit: limit,
                     fields: fields.join(","),
                     r: r,
-                })
+                }, {showProgress: false})
             )
             .then((response) => {
                 let results;

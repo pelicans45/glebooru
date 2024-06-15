@@ -9,6 +9,8 @@
 <hr>
 <% } %>
 
+<!--
 <p>
-<a href="https://github.com/parallax4/glebooru">Source code</a>
+<a href="">Source code</a>
 </p>
+-->

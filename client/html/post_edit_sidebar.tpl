@@ -118,7 +118,7 @@
             <section class='management'>
                 <ul>
                     <% if (ctx.canFeaturePosts) { %>
-                        <li><a class='feature'>Feature this post on main page</a></li>
+                        <li><a class='feature' style='display: none'>Feature this post on main page</a></li>
                     <% } %>
                     <% if (ctx.canMergePosts) { %>
                         <li><a class='merge'>Merge this post with another</a></li>

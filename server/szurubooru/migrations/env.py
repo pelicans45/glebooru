@@ -25,7 +25,7 @@ import szurubooru.model.base  # noqa: E402
 
 
 alembic_config = alembic.context.config
-logging.config.fileConfig(alembic_config.config_file_name)
+#logging.config.fileConfig(alembic_config.config_file_name)
 
 szuru_config = szurubooru.config.config
 alembic_config.set_main_option("sqlalchemy.url", szuru_config["database"])

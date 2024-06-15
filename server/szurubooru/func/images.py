@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import re
 import shlex
@@ -9,10 +10,9 @@ from typing import List
 import HeifImagePlugin
 import pillow_avif
 from PIL import Image as PILImage
-from szurubooru.func import mime, util
 
 from szurubooru import errors
-from szurubooru.log import logger
+from szurubooru.func import mime, util
 
 
 def convert_heif_to_png(content: bytes) -> bytes:
@@ -282,14 +282,12 @@ class Image:
             )
             out, err = proc.communicate()
             if proc.returncode != 0:
-                logger.warning(
+                logging.warning(
                     "Failed to execute ffmpeg command (cli=%r, err=%r)",
                     " ".join(shlex.quote(arg) for arg in cli),
                     err,
                 )
-                if (len(out) > 0 and not ignore_error_if_data) or len(
-                    out
-                ) == 0:
+                if (len(out) > 0 and not ignore_error_if_data) or len(out) == 0:
                     raise errors.ProcessingError(
                         "Error while processing image.\n" + err.decode("utf-8")
                     )
@@ -314,7 +312,5 @@ class Image:
         # assert "format" in self.info
         # assert "streams" in self.info
         if len(self.info["streams"]) < 1:
-            logger.warning("The video contains no video streams.")
-            raise errors.ProcessingError(
-                "The video contains no video streams."
-            )
+            logging.warning("The video contains no video streams.")
+            raise errors.ProcessingError("The video contains no video streams.")

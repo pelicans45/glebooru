@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import sqlalchemy as sa
 from sqlalchemy.event import listens_for
 
+from szurubooru import config, db, errors, model, rest
 from szurubooru.func import (
     comments,
     files,
@@ -45,7 +46,7 @@ class PostAlreadyFeaturedError(errors.ValidationError):
 class PostAlreadyUploadedError(errors.ValidationError):
     def __init__(self, other_post: model.Post) -> None:
         super().__init__(
-            "Post already uploaded (%d)" % other_post.post_id,
+            "File already uploaded (#%d)" % other_post.post_id,
             {
                 "otherPostUrl": get_post_content_url(other_post),
                 "otherPostId": other_post.post_id,
@@ -193,14 +194,14 @@ class PostSerializer(serialization.BaseSerializer):
             "commentCount": self.serialize_comment_count,
             "noteCount": self.serialize_note_count,
             "relationCount": self.serialize_relation_count,
-            "featureCount": self.serialize_feature_count,
-            "lastFeatureTime": self.serialize_last_feature_time,
+            #"featureCount": self.serialize_feature_count,
+            #"lastFeatureTime": self.serialize_last_feature_time,
             "favoritedBy": self.serialize_favorited_by,
             "hasCustomThumbnail": self.serialize_has_custom_thumbnail,
             "notes": self.serialize_notes,
             "comments": self.serialize_comments,
-            "metrics": self.serialize_metrics,
-            "metricRanges": self.serialize_metric_ranges,
+            #"metrics": self.serialize_metrics,
+            #"metricRanges": self.serialize_metric_ranges,
             "pools": self.serialize_pools,
         }
 
@@ -260,9 +261,9 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
                 "usages": tag.post_count,
-                "metric": {"min": tag.metric.min, "max": tag.metric.max}
-                if tag.metric
-                else None,
+                #"metric": {"min": tag.metric.min, "max": tag.metric.max}
+                #if tag.metric
+                #else None,
             }
             for tag in tags.sort_tags(self.post.tags)
         ]
@@ -392,7 +393,13 @@ def get_post_count() -> int:
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
 
 
+get_post_query = db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id"))
+
 def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
+    #return db._engine.execute("select * from post where id = %s", (post_id,)).first()
+    #return db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id")).params(id=post_id).first()
+    return get_post_query.params(id=post_id).first()
+
     return (
         db.session.query(model.Post)
         .filter(model.Post.post_id == post_id)
@@ -608,9 +615,9 @@ def update_all_post_signatures() -> None:
                 post, files.get(get_post_content_path(post))
             )
             db.session.commit()
-            logger.info("Created Signature - Post %d", post.post_id)
+            #logging.info("Created Signature - Post %d", post.post_id)
         except Exception as ex:
-            logger.exception(ex)
+            logging.exception(ex)
 
 
 def update_all_md5_checksums() -> None:
@@ -626,9 +633,9 @@ def update_all_md5_checksums() -> None:
                 files.get(get_post_content_path(post))
             )
             db.session.commit()
-            logger.info("Created MD5 - Post %d", post.post_id)
+            #logging.info("Created MD5 - Post %d", post.post_id)
         except Exception as ex:
-            logger.exception(ex)
+            logging.exception(ex)
 
 
 def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
@@ -678,7 +685,7 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
         post.canvas_width = image.width
         post.canvas_height = image.height
     except errors.ProcessingError as ex:
-        logger.exception(ex)
+        logging.exception(ex)
         if not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError("Unable to process image metadata")
         else:

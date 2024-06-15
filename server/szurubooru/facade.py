@@ -4,16 +4,15 @@ import threading
 import time
 from typing import Any, Callable, Type
 
-import coloredlogs
 import sqlalchemy as sa
 import sqlalchemy.orm.exc
+
+from szurubooru import api, config, db, errors, middleware, rest
 from szurubooru.func.file_uploads import purge_old_uploads
 from szurubooru.func.posts import (
     update_all_md5_checksums,
     update_all_post_signatures,
 )
-
-from szurubooru import api, config, db, errors, middleware, rest
 
 
 def _map_error(
@@ -87,9 +86,7 @@ def validate_config() -> None:
 
     for key in ["data_url", "data_dir"]:
         if not config.config[key]:
-            raise errors.ConfigError(
-                "Service is not configured: %r is missing" % key
-            )
+            raise errors.ConfigError("Service is not configured: %r is missing" % key)
 
     if not os.path.isabs(config.config["data_dir"]):
         raise errors.ConfigError("data_dir must be an absolute path")
@@ -97,22 +94,16 @@ def validate_config() -> None:
     if not config.config["database"]:
         raise errors.ConfigError("Database is not configured")
 
-    if config.config["webhooks"] and not isinstance(
-        config.config["webhooks"], list
-    ):
+    if config.config["webhooks"] and not isinstance(config.config["webhooks"], list):
         raise errors.ConfigError("Webhooks must be provided as a list of URLs")
 
     if config.config["smtp"]["host"]:
         if not config.config["smtp"]["port"]:
             raise errors.ConfigError("SMTP host is set but port is not set")
         if not config.config["smtp"]["user"]:
-            raise errors.ConfigError(
-                "SMTP host is set but username is not set"
-            )
+            raise errors.ConfigError("SMTP host is set but username is not set")
         if not config.config["smtp"]["pass"]:
-            raise errors.ConfigError(
-                "SMTP host is set but password is not set"
-            )
+            raise errors.ConfigError("SMTP host is set but password is not set")
         if not config.config["smtp"]["from"]:
             raise errors.ConfigError(
                 "From address must be set to use mail-based password reset"
@@ -136,10 +127,20 @@ _live_migrations = (
 
 def create_app() -> Callable[[Any, Any], Any]:
     """Create a WSGI compatible App object."""
+    """
+    logging.handlers.clear()
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter("[%(asctime)s] %(levelname)s - %(message)s")
+    ch.setFormatter(formatter)
+    logging.addHandler(ch)
+    logging.setLevel(logging.INFO)
+    """
+
+    logging.basicConfig(
+        level=logging.INFO, format="[%(asctime)s] %(levelname)s - %(message)s"
+    )
+
     validate_config()
-    coloredlogs.install(fmt="[%(asctime)-15s] %(name)s %(message)s")
-    if config.config["debug"]:
-        logging.getLogger("szurubooru").setLevel(logging.INFO)
     if config.config["show_sql"]:
         logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 

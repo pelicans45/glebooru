@@ -170,7 +170,7 @@ class PostUploadView extends events.EventTarget {
                 //extraText:
                 //    "Allowed extensions: .jpg, .png, .gif, .webm, .mp4, .swf, .avif, .heif, .heic",
                 extraText: "",
-                allowUrls: true,
+                allowUrls: false,
                 allowMultiple: true,
                 lock: false,
             }

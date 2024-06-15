@@ -88,7 +88,9 @@
                                     <br/>
                                     <%= ctx.makeCheckbox({text: 'Add relation', name: 'add-relation'}) %>
                                 <% } else { %>
+                                    <span style="display:none">
                                     <%= ctx.makeCheckbox({text: 'Copy tags', name: 'copy-tags'}) %>
+                                    </span>
                                 <% } %>
                             </div>
                         </li>

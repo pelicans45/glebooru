@@ -1,15 +1,19 @@
 import cgi
-import orjson as json
+import logging
 import re
 import urllib.parse
-import numpy as np
 from datetime import datetime
 from typing import Any, Callable, Dict, Tuple
+
+import numpy as np
+import orjson as json
 
 from szurubooru import db
 from szurubooru.func import util
 from szurubooru.rest import context, errors, middleware, routes
-from szurubooru.log import logger
+
+from szurubooru.rest import context, errors, middleware, routes
+
 
 def _json_serializer(obj: Any) -> str:
     """JSON serializer for objects not serializable by default JSON code"""
@@ -23,7 +27,7 @@ def _json_serializer(obj: Any) -> str:
 
 
 def _dump_json(obj: Any) -> str:
-    #return orig_json.dumps(obj, default=_json_serializer, indent=2)
+    # return orig_json.dumps(obj, default=_json_serializer, indent=2)
     return json.dumps(obj, default=_json_serializer)
 
 
@@ -48,9 +52,7 @@ def _create_context(env: Dict[str, Any]) -> context.Context:
     if "multipart" in env.get("CONTENT_TYPE", ""):
         form = cgi.FieldStorage(fp=env["wsgi.input"], environ=env)
         if not form.list:
-            raise errors.HttpBadRequest(
-                "ValidationError", "No files attached."
-            )
+            raise errors.HttpBadRequest("ValidationError", "No files attached.")
         body = form.getvalue("metadata")
         for key in form:
             files[key] = form.getvalue(key)
@@ -140,5 +142,5 @@ def application(
                 blob[key] = value
 
         if not errors.can_ignore_error(ex):
-            logger.exception(ex)
+            logging.exception(ex)
         return (_dump_json(blob),)

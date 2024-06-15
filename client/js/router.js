@@ -358,7 +358,7 @@ const _onClick = (router) => {
             "TODO: remove orig check (click home page from home page?)"
         );
 		*/
-		
+
         e.preventDefault();
         router.show(orig);
     };

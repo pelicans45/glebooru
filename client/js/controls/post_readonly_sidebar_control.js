@@ -51,6 +51,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._installScore();
         this._installFitButtons();
         this._syncFitButton();
+		/*
         if (this._metricsListNode) {
             this._metricsControl = new PostMetricListControl(
                 this._metricsListNode,
@@ -59,6 +60,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         }
         //this._loadSimilarPosts();
         //this._loadLookalikePosts();
+		*/
     }
 
     get _scoreContainerNode() {

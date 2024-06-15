@@ -262,7 +262,7 @@ class Api extends events.EventTarget {
         this.userPassword = null;
         this.token = null;
         this.dispatchEvent(new CustomEvent("logout"));
-		location.href = "/"
+        location.href = "/";
     }
 
     forget() {
@@ -386,7 +386,7 @@ class Api extends events.EventTarget {
 
         let abortFunction = () => {};
         let returnedPromise = new Promise((resolve, reject) => {
-            if (!options.noProgress) {
+            if (options.showProgress) {
                 progress.start();
             }
 
@@ -461,7 +461,9 @@ class Api extends events.EventTarget {
             };
 
             req.end((error, response) => {
-                progress.done();
+                if (options.showProgress) {
+                    progress.done();
+                }
                 abortFunction = () => {};
                 if (error) {
                     if (response && response.body) {

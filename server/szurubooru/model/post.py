@@ -257,12 +257,12 @@ class Post(Base):
     comments = sa.orm.relationship(
         "Comment", cascade="all, delete-orphan", overlaps="post"
     )
-    metrics = sa.orm.relationship(
-        "PostMetric", cascade="all, delete-orphan", lazy="joined"
-    )
-    metric_ranges = sa.orm.relationship(
-        "PostMetricRange", cascade="all, delete-orphan", lazy="joined"
-    )
+    #metrics = sa.orm.relationship(
+    #    "PostMetric", cascade="all, delete-orphan", lazy="joined"
+    #)
+    #metric_ranges = sa.orm.relationship(
+    #    "PostMetricRange", cascade="all, delete-orphan", lazy="joined"
+    #)
     _pools = sa.orm.relationship(
         "PoolPost",
         cascade="all,delete-orphan",
@@ -298,11 +298,11 @@ class Post(Base):
 
     @hybrid_property
     def flags(self) -> List[str]:
-        return sorted([x for x in self.flags_string.split(",") if x])
+        return sorted(x for x in self.flags_string.split(",") if x)
 
     @flags.setter
     def flags(self, data: List[str]) -> None:
-        self.flags_string = ",".join([x for x in data if x])
+        self.flags_string = ",".join(x for x in data if x)
 
     score = sa.orm.column_property(
         sa.sql.expression.select(
@@ -331,6 +331,7 @@ class Post(Base):
         .scalar_subquery()
     )
 
+    """
     feature_count = sa.orm.column_property(
         sa.sql.expression.select([sa.sql.expression.func.count(PostFeature.post_id)])
         .where(PostFeature.post_id == post_id)
@@ -344,6 +345,7 @@ class Post(Base):
         .correlate_except(PostFeature)
         .scalar_subquery()
     )
+    """
 
     comment_count = sa.orm.column_property(
         sa.sql.expression.select([sa.sql.expression.func.count(Comment.post_id)])

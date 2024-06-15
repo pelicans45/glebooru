@@ -84,11 +84,13 @@ class PostMainView {
 
         const showRandomImage = () => {
             if (ctx.randomPostId) {
-                router.show(ctx.getPostUrl(ctx.randomPostId, ctx.parameters));
+				const params = Object.assign({}, ctx.parameters);
+				params.r = Math.round(Math.random() * 998) + 1;
+                router.show(ctx.getPostUrl(ctx.randomPostId, params));
             }
         };
 
-        keyboard.bind("e", () => {
+        keyboard.bind(["t", "e"], () => {
             if (ctx.editMode) {
                 router.show(uri.formatClientLink("", ctx.post.id));
             } else {

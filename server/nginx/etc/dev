@@ -15,7 +15,7 @@ server {
     }
 
     #location /api/tag-siblings {
-    #    proxy_pass http://127.0.0.1:8080/api/tag-siblings;
+    #    proxy_pass http://client/api/tag-siblings;
     #    include /opt/booru/server/nginx/proxy;
     #
     #    proxy_cache main_cache;
