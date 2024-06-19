@@ -251,7 +251,7 @@ def get_or_create_tags_by_names(
     return existing_tags, new_tags
 
 
-def get_tag_siblings(tag: model.Tag) -> List[model.Tag]:
+def get_tag_siblings(tag: model.Tag, limit) -> List[model.Tag]:
     # assert tag
     tag_alias = sa.orm.aliased(model.Tag)
     pt_alias1 = sa.orm.aliased(model.PostTag)
@@ -265,7 +265,7 @@ def get_tag_siblings(tag: model.Tag) -> List[model.Tag]:
         .group_by(tag_alias.tag_id)
         .order_by(sa.func.count(pt_alias2.post_id).desc())
         .order_by(tag_alias.first_name)
-        .limit(50)
+        .limit(limit)
     )
     return result
 

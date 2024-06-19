@@ -9,7 +9,7 @@ function formatApiLink(...values) {
             for (let key of Object.keys(value)) {
                 if (value[key]) {
                     variableParts.push(
-                        key + "=" + encodeURIComponent(value[key].toString())
+                        key + "=" + encodeURIComponent(value[key].toString().trim())
                     );
                 }
             }
@@ -54,7 +54,7 @@ function formatClientLink(...values) {
             for (let key of Object.keys(value)) {
                 if (value[key]) {
                     variableParts.push(
-                        key + "=" + escapeParam(value[key].toString())
+                        key + "=" + escapeParam(value[key].toString().trim())
                     );
                 }
             }
@@ -79,7 +79,7 @@ function formatPostsLink(...values) {
                 if (key === "q") {
                     if (value[key]) {
                         parts.unshift(
-                            escapeParam(value[key].toString())
+                            escapeParam(value[key].toString().trim())
                                 .replace(/%20/g, "+")
                                 .replace(/%3A/g, ":")
                         );
@@ -89,7 +89,7 @@ function formatPostsLink(...values) {
 
                 if (value[key]) {
                     variableParts.push(
-                        key + "=" + escapeParam(value[key].toString())
+                        key + "=" + escapeParam(value[key].toString().trim())
                     );
                 }
             }

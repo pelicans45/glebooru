@@ -20,12 +20,12 @@ const fields = [
 	"contentUrl",
 	"creationTime",
     "type",
-    //"safety",
+    "safety",
     "score",
     "favoriteCount",
     "commentCount",
     "tags",
-    //"version",
+    "version",
 ];
 
 class PostListController {

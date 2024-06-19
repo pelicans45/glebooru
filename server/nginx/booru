@@ -11,8 +11,8 @@ server {
         include /opt/booru/server/nginx/include/proxy;
     }
 
-    #location /api/tag-siblings {
-    #    proxy_pass http://127.0.0.1:8080/api/tag-siblings;
+    #location ~ /api/(tag-siblings/lens|tags/all)(.*) {
+    #    proxy_pass http://127.0.0.1:8080/api/$1$2;
     #    include /opt/booru/server/nginx/include/proxy;
     #
     #    proxy_cache main_cache;

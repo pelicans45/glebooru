@@ -12,10 +12,15 @@ let allRelevantTags = null;
 let topRelevantMatches = null;
 
 class TagList extends AbstractList {
-    static search(text, offset, limit, fields) {
+    static search(text, offset, limit, fields, all) {
+        let path = "tags";
+		if (all) {
+			path += "/all";
+		}
+		path = "tags";
         return api
             .get(
-                uri.formatApiLink("tags", {
+                uri.formatApiLink(path, {
                     q: text,
                     offset: offset,
                     limit: limit,
@@ -46,8 +51,10 @@ class TagList extends AbstractList {
             return this.search(
                 "sort:usages",
                 0,
-                config.maxSuggestedResults,
-                ["names", "category", "usages"]
+                //config.maxSuggestedResults,
+                5000,
+                ["names", "category", "usages"],
+				true,
             ).then((response) => {
                 allRelevantTags = response;
                 return Promise.resolve(allRelevantTags);
@@ -56,6 +63,7 @@ class TagList extends AbstractList {
 
         return api
             .get(
+				//lens
                 uri.formatApiLink("tag-siblings", lens.hostnameFilter),
                 { noProgress: true }
                 /*

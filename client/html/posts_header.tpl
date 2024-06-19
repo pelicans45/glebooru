@@ -45,6 +45,7 @@
             %></span><%
         }
         %><wbr/><%
+        /*
         if (ctx.canViewMetrics) {
             %><span class="metrics-btn-holder"><%
                 %><a class='mousetrap button append open metrics-btn'><%
@@ -57,6 +58,7 @@
                 %></a><%
             %></span><%
         }
+        */
     %></form><%
     %><div class='bulk-edit-block hidden'><%
         if (ctx.canBulkEditTags) {

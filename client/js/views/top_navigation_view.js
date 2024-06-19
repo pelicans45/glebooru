@@ -46,7 +46,6 @@ class TopNavigationView {
 
     activate(key) {
         if (this._key !== key) {
-            console.log("activate", this._key, key);
             const active = this._hostNode.querySelector(
                 "li[data-name].active"
             );
@@ -72,8 +71,6 @@ class TopNavigationView {
 		*/
 
             this._toggleExtraNavLinks(key);
-        } else {
-            console.log("no activate - same key", this._key, key);
         }
         this._key = key;
     }

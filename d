@@ -8,12 +8,10 @@ windowsdockercompose="docker-compose.dev.windows.yml"
 
 if [ "$1" == "-w" ] || [ "$1" == "--watch" ]; then
     export GLEBOORU_WATCH=1
-    if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "cygwin" ] || [ "$OSTYPE" == "win32" ]; then
-        export GLEBOORU_WATCH_POLL=1
-    fi
 fi
 
 if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "cygwin" ] || [ "$OSTYPE" == "win32" ]; then
+    export GLEBOORU_WATCH_POLL=1
     sed 's/platform: linux\/arm64$//' $dockercompose > $windowsdockercompose
     dockercompose=$windowsdockercompose
 fi

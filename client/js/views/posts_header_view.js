@@ -113,8 +113,8 @@ class BulkTagEditor extends BulkEditor {
         return this._hostNode.querySelector("input[name=tag]");
     }
 
-    focusQueryInput() {
-        search.focusInputNode(this._queryInputNode);
+    focusInput() {
+        search.focusInputNode(this._inputNode);
     }
 
     blur() {
@@ -130,8 +130,8 @@ class BulkTagEditor extends BulkEditor {
     _evtOpenLinkClick(e) {
         e.preventDefault();
         this.toggleOpen(true);
-        this.focusQueryInput();
         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+		this.focusInput();
     }
 
     _evtCloseLinkClick(e) {
@@ -244,10 +244,7 @@ class PostsHeaderView extends events.EventTarget {
                 this._evtToggleQueryShortcut(e)
             );
             this.addEventListener("navigate", (e) =>
-                this._setupQueryShortcutButton(
-                    shortcut,
-                    e.detail.parameters.q
-                )
+                this._setupQueryShortcutButton(shortcut, e.detail.parameters.q)
             );
         }
 
@@ -287,6 +284,7 @@ class PostsHeaderView extends events.EventTarget {
             );
         }
 
+        /*
         if (this._metricsButtonHolderNode) {
             this._metricControl = new MetricHeaderControl(
                 this._metricsBlockNode,
@@ -302,6 +300,7 @@ class PostsHeaderView extends events.EventTarget {
                 this._evtCloseMetricsBtnClick(e)
             );
         }
+			*/
 
         for (let editor of this._bulkEditors) {
             editor.addEventListener("submit", (e) => {
@@ -534,16 +533,18 @@ class PostsHeaderView extends events.EventTarget {
     _evtFormSubmit(e) {
         e.preventDefault();
         this._navigate();
+        /*
         if (this._metricControl) {
             this._metricControl.refreshQuery(this._queryInputNode.value);
         }
+		*/
     }
     _evtRandomizeButtonClick(e) {
         e.preventDefault();
+        const query = this._queryInputNode.value.trim();
         if (!this._queryInputNode.value.includes("sort:random")) {
-            const space = this._queryInputNode.value ? " " : "";
-            this._queryInputNode.value =
-                this._queryInputNode.value.trim() + space + "sort:random ";
+            const space = query ? " " : "";
+            this._queryInputNode.value = query + space + "sort:random ";
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         // localStorage.r = this._ctx.parameters.r;

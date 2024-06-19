@@ -49,8 +49,6 @@ class AutoCompleteControl {
         this._results = [];
         this._activeResult = -1;
 
-        console.log("autocomplete");
-
         this._install();
     }
 

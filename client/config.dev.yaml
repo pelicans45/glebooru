@@ -102,6 +102,7 @@ privileges:
     'posts:reverse_search':         anonymous
     'posts:view':                   anonymous
     'posts:view:featured':          anonymous
+    'posts:view:similar':           anonymous
     'posts:edit:content':           power
     'posts:edit:flags':             regular
     'posts:edit:notes':             power
@@ -118,7 +119,6 @@ privileges:
     'posts:bulk-edit:tags':         power
     'posts:bulk-edit:safety':       power
     'posts:bulk-edit:delete':       power
-    'posts:view:similar':           anonymous
 
     # Can see new posts in gallery
     'posts:list:new':               anonymous

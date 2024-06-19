@@ -9,3 +9,5 @@ hooks/
 
 # User configured config file
 config.yaml
+
+tests/

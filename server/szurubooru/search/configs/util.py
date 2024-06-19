@@ -226,8 +226,7 @@ def create_subquery_filter(
             subquery = subquery_decorator(subquery)
         subquery = subquery.options(sa.orm.lazyload("*"))
         subquery = filter_func(subquery, criterion, False)
-        #subquery = sa.select(filter_func(subquery, criterion, False))
-        subquery = subquery.subquery("t")
+        subquery = sa.select(subquery.subquery("t"))
         expression = left_id_column.in_(subquery)
         if negated:
             expression = ~expression

@@ -6,3 +6,4 @@ cd /opt/app
 
 #echo "Starting szurubooru API on port ${PORT} - Running on ${THREADS} threads"
 exec waitress-serve --port ${PORT} --threads ${THREADS} szurubooru.facade:app
+#python app.py

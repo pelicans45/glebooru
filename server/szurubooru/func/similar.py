@@ -4,8 +4,8 @@ import sqlalchemy as sa
 
 from szurubooru import db, model, search
 
-_search_executor_config = search.configs.PostSearchConfig()
-_search_executor = search.Executor(_search_executor_config)
+#_search_executor_config = search.configs.PostSearchConfig()
+#_search_executor = search.Executor(_search_executor_config)
 
 
 # TODO(hunternif): this ignores the query, e.g. rating.

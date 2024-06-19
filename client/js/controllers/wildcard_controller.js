@@ -17,12 +17,8 @@ class NotFoundController {
 module.exports = (router) => {
     router.enter(null, (ctx, next) => {
         if (postListRegex.test(ctx.canonicalPath)) {
-            console.log("wildcard postlist - ctx:", ctx);
-
             ctx.controller = new PostListController(ctx);
         } else {
-            console.log("wildcard notfound - ctx:", ctx);
-
             ctx.controller = new NotFoundController(ctx.canonicalPath);
         }
     });

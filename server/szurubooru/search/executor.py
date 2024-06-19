@@ -58,8 +58,6 @@ class Executor:
         if "sort:random" not in query_text:
             query_text = "sort:random " + query_text
         count, random_entities = self.execute(query_text, 0, 1)
-        if len(random_entities) == 1:
-            random_entities = None
         return (
             prev_filter_query.one_or_none(),
             next_filter_query.one_or_none(),
@@ -125,7 +123,7 @@ class Executor:
     ) -> rest.Response:
         query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
-        limit = ctx.get_param_as_int("limit", default=100, min=1, max=100)
+        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)#max=100)
         count, entities = self.execute(query, offset, limit)
         return {
             "q": query,

@@ -16,6 +16,8 @@ const scoreTemplate = views.getTemplate("score");
 const favTemplate = views.getTemplate("fav");
 const similarItemTemplate = views.getTemplate("similar-post-item");
 
+const similarPostCount = 10;
+
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {
         super();
@@ -51,16 +53,16 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._installScore();
         this._installFitButtons();
         this._syncFitButton();
-		/*
+        /*
         if (this._metricsListNode) {
             this._metricsControl = new PostMetricListControl(
                 this._metricsListNode,
                 this._post
             );
         }
-        //this._loadSimilarPosts();
+			*/
+        this._loadSimilarPosts();
         //this._loadLookalikePosts();
-		*/
     }
 
     get _scoreContainerNode() {
@@ -263,12 +265,15 @@ class PostReadonlySidebarControl extends events.EventTarget {
     }
 
     _loadSimilarPosts() {
+        if (this._post.tags.length < 2) {
+            return;
+        }
         return PostList.search(
             "similar:" + this._post.id + " -id:" + this._post.id,
             0,
-            parseInt(settings.get().similarPosts),
+            similarPostCount,
             ["id", "thumbnailUrl"],
-			true
+            true
         ).then((response) => {
             if (response.results.length === 0) {
                 return;
@@ -289,7 +294,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
     }
 
     _loadLookalikePosts() {
-        const limit = parseInt(settings.get().similarPosts);
+        const limit = similarPostCount;
         const fields = ["id", "thumbnailUrl"];
         const threshold = 1;
         return PostList.reverseSearch(

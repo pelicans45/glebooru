@@ -4,8 +4,6 @@ WORKDIR /opt/app
 ARG PUID=1000
 ARG PGID=1000
 
-COPY requirements.txt /tmp/
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     libheif1 \
@@ -16,14 +14,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists
 
+COPY requirements.txt /tmp/
+
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
 RUN mkdir -p /opt/app /data \
     && addgroup --gid ${PGID} app \
-    #&& adduser -SDH -h /opt/app -g '' -G app -u ${PUID} app \
     && useradd -u ${PUID} -g app -d /opt/app app \
-    #&& adduser app app \
     && chown -R app:app /opt/app /data
 
 COPY . ./
@@ -37,5 +35,6 @@ EXPOSE ${PORT}
 ARG THREADS=4
 ENV THREADS=${THREADS}
 
-CMD ["/opt/app/docker-start.sh"]
+#CMD ["/opt/app/docker-start.sh"]
+CMD ["/opt/app/app.py"]
 VOLUME ["/data"]

@@ -35,7 +35,7 @@ def _create_if_needed(tag_names: List[str], user: model.User) -> None:
         snapshots.create(tag, user)
 
 
-@rest.routes.get("/tags/?")
+@rest.routes.get("/tags/?(all)?")
 def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
     return _search_executor.execute_and_serialize(
@@ -43,12 +43,14 @@ def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     )
 
 
+"""
 @rest.routes.get("/tags/all")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
     return _search_executor.execute_and_serialize(
         ctx, lambda tag: _serialize(ctx, tag)
     )
+"""
 
 # relevant to:
 # - a given tag
@@ -168,7 +170,21 @@ def get_tag_siblings(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:view")
     tag = _get_tag(params)
-    result = tags.get_tag_siblings(tag)
+    result = tags.get_tag_siblings(tag, limit=50)
+    serialized_siblings = []
+    for sibling, occurrences in result:
+        serialized_siblings.append(
+            {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
+        )
+    return {"results": serialized_siblings}
+
+@rest.routes.get("/tag-siblings/lens/(?P<tag_name>.+)")
+def get_lens_tag_siblings(
+    ctx: rest.Context, params: Dict[str, str]
+) -> rest.Response:
+    auth.verify_privilege(ctx.user, "tags:view")
+    tag = _get_tag(params)
+    result = tags.get_tag_siblings(tag, limit=5000)
     serialized_siblings = []
     for sibling, occurrences in result:
         serialized_siblings.append(

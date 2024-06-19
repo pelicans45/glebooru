@@ -3,10 +3,8 @@ const TagAutoCompleteControl = require("./tag_auto_complete_control.js");
 
 class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
-        console.log("postslisttagautocompletecontrol");
         super(input, options);
 
-        console.log("options", options);
         this._valueEntered = false;
 
         this._sourceInputNode.addEventListener("focus", (e) => {
