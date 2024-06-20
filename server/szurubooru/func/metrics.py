@@ -271,5 +271,3 @@ def update_or_create_post_metric_ranges(
 def delete_metric(metric: model.Metric) -> None:
     # assert metric
     db.session.delete(metric)
-    # assert metric
-    db.session.delete(metric)

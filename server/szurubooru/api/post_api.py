@@ -4,6 +4,8 @@ from datetime import datetime
 from math import ceil
 from typing import Dict, List, Optional
 
+import sqlalchemy as sa
+
 from szurubooru import db, errors, model, rest, search
 from szurubooru.func import (
     auth,
@@ -190,16 +192,20 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.commit()
     return _serialize_post(ctx, post)
 
+post_select_statement = sa.text("select * from post where id = :id")
 
 @rest.routes.delete("/post/(?P<post_id>[^/]+)/?")
 def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:delete")
-    post = _get_post(params)
+    #post = _get_post(params)
+    post_id = int(params["post_id"])
+    post = ctx.session.query(model.Post).from_statement(post_select_statement).params(id=post_id).first()
     versions.verify_version(post, ctx)
     snapshots.delete(post, ctx.user)
-    posts.delete(post)
+    #posts.delete(post)
+    ctx.session.delete(post)
     ctx.session.commit()
-    logging.info("%s deleted post %d", ctx.user.name, _get_post_id(params))
+    logging.info("%s deleted post %d", ctx.user.name, post_id)
     return {}
 
 
