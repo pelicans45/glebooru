@@ -7,7 +7,7 @@
         display: flex
         align-content: flex-end
         flex-wrap: wrap
-        margin: 0 -1.5em
+        //margin: 0 -1.5em
         @media (max-width: 1000px)
             margin: 0 -1em
 
@@ -17,6 +17,7 @@
             display: inline-block
             text-align: left
             min-width: 8em
+            margin: 0 .2em .4em
             /*
             TODO: change?
             min-width: 10em
@@ -25,7 +26,7 @@
             &:not(.flexbox-dummy)
                 min-height: 8em
                 //height: 14vw
-                height: 14vmax
+                height: 16vmax
 
             .thumbnail-wrapper
                 display: inline-block
@@ -225,7 +226,7 @@
                 float: left
                 margin-right: 1em
     input
-        margin-bottom: 0.25em
+        //margin-bottom: 0.25em
         margin-right: 0.25em
     input[name=search-text]
         width: 25em
@@ -435,9 +436,9 @@
                 background-color: alpha(@background-color, 0.15)
 
     .icon-button
-        padding: 0.2em
+        padding: 0 0.2em
         margin-right: 0.25em
-        margin-bottom: 0.25em
+        margin-bottom: 0.15em
         i
             vertical-align: middle
     .icon-inline

@@ -28,7 +28,7 @@ body
     color: $text-color
     font-family: 'Open Sans', sans-serif
     font-size: 1em
-    line-height: 1.4
+    //line-height: 1.4
     @media (max-width: 800px)
         font-size: 0.875em
     @media (max-width: 1200px)
@@ -158,11 +158,11 @@ nav
 
     &.buttons
         margin: 1em 0
-        line-height: 2.3em
+        line-height: 2.6em
         vertical-align: middle
         ul
             li
-                display: inline-block
+                //display: inline-block
             li a
                 padding: 0 1.2em
             li:not(.active) a
@@ -184,7 +184,6 @@ nav
             text-align: right
             li
                 display: inline-block
-                float: left
                 a
                     padding: 0 1.5em
             #mobile-navigation-toggle
@@ -221,23 +220,20 @@ nav
 
 
         ul li
-            &[data-name=settings]
-                i.la
-                    font-size: 24px !important
-                    position: relative
-                    //top: 2px
-                    //left: 12px
-                    top: 0.125em
-                    //left: 0.5em
-                    left: 0.75em
-
             &[data-name=posts],
             &[data-name=upload]
-                i.la
-                    font-size: 32px
-                    position: relative
-                    top: 0.125em
+                float: left
 
+            &[data-name=settings]
+                i.la.la-cog
+                    font-size: 24px
+                    //top: 2px
+                    //left: 12px
+                    top: 0.100em
+                    //left: 0.75em
+
+            &[data-name=posts],
+            &[data-name=upload],
             &[data-name=account],
             &[data-name=register],
             &[data-name=login],
@@ -248,12 +244,10 @@ nav
             &[data-name=pools],
             &[data-name=comments],
             &[data-name=users]
-                float: none
-
                 i.la
                     font-size: 32px
                     position: relative
-                    top: 0.125em
+                    top: 0.160em
 
             &[data-name=home],
             &[data-name=register],
@@ -263,10 +257,10 @@ nav
         .thumbnail
             width: 1.5em
             height: 1.5em
-            margin: calc((2.3em - 1.5em) / 2)
-            margin-right: 0.6em
-            margin-left: calc(0.6em - 1.2em)
-            float: left
+            margin: 0 0.5em;
+            margin-left: .58em;
+            //margin-left: calc(0.6em - 1.2em)
+            //float: left
             @media (max-width: 1000px)
                 display: none
 
@@ -286,6 +280,7 @@ nav
                 &[data-name=login],
                 &[data-name=logout],
                 &[data-name=account],
+                &[data-name=settings],
                 &[data-name=help]
                     &:not(.active) a
                         background: $extra-nav-link-background-color
