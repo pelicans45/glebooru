@@ -207,7 +207,7 @@ class PostUploadView extends events.EventTarget {
             this._tagControl = new TagInputControl(
                 this._tagInputNode,
                 tagList,
-                "Add tags (optional)"
+                "(optional) enter a tag & press space"
             );
         }
     }

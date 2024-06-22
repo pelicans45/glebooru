@@ -35,6 +35,6 @@ EXPOSE ${PORT}
 ARG THREADS=4
 ENV THREADS=${THREADS}
 
-CMD ["/opt/app/docker-start.sh"]
-#CMD ["/opt/app/app.py"]
+#CMD ["/opt/app/docker-start.sh"]
+CMD ["/opt/app/app.py"]
 VOLUME ["/data"]

@@ -23,10 +23,8 @@ from szurubooru.func import (
     util,
 )
 from szurubooru.func.image_hash import NpMatrix
-
 from szurubooru.log import logger
 from szurubooru import config, db, errors, model, rest
-
 
 EMPTY_PIXEL = (
     b"\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00"
@@ -248,7 +246,7 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
-        if self.post.file_size < config.config["thumbnails"]["min_file_size"]:
+        if (self.post.type == "image" or self.post.type == "animation") and self.post.file_size < config.config["thumbnails"]["min_file_size"]:
             return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
 
@@ -713,7 +711,7 @@ def update_post_thumbnail(
 def generate_post_thumbnail(post: model.Post) -> None:
     # assert post
 
-    if post.file_size < config.config["thumbnails"]["min_file_size"]:
+    if (post.type == "image" or post.type == "animation") and post.file_size < config.config["thumbnails"]["min_file_size"]:
         return
 
     backup_path = get_post_thumbnail_backup_path(post)

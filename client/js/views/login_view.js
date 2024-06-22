@@ -23,6 +23,7 @@ class LoginView extends events.EventTarget {
 
         views.decorateValidator(this._formNode);
         this._userNameInputNode.setAttribute("pattern", vars.userNameRegex);
+		this._userNameInputNode.focus();
         this._passwordInputNode.setAttribute("pattern", vars.passwordRegex);
         this._formNode.addEventListener("submit", (e) => {
             e.preventDefault();

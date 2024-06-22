@@ -19,6 +19,7 @@ class RegistrationView extends events.EventTarget {
         );
         views.syncScrollPosition();
         views.decorateValidator(this._formNode);
+		this._userNameFieldNode.focus();
         this._formNode.addEventListener("submit", (e) => this._evtSubmit(e));
     }
 

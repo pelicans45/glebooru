@@ -205,7 +205,7 @@ class PostsPageView extends events.EventTarget {
             if (deleteFlipperNode) {
                 deleteFlipperNode.classList.toggle(
                     "delete",
-                    this._ctx.bulkEdit.markedForDeletion.some(
+                    this._ctx.bulkEdit.delete.some(
                         (x) => x.id == postId
                     )
                 );

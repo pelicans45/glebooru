@@ -1,7 +1,7 @@
 <div class='tag-input'>
     <div class='main-control'>
         <input type='text' placeholder='<%- ctx.tagsPlaceholder %>'/>
-        <button>Add</button>
+        <button style="display: none">Add</button>
     </div>
 
     <div class='tag-suggestions'>

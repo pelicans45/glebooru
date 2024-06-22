@@ -34,7 +34,7 @@ class PostContentControl {
         );
 
         hostNode
-            .querySelector(".post-content img.resize-listener")
+            .querySelector(".main-content")
             .addEventListener("click", (e) => {
                 if (!e.shiftKey) {
                     return;
