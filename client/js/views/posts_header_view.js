@@ -40,6 +40,10 @@ class BulkEditor extends events.EventTarget {
         return this._hostNode.querySelector(".close");
     }
 
+    get _submitLinkNode() {
+        return this._hostNode.querySelector("input[type=submit]");
+    }
+
     toggleOpen(state) {
         this._hostNode.classList.toggle("opened", state);
     }
@@ -125,6 +129,9 @@ class BulkTagEditor extends BulkEditor {
     _evtFormSubmit(e) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent("submit", { detail: {} }));
+		const node = this._submitLinkNode;
+		node.disabled = true;
+		node.value = "Tagging images..."
     }
 
     _evtOpenLinkClick(e) {
