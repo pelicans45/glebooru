@@ -252,19 +252,23 @@ class PostEditSidebarControl extends events.EventTarget {
             this._tagControl.addEventListener("change", (e) => {
                 this.dispatchEvent(new CustomEvent("change"));
                 this._syncExpanderTitles();
+				/*
                 this._post.removeMetricsWithoutTag();
                 if (this._metricControl) {
                     this._metricControl.refreshContent();
                 }
+				*/
             });
         }
 
+		/*
         if (this._metricControl) {
             this._metricControl.addEventListener("change", (e) => {
                 this.dispatchEvent(new CustomEvent("change"));
                 this._syncExpanderTitles();
             });
         }
+		*/
 
         if (this._noteTextareaNode) {
             this._noteTextareaNode.addEventListener("change", (e) =>

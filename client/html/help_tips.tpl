@@ -8,6 +8,7 @@ When viewing an image:
     <li>If you've searched for tags, these will navigate to other images matched by those tags</li>
     </ul>
 </li>
+<li>A dashed red background around a thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
 <li>The upload page supports folders and multiple files</li>
 <li>Use underscores when searching for tags containing spaces ("<code>concept art</code>" -> "<code>concept_art</code>")</li>
 <% for (const tip of ctx.tips) { %>

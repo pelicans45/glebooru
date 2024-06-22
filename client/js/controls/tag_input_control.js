@@ -95,7 +95,7 @@ class TagInputControl extends events.EventTarget {
 
         // dom
         const editAreaNode = template({
-            tagsPlaceholder: placeholder || "Add tags...",
+            tagsPlaceholder: placeholder || "add tags...",
         });
         this._editAreaNode = editAreaNode;
         this._tagInputNode = editAreaNode.querySelector("input");

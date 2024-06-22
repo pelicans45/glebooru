@@ -393,12 +393,11 @@ def get_post_count() -> int:
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
 
 
-get_post_query = db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id"))
+post_select_statement = sa.text("select * from post where id = :id")
 
 def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
-    #return db._engine.execute("select * from post where id = %s", (post_id,)).first()
-    #return db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id")).params(id=post_id).first()
-    return get_post_query.params(id=post_id).first()
+    return db.session.query(model.Post).from_statement(post_select_statement).params(id=post_id).first()
+    #return get_post_query.params(id=post_id).first()
 
     return (
         db.session.query(model.Post)

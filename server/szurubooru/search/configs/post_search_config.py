@@ -133,7 +133,7 @@ def _similar_filter(
     # subquery for tags of the given post (post id in criterion)
     tag_query = db.session.query(model.PostTag.tag_id)
     tag_query = filter_func_tag(tag_query, criterion, False)
-    tag_query = tag_query.subquery("source_tags")
+    tag_query = sa.select(tag_query.subquery("source_tags"))
 
     if negated:
         # negated query runs normally, doesn't apply sort

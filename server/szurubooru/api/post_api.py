@@ -126,11 +126,16 @@ def create_snapshots_for_post(
     for tag in new_tags:
         snapshots.create(tag, user)
 
+get_post_query = db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id"))
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")
 def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
-    auth.verify_privilege(ctx.user, "posts:view")
-    post = _get_post(params)
+    #auth.verify_privilege(ctx.user, "posts:view")
+    #post = _get_post(params)
+    post_id = int(params["post_id"])
+    post = get_post_query.params(id=post_id).first()
+    if not post:
+        raise posts.PostNotFoundError("Post %d not found." % post_id)
     return _serialize_post(ctx, post)
 
 
@@ -192,18 +197,15 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.commit()
     return _serialize_post(ctx, post)
 
-post_select_statement = sa.text("select * from post where id = :id")
-
 @rest.routes.delete("/post/(?P<post_id>[^/]+)/?")
 def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:delete")
-    #post = _get_post(params)
+    post = _get_post(params)
     post_id = int(params["post_id"])
-    post = ctx.session.query(model.Post).from_statement(post_select_statement).params(id=post_id).first()
     versions.verify_version(post, ctx)
     snapshots.delete(post, ctx.user)
-    #posts.delete(post)
-    ctx.session.delete(post)
+    posts.delete(post)
+    #ctx.session.delete(post)
     ctx.session.commit()
     logging.info("%s deleted post %d", ctx.user.name, post_id)
     return {}

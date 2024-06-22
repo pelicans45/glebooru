@@ -46,8 +46,8 @@ class TopNavigationController {
 
         if (
             !(
-                api.hasPrivilege("tags:list") &&
-                api.hasPrivilege("users:edit:self:name")
+                api.hasPrivilege("tags:list")// &&
+                //api.hasPrivilege("users:edit:self:name")
             )
         ) {
             topNavigation.hide("tags");

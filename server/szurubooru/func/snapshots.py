@@ -132,7 +132,7 @@ def modify(entity: model.Base, auth_user: Optional[model.User]) -> None:
     table = next(
         (
             cls
-            for cls in model.Base._decl_class_registry.values()
+            for cls in model.Base.registry._class_registry.values()
             if hasattr(cls, "__table__")
             and cls.__table__.fullname == entity.__table__.fullname
         ),

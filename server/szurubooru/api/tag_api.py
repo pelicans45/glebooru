@@ -35,7 +35,7 @@ def _create_if_needed(tag_names: List[str], user: model.User) -> None:
         snapshots.create(tag, user)
 
 
-@rest.routes.get("/tags/?(all)?")
+@rest.routes.get("/tags/?")
 def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
     return _search_executor.execute_and_serialize(
@@ -43,14 +43,12 @@ def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     )
 
 
-"""
 @rest.routes.get("/tags/all")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
     return _search_executor.execute_and_serialize(
         ctx, lambda tag: _serialize(ctx, tag)
     )
-"""
 
 # relevant to:
 # - a given tag
