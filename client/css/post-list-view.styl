@@ -264,8 +264,8 @@
     #randomize-button
         font-size: 24px
         cursor: pointer
-        color: lighten($main-color, 80%)
-        //color: $link-color
+        //color: lighten($main-color, 80%)
+        color: $link-color
         position: relative
         //top: 0.1em
         //bottom: 0.1em
@@ -274,10 +274,10 @@
         &.selected
             color: $main-color
             &:hover
-                color: darken($main-color, 10%)
+                color: darken($main-color, 10%) !important
 
         &:hover
-            color: lighten($main-color, 85%)
+            color: lighten($link-color, 15%) !important
 
     .append
         @media (max-width: 500px)

@@ -16,7 +16,7 @@ const scoreTemplate = views.getTemplate("score");
 const favTemplate = views.getTemplate("fav");
 const similarItemTemplate = views.getTemplate("similar-post-item");
 
-const similarPostCount = 10;
+const similarPostCount = 5;
 
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {
@@ -37,7 +37,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
             this._hostNode,
             template({
                 post: this._post,
-                tags: lens.excludeHostnameTag(this._post.tags),
+                tags: lens.excludeRedundantTags(this._post.tags),
                 enableSafety: vars.safetyEnabled,
                 canListPosts: api.hasPrivilege("posts:list"),
                 canEditPosts: api.hasPrivilege("posts:edit"),
@@ -265,7 +265,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
     }
 
     _loadSimilarPosts() {
-        if (this._post.tags.length < 2) {
+        if (this._post.tags.length < 3) {
             return;
         }
         return PostList.search(
@@ -273,6 +273,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
             0,
             similarPostCount,
             ["id", "thumbnailUrl"],
+            undefined,
             true
         ).then((response) => {
             if (response.results.length === 0) {

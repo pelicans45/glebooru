@@ -30,6 +30,14 @@ class PostMainController extends BasePostController {
                     return;
                 }
 
+				/*
+                //post.tags = lens.excludeRedundantTags(post.tags);
+                post.tags.splice(
+                    0,
+                    post.tags.length,
+                    ...lens.excludeRedundantTags(post.tags)
+                );
+				*/
                 this._post = post;
                 this._view = new PostMainView({
                     post: post,

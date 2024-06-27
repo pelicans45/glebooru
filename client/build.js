@@ -204,15 +204,15 @@ function bundleCss(domain, data) {
     const outputDir = `${outputPath}/${domain}/css`;
     const appStylesheet = `${outputDir}/app.css`;
 
-	let sourcemap = DEV ? {inline: true} : false;
+    let sourcemap = DEV ? { inline: true } : false;
 
     const css = stylus.render(readFile(mainStylesheet), {
         filename: mainStylesheet,
         sourcemap: sourcemap,
-		compress: true,
+        compress: true,
     });
 
-	fs.writeFileSync(appStylesheet, css);
+    fs.writeFileSync(appStylesheet, css);
 
     //let css = "";
     //for (const file of glob.sync("./css/**/*.styl")) {
@@ -308,8 +308,8 @@ function bundleAppJs(domain, b, compress, callback) {
     });
 }
 
-function bundleJs(domain) {
-    if (!process.argv.includes("--no-vendor-js")) {
+function bundleJs(domain, noVendor) {
+    if (!(process.argv.includes("--no-vendor-js") || noVendor)) {
         bundleVendorJs(domain, true);
     }
 
@@ -328,6 +328,10 @@ function bundleJs(domain) {
             console.info(`Built ${domain}`);
         });
     }
+}
+
+function bundleJsNoVendor(domain) {
+    bundleJs(domain, true);
 }
 
 const environment = DEV ? "development" : "production";
@@ -496,11 +500,11 @@ function watch() {
         });
     }
 
-	const options = {};
-	if (WATCH_POLL) {
-		options.usePolling = true;
-		console.log("Using polling");
-	}
+    const options = {};
+    if (WATCH_POLL) {
+        options.usePolling = true;
+        console.log("Using polling");
+    }
 
     chokidar.watch("./html/**/*.tpl", options).on("change", () => {
         try {
@@ -518,7 +522,7 @@ function watch() {
     });
     chokidar.watch("./js/**/*.js", options).on("change", () => {
         try {
-            bundleForAllDomains(bundleJs, emitReload);
+            bundleForAllDomains(bundleJsNoVendor, emitReload);
         } catch (e) {
             console.error(pe.render(e));
         }

@@ -31,7 +31,9 @@ Add the following to your hosts file:
 
 ```
 127.0.0.1 booru
+127.0.0.1 bagg
 127.0.0.1 bfilter
+127.0.0.1 bfilter2
 ```
 
 Run `./d` to start the development Docker containers. Pass `-w` to `./d` to live-recompile client-side files.

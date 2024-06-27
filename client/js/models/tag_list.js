@@ -1,7 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
-const config = require("../config.js");
+const vars = require("../vars.js");
 const tags = require("../tags.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");
@@ -14,10 +14,9 @@ let topRelevantMatches = null;
 class TagList extends AbstractList {
     static search(text, offset, limit, fields, all) {
         let path = "tags";
-		if (all) {
-			path += "/all";
-		}
-		path = "tags";
+        if (all) {
+            path = "all-tags";
+        }
         return api
             .get(
                 uri.formatApiLink(path, {
@@ -28,9 +27,11 @@ class TagList extends AbstractList {
                 }),
                 { noProgress: true },
                 (response) => {
-                    response.results = lens.hostnameFilterTags(
+                    /*
+                    response.results = lens.excludeRedundantTags(
                         response.results
                     );
+					*/
                 }
             )
             .then((response) => {
@@ -42,8 +43,8 @@ class TagList extends AbstractList {
             });
     }
 
-    static getAllRelevant() {
-        if (allRelevantTags) {
+    static getAllRelevant(refresh) {
+        if (allRelevantTags && !refresh) {
             return Promise.resolve(allRelevantTags);
         }
 
@@ -51,37 +52,35 @@ class TagList extends AbstractList {
             return this.search(
                 "sort:usages",
                 0,
-                //config.maxSuggestedResults,
                 5000,
                 ["names", "category", "usages"],
-				true,
+                true
             ).then((response) => {
                 allRelevantTags = response;
+                /*
+                allRelevantTags = Object.assign({}, response, {
+                    results: this.fromResponse(response.results),
+                });
+				*/
                 return Promise.resolve(allRelevantTags);
             });
         }
 
         return api
-            .get(
-				//lens
-                uri.formatApiLink("tag-siblings", lens.hostnameFilter),
-                { noProgress: true }
-                /*
-                (response) => {
-                    response.results = lens.hostnameFilterTags(
-                        response.results
-                    );
-
-                }
-				*/
-            )
+            .get(uri.formatApiLink("lens-siblings", lens.hostnameFilter), {
+                noProgress: true,
+            })
             .then((response) => {
                 for (const result of response.results) {
                     result.tag.usages = result.occurrences;
                 }
 
+                const results = lens.excludeRedundantTags(
+                    response.results.map((result) => result.tag)
+                );
+
                 allRelevantTags = Object.assign({}, response, {
-                    results: this.fromResponse(response.results),
+                    results: this.fromResponse(results),
                 });
 
                 return Promise.resolve(allRelevantTags);
@@ -102,27 +101,33 @@ class TagList extends AbstractList {
             }
 
             return Promise.resolve(
-                _tags
+                _tags.results
+                    .copy()
                     .filter((tag) => matchFunc(tag.names[0]))
                     .slice(offset, offset + limit)
             );
         });
     }
 
-    static getTopRelevantMatches() {
-        if (topRelevantMatches) {
+    static getTopRelevantMatches(refresh) {
+        if (topRelevantMatches && !refresh) {
             return Promise.resolve(topRelevantMatches);
         }
 
-        return this.getAllRelevant().then((response) => {
+        return this.getAllRelevant(refresh).then((response) => {
             topRelevantMatches = tags.tagListToMatches(
-                response.results.slice(0, config.maxSuggestedResults),
+                response.results.copy().slice(0, vars.maxSuggestedResults),
                 {
                     isTaggedWith: () => false,
                 }
             );
             return Promise.resolve(topRelevantMatches);
         });
+    }
+
+    static refreshRelevant() {
+        console.log("refreshing relevant tags");
+        this.getTopRelevantMatches(true);
     }
 
     findByName(testName) {
@@ -181,12 +186,6 @@ class TagList extends AbstractList {
         return this.filter((tag) => tag.metric);
     }
 }
-
-/*
-if (lens.isUniversal) {
-    TagList.search = TagList.apiSearch;
-}
-*/
 
 TagList._itemClass = Tag;
 TagList._itemName = "tag";

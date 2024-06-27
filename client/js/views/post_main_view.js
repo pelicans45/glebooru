@@ -90,12 +90,13 @@ class PostMainView {
             }
         };
 
-        keyboard.bind(["t", "e"], () => {
+        keyboard.bind(["t", "e"], (e) => {
             if (ctx.editMode) {
                 router.show(uri.formatClientLink("", ctx.post.id));
             } else {
                 router.show(uri.formatClientLink("", ctx.post.id, "edit"));
             }
+			e.preventDefault();
         });
         keyboard.bind(["a", "left"], showPreviousImage);
         keyboard.bind(["d", "right"], showNextImage);

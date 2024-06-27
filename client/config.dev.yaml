@@ -96,7 +96,8 @@ privileges:
     'user_tokens:delete:any':       administrator
     'user_tokens:delete:self':      regular
 
-    'posts:create:anonymous':       anonymous
+    #'posts:create':                 regular
+    'posts:create:anonymous':       regular
     'posts:create:identified':      regular
     'posts:list':                   anonymous
     'posts:reverse_search':         anonymous
@@ -109,7 +110,7 @@ privileges:
     'posts:edit:relations':         regular
     'posts:edit:safety':            power
     'posts:edit:source':            regular
-    'posts:edit:tags':              anonymous
+    'posts:edit:tags':              regular
     'posts:edit:thumbnail':         power
     'posts:feature':                administrator
     'posts:delete':                 moderator
@@ -123,7 +124,7 @@ privileges:
     # Can see new posts in gallery
     'posts:list:new':               anonymous
 
-    'tags:create':                  anonymous
+    'tags:create':                  regular
     'tags:edit:names':              power
     'tags:edit:category':           power
     'tags:edit:description':        power
@@ -167,7 +168,7 @@ privileges:
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
 
-    'comments:create':              anonymous
+    'comments:create':              regular
     'comments:delete:any':          moderator
     'comments:delete:own':          regular
     'comments:edit:any':            moderator
@@ -178,7 +179,7 @@ privileges:
 
     'snapshots:list':               power
 
-    'uploads:create':               anonymous
+    'uploads:create':               regular
     'uploads:use_downloader':       administrator
 
 ## ONLY SET THESE IF DEPLOYING OUTSIDE OF DOCKER

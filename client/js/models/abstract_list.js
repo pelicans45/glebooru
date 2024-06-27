@@ -100,6 +100,10 @@ class AbstractList extends events.EventTarget {
         return this;
     }
 
+	copy() {
+		return this.constructor.fromResponse(this.raw_data);
+	}
+
     filter(...args) {
         return this._list.filter(...args);
     }

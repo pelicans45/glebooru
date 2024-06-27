@@ -32,11 +32,11 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
         if (!val || /^ *sort:\S+ *$/.test(val)) {
             if (!this._valueEntered) {
                 this._show();
-                console.log("no value, no prev value");
+                //console.log("no value, no prev value");
                 return;
             }
 
-            console.log("no value, yes prev value");
+            //console.log("no value, yes prev value");
 
             this._activeResult = -1;
             this._setDefaultMatches();
@@ -45,6 +45,7 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
             return;
         }
 
+		//console.log("value entered");
         this._valueEntered = true;
     }
 }

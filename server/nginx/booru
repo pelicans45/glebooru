@@ -1,7 +1,7 @@
 #proxy_cache_path /var/cache/nginx_booru levels=1:2 keys_zone=main_cache:10m max_size=100m inactive=60m use_temp_path=off;
 
 server {
-    server_name jej.lol glegle.gallery bury.pink flube.supply spikedog.school yosho.io;
+    server_name jej.lol lole.meme glegle.gallery bury.pink flube.supply spikedog.school yosho.io;
     listen 80;
     client_max_body_size 40M;
     client_body_timeout 30s;

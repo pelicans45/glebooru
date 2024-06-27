@@ -53,10 +53,10 @@ const controllers = [
     require("./controllers/auth_controller.js"),
 
     require("./controllers/post_detail_controller.js"),
+    require("./controllers/pool_create_controller.js"),
     require("./controllers/pool_controller.js"),
     require("./controllers/pool_list_controller.js"),
     require("./controllers/pool_categories_controller.js"),
-    require("./controllers/pool_create_controller.js"),
 
     require("./controllers/user_controller.js"),
     require("./controllers/user_list_controller.js"),

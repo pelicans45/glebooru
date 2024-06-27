@@ -95,7 +95,7 @@ class TagInputControl extends events.EventTarget {
 
         // dom
         const editAreaNode = template({
-            tagsPlaceholder: placeholder || "enter a tag & press space",
+            tagsPlaceholder: placeholder || "add tags...",
         });
         this._editAreaNode = editAreaNode;
         this._tagInputNode = editAreaNode.querySelector("input");
@@ -155,6 +155,9 @@ class TagInputControl extends events.EventTarget {
 
         // add existing tags
         for (let tag of [...this.tags]) {
+			if (lens.isLensTag(tag)) {
+				continue
+			}
             const listItemNode = this._createListItemNode(tag);
             this._tagListNode.appendChild(listItemNode);
         }
@@ -343,16 +346,14 @@ class TagInputControl extends events.EventTarget {
         usagesNode.setAttribute("data-pseudo-content", tag.postCount);
         let removalLinkNode;
 
-        if (tag.names[0] !== lens.hostnameFilter) {
-            removalLinkNode = document.createElement("a");
-            removalLinkNode.classList.add("remove-tag");
-            removalLinkNode.setAttribute("href", "");
-            removalLinkNode.setAttribute("data-pseudo-content", "×");
-            removalLinkNode.addEventListener("click", (e) => {
-                e.preventDefault();
-                this.deleteTag(tag);
-            });
-        }
+        removalLinkNode = document.createElement("a");
+        removalLinkNode.classList.add("remove-tag");
+        removalLinkNode.setAttribute("href", "");
+        removalLinkNode.setAttribute("data-pseudo-content", "×");
+        removalLinkNode.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.deleteTag(tag);
+        });
 
         const listItemNode = document.createElement("li");
         if (removalLinkNode) {
@@ -361,6 +362,7 @@ class TagInputControl extends events.EventTarget {
         listItemNode.appendChild(tagLinkNode);
         listItemNode.appendChild(searchLinkNode);
         listItemNode.appendChild(usagesNode);
+
         for (let name of tag.names) {
             this._tagToListItemNode.set(name, listItemNode);
         }

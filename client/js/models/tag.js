@@ -7,10 +7,10 @@ const misc = require("../util/misc.js");
 
 class Tag extends events.EventTarget {
     constructor() {
-        const TagList = require("./tag_list.js");
-
+		const TagList = require("./tag_list.js");
         super();
         this._orig = {};
+		this.TagList = TagList;
 
         for (let obj of [this, this._orig]) {
             obj._suggestions = new TagList();
@@ -126,6 +126,7 @@ class Tag extends events.EventTarget {
                     },
                 })
             );
+			this.TagList.refreshRelevant();
             return Promise.resolve();
         });
     }

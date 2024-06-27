@@ -81,7 +81,7 @@
 .post-view .readonly-sidebar
     display: grid
 
-    .user
+    body:not(.rank-moderator, .rank-administrator) & .user
         display: none
 
     .la-download
@@ -135,7 +135,7 @@
             display: none
 
         .social
-            display: none
+            //display: none
 
             margin-top: 1em
             .score-container

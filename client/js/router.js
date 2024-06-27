@@ -143,7 +143,7 @@ class Route {
                         continue;
                     }
                     parameters["q"] = uri.unescapeParam(
-                        query.replace(/\+/g, "%20").replace(/:/g, "%3A")
+                        query.replace(/\+/g, "%20")//.replace(/:/g, "%3A")
                     );
 
                     for (let word of parts.slice(1)) {

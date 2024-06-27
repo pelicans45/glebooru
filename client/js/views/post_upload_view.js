@@ -200,15 +200,18 @@ class PostUploadView extends events.EventTarget {
 
         if (this._tagInputNode) {
             const tagList = new TagList();
+			/*
             if (lens.hostnameFilter) {
                 tagList.addByName(lens.hostnameFilter);
             }
+			*/
 
             this._tagControl = new TagInputControl(
                 this._tagInputNode,
                 tagList,
-                "(optional) enter a tag & press space"
+                "(optional) add tags..."
             );
+			this._tagInputNode.focus();
         }
     }
 

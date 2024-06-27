@@ -75,7 +75,7 @@
 
     <% if (ctx.post.relations.length) { %>
         <nav class='relations'>
-            <h1>Relations</h1>
+            <h2>Relations</h2>
             <ul><!--
                 --><% for (let post of ctx.post.relations) { %><!--
                     --><li><!--
@@ -89,7 +89,7 @@
     <% } %>
 
     <nav class='tags'>
-        <!-- <h1>Tags</h1> -->
+        <!-- <h2>Tags</h2> -->
         <% if (ctx.tags.length) { %>
             <ul class='compact-tags'><!--
                 --><% for (let tag of ctx.tags) { %><!--
@@ -125,20 +125,20 @@
 
     <% /* if (ctx.post.metrics.length + ctx.post.metricRanges.length) { %>
         <nav class='metrics'>
-            <h1>Metrics (<%- ctx.post.metrics.length + ctx.post.metricRanges.length %>)</h1>
+            <h2>Metrics (<%- ctx.post.metrics.length + ctx.post.metricRanges.length %>)</h2>
             <ul class='compact-post-metrics'></ul>
         </nav>
     <% } */ %>
 
     <% if (ctx.canViewSimilar) { %>
         <nav class='similar'>
-            <h1>Similar</h1>
+            <h2>Similar</h2>
             <ul></ul>
-            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id}) %>'>See more</a>
+            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id}) %>' style='display: block'>See more</a>
         </nav>
 
         <nav class='lookalikes'>
-            <h1>Lookalikes</h1>
+            <h2>Lookalikes</h2>
             <ul></ul>
         </nav>
     <% } %>

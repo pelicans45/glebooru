@@ -13,7 +13,8 @@ class PostsPageView extends events.EventTarget {
         super();
         this._ctx = ctx;
         this._hostNode = ctx.hostNode;
-        ctx.excludeHostnameTag = lens.excludeHostnameTag;
+        ctx.excludeRedundantTags = lens.excludeRedundantTags;
+        //ctx.needsTagsThreshold = lens.ctx.isUniversal ? 0 : 2;
         views.replaceContent(this._hostNode, template(ctx));
 
         this._postIdToPost = {};
@@ -205,9 +206,7 @@ class PostsPageView extends events.EventTarget {
             if (deleteFlipperNode) {
                 deleteFlipperNode.classList.toggle(
                     "delete",
-                    this._ctx.bulkEdit.delete.some(
-                        (x) => x.id == postId
-                    )
+                    this._ctx.bulkEdit.delete.some((x) => x.id == postId)
                 );
             }
         }

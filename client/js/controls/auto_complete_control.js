@@ -1,7 +1,7 @@
 "use strict";
 
 const views = require("../util/views.js");
-const config = require("../config.js");
+const vars = require("../vars.js");
 
 const KEY_TAB = 9;
 const KEY_RETURN = 13;
@@ -24,6 +24,7 @@ function _getSelectionStart(input) {
     return 0;
 }
 
+
 class AutoCompleteControl {
     constructor(sourceInputNode, options) {
         this._sourceInputNode = sourceInputNode;
@@ -32,7 +33,7 @@ class AutoCompleteControl {
             this._options,
             {
                 verticalShift: 2,
-                maxResults: config.maxSuggestedResults,
+                maxResults: vars.maxSuggestedResults,
                 getTextToFind: () => {
                     const value = sourceInputNode.value;
                     const start = _getSelectionStart(sourceInputNode);
@@ -53,7 +54,7 @@ class AutoCompleteControl {
     }
 
     hide() {
-        //window.clearTimeout(this._showTimeout);
+        window.clearTimeout(this._showTimeout);
         this._suggestionDiv.style.display = "none";
         this._isVisible = false;
     }
@@ -100,7 +101,6 @@ class AutoCompleteControl {
 
     _showOrHide() {
         const textToFind = this._options.getTextToFind();
-        //if (!textToFind || !textToFind.length) {
         if (!textToFind) {
             this.hide();
         } else {
@@ -143,7 +143,7 @@ class AutoCompleteControl {
     }
 
     _uninstall() {
-        //window.clearTimeout(this._showTimeout);
+        window.clearTimeout(this._showTimeout);
         document.body.removeChild(this._suggestionDiv);
     }
 
@@ -194,24 +194,20 @@ class AutoCompleteControl {
             e.stopImmediatePropagation();
             func();
         } else {
-            this._showOrHide();
-            /*
+            //this._showOrHide();
             window.clearTimeout(this._showTimeout);
             this._showTimeout = window.setTimeout(() => {
                 this._showOrHide();
-            }, 100);
-			*/
+            }, 0);
         }
     }
 
     _evtBlur(e) {
-        /*
         window.clearTimeout(this._showTimeout);
         window.setTimeout(() => {
             this.hide();
-        }, 50);
-		*/
-        this.hide();
+        }, 0);
+        //this.hide();
     }
 
     _evtFocus(e) {
@@ -249,6 +245,7 @@ class AutoCompleteControl {
     }
 
     _updateResults(textToFind) {
+        //console.log("update results");
         this._options.getMatches(textToFind).then((matches) => {
             const oldResults = this._results.slice();
             this._results = matches.slice(0, this._options.maxResults);
@@ -284,8 +281,8 @@ class AutoCompleteControl {
             const listItem = document.createElement("li");
             const link = document.createElement("a");
             link.innerHTML = resultItem.caption;
-            //link.setAttribute("href", "");
-            //link.setAttribute("data-key", resultItem.value);
+            link.setAttribute("href", "");
+            link.setAttribute("data-key", resultItem.value);
             link.addEventListener("mouseenter", (e) => {
                 e.preventDefault();
                 this._activeResult = resultIndexWorkaround;

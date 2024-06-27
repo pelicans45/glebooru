@@ -161,6 +161,9 @@ class Api extends events.EventTarget {
                         options
                     );
                     this.user = response;
+					if (this.user.rank) {
+						document.body.classList.add(`rank-${this.user.rank}`)
+					}
                     resolve();
                     this.dispatchEvent(new CustomEvent("login"));
                 },

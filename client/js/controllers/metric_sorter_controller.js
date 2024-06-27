@@ -130,6 +130,7 @@ class MetricSorterController {
             this._ctx.parameters.skips || 0,
             1,
             ["id"],
+			undefined,
 			true
         ).then((response) => {
             if (!response.results.length) {

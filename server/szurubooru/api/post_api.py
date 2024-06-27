@@ -18,9 +18,9 @@ from szurubooru.func import (
     serialization,
     similar,
     snapshots,
-    tags,
     versions,
 )
+from . import tag_api
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
@@ -45,7 +45,7 @@ def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Respo
 
 @rest.routes.get("/posts/?")
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    auth.verify_privilege(ctx.user, "posts:list")
+    #auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(
         ctx, lambda post: _serialize_post(ctx, post)
@@ -116,6 +116,8 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
             None if anonymous else ctx.user,
         )
     ctx.session.commit()
+    if tag_names:
+        tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
 
 
@@ -155,6 +157,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
                 ),
             ),
         )
+    new_tags = []
     if ctx.has_param("tags"):
         auth.verify_privilege(ctx.user, "posts:edit:tags")
         new_tags = posts.update_post_tags(post, ctx.get_param_as_string_list("tags"))
@@ -195,6 +198,8 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
+    if new_tags:
+        tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
 
 @rest.routes.delete("/post/(?P<post_id>[^/]+)/?")

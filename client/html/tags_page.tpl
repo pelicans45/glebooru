@@ -9,6 +9,13 @@
                         <a href='<%- ctx.formatClientLink('tags', {q: 'sort:name'}) %>'>Tag name</a>
                     <% } %>
                 </th>
+                <th class='usages'>
+                    <% if (ctx.parameters.q == 'sort:usages') { %>
+                        <a href='<%- ctx.formatClientLink('tags', {q: '-sort:usages'}) %>'>Usages</a>
+                    <% } else { %>
+                        <a href='<%- ctx.formatClientLink('tags', {q: 'sort:usages'}) %>'>Usages</a>
+                    <% } %>
+                </th>
                 <th class='implications'>
                     <% if (ctx.parameters.q == 'sort:implication-count') { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: '-sort:implication-count'}) %>'>Implications</a>
@@ -23,13 +30,6 @@
                         <a href='<%- ctx.formatClientLink('tags', {q: 'sort:suggestion-count'}) %>'>Suggestions</a>
                     <% } %>
                 </th>
-                <th class='usages'>
-                    <% if (ctx.parameters.q == 'sort:usages') { %>
-                        <a href='<%- ctx.formatClientLink('tags', {q: '-sort:usages'}) %>'>Usages</a>
-                    <% } else { %>
-                        <a href='<%- ctx.formatClientLink('tags', {q: 'sort:usages'}) %>'>Usages</a>
-                    <% } %>
-                </th>
                 <th class='creation-time'>
                     <% if (ctx.parameters.q == 'sort:creation-time') { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: '-sort:creation-time'}) %>'>Created</a>
@@ -39,10 +39,13 @@
                 </th>
             </thead>
             <tbody>
-                <% for (let tag of ctx.response.results) {
+                <%
+                for (let tag of ctx.response.results) {
+                    /*
                     if (ctx.hostnameExcludedTag(tag)) {
                         continue;
                     }
+                    */
                 %>
                     <tr>
                         <td class='names'>
@@ -52,6 +55,9 @@
                                 <% } %>
                             </ul>
                             <span class='tag-page-search'><a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>'><i class="la la-search"></i></a></span>
+                        </td>
+                        <td class='usages'>
+                            <a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>'><%- tag.postCount %></a>
                         </td>
                         <td class='implications'>
                             <% if (tag.implications.length) { %>
@@ -74,9 +80,6 @@
                             <% } else { %>
                                 -
                             <% } %>
-                        </td>
-                        <td class='usages'>
-                            <a href='<%- ctx.formatClientLink('posts', {q: tag.names[0]}) %>'><%- tag.postCount %></a>
                         </td>
                         <td class='creation-time'>
                             <%= ctx.makeRelativeTime(tag.creationTime) %>

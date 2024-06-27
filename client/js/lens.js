@@ -10,7 +10,7 @@ for (const [domain, data] of Object.entries(config.sites)) {
 const site = config.sites[location.hostname];
 
 if (!site) {
-    throw "Hostname error";
+    throw "Unable to load site data";
 }
 const name = site.name;
 
@@ -18,7 +18,13 @@ const universalHostname = vars.mainDomain;
 const isUniversal = location.hostname === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
-const excludedTags = new Set(getExcludedTags());
+let excludedTags = new Set(getExcludedTags());
+
+let siteExcludedTags = new Set();
+if (site.exclude && site.exclude.length) {
+    siteExcludedTags = new Set(site.exclude);
+}
+excludedTags = new Set([...excludedTags, ...siteExcludedTags]);
 
 function objectFlip(obj) {
     const ret = {};
@@ -57,13 +63,23 @@ function addHostnameFilter(text) {
     return text;
 }
 
-function excludeHostnameTag(tags) {
-    return tags.filter((tag) => tag.names[0] !== hostnameFilter);
+function isLensTag(tag) {
+    const name = tag.names[0];
+    return name === hostnameFilter || siteExcludedTags.has(name);
+}
+
+function excludeRedundantTags(tags) {
+    return tags.filter((tag) => {
+        const name = tag.names[0];
+        return name !== hostnameFilter && !siteExcludedTags.has(name);
+    });
 }
 
 function checkHostnameFilterRedirect(post) {
+    return;
+
     const tagNames = post.tagNames;
-    if (!tagNames) {
+    if (!tagNames || isUniversal) {
         return;
     }
 
@@ -118,6 +134,7 @@ module.exports = {
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
     hostnameFilterTags: hostnameFilterTags,
-    excludeHostnameTag: excludeHostnameTag,
+    excludeRedundantTags: excludeRedundantTags,
     isHostnameTagName: isHostnameTagName,
+	isLensTag,
 };

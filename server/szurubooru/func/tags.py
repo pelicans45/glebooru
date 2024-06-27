@@ -27,6 +27,9 @@ RESERVED_NAMES = {
     "tag-categories",
     "user",
     "users",
+    "api",
+    "discord",
+    "all",
 }
 
 

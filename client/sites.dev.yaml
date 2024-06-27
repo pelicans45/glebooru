@@ -8,9 +8,24 @@ booru:
   color: "#6a86ea"
   tips: []
 
-#bfilter:
-#  name: booru filter dev
-#  description: booru filter dev
-#  query: test
-#  color: "#6824dd"
-#  tips: [Extra site tip here]
+bagg:
+  name: booru aggregation dev
+  description: booru aggregation dev
+  query: agg
+  color: "#00ff00"
+
+bfilter:
+  name: booru filter dev
+  description: booru filter dev
+  query: filter1
+  exclude: [agg]
+  color: "#0000ff"
+  tips: [Extra site tip 1]
+
+bfilter2:
+  name: booru filter dev 2
+  description: booru filter dev 2
+  query: filter2
+  exclude: [agg]
+  color: "#ff0000"
+  tips: [Extra site tip 2]

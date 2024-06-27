@@ -17,8 +17,8 @@ const Post = require("../models/post.js");
 const fields = [
     "id",
     "thumbnailUrl",
-	"contentUrl",
-	"creationTime",
+    "contentUrl",
+    "creationTime",
     "type",
     "safety",
     "score",
@@ -45,7 +45,7 @@ class PostListController {
 
         this._ctx = ctx;
 
-		this._canSeeNewPosts = api.hasPrivilege("posts:list:new");
+        this._canSeeNewPosts = api.hasPrivilege("posts:list:new");
 
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
@@ -108,10 +108,11 @@ class PostListController {
                 .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
-        this._headerView.focusSearchInputIfSet();
-        this._headerView.toggleRandomizeButtonSelected(
-            this._ctx.parameters.q.includes("sort:random")
-        );
+        const random = this._ctx.parameters.q.includes("sort:random");
+        if (!random) {
+            this._headerView.focusSearchInputIfSet();
+        }
+        this._headerView.toggleRandomizeButtonSelected(random);
     }
 
     _evtTag(e) {
@@ -255,7 +256,7 @@ class PostListController {
                     limit,
                     fields,
                     this._ctx.parameters.r,
-					true, //this._canSeeNewPosts,
+                    true //this._canSeeNewPosts,
                 );
             },
             pageRenderer: (pageCtx) => {

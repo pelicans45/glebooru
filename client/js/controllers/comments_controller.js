@@ -40,6 +40,7 @@ class CommentsController {
                     offset,
                     limit,
                     fields,
+					undefined,
 					true
                 );
             },

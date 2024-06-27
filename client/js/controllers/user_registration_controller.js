@@ -15,7 +15,9 @@ class UserRegistrationController {
 
         if (!api.hasPrivilege("users:create:self")) {
             this._view = new EmptyView();
-            this._view.showError("Registration is closed.");
+            this._view.showError(
+                "Registration is closed. Join [our Discord](/discord) to request an account."
+            );
             return;
         }
 

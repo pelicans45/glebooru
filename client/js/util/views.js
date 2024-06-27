@@ -427,14 +427,15 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
+	const timeout = className === "error" ? 6000 : 2500;
     setTimeout(() => {
         wrapperNode.remove();
-    }, 2500);
+    }, timeout);
     return true;
 }
 
 function appendExclamationMark() {
-	const prefix = "! ERROR ! ";
+	const prefix = "** ERROR ** | ";
     if (!document.title.startsWith(prefix)) {
         document.oldTitle = document.title;
         document.title = `${prefix} ${document.title}`;

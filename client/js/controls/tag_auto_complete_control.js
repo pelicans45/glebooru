@@ -16,7 +16,8 @@ class TagAutoCompleteControl extends AutoCompleteControl {
             options
         );
 
-        if (lens.isUniversal) {
+        //if (lens.isUniversal) {
+        if (false) {
             options.getMatches = (text) => {
                 if (text.includes(":")) {
                     return Promise.resolve([]);
@@ -59,10 +60,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
                     ).then(
                         (response) =>
                             resolve(
-                                tags.tagListToMatches(
-                                    response.results,
-                                    this._options
-                                )
+                                tags.tagListToMatches(response, this._options)
                             ),
                         reject
                     );

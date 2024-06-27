@@ -13,6 +13,7 @@ const Post = require("../models/post.js");
 const Tag = require("../models/tag.js");
 const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
+const TagList = require("../models/tag_list.js");
 
 const genericErrorMessage =
     "One or more posts needs your attention; " +
@@ -27,7 +28,10 @@ class PostUploadController {
 
         if (!api.hasPrivilege("posts:create")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to upload posts.");
+            //const msg = "You don't have privileges to upload posts.";
+            const msg =
+                "An account is required to upload images. Join [our Discord](/discord) to request an account.";
+            this._view.showError(msg);
             return;
         }
 
@@ -61,12 +65,16 @@ class PostUploadController {
         this._view.disableForm();
         this._view.clearMessages();
         let anyFailures = false;
+        let hasTags = false;
 
         e.detail.uploadables
             .reduce(
                 (promise, uploadable) =>
-                    promise.then(() =>
-                        this._uploadSinglePost(
+                    promise.then(() => {
+                        if (uploadable.tags.length > 0) {
+                            hasTags = true;
+                        }
+                        return this._uploadSinglePost(
                             uploadable,
                             e.detail.skipDuplicates,
                             e.detail.alwaysUploadSimilar,
@@ -100,8 +108,8 @@ class PostUploadController {
                             if (e.detail.pauseRemainOnError) {
                                 return Promise.reject();
                             }
-                        })
-                    ),
+                        });
+                    }),
                 Promise.resolve()
             )
             .then(() => {
@@ -115,6 +123,9 @@ class PostUploadController {
                     misc.disableExitConfirmation();
                     const ctx = router.show(uri.formatClientLink(""));
                     ctx.controller.showSuccess("Uploaded.");
+                    if (hasTags) {
+                        TagList.refreshRelevant();
+                    }
                 },
                 (error) => {
                     this._view.showError(genericErrorMessage);
@@ -172,13 +183,22 @@ class PostUploadController {
                         searchResult.similarPosts.length &&
                         !alwaysUploadSimilar
                     ) {
-                        let error = new Error(
-                            `Found ${searchResult.similarPosts.length} similar ` +
-                                "posts.\nYou can resume or discard this upload."
-                        );
-                        error.uploadable = uploadable;
-                        error.similarPosts = searchResult.similarPosts;
-                        return Promise.reject(error);
+                        let similarFound = false;
+                        for (const similarPost of searchResult.similarPosts) {
+                            if (parseFloat(similarPost.distance) < 0.05) {
+                                similarFound = true;
+                                break;
+                            }
+                        }
+                        if (similarFound) {
+                            const error = new Error(
+                                `Found ${searchResult.similarPosts.length} similar ` +
+                                    "posts.\nYou can resume or discard this upload."
+                            );
+                            error.uploadable = uploadable;
+                            error.similarPosts = searchResult.similarPosts;
+                            return Promise.reject(error);
+                        }
                     } else if (uploadable.foundOriginal) {
                         return this._copyTagsToOriginalAndSave(
                             uploadable,
@@ -250,7 +270,7 @@ class PostUploadController {
             uploadable.tags.unshift(lens.hostnameFilter);
         }
 
-        for (let tagName of uploadable.tags) {
+        for (const tagName of uploadable.tags) {
             const tag = new Tag();
             tag.names = [tagName];
             post.tags.add(tag);

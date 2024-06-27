@@ -1,10 +1,13 @@
 <% if (ctx.postFlow) { %><div class='post-list post-flow'><% } else { %><div class='post-list'><% } %>
     <% if (ctx.response.results.length) { %>
         <ul>
-            <% for (let post of ctx.response.results) { %>
+            <%
+            for (let post of ctx.response.results) {
+                const postTags = ctx.excludeRedundantTags(post.tags);
+            %>
                 <li data-post-id='<%= post.id %>'>
-                    <a class='thumbnail-wrapper <%= post.tags.length > 1 ? "tags" : "no-tags" %>'
-                            title='<%- ctx.excludeHostnameTag(post.tags).map(tag => tag.names[0]).join(' ') || '(no tags)' %>'
+                    <a class='thumbnail-wrapper <%= postTags.length > 2 ? "tags" : "no-tags" %>'
+                            title='<%- postTags.map(tag => tag.names[0]).join(' ') || '(no tags)' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
                         <span class='type' data-type='<%- post.type %>'>

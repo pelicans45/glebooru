@@ -9,13 +9,23 @@
     </thead>
     <tbody>
         <tr>
-            <td><kbd>Q</kbd></td>
+            <td><kbd>Q</kbd> or <kbd>/</kbd></td>
             <td>Focus search bar</td>
         </tr>
 
         <tr>
             <td><kbd>Tab</kbd></td>
-            <td>Select first tag suggestion</td>
+            <td>Insert first tag suggestion</td>
+        </tr>
+
+        <tr>
+            <td><kbd>↑</kbd> and <kbd>↓</kbd></td>
+            <td>Cycle through tag suggestions</td>
+        </tr>
+
+        <tr>
+            <td><kbd>Enter</kbd></td>
+            <td>Insert selected tag suggestion</td>
         </tr>
 
         <tr>

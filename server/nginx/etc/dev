@@ -3,7 +3,7 @@ upstream client {
 }
 
 server {
-    server_name booru bfilter;
+    server_name booru bagg bfilter bfilter2;
     listen 4000;
     client_max_body_size 40M;
     client_body_timeout 30s;

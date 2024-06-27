@@ -73,7 +73,7 @@ a
     //&:focus
     //    outline: 2px solid $main-color
     &:hover
-        color: lighten($link-color, 20%)
+        color: lighten($link-color, 15%) !important
     .vim-nav-hint
         position: absolute
         visibility: hidden
@@ -286,9 +286,11 @@ nav
                         background: $extra-nav-link-background-color
                         color: $extra-nav-link-color !important
 
+                        /*
                         &:hover
                             background: lighten($extra-nav-link-background-color, 20%)
                             color: lighten($extra-nav-link-color, 20%) !important
+                        */
 
 .darktheme nav
     &.buttons
