@@ -84,10 +84,10 @@
 
             <li>
                 <%= ctx.makeCheckbox({
-                    text: 'Always show navbar',
+                    text: 'Sticky navigation bar',
                     name: 'navbar-follow',
                     checked: ctx.browsingSettings.navbarFollow,
-                    title: 'Show the navbar at the top of the screen when scrolling',
+                    title: 'Keep the navigation bar at the top of the screen when scrolling down',
                 }) %>
             </li>
 

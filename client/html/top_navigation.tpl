@@ -1,17 +1,33 @@
 <nav id='top-navigation' class='buttons'><!--
-    --><ul><!--
-        --><button id="mobile-navigation-toggle"><!--
-            --><span class="site-name"><%- ctx.name %></span><!--
-            --><span class="toggle-icon"><i class="la la-bars"></i></span><!--
-        --></button><!--
+    --><button id="mobile-navigation-toggle"><!--
+        --><span class="site-name"><%- ctx.name %></span><!--
+        --><span class="toggle-icon"><i class="la la-bars"></i></span><!--
+    --></button><!--
+    --><ul id="nav-left" class="nav-bar"><!--
         --><% for (let item of ctx.items) { %><!--
-            --><% if (item.available) { %><!--
-                --><li data-name='<%- item.key %>'><!--
-                    --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
-                        --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                        --><span class='text'><%= item.text %></span><!--
-                    --></a><!--
-                --></li><!--
+            --><% if (item.direction === "left") { %><!--
+                --><% if (item.available) { %><!--
+                    --><li data-name='<%- item.key %>'><!--
+                        --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
+                            --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
+                            --><span class='text'><%= item.text %></span><!--
+                        --></a><!--
+                    --></li><!--
+                --><% } %><!--
+            --><% } %><!--
+        --><% } %><!--
+    --></ul><!--
+    --><ul id="nav-right" class="nav-bar"><!--
+        --><% for (let item of ctx.items) { %><!--
+            --><% if (item.direction === "right") { %><!--
+                --><% if (item.available) { %><!--
+                    --><li data-name='<%- item.key %>'><!--
+                        --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
+                            --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
+                            --><span class='text'><%= item.text %></span><!--
+                        --></a><!--
+                    --></li><!--
+                --><% } %><!--
             --><% } %><!--
         --><% } %><!--
     --></ul><!--

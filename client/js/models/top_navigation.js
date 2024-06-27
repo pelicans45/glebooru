@@ -4,11 +4,12 @@ const events = require("../events.js");
 const lens = require("../lens.js");
 
 class TopNavigationItem {
-    constructor(accessKey, title, text, url, available, imageUrl) {
+    constructor(accessKey, title, text, url, direction, available, imageUrl) {
         this.accessKey = accessKey;
         this.title = title;
         this.text = text;
         this.url = url;
+        this.direction = direction;
         this.available = available === undefined ? true : available;
         this.imageUrl = imageUrl === undefined ? null : imageUrl;
         this.key = null;
@@ -80,7 +81,13 @@ function _makeTopNavigation() {
     //ret.add("home", new TopNavigationItem("M", "Home", "home"));
     ret.add(
         "posts",
-        new TopNavigationItem("G", "Gallery", "<i class='la la-th'></i>", "")
+        new TopNavigationItem(
+            "G",
+            "Gallery",
+            "<i class='la la-th'></i>",
+            null,
+            "left"
+        )
     );
     ret.add(
         "upload",
@@ -88,7 +95,8 @@ function _makeTopNavigation() {
             "U",
             "Upload",
             "<i class='la la-cloud-upload'></i>",
-            "upload"
+            "upload",
+            "left"
         )
     );
     ret.add(
@@ -97,7 +105,8 @@ function _makeTopNavigation() {
             "T",
             "Tags",
             "<i class='la la-tags'></i>",
-            "tags"
+            "tags",
+            "right"
         )
     );
     ret.add(
@@ -106,7 +115,8 @@ function _makeTopNavigation() {
             "C",
             "Comments",
             "<i class='la la-comments'></i>",
-            "comments"
+            "comments",
+            "right"
         )
     );
 
@@ -116,7 +126,8 @@ function _makeTopNavigation() {
             "P",
             "Pools",
             "<i class='la la-icons'></i>",
-            "pools"
+            "pools",
+            "right"
         )
     );
     ret.add(
@@ -125,7 +136,8 @@ function _makeTopNavigation() {
             null,
             "Users",
             "<i class='la la-users'></i>",
-            "users"
+            "users",
+            "right"
         )
     );
     ret.add(
@@ -134,7 +146,8 @@ function _makeTopNavigation() {
             "R",
             "Register",
             "<i class='la la-user-plus'></i>",
-            "register"
+            "register",
+            "right"
         )
     );
     ret.add(
@@ -143,7 +156,8 @@ function _makeTopNavigation() {
             "L",
             "Login",
             "<i class='la la-sign-in'></i>",
-            "login"
+            "login",
+            "right"
         )
     );
     ret.add(
@@ -152,7 +166,8 @@ function _makeTopNavigation() {
             null,
             "Logout",
             "<i class='la la-sign-out'></i>",
-            "logout"
+            "logout",
+            "right"
         )
     );
     ret.add(
@@ -161,17 +176,22 @@ function _makeTopNavigation() {
             "H",
             "Help",
             "<i class='la la-info'></i>",
-            "help"
+            "help",
+            "right"
         )
     );
-    ret.add("account", new TopNavigationItem("A", "Account", "", "user/{me}"));
+    ret.add(
+        "account",
+        new TopNavigationItem("A", "Account", "", "user/{me}", "right")
+    );
     ret.add(
         "settings",
         new TopNavigationItem(
             null,
             "Settings",
             "<i class='la la-cog'></i>",
-            "settings"
+            "settings",
+            "right"
         )
     );
     return ret;

@@ -48,6 +48,8 @@ h1
 h2
     font-size: 1.5em
 
+.setting
+    cursor: help
 p,
 ol,
 ul
@@ -89,10 +91,16 @@ form .la-question-circle-o
     font-size: 24px
     vertical-align: middle
 
-#top-navigation-holder.follow-scroll
-    position: sticky
+#top-navigation-holder
+    position: relative
+    opacity: .95
     top: 0
-    z-index: 9999999999
+    z-index: 1000
+    @media (max-width: 1000px) {
+        height: 30px
+    }
+    &.follow-scroll
+        position: sticky
 
 #content-holder
     padding: 1.5em
@@ -108,7 +116,9 @@ form .la-question-circle-o
             margin-top: 0
         nav.buttons
             ul
-                display: block
+                display: flex
+                @media (max-width: 1000px)
+                    flex-direction: column
                 max-width: 100%
                 white-space: nowrap
                 overflow-x: auto
@@ -140,7 +150,37 @@ hr
 .darktheme hr
     border-top: 1px solid darken($line-color, 25%)
 
+#top-navigation
+    display: flex
+    flex-direction: row
+    height: 40px
+    @media (max-width: 1000px)
+        position: absolute
+        flex-direction: column
+        align-items: flex-end
+        height: unset
+        right: 0
+        width: 100%
+        //background: $window-color-darktheme !important
 nav
+    .nav-bar
+        display: flex
+        height: 100%
+        width: 50%
+        margin: 0
+        z-index: 2000
+        background: #171717
+        @media (max-width: 1000px)
+            &.opened
+                width: max-content
+                flex-direction: column
+                background-color: $window-color-darktheme
+                opacity: .96
+            &:not(.opened)
+                display: none
+    #nav-right
+        justify-content: flex-end
+
     ul
         list-style-type: none
         padding: 0
@@ -151,20 +191,17 @@ nav
             padding: 0
             margin: 0
             a
-                display: inline-block
             img
                 margin: 0
                 vertical-align: top /* fix ghost margin under the image */
 
     &.buttons
-        margin: 1em 0
-        line-height: 2.6em
-        vertical-align: middle
         ul
             li
                 //display: inline-block
             li a
                 padding: 0 1.2em
+                height: 100%
             li:not(.active) a
                 color: $inactive-tab-text-color
             li:hover:not(.active) a
@@ -177,61 +214,41 @@ nav
                 outline: 0
 
     &#top-navigation
-        background: $top-navigation-color
         margin: 0
+        #mobile-navigation-toggle
+            display: none
+            width: 100%
+            padding: 0 1em
+            line-height: 2.3em
+            font-family: inherit
+            border: none
+            background: none
+            .site-name
+                display: block
+                float: left
+                max-width: 50vw
+                overflow: hidden
+                text-overflow: ellipsis
+            @media (max-width: 1000px)
+                display: flex
+                justify-content: space-between
+                background-color: #1a1a1a
+                padding-right: 1em
+            .toggle-icon
+                margin-right: 1em
         ul
-            display: block
-            text-align: right
             li
-                display: inline-block
                 a
                     padding: 0 1.5em
-            #mobile-navigation-toggle
-                display: none
-                width: 100%
-                padding: 0 1em
-                line-height: 2.3em
-                font-family: inherit
-                border: none
-                background: none
-                color: $active-tab-text-color
-                .site-name
-                    display: block
-                    float: left
-                    max-width: 50vw
-                    overflow: hidden
-                    text-overflow: ellipsis
-                .toggle-icon
-                    display: block
-                    float: right
-            @media (max-width: 1000px)
-                text-align: left
-                li
-                    display: none
-                    float: none
-                    a
-                        display: block
-                        padding: 0 1em
-                #mobile-navigation-toggle
-                    display: block
-                &.opened
-                    li
-                        display: block
-
-
+                    display: flex
+                    align-items: center
+                    justify-content: center
         ul li
-            &[data-name=posts],
-            &[data-name=upload]
-                float: left
-
             &[data-name=settings]
                 i.la.la-cog
                     font-size: 24px
-                    //top: 2px
-                    //left: 12px
-                    top: 0.100em
-                    //left: 0.75em
-
+                    @media (max-width: 1000px)
+                        padding: 4px 0 4px 0
             &[data-name=posts],
             &[data-name=upload],
             &[data-name=account],
@@ -247,22 +264,18 @@ nav
                 i.la
                     font-size: 32px
                     position: relative
-                    top: 0.160em
 
             &[data-name=home],
             &[data-name=register],
             &[data-name=logout]
                 display: none
-
         .thumbnail
             width: 1.5em
             height: 1.5em
-            margin: 0 0.5em;
-            margin-left: .58em;
-            //margin-left: calc(0.6em - 1.2em)
-            //float: left
+            //margin: 0 0.5em;
+            //margin-left: .58em;
             @media (max-width: 1000px)
-                display: none
+                padding: 4px 0 4px 0
 
     @media (min-width: 1000px)
         &:not(.show-extra-nav-links)
@@ -290,6 +303,11 @@ nav
                             background: lighten($extra-nav-link-background-color, 20%)
                             color: lighten($extra-nav-link-color, 20%) !important
 
+nav.buttons&:not(#top-navigation)
+    ul
+        li
+            display: flex
+            line-height: 30px
 .darktheme nav
     &.buttons
         ul
@@ -305,7 +323,6 @@ nav
             :focus
                 background: $focused-tab-background-color-darktheme
     &#top-navigation
-        background: $top-navigation-color-darktheme
         ul
             #mobile-navigation-toggle
                 color: $text-color-darktheme
