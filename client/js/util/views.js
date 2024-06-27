@@ -97,12 +97,12 @@ function makeCheckbox(options) {
                     : false,
             disabled: options.readonly,
             required: options.required,
-            title: options.title,
         }),
         makeElement(
             "span",
             {
-                class: "checkbox " + (options.class || ""),
+                class: "setting checkbox" + (" " + options.class || ""),
+                title: options.title,
             },
             options.text
         )
@@ -444,7 +444,7 @@ function appendExclamationMark() {
 
 function showError(target, message) {
     appendExclamationMark();
-	console.error(message);
+    console.error(message);
     return showMessage(target, misc.formatInlineMarkdown(message), "error");
 }
 

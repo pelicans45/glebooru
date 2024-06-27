@@ -31,7 +31,7 @@
         -->
         <wbr/>
         <% if (ctx.canBulkEditTags) {
-            %><span class="bulk-edit-btn-holder"><%
+            %><span class="bulk-edit-btn-holder" title="Mass actions"><%
                 %><a class='mousetrap button append open bulk-edit-btn'><%
                     if (window.innerWidth <= 500) { %>Mass<%
                     } else { %>Mass edit<% }

@@ -80,14 +80,19 @@ function _makeTopNavigation() {
     //ret.add("home", new TopNavigationItem("M", "Home", "home"));
     ret.add(
         "posts",
-        new TopNavigationItem("G", "Gallery", "<i class='la la-th'></i>", "")
+        new TopNavigationItem(
+            "G",
+            "Gallery",
+            "<i class='la la-th left'></i>",
+            ""
+        )
     );
     ret.add(
         "upload",
         new TopNavigationItem(
             "U",
             "Upload",
-            "<i class='la la-cloud-upload'></i>",
+            "<i class='la la-cloud-upload left'></i>",
             "upload"
         )
     );
@@ -96,7 +101,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "T",
             "Tags",
-            "<i class='la la-tags'></i>",
+            "<i class='la la-tags right'></i>",
             "tags"
         )
     );
@@ -105,7 +110,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "C",
             "Comments",
-            "<i class='la la-comments'></i>",
+            "<i class='la la-comments right'></i>",
             "comments"
         )
     );
@@ -115,7 +120,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "P",
             "Pools",
-            "<i class='la la-icons'></i>",
+            "<i class='la la-icons right'></i>",
             "pools"
         )
     );
@@ -124,7 +129,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             null,
             "Users",
-            "<i class='la la-users'></i>",
+            "<i class='la la-users right'></i>",
             "users"
         )
     );
@@ -133,7 +138,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "R",
             "Register",
-            "<i class='la la-user-plus'></i>",
+            "<i class='la la-user-plus right'></i>",
             "register"
         )
     );
@@ -142,7 +147,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "L",
             "Login",
-            "<i class='la la-sign-in'></i>",
+            "<i class='la la-sign-in right'></i>",
             "login"
         )
     );
@@ -151,7 +156,7 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             null,
             "Logout",
-            "<i class='la la-sign-out'></i>",
+            "<i class='la la-sign-out right'></i>",
             "logout"
         )
     );
@@ -160,17 +165,20 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "H",
             "Help",
-            "<i class='la la-info'></i>",
+            "<i class='la la-info right'></i>",
             "help"
         )
     );
-    ret.add("account", new TopNavigationItem("A", "Account", "", "user/{me}"));
+    ret.add(
+        "account",
+        new TopNavigationItem("A", "Account", "right", "user/{me}")
+    );
     ret.add(
         "settings",
         new TopNavigationItem(
             null,
             "Settings",
-            "<i class='la la-cog'></i>",
+            "<i class='la la-cog right'></i>",
             "settings"
         )
     );
