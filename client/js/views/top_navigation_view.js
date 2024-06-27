@@ -31,12 +31,17 @@ class TopNavigationView {
         return this._hostNode.querySelector("#top-navigation");
     }
 
-    get _navigationListNode() {
-        return this._hostNode.querySelector("nav > ul");
+    get _navigationListNodes() {
+        return this._hostNode.querySelectorAll("nav > ul");
     }
 
     get _navigationLinkNodes() {
-        return this._navigationListNode.querySelectorAll("li > a");
+        let nodes = [];
+        this._navigationListNodes.forEach((element) => {
+            nodes.push(element.querySelectorAll("li > a"));
+        });
+
+        return nodes;
     }
 
     render(ctx) {
@@ -81,18 +86,24 @@ class TopNavigationView {
         );
 
         for (let navigationLinkNode of this._navigationLinkNodes) {
-            navigationLinkNode.addEventListener("click", (e) =>
-                this._navigationLinkClick(e)
-            );
+            navigationLinkNode.forEach((element) => {
+                element.addEventListener("click", (e) =>
+                    this._navigationLinkClick(e)
+                );
+            });
         }
     }
 
     _mobileNavigationToggleClick(e) {
-        this._navigationListNode.classList.toggle("opened");
+        this._navigationListNodes.forEach((nav) => {
+            nav.classList.toggle("opened");
+        });
     }
 
     _navigationLinkClick(e) {
-        this._navigationListNode.classList.remove("opened");
+        this._navigationListNodes.forEach((nav) => {
+            nav.classList.remove("opened");
+        });
     }
 
     _toggleExtraNavLinks(key) {

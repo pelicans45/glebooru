@@ -1,5 +1,13 @@
 @require colors
 
+.comments-container
+    margin-top: 25px;
+
+.comment-form-container
+    .comment-container
+        .comment
+            min-width: 45em
+
 .comment-container
     padding: 0 0 0 60px
 
@@ -19,7 +27,8 @@
 
     .comment
         border: 1px solid $comment-border-color
-
+        width: fit-content
+        max-width: 1000px
         header
             white-space: nowrap
             font-size: 95%
@@ -51,6 +60,8 @@
 
                 .date, .score-container, .edit
                     margin-right: 2em
+                .date
+                    margin-left: 4px
 
             .score-container, .link-container
                 display: inline-block

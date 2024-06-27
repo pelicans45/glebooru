@@ -18,11 +18,11 @@ const defaultSettings = {
     tagSuggestions: true,
     autoplayVideos: true,
     postsPerPage: 58,
-	similarPosts: 5,
+    similarPosts: 5,
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
     postFlow: false,
-	navbarFollow: false,
+    navbarFollow: true,
 };
 
 class Settings extends events.EventTarget {
@@ -34,7 +34,10 @@ class Settings extends events.EventTarget {
     _getFromLocalStorage() {
         let ret = Object.assign({}, defaultSettings);
         try {
-            Object.assign(ret, JSON.parse(localStorage.getItem(this._settingsKey)));
+            Object.assign(
+                ret,
+                JSON.parse(localStorage.getItem(this._settingsKey))
+            );
         } catch (e) {
             // continue regardless of error
         }
@@ -62,7 +65,7 @@ class Settings extends events.EventTarget {
 
     get _settingsKey() {
         //FIXME(hunternif): username is null if settings are accessed before api.loginFromCookies()
-        return "settings" //-" + api.userName;
+        return "settings"; //-" + api.userName;
     }
 }
 

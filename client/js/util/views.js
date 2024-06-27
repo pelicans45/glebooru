@@ -97,12 +97,12 @@ function makeCheckbox(options) {
                     : false,
             disabled: options.readonly,
             required: options.required,
-            title: options.title,
         }),
         makeElement(
             "span",
             {
-                class: "checkbox " + (options.class || ""),
+                class: "setting checkbox" + (" " + options.class || ""),
+                title: options.title,
             },
             options.text
         )
@@ -434,7 +434,7 @@ function showMessage(target, message, className) {
 }
 
 function appendExclamationMark() {
-	const prefix = "! ERROR ! ";
+    const prefix = "! ERROR ! ";
     if (!document.title.startsWith(prefix)) {
         document.oldTitle = document.title;
         document.title = `${prefix} ${document.title}`;
@@ -443,7 +443,7 @@ function appendExclamationMark() {
 
 function showError(target, message) {
     appendExclamationMark();
-	console.error(message);
+    console.error(message);
     return showMessage(target, misc.formatInlineMarkdown(message), "error");
 }
 
