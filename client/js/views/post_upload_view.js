@@ -211,7 +211,6 @@ class PostUploadView extends events.EventTarget {
                 tagList,
                 "(optional) add tags..."
             );
-			this._tagInputNode.focus();
         }
     }
 
@@ -250,7 +249,6 @@ class PostUploadView extends events.EventTarget {
 
     addUploadables(uploadables) {
         this._formNode.classList.remove("inactive");
-        this._tagInputNode.focus();
         let duplicatesFound = 0;
         for (let uploadable of uploadables) {
             uploadable.safety = this._ctx.defaultSafety || uploadable.safety;
@@ -278,6 +276,7 @@ class PostUploadView extends events.EventTarget {
             }
             alert(message);
         }
+		this._tagControl._tagInputNode.focus();
     }
 
     removeUploadable(uploadable) {

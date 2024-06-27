@@ -6,12 +6,11 @@
     --><ul id="nav-left" class="nav-bar"><!--
         --><% for (let item of ctx.items) { %><!--
             --><% if (item.text.includes("left")) { %><!--
-                --><% item.text.replace("left","left22") %><!--
                 --><% if (item.available) { %><!--
                     --><li data-name='<%- item.key %>'><!--
                         --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
                             --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                            --><span class='text'><%= item.text.replace("left","") %></span><!--
+                            --><span class='text'><%= item.text.replace("left", "") %></span><!--
                         --></a><!--
                     --></li><!--
                 --><% } %><!--
@@ -25,7 +24,7 @@
                     --><li data-name='<%- item.key %>'><!--
                         --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
                             --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                            --><span class='text'><%= item.text.replace("right","") %></span><!--
+                            --><span class='text'><%= item.text.replace("right", "") %></span><!--
                         --></a><!--
                     --></li><!--
                 --><% } %><!--

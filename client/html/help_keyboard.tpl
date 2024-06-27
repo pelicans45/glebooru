@@ -44,14 +44,16 @@
         </tr>
 
         <tr>
-            <td><kbd>T</kbd></td>
+            <td><kbd>T</kbd> or <kbd>E</kbd></td>
             <td>Add tags to image</td>
         </tr>
 
+        <!--
         <tr>
             <td><kbd>P</kbd></td>
             <td>Focus first image in list</td>
         </tr>
+        -->
 
         <tr>
             <td><kbd>Command/Ctrl+S</kbd></td>

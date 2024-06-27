@@ -8,6 +8,7 @@ When viewing an image:
     <li>If you've searched for tags before clicking the image, these will navigate to other images matched by those tags</li>
     </ul>
 </li>
+<li>To add tags when uploading or editing an image, type the tag name and press <code>Space</code> or <code>Enter</code>, or press <code>Tab</code> to insert the first suggestion, or use the arrow keys and <code>Enter</code> to insert a different suggestion</li>
 <li>An account is required to upload images and add tags - to request an account, join our <a href="/discord">Discord</a></li>
 <li>A dashed red background around a thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
 <li>The upload page supports folders and multiple files</li>
