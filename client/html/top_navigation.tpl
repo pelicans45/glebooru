@@ -5,12 +5,12 @@
     --></button><!--
     --><ul id="nav-left" class="nav-bar"><!--
         --><% for (let item of ctx.items) { %><!--
-            --><% if (item.text.includes("left")) { %><!--
+            --><% if (item.direction === "left") { %><!--
                 --><% if (item.available) { %><!--
                     --><li data-name='<%- item.key %>'><!--
                         --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
                             --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                            --><span class='text'><%= item.text.replace("left", "") %></span><!--
+                            --><span class='text'><%= item.text %></span><!--
                         --></a><!--
                     --></li><!--
                 --><% } %><!--
@@ -19,12 +19,12 @@
     --></ul><!--
     --><ul id="nav-right" class="nav-bar"><!--
         --><% for (let item of ctx.items) { %><!--
-            --><% if (item.text.includes("right")) { %><!--
+            --><% if (item.direction === "right") { %><!--
                 --><% if (item.available) { %><!--
                     --><li data-name='<%- item.key %>'><!--
                         --><a href='<%- item.url %>' title='<%- item.title %>' accesskey='<%- item.accessKey %>'><!--
                             --><% if (item.imageUrl) { print(ctx.makeThumbnail(item.imageUrl)); } %><!--
-                            --><span class='text'><%= item.text.replace("right", "") %></span><!--
+                            --><span class='text'><%= item.text %></span><!--
                         --></a><!--
                     --></li><!--
                 --><% } %><!--

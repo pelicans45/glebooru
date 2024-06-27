@@ -4,11 +4,12 @@ const events = require("../events.js");
 const lens = require("../lens.js");
 
 class TopNavigationItem {
-    constructor(accessKey, title, text, url, available, imageUrl) {
+    constructor(accessKey, title, text, url, direction, available, imageUrl) {
         this.accessKey = accessKey;
         this.title = title;
         this.text = text;
         this.url = url;
+        this.direction = direction;
         this.available = available === undefined ? true : available;
         this.imageUrl = imageUrl === undefined ? null : imageUrl;
         this.key = null;
@@ -83,8 +84,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "G",
             "Gallery",
-            "<i class='la la-th left'></i>",
-            ""
+            "<i class='la la-th'></i>",
+            null,
+            "left"
         )
     );
     ret.add(
@@ -92,8 +94,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "U",
             "Upload",
-            "<i class='la la-cloud-upload left'></i>",
-            "upload"
+            "<i class='la la-cloud-upload'></i>",
+            "upload",
+            "left"
         )
     );
     ret.add(
@@ -101,8 +104,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "T",
             "Tags",
-            "<i class='la la-tags right'></i>",
-            "tags"
+            "<i class='la la-tags'></i>",
+            "tags",
+            "right"
         )
     );
     ret.add(
@@ -110,8 +114,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "C",
             "Comments",
-            "<i class='la la-comments right'></i>",
-            "comments"
+            "<i class='la la-comments'></i>",
+            "comments",
+            "right"
         )
     );
 
@@ -120,8 +125,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "P",
             "Pools",
-            "<i class='la la-icons right'></i>",
-            "pools"
+            "<i class='la la-icons'></i>",
+            "pools",
+            "right"
         )
     );
     ret.add(
@@ -129,8 +135,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             null,
             "Users",
-            "<i class='la la-users right'></i>",
-            "users"
+            "<i class='la la-users'></i>",
+            "users",
+            "right"
         )
     );
     ret.add(
@@ -138,8 +145,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "R",
             "Register",
-            "<i class='la la-user-plus right'></i>",
-            "register"
+            "<i class='la la-user-plus'></i>",
+            "register",
+            "right"
         )
     );
     ret.add(
@@ -147,8 +155,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "L",
             "Login",
-            "<i class='la la-sign-in right'></i>",
-            "login"
+            "<i class='la la-sign-in'></i>",
+            "login",
+            "right"
         )
     );
     ret.add(
@@ -156,8 +165,9 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             null,
             "Logout",
-            "<i class='la la-sign-out right'></i>",
-            "logout"
+            "<i class='la la-sign-out'></i>",
+            "logout",
+            "right"
         )
     );
     ret.add(
@@ -165,21 +175,23 @@ function _makeTopNavigation() {
         new TopNavigationItem(
             "H",
             "Help",
-            "<i class='la la-info right'></i>",
-            "help"
+            "<i class='la la-info'></i>",
+            "help",
+            "right"
         )
     );
     ret.add(
         "account",
-        new TopNavigationItem("A", "Account", "right", "user/{me}")
+        new TopNavigationItem("A", "Account", "", "user/{me}", "right")
     );
     ret.add(
         "settings",
         new TopNavigationItem(
             null,
             "Settings",
-            "<i class='la la-cog right'></i>",
-            "settings"
+            "<i class='la la-cog'></i>",
+            "settings",
+            "right"
         )
     );
     return ret;

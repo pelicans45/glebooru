@@ -116,7 +116,9 @@ form .la-question-circle-o
             margin-top: 0
         nav.buttons
             ul
-                display: block
+                display: flex
+                @media (max-width: 1000px)
+                    flex-direction: column
                 max-width: 100%
                 white-space: nowrap
                 overflow-x: auto
