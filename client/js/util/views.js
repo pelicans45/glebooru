@@ -442,6 +442,7 @@ function appendExclamationMark() {
     }
 }
 
+
 function showError(target, message) {
     appendExclamationMark();
     console.error(message);

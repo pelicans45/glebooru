@@ -2,9 +2,9 @@
     <h1>#<%- ctx.post.id %></h1>
     <nav class='buttons'><!--
         --><ul><!--
-            --><li><a href='<%- ctx.formatClientLink('post', ctx.post.id) %>'><i class='la la-reply'></i> Main view</a></li><!--
+            --><li><a href='<%- ctx.formatClientLink('', ctx.post.id) %>'><i class='la la-reply'></i> Main view</a></li><!--
             --><% if (ctx.canMerge) { %><!--
-                --><li data-name='merge'><a href='<%- ctx.formatClientLink('post', ctx.post.id, 'merge') %>'>Merge with&hellip;</a></li><!--
+                --><li data-name='merge'><a href='<%- ctx.formatClientLink('', ctx.post.id, 'merge') %>'>Merge with&hellip;</a></li><!--
             --><% } %><!--
         --></ul><!--
     --></nav>

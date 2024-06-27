@@ -22,8 +22,14 @@ const defaultSettings = {
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
     postFlow: false,
-    navbarFollow: true,
+    navbarFollow: false,
 };
+
+const isMobile = "ontouchstart" in document.documentElement;
+
+if (isMobile) {
+    defaultSettings.navbarFollow = true;
+}
 
 class Settings extends events.EventTarget {
     constructor() {

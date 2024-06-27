@@ -173,7 +173,7 @@ privileges:
     'comments:delete:own':          regular
     'comments:edit:any':            moderator
     'comments:edit:own':            regular
-    'comments:list':                regular
+    'comments:list':                anonymous
     'comments:view':                anonymous
     'comments:score':               regular
 
