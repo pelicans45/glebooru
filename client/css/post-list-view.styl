@@ -7,10 +7,10 @@
         display: flex
         align-content: flex-end
         flex-wrap: wrap
-        //margin: 0 -1.5em
-        @media (max-width: 1000px)
-            margin: 0 -1em
-
+        @media (max-width: 100vh)
+            display: block !important;
+            column-width: 20vh !important;
+            column-gap: 2vmin !important;
         li
             position: relative
             flex-grow: 1
@@ -18,11 +18,13 @@
             text-align: left
             min-width: 8em
             margin: 0 .2em .4em
-            /*
-            TODO: change?
-            min-width: 10em
-            width: 12vw
-            */
+
+            @media (max-width: 100vh)
+                min-height: unset !important;
+                height: unset !important;
+                width: 100%;
+                margin: 0 0 2vmin;
+
             &:not(.flexbox-dummy)
                 min-height: 8em
                 //height: 14vw
@@ -219,7 +221,6 @@
         //margin-bottom: 0.75em
         margin-bottom: 1em
         @media (max-width: 1000px)
-            display: block
             &.bulk-edit-tags:not(.opened), &.bulk-edit-safety:not(.opened)
                 float: left
                 margin-right: 1em
@@ -233,7 +234,7 @@
         @media (max-width: 1000px)
             display: block
             width: 100%
-            margin-bottom: 0.5em
+            max-width: 25em
 
         transition: none
         caret-color: #989898

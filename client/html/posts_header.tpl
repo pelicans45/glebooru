@@ -15,14 +15,6 @@
             %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
         %><% } %><%
         %><% if (ctx.isLoggedIn) { %><%
-            %><a class='mousetrap icon-button query-shortcut' data-term='special:liked' title='Liked' style='display: none'><%
-                %><i class="la la-thumbs-up term-selected"></i><%
-                %><i class="lar la-thumbs-up term-unselected"></i><%
-            %></a><%
-            %><a class='mousetrap icon-button query-shortcut' data-term='special:fav' title='Favorited' style='display: none'><%
-                %><i class="la la-heart term-selected"></i><%
-                %><i class="lar la-heart term-unselected"></i><%
-            %></a><%
         %><% } %>
         <!--
         <wbr/>
