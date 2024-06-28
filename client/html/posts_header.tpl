@@ -3,6 +3,9 @@
         %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.q ? ctx.parameters.q.trim() + " " : "", placeholder: '\uf002'}) %><%
         %><wbr/><%
         %><!--<input class='mousetrap' type='submit' value='Search'/>--><%
+        %><span id='score-sort-button' class='icon-button' title="Sort by most liked"><%
+            %><i class="la la-thumbs-up"><%
+        %></span><%
         %><span title="Random sort" id='randomize-button' class='icon-button'><%
             %><i class="la la-random"><%
         %></span><%
@@ -12,14 +15,6 @@
             %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
         %><% } %><%
         %><% if (ctx.isLoggedIn) { %><%
-            %><a class='mousetrap icon-button query-shortcut' data-term='special:liked' title='Liked'><%
-                %><i class="la la-thumbs-up term-selected"></i><%
-                %><i class="lar la-thumbs-up term-unselected"></i><%
-            %></a><%
-            %><a class='mousetrap icon-button query-shortcut' data-term='special:fav' title='Favorited'><%
-                %><i class="la la-heart term-selected"></i><%
-                %><i class="lar la-heart term-unselected"></i><%
-            %></a><%
         %><% } %>
         <!--
         <wbr/>

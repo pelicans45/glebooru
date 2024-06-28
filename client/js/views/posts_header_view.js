@@ -129,16 +129,16 @@ class BulkTagEditor extends BulkEditor {
     _evtFormSubmit(e) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent("submit", { detail: {} }));
-		const node = this._submitLinkNode;
-		node.disabled = true;
-		node.value = "Tagging images..."
+        const node = this._submitLinkNode;
+        node.disabled = true;
+        node.value = "Tagging images...";
     }
 
     _evtOpenLinkClick(e) {
         e.preventDefault();
         this.toggleOpen(true);
         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
-		this.focusInput();
+        this.focusInput();
     }
 
     _evtCloseLinkClick(e) {
@@ -241,8 +241,12 @@ class PostsHeaderView extends events.EventTarget {
         this._formNode.addEventListener("submit", (e) =>
             this._evtFormSubmit(e)
         );
-        this._randomizeButtonNode.addEventListener("click", (e) =>
-            this._evtRandomizeButtonClick(e)
+        this._randomSortButtonNode.addEventListener("click", (e) =>
+            this._evtRandomSortButtonClick(e)
+        );
+
+        this._scoreSortButtonNode.addEventListener("click", (e) =>
+            this._evtScoreSortButtonClick(e)
         );
 
         for (let shortcut of this._shortcutButtonNodes) {
@@ -343,8 +347,21 @@ class PostsHeaderView extends events.EventTarget {
         }
     }
 
-    toggleRandomizeButtonSelected(selected) {
-        this._randomizeButtonNode.classList.toggle("selected", selected);
+    toggleButtonSelected(button, buttonState) {
+        switch (button) {
+            case "random":
+                this._randomSortButtonNode.classList.toggle(
+                    "selected",
+                    buttonState
+                );
+                break;
+            case "score":
+                this._scoreSortButtonNode.classList.toggle(
+                    "selected",
+                    buttonState
+                );
+                break;
+        }
     }
 
     focusQueryInput() {
@@ -363,8 +380,12 @@ class PostsHeaderView extends events.EventTarget {
         return this._hostNode.querySelector("form input[name=search-text]");
     }
 
-    get _randomizeButtonNode() {
+    get _randomSortButtonNode() {
         return this._hostNode.querySelector("#randomize-button");
+    }
+
+    get _scoreSortButtonNode() {
+        return this._hostNode.querySelector("#score-sort-button");
     }
 
     get _shortcutButtonNodes() {
@@ -546,15 +567,32 @@ class PostsHeaderView extends events.EventTarget {
         }
 		*/
     }
-    _evtRandomizeButtonClick(e) {
+    _evtRandomSortButtonClick(e) {
         e.preventDefault();
+        const sort = "sort:random";
         const query = this._queryInputNode.value.trim();
-        if (!this._queryInputNode.value.includes("sort:random")) {
+        if (!this._queryInputNode.value.includes(sort)) {
             const space = query ? " " : "";
-            this._queryInputNode.value = query + space + "sort:random ";
+            this._queryInputNode.value = query + space + `${sort} `;
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         // localStorage.r = this._ctx.parameters.r;
+        this._navigate();
+    }
+
+    _evtScoreSortButtonClick(e) {
+        e.preventDefault();
+        const sort = "sort:score";
+        const query = this._queryInputNode.value.trim();
+        if (!this._queryInputNode.value.includes(sort)) {
+            const space = query ? " " : "";
+            this._queryInputNode.value = query + space + `${sort} `;
+        } else {
+            this._queryInputNode.value = this._queryInputNode.value
+                .replace(` ${sort}`, "")
+                .replace(sort, "");
+        }
+        this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         this._navigate();
     }
 
