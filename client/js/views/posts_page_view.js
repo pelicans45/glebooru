@@ -5,6 +5,7 @@ const lens = require("../lens.js");
 const tags = require("../tags.js");
 const views = require("../util/views.js");
 const misc = require("../util/misc.js");
+const settings = require("../models/settings.js");
 
 const template = views.getTemplate("posts-page");
 
@@ -71,6 +72,17 @@ class PostsPageView extends events.EventTarget {
         }
 
         this._syncBulkEditorsHighlights();
+
+        const elements = this._hostNode.querySelectorAll(".post-list > ul");
+        elements.forEach((element) => {
+            if (!element.classList.contains("layout")) {
+                element.classList.add(
+                    settings.get().columnLayout
+                        ? "column-layout"
+                        : "default-layout"
+                );
+            }
+        });
     }
 
     get _listItemNodes() {

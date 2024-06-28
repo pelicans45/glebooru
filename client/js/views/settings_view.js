@@ -48,6 +48,7 @@ class SettingsView extends events.EventTarget {
                     darkTheme: this._find("dark-theme").checked,
                     postFlow: this._find("post-flow").checked,
                     navbarFollow: this._find("navbar-follow").checked,
+                    columnLayout: this._find("column-layout").checked,
                     uploadSafety: this._safetyButtonNodes.length
                         ? Array.from(this._safetyButtonNodes)
                               .filter((node) => node.checked)[0]

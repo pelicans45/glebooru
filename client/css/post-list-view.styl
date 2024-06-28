@@ -1,32 +1,37 @@
 @require colors
 
 .post-list
+    //@media (min-width: 1000px)
+    ul.default-layout
+        display: grid
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+        column-gap: 20px
+        li
+            display: flex
+            align-items: center
+            justify-content: center
+
+            margin-top: 5px
+            .thumbnail-wrapper
+                height: auto
+                width: unset
+            .thumbnail img
+                max-width: 200px
+                max-height: 200px
     ul
         list-style-type: none
         padding: 0
-        display: flex
-        align-content: flex-end
-        flex-wrap: wrap
-        //margin: 0 -1.5em
-        @media (max-width: 1000px)
-            margin: 0 -1em
-
+        column-width: 20vh
+        column-count: 6
         li
-            position: relative
-            flex-grow: 1
             display: inline-block
-            text-align: left
-            min-width: 8em
-            margin: 0 .2em .4em
-            /*
-            TODO: change?
-            min-width: 10em
-            width: 12vw
-            */
-            &:not(.flexbox-dummy)
-                min-height: 8em
-                //height: 14vw
-                height: 16vmax
+            position: relative
+            min-width: 100%
+            margin: .4em .2em
+            float: left
+
+            @media (max-width: 100vh)
+                margin: 0 0 2vmin;
 
             .thumbnail-wrapper
                 display: inline-block
@@ -42,7 +47,7 @@
                     position: absolute
                     bottom: 0.5em
                     padding: 0.33em 0.5em
-                    background: rgba(0,0,0,0.5)
+                    background: rgba(7, 6, 6, 0.5)
                     height: 1em
 
                 .type
@@ -183,14 +188,22 @@
                 .thumbnail
                     outline: 1.75px dashed $post-thumbnail-no-tags-border-color
 
-            &:hover
-                background: $post-thumbnail-border-color
                 .thumbnail
                     opacity: .9
 
             &:hover a, a:active, a:focus
                 .thumbnail
                     outline: 2px solid $main-color !important
+
+    ul.default-layout
+        li
+            a
+                &:hover
+                    background: $post-thumbnail-border-color
+    ul.column-layout
+        li
+            &:hover
+                background: $post-thumbnail-border-color
 
 .post-flow
     ul
@@ -219,7 +232,6 @@
         //margin-bottom: 0.75em
         margin-bottom: 1em
         @media (max-width: 1000px)
-            display: block
             &.bulk-edit-tags:not(.opened), &.bulk-edit-safety:not(.opened)
                 float: left
                 margin-right: 1em
@@ -233,7 +245,7 @@
         @media (max-width: 1000px)
             display: block
             width: 100%
-            margin-bottom: 0.5em
+            max-width: 25em
 
         transition: none
         caret-color: #989898
