@@ -124,6 +124,7 @@ class PostListController {
         Object.keys(selected).forEach((element) => {
             this._headerView.toggleButtonSelected(element, selected[element]);
         });
+		this._headerView._addQuerySpace();
     }
 
     _evtTag(e) {

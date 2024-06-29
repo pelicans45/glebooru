@@ -576,7 +576,6 @@ class PostsHeaderView extends events.EventTarget {
             this._queryInputNode.value = query + space + `${sort} `;
         }
         this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
-        // localStorage.r = this._ctx.parameters.r;
         this._navigate();
     }
 
@@ -592,8 +591,14 @@ class PostsHeaderView extends events.EventTarget {
                 .replace(` ${sort}`, "")
                 .replace(sort, "");
         }
-        this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
         this._navigate();
+    }
+
+    _addQuerySpace() {
+        const q = this._queryInputNode.value.trim();
+        if (q) {
+            this._queryInputNode.value = q + " ";
+        }
     }
 
     _navigate() {

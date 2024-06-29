@@ -15,11 +15,19 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
             this._displayDefaultMatches();
         });
 
+        this._sourceInputNode.addEventListener("keydown", (e) => {
+            if (e.keyCode === 8 && this._activeResult === -1 && !this._valueEntered) {
+                this._setDefaultMatches().then(() => {
+                    this._show();
+                });
+            }
+        });
+
         this._setDefaultMatches();
     }
 
     _setDefaultMatches() {
-        TagList.getTopRelevantMatches().then((results) => {
+        return TagList.getTopRelevantMatches().then((results) => {
             this._suggestionDiv.style.display = "none !important";
             this._results = results;
             this._refreshList();
@@ -32,20 +40,26 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
         if (!val || /^ *sort:\S+ *$/.test(val)) {
             if (!this._valueEntered) {
                 this._show();
-                //console.log("no value, no prev value");
                 return;
             }
 
-            //console.log("no value, yes prev value");
-
             this._activeResult = -1;
-            this._setDefaultMatches();
-            this._valueEntered = false;
-            this._show();
+            this._setDefaultMatches().then(() => {
+				this._valueEntered = false;
+                this._show();
+            });
+
+			/*
+			this._activeResult = -1;
+			this._setDefaultMatches();
+			this._valueEntered = false;
+			this._show();
+			*/
+
             return;
         }
 
-		//console.log("value entered");
+        //console.log("value entered");
         this._valueEntered = true;
     }
 }
