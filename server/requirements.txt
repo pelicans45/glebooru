@@ -16,5 +16,4 @@ SQLAlchemy==1.4.46
 youtube_dl
 setuptools
 waitress
-fastwsgi
 orjson
