@@ -64,7 +64,7 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
         post = posts.get_post_by_id(int(query_text))
         return _serialize_post(ctx, post)
 
-    query_text = "sort:random type:image " + query_text
+    query_text = "sort:random type:image,animation " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return ""
