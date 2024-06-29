@@ -98,10 +98,16 @@ class PostListController {
     }
 
     _evtNavigate(e) {
+		const params = e.detail.parameters;
+        if (params.r && !params.q.includes("sort:random")) {
+            params.r = null;
+        }
+
         this._ctx = router.showNoDispatch(
-            uri.formatPostsLink(e.detail.parameters)
+            uri.formatPostsLink(params)
         );
-        Object.assign(this._ctx.parameters, e.detail.parameters);
+
+        Object.assign(this._ctx.parameters, params);
         this._bulkEditTags.map((tagName) =>
             tags
                 .resolveTagAndCategory(tagName)
@@ -112,19 +118,19 @@ class PostListController {
             random: this._ctx.parameters.q.includes("sort:random"),
             score: this._ctx.parameters.q.includes("sort:score"),
         };
-        let sortIsSelected = false;
-        Object.keys(selected).forEach((element) => {
-            if (selected[element] === true) {
-                sortIsSelected = true;
-            }
-        });
-        if (!sortIsSelected) {
+
+        let buttonSort = false;
+        for (const [sortType, isSelected] of Object.entries(selected)) {
+			this._headerView.toggleButtonSelected(sortType, isSelected);
+        };
+
+		this._headerView._addQuerySpace();
+		this._headerView.focusSearchInputIfSet();
+		/*
+        if (!buttonSort) {
             this._headerView.focusSearchInputIfSet();
         }
-        Object.keys(selected).forEach((element) => {
-            this._headerView.toggleButtonSelected(element, selected[element]);
-        });
-        this._headerView._addQuerySpace();
+		*/
     }
 
     _evtTag(e) {

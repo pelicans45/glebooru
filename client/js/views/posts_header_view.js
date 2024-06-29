@@ -241,13 +241,15 @@ class PostsHeaderView extends events.EventTarget {
         this._formNode.addEventListener("submit", (e) =>
             this._evtFormSubmit(e)
         );
-        this._randomSortButtonNode.addEventListener("click", (e) =>
-            this._evtRandomSortButtonClick(e)
-        );
 
-        this._scoreSortButtonNode.addEventListener("click", (e) =>
-            this._evtScoreSortButtonClick(e)
-        );
+        this._randomSortButtonNode.addEventListener("click", (e) => {
+            this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
+            this._handleSortButtonClick(e, "random");
+        });
+
+        this._scoreSortButtonNode.addEventListener("click", (e) => {
+            this._handleSortButtonClick(e, "score");
+        });
 
         for (let shortcut of this._shortcutButtonNodes) {
             this._setupQueryShortcutButton(shortcut, ctx.parameters.q);
@@ -348,20 +350,11 @@ class PostsHeaderView extends events.EventTarget {
     }
 
     toggleButtonSelected(button, buttonState) {
-        switch (button) {
-            case "random":
-                this._randomSortButtonNode.classList.toggle(
-                    "selected",
-                    buttonState
-                );
-                break;
-            case "score":
-                this._scoreSortButtonNode.classList.toggle(
-                    "selected",
-                    buttonState
-                );
-                break;
-        }
+		const nodes = {
+			"random": this._randomSortButtonNode,
+			"score": this._scoreSortButtonNode
+		}
+		nodes[button].classList.toggle("selected", buttonState);
     }
 
     focusQueryInput() {
@@ -582,15 +575,28 @@ class PostsHeaderView extends events.EventTarget {
     _evtScoreSortButtonClick(e) {
         e.preventDefault();
         const sort = "sort:score";
-        const query = this._queryInputNode.value.trim();
+        let query = this._queryInputNode.value.trim();
         if (!this._queryInputNode.value.includes(sort)) {
-            const space = query ? " " : "";
-            this._queryInputNode.value = query + space + `${sort} `;
+            if (query) {
+                query += " ";
+            }
+            this._queryInputNode.value = `${query}${sort} `;
         } else {
             this._queryInputNode.value = this._queryInputNode.value
                 .replace(` ${sort}`, "")
                 .replace(sort, "");
         }
+        this._navigate();
+    }
+
+    _handleSortButtonClick(e, sort) {
+        e.preventDefault();
+        const query = this._queryInputNode.value.trim();
+        let modified = query.replaceAll(/ *sort:(random|score)/gi, "").trim();
+        if (sort === "random" || !query.includes(sort)) {
+            modified += ` sort:${sort} `;
+        }
+        this._queryInputNode.value = modified;
         this._navigate();
     }
 

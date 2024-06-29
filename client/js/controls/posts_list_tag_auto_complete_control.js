@@ -37,7 +37,8 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
 
     _displayDefaultMatches() {
         const val = this._sourceInputNode.value;
-        if (!val || /^ *sort:\S+ *$/.test(val)) {
+        //if (!val || /^ *sort:\S+ *$/.test(val)) {
+		if (!val) {
             if (!this._valueEntered) {
                 this._show();
                 return;
