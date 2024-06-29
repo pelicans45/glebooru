@@ -12,7 +12,7 @@ from szurubooru.func import (
 )
 
 TAG_LIST_CACHE = {}
-TAG_LIST_CACHE_EXPIRATION_SECONDS = 180
+TAG_LIST_CACHE_EXPIRATION_SECONDS = 600
 
 _search_executor = search.Executor(search.configs.TagSearchConfig())
 
@@ -66,12 +66,10 @@ def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
     return _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
 
-import logging
 @rest.routes.get("/all-tags/?")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     #auth.verify_privilege(ctx.user, "tags:list")
     cached = get_cached_tag_list("all")
-    logging.info("cached: %s", bool(cached))
     if cached:
         return cached
 
@@ -202,7 +200,7 @@ def get_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response
     return {"results": serialized_siblings}
 
 
-@rest.routes.get("/lens-siblings/(?P<tag_name>.+)")
+@rest.routes.get("/lens-tags/(?P<tag_name>.+)")
 def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     #auth.verify_privilege(ctx.user, "tags:view")
     tag_name = params["tag_name"]

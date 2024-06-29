@@ -75,16 +75,22 @@ class TagListController {
                 return uri.formatClientLink("tags", parameters);
             },
             requestPage: (offset, limit) => {
-                /*
-                if (!(lens.isUniversal || this._ctx.parameters.q)) {
-                    return TagList.getRelevant("", offset, limit);
+				const query = (this._ctx.parameters.q || "").trim();
+
+                if (!query) {
+                    return TagList.getAllRelevant().then((response) => {
+						const r = {};
+						r.results = response.results.copy().slice(offset, offset + limit);
+						r.total = r.results.length;
+						r.q = "";
+						r.limit = limit;
+						r.offset = offset;
+						return Promise.resolve(r);
+					});
                 }
-				*/
 
                 return TagList.search(
-                    this._ctx.parameters.q
-                        ? this._ctx.parameters.q.trim()
-                        : "sort:usages",
+                    query,
                     offset,
                     limit,
                     fields

@@ -11,6 +11,15 @@ const Tag = require("./tag.js");
 let allRelevantTags = null;
 let topRelevantMatches = null;
 
+const fields = [
+    "names",
+    "suggestions",
+    "implications",
+    "creationTime",
+    "usages",
+    "category",
+];
+
 class TagList extends AbstractList {
     static search(text, offset, limit, fields, all) {
         let path = "tags";
@@ -49,25 +58,21 @@ class TagList extends AbstractList {
         }
 
         if (lens.isUniversal) {
-            return this.search(
-                "sort:usages",
-                0,
-                5000,
-                ["names", "category", "usages"],
-                true
-            ).then((response) => {
-                allRelevantTags = response;
-                /*
+            return this.search("sort:usages", 0, 5000, fields, true).then(
+                (response) => {
+                    allRelevantTags = response;
+                    /*
                 allRelevantTags = Object.assign({}, response, {
                     results: this.fromResponse(response.results),
                 });
 				*/
-                return Promise.resolve(allRelevantTags);
-            });
+                    return Promise.resolve(allRelevantTags);
+                }
+            );
         }
 
         return api
-            .get(uri.formatApiLink("lens-siblings", lens.hostnameFilter), {
+            .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
                 noProgress: true,
             })
             .then((response) => {

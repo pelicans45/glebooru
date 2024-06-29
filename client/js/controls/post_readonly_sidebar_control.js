@@ -16,7 +16,7 @@ const scoreTemplate = views.getTemplate("score");
 const favTemplate = views.getTemplate("fav");
 const similarItemTemplate = views.getTemplate("similar-post-item");
 
-const similarPostCount = 5;
+const similarPostCount = 4;
 
 class PostReadonlySidebarControl extends events.EventTarget {
     constructor(hostNode, ctx, postContentControl) {

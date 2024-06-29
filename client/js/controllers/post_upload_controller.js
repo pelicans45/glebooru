@@ -30,7 +30,7 @@ class PostUploadController {
             this._view = new EmptyView();
             //const msg = "You don't have privileges to upload posts.";
             const msg =
-                "An account is required to upload images. Join [our Discord](/discord) to request an account.";
+                "A privileged account is required to upload images. [Register](/register) an account if you don't have one and join [our Discord](/discord/) to request upload permissions.";
             this._view.showError(msg);
             return;
         }

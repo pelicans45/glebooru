@@ -97,20 +97,20 @@ privileges:
     'user_tokens:delete:self':      regular
 
     #'posts:create':                 regular
-    'posts:create:anonymous':       regular
-    'posts:create:identified':      regular
+    'posts:create:anonymous':       power
+    'posts:create:identified':      power
     'posts:list':                   anonymous
     'posts:reverse_search':         anonymous
     'posts:view':                   anonymous
     'posts:view:featured':          anonymous
     'posts:view:similar':           anonymous
     'posts:edit:content':           power
-    'posts:edit:flags':             regular
+    'posts:edit:flags':             power
     'posts:edit:notes':             power
-    'posts:edit:relations':         regular
+    'posts:edit:relations':         power
     'posts:edit:safety':            power
-    'posts:edit:source':            regular
-    'posts:edit:tags':              regular
+    'posts:edit:source':            power
+    'posts:edit:tags':              power
     'posts:edit:thumbnail':         power
     'posts:feature':                administrator
     'posts:delete':                 moderator
@@ -124,7 +124,7 @@ privileges:
     # Can see new posts in gallery
     'posts:list:new':               anonymous
 
-    'tags:create':                  regular
+    'tags:create':                  power
     'tags:edit:names':              power
     'tags:edit:category':           power
     'tags:edit:description':        power
@@ -150,7 +150,7 @@ privileges:
     'metrics:list':                 moderator
     'metrics:delete':               moderator
 
-    'pools:create':                 regular
+    'pools:create':                 power
     'pools:edit:names':             power
     'pools:edit:category':          power
     'pools:edit:description':       power
@@ -168,18 +168,18 @@ privileges:
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
 
-    'comments:create':              regular
+    'comments:create':              power
     'comments:delete:any':          moderator
-    'comments:delete:own':          regular
+    'comments:delete:own':          power
     'comments:edit:any':            moderator
-    'comments:edit:own':            regular
+    'comments:edit:own':            power
     'comments:list':                anonymous
     'comments:view':                anonymous
     'comments:score':               regular
 
     'snapshots:list':               power
 
-    'uploads:create':               regular
+    'uploads:create':               power
     'uploads:use_downloader':       administrator
 
 ## ONLY SET THESE IF DEPLOYING OUTSIDE OF DOCKER

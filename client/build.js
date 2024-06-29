@@ -61,7 +61,7 @@ vars["newPostVisibilityThresholdMilliseconds"] =
 
 const webapp_icons = [
     { name: "android-chrome-192x192.png", size: 192 },
-    { name: "android-chrome-512x512.png", size: 512 },
+    //{ name: "android-chrome-512x512.png", size: 512 },
     { name: "apple-touch-icon.png", size: 180 },
     { name: "mstile-150x150.png", size: 150 },
 ];
@@ -402,7 +402,7 @@ function bundleWebAppFiles(domain, data) {
 
     Promise.all(
         webapp_icons.map((icon) => {
-            return Jimp.read(`${imgDir}/app.png`).then((file) => {
+            return Jimp.read(`${imgDir}/favicon.png`).then((file) => {
                 file.resize(icon.size, Jimp.AUTO, Jimp.RESIZE_BEZIER).write(
                     path.join(`${outputDir}/img/`, `${icon.name}`)
                 );
@@ -412,9 +412,10 @@ function bundleWebAppFiles(domain, data) {
         //console.info("Generated webapp icons");
     });
 
+	/*
     Promise.all(
         webapp_splash_screens.map((dim) => {
-            return Jimp.read(`${imgDir}/splash.png`).then((file) => {
+            return Jimp.read(`${imgDir}/favicon.png`).then((file) => {
                 file.resize(dim.center, Jimp.AUTO, Jimp.RESIZE_BEZIER)
                     .background(0xffffffff)
                     .contain(
@@ -444,6 +445,7 @@ function bundleWebAppFiles(domain, data) {
     ).then(() => {
         //console.info("Generated splash screens");
     });
+	*/
 }
 
 function makeOutputDirs(domain) {
