@@ -8,12 +8,12 @@ server {
 
     location / {
         proxy_pass http://127.0.0.1:8080;
-        include /opt/booru/server/nginx/include/proxy;
+        include /opt/booru/server/nginx/etc/include/proxy;
     }
 
     #location ~ /api/(tag-siblings/lens|tags/all)(.*) {
     #    proxy_pass http://127.0.0.1:8080/api/$1$2;
-    #    include /opt/booru/server/nginx/include/proxy;
+    #    include /opt/booru/server/nginx/etc/include/proxy;
     #
     #    proxy_cache main_cache;
     #    proxy_cache_valid 200 10m;
@@ -28,10 +28,6 @@ server {
         return 503 "please try again later";
         default_type text/plain;
     }
-
-    allow 24.126.0.0/16;
-    allow 68.33.0.0/16;
-    deny all;
 
     include /etc/nginx/include/cloudflare;
 }
