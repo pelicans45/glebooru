@@ -107,6 +107,7 @@ form .la-question-circle-o
     text-align: center
     @media (max-width: 1000px)
         padding: 1em
+        padding-top: 1.5em
     >.content-wrapper
         box-sizing: border-box /* make max-width: 100% on this element include padding */
         text-align: left
@@ -161,6 +162,9 @@ hr
         height: unset
         right: 0
         width: 100%
+        pointer-events: none
+        *
+            pointer-events: all
         //background: $window-color-darktheme !important
 nav
     .nav-bar

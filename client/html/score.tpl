@@ -24,4 +24,8 @@
         <span class='vim-nav-hint'>downvote</span>
         <span class='vim-nav-hint'>dislike</span>
     </a>
+<% } else { %>
+    <a class='downvote inactive'>
+        <i class='lar la-thumbs-down'></i>
+    </a>
 <% } %>

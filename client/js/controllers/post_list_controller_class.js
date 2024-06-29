@@ -108,11 +108,22 @@ class PostListController {
                 .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
-        const random = this._ctx.parameters.q.includes("sort:random");
-        if (!random) {
+        const selected = {
+            random: this._ctx.parameters.q.includes("sort:random"),
+            score: this._ctx.parameters.q.includes("sort:score"),
+        };
+        let sortIsSelected = false;
+        Object.keys(selected).forEach((element) => {
+            if (selected[element] === true) {
+                sortIsSelected = true;
+            }
+        });
+        if (!sortIsSelected) {
             this._headerView.focusSearchInputIfSet();
         }
-        this._headerView.toggleRandomizeButtonSelected(random);
+        Object.keys(selected).forEach((element) => {
+            this._headerView.toggleButtonSelected(element, selected[element]);
+        });
     }
 
     _evtTag(e) {

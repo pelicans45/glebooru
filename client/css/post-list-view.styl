@@ -218,8 +218,6 @@
         width: auto
         //margin-bottom: 0.75em
         margin-bottom: 1em
-        *
-            vertical-align: top
         @media (max-width: 1000px)
             display: block
             &.bulk-edit-tags:not(.opened), &.bulk-edit-safety:not(.opened)
@@ -261,15 +259,13 @@
             &::placeholder
                 color: transparent
 
-    #randomize-button
-        font-size: 24px
+    #randomize-button,
+    #score-sort-button
+        font-size: 23px
         cursor: pointer
         //color: lighten($main-color, 80%)
         color: $link-color
         position: relative
-        //top: 0.1em
-        //bottom: 0.1em
-        //bottom: 0.175em
 
         &.selected
             color: $main-color
@@ -278,7 +274,9 @@
 
         &:hover
             color: lighten($link-color, 15%) !important
-
+    #score-sort-button
+        font-size: 22px
+        margin-right: 0
     .append
         @media (max-width: 500px)
             margin-left: 0.8em
@@ -438,9 +436,7 @@
     .icon-button
         padding: 0 0.2em
         margin-right: 0.25em
-        margin-bottom: 0.15em
-        i
-            vertical-align: middle
+       //margin-bottom: 0.15em
     .icon-inline
         vertical-align: baseline
         margin-left: 0.3em

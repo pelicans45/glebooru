@@ -27,6 +27,10 @@ class TopNavigationView {
         return this._hostNode.querySelector("#mobile-navigation-toggle");
     }
 
+    get _siteNameNode() {
+        return this._mobileNavigationToggleNode.querySelector(".site-name");
+    }
+
     get _topNavigation() {
         return this._hostNode.querySelector("#top-navigation");
     }
@@ -82,25 +86,32 @@ class TopNavigationView {
 
     _bindMobileNavigationEvents() {
         this._mobileNavigationToggleNode.addEventListener("click", (e) =>
-            this._mobileNavigationToggleClick(e)
+            this._mobileNavigationToggleClick()
+        );
+
+        this._siteNameNode.addEventListener("click", (e) =>
+            this._siteNameNodeClick(e)
         );
 
         for (let navigationLinkNode of this._navigationLinkNodes) {
             navigationLinkNode.forEach((element) => {
                 element.addEventListener("click", (e) =>
-                    this._navigationLinkClick(e)
+                    this._navigationLinkClick()
                 );
             });
         }
     }
 
-    _mobileNavigationToggleClick(e) {
+    _mobileNavigationToggleClick() {
         this._navigationListNodes.forEach((nav) => {
             nav.classList.toggle("opened");
         });
     }
-
-    _navigationLinkClick(e) {
+    _siteNameNodeClick(e) {
+        e.stopPropagation();
+        this._topNavigation.querySelector(`[title="Gallery"]`).click();
+    }
+    _navigationLinkClick() {
         this._navigationListNodes.forEach((nav) => {
             nav.classList.remove("opened");
         });
