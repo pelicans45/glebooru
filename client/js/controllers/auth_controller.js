@@ -22,7 +22,7 @@ class LoginController {
         this._loginView.clearMessages();
         this._loginView.disableForm();
         api.forget();
-        api.login(e.detail.name, e.detail.password, e.detail.remember).then(
+        api.login(e.detail.name, e.detail.password, true).then(
             () => {
                 const ctx = router.show(uri.formatClientLink());
                 ctx.controller.showSuccess("Logged in");

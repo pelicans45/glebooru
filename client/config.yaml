@@ -95,20 +95,20 @@ privileges:
     'user_tokens:delete:any':       administrator
     'user_tokens:delete:self':      regular
 
-    'posts:create:anonymous':       power
-    'posts:create:identified':      power
+    'posts:create:anonymous':       regular
+    'posts:create:identified':      regular
     'posts:list':                   anonymous
     'posts:reverse_search':         anonymous
     'posts:view':                   anonymous
     'posts:view:featured':          anonymous
     'posts:view:similar':           anonymous
-    'posts:edit:content':           power
+    'posts:edit:content':           moderator
     'posts:edit:flags':             power
     'posts:edit:notes':             power
     'posts:edit:relations':         power
     'posts:edit:safety':            power
     'posts:edit:source':            power
-    'posts:edit:tags':              power
+    'posts:edit:tags':              regular
     'posts:edit:thumbnail':         power
     'posts:feature':                administrator
     'posts:delete':                 moderator
@@ -122,7 +122,7 @@ privileges:
     # Can see new posts in gallery
     'posts:list:new':               anonymous
 
-    'tags:create':                  power
+    'tags:create':                  regular
     'tags:edit:names':              power
     'tags:edit:category':           power
     'tags:edit:description':        power
@@ -177,7 +177,7 @@ privileges:
 
     'snapshots:list':               power
 
-    'uploads:create':               power
+    'uploads:create':               regular
     'uploads:use_downloader':       administrator
 
 ## ONLY SET THESE IF DEPLOYING OUTSIDE OF DOCKER

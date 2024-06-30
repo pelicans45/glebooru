@@ -20,6 +20,10 @@ server {
     #    add_header 'Cache-Control' 'public, max-age=600';
     #}
 
+    location ~ /discord/? {
+        return 302 "https://discord.gg/tN9GPvbPpf";
+    }
+
     location @err {
         return 500 "internal server error";
         default_type text/plain;

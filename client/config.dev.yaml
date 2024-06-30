@@ -104,7 +104,7 @@ privileges:
     'posts:view':                   anonymous
     'posts:view:featured':          anonymous
     'posts:view:similar':           anonymous
-    'posts:edit:content':           power
+    'posts:edit:content':           moderator
     'posts:edit:flags':             power
     'posts:edit:notes':             power
     'posts:edit:relations':         power

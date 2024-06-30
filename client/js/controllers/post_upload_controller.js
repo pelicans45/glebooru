@@ -29,8 +29,11 @@ class PostUploadController {
         if (!api.hasPrivilege("posts:create")) {
             this._view = new EmptyView();
             //const msg = "You don't have privileges to upload posts.";
+			/*
             const msg =
                 "A privileged account is required to upload images. [Register](/register) an account if you don't have one and join [our Discord](/discord/) to request upload permissions.";
+			*/
+			const msg = "[Register](/register) an account to upload images."
             this._view.showError(msg);
             return;
         }

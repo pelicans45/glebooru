@@ -130,7 +130,6 @@ class Executor:
             "offset": offset,
             "limit": limit,
             "total": count,
-            # "results": list([serializer(entity) for entity in entities]),
             "results": [serializer(entity) for entity in entities],
         }
 
