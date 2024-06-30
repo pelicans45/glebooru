@@ -119,7 +119,7 @@ class PostListController {
             score: this._ctx.parameters.q.includes("sort:score"),
         };
 
-        let buttonSort = false;
+        //let buttonSort = false;
         for (const [sortType, isSelected] of Object.entries(selected)) {
 			this._headerView.toggleButtonSelected(sortType, isSelected);
         };

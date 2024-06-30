@@ -91,6 +91,15 @@
                 }) %>
             </li>
 
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Column gallery layout',
+                    name: 'column-layout',
+                    checked: ctx.browsingSettings.columnLayout,
+                    title: 'Change the gallery layout to a column-based one',
+                }) %>
+            </li>
+
             <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Use post flow',
