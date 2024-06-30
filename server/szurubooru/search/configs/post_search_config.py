@@ -308,7 +308,7 @@ class PostSearchConfig(BaseSearchConfig):
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Post)
+        return db.session.query(model.Post), model.Post
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
         return query.order_by(model.Post.post_id.desc())

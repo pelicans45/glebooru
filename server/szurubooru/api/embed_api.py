@@ -1,17 +1,14 @@
-import re
 import html
-from urllib.parse import quote
+import re
 from typing import Dict, Optional
+from urllib.parse import quote
+from pathlib import Path
 
 from szurubooru import config, model, rest
-from szurubooru.func import (
-    auth,
-    posts,
-    serialization,
-)
+from szurubooru.func import auth, posts, serialization
 
-with open(f"{config.config['data_dir']}/../index.htm") as index:
-    index_html = index.read()
+current_dir = Path(__file__).parent.resolve()
+index_html = (current_dir / "../../index.html").read_text()
 
 def _index_path(params: Dict[str, str]) -> int:
     try:
@@ -48,7 +45,7 @@ def _serialize_post(
 def get_post(
     ctx: rest.Context, _params: Dict[str, str] = {}, url: str = ""
 ) -> rest.Response:
-    auth.verify_privilege(ctx.user, "posts:view")
+    #auth.verify_privilege(ctx.user, "posts:view")
 
     url = url or ctx.get_param_as_string("url")
     match = re.match(r".*?/post/(?P<post_id>\d+)", url)
@@ -61,7 +58,7 @@ def get_post(
     embed = {
         "version": "1.0",
         "type": "photo",
-        "title": f"{config.config['name']} – Post #{post_id}",
+        "title": f"{config.config['name']} – #{post_id}",
         "author_name": serialized["user"]["name"] if serialized["user"] else None,
         "provider_name": config.config["name"],
         "provider_url": config.config["homepage_url"],
@@ -75,7 +72,7 @@ def get_post(
     return embed
 
 
-@rest.routes.get("/index(?P<path>/.+)")
+@rest.routes.get("/post-embed-index(?P<path>/.+)")
 def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     path = _index_path(params)
     try:

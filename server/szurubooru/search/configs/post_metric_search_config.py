@@ -22,7 +22,7 @@ class PostMetricSearchConfig(BaseSearchConfig):
         return db.session.query(model.PostMetric).options(sa.orm.lazyload('*'))
 
     def create_count_query(self, disable_eager_loads: bool) -> SaQuery:
-        return self.create_filter_query(disable_eager_loads)
+        return self.create_filter_query(disable_eager_loads), model.PostMetric
 
     def create_around_query(self) -> SaQuery:
         return self.create_filter_query()

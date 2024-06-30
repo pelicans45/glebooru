@@ -16,7 +16,7 @@ class CommentSearchConfig(BaseSearchConfig):
         return db.session.query(model.Comment).join(model.User)
 
     def create_count_query(self, disable_eager_loads: bool) -> SaQuery:
-        return self.create_filter_query(disable_eager_loads)
+        return self.create_filter_query(disable_eager_loads), model.Comment
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()

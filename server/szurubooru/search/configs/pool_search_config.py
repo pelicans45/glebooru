@@ -24,7 +24,7 @@ class PoolSearchConfig(BaseSearchConfig):
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Pool)
+        return db.session.query(model.Pool), model.Pool
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()

@@ -82,7 +82,7 @@ def application(
     try:
         ctx = _create_context(env)
         accept_header = ctx.get_header("Accept")
-        if "*/*" not in accept_header and "application/json" not in accept_header:
+        if "application/json" not in accept_header and "*/*" not in accept_header:
             raise errors.HttpNotAcceptable(
                 "ValidationError", "This API only supports JSON responses."
             )
@@ -119,7 +119,7 @@ def application(
             finally:
                 db.session.remove()
 
-            if type(response) == dict and response.get("return_type") == "custom":
+            if response.get("return_type") == "custom":
                 start_response(response.get("status_code", "200"), [("content-type", "text/html")])
                 return (response.get("content", "").encode("utf-8"),)
 

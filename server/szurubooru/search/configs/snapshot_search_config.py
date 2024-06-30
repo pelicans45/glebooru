@@ -14,7 +14,7 @@ class SnapshotSearchConfig(BaseSearchConfig):
         return db.session.query(model.Snapshot)
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Snapshot)
+        return db.session.query(model.Snapshot), model.Snapshot
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()

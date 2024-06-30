@@ -32,7 +32,7 @@ class TagSearchConfig(BaseSearchConfig):
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Tag)
+        return db.session.query(model.Tag), model.Tag
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()

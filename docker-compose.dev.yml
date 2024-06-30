@@ -21,9 +21,13 @@ services:
     volumes:
       - "server_data:/data"
       - "./client/config.dev.yaml:/opt/app/config.yaml:ro"
+      - "./client/html/index.html:/opt/app/index.html:ro"
 
   client:
-    build: client
+    build:
+      context: client
+      args:
+        DEV: 1
     platform: linux/arm64
     restart: unless-stopped
     depends_on:
