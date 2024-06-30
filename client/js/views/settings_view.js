@@ -48,6 +48,11 @@ class SettingsView extends events.EventTarget {
                     darkTheme: this._find("dark-theme").checked,
                     postFlow: this._find("post-flow").checked,
                     navbarFollow: this._find("navbar-follow").checked,
+                    layoutType: this._layoutButtonNodes.length
+                        ? Array.from(this._layoutButtonNodes)
+                              .filter((node) => node.checked)[0]
+                              .value.toLowerCase()
+                        : undefined,
                     uploadSafety: this._safetyButtonNodes.length
                         ? Array.from(this._safetyButtonNodes)
                               .filter((node) => node.checked)[0]
@@ -60,6 +65,10 @@ class SettingsView extends events.EventTarget {
 
     get _formNode() {
         return this._hostNode.querySelector("form");
+    }
+
+    get _layoutButtonNodes() {
+        return this._formNode.querySelectorAll(".layoutType input");
     }
 
     get _safetyButtonNodes() {

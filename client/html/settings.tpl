@@ -91,6 +91,27 @@
                 }) %>
             </li>
 
+            <li class='layoutType'>
+                <label>Gallery Layout</label>
+                <div class='radio-wrapper'>
+                    <%= ctx.makeRadio({
+                    name: 'layout-type',
+                    value: 'default',
+                    selectedValue: ctx.browsingSettings.layoutType,
+                    text: 'Default'}) %>
+                    <%= ctx.makeRadio({
+                    name: 'layout-type',
+                    value: 'column',
+                    selectedValue: ctx.browsingSettings.layoutType,
+                    text: 'Column'}) %>
+                    <%= ctx.makeRadio({
+                    name: 'layout-type',
+                    value: 'grid',
+                    selectedValue: ctx.browsingSettings.layoutType,
+                    text: 'Grid'}) %>
+                </div>
+            </li>
+
             <li style="display: none">
                 <%= ctx.makeCheckbox({
                     text: 'Use post flow',
