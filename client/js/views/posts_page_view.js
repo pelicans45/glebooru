@@ -76,11 +76,7 @@ class PostsPageView extends events.EventTarget {
         const elements = this._hostNode.querySelectorAll(".post-list > ul");
         elements.forEach((element) => {
             if (!element.classList.contains("layout")) {
-                element.classList.add(
-                    settings.get().columnLayout
-                        ? "column-layout"
-                        : "default-layout"
-                );
+                element.classList.add(settings.get().layoutType + "-layout");
             }
         });
 

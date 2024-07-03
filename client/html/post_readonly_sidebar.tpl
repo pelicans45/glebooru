@@ -1,35 +1,8 @@
 <div class='readonly-sidebar'>
     <article class='details'>
-        <section class='download'>
-            <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
-                <i class='la la-download'></i>
-                <!--
-                <span style="display: none">
-                <%= ctx.makeFileSize(ctx.post.fileSize) %>
-                <%- {
-                    'image/gif': 'GIF',
-                    'image/jpeg': 'JPEG',
-                    'image/png': 'PNG',
-                    'image/webp': 'WEBP',
-                    'image/bmp': 'BMP',
-                    'image/avif': 'AVIF',
-                    'image/heif': 'HEIF',
-                    'image/heic': 'HEIC',
-                    'video/webm': 'WEBM',
-                    'video/mp4': 'MPEG-4',
-                    'video/quicktime': 'MOV',
-                    'application/x-shockwave-flash': 'SWF',
-                }[ctx.post.mimeType] %>
-                </span>
-                -->
-            </a>
-            <span class='dims'><%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %></span>
-            <!--
-            <% if (ctx.post.flags.length) { %>
-                <% if (ctx.post.flags.includes('loop')) { %><i class='la la-redo-alt'></i><% } %>
-                <% if (ctx.post.flags.includes('sound')) { %><i class='la la-volume-up'></i><% } %>
-            <% } %>
-            -->
+        <section class='social'>
+            <div class='score-container'></div>
+            <div class='fav-container'></div>
         </section>
 
         <section class='upload-info'>
@@ -67,10 +40,6 @@
             <a target="_blank" href='https://www.google.com/searchbyimage?&image_url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
         </section>
 
-        <section class='social'>
-            <div class='score-container'></div>
-            <div class='fav-container'></div>
-        </section>
     </article>
 
     <% if (ctx.post.relations.length) { %>

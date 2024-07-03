@@ -7,13 +7,15 @@
     .comment-container
         .comment
             min-width: 45em
+            @media (max-width: 1000px)
+                min-width: 70vw
 
 .comment-container
-    padding: 0 0 0 60px
+    //padding: 0 0 0 60px
 
     .avatar
         float: left
-        margin-left: -60px
+        //margin-left: -60px
         vertical-align: top
 
         .thumbnail
@@ -73,11 +75,11 @@
                 width: 0
                 height: 0
                 left: -1.5em
-                top: calc(50% - 0.75em)
+                top: .6em
                 border: 0.75em solid transparent
                 border-right: 0.75em solid darken($comment-border-color, 10%)
 
-            &:after
+            /*&:after
                 position: absolute
                 display: block
                 content: ' '
@@ -86,7 +88,7 @@
                 left: calc(-1.5em + 1px)
                 top: calc(50% - 0.75em)
                 border: 0.75em solid transparent
-                border-right: 0.75em solid $comment-header-background-color
+                border-right: 0.75em solid $comment-header-background-color*/
 
             .edit, .delete, .score-container a, .nickname a
                 &:not(.inactive)

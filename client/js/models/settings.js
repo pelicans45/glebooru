@@ -23,7 +23,7 @@ const defaultSettings = {
     darkTheme: true,
     postFlow: false,
     navbarFollow: false,
-    columnLayout: false,
+    layoutType: "default",
 };
 
 const isMobile = "ontouchstart" in document.documentElement;

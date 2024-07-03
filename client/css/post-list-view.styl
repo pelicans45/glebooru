@@ -3,6 +3,25 @@
 .post-list
     //@media (min-width: 1000px)
     ul.default-layout
+        display: flex
+        flex-wrap: wrap
+        justify-content: center
+
+        li
+            height: 15vw
+            min-height: 10em
+
+            flex-grow: 1
+
+            margin: .1em .25em .3em .25em
+
+            .thumbnail-wrapper
+                height: 100%
+                width: 100%
+            .thumbnail img
+                object-fit: cover
+
+    ul.grid-layout
         display: grid
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
         column-gap: 20px
@@ -12,21 +31,31 @@
             justify-content: center
 
             margin-top: 5px
+
             .thumbnail-wrapper
                 height: auto
                 width: unset
             .thumbnail img
                 max-width: 200px
                 max-height: 200px
-    ul
-        list-style-type: none
-        padding: 0
+
+
+    ul.column-layout
         column-width: 20vh
         column-count: 6
         li
+            min-width: 100%
+            .gallery-thumb
+                max-height: 350px
+                min-height: 100px
+
+    ul
+        list-style-type: none
+        padding: 0
+        li
             display: inline-block
             position: relative
-            min-width: 100%
+            //min-width: 100%
             margin: .4em .2em
             float: left
 
@@ -51,21 +80,13 @@
                     height: 1em
 
                 .type
-                    //display: none
+                    display: none
                     float: left
-                    //left: 0.5em
-                    left: 2em
+                    left: 0.5em
                     &[data-type=image]
                         display: none
 
                 .stats
-                    .page-content-holder.show-score &
-                        display: initial
-                    display: none
-
-                    .post-favorites, .post-comments
-                        display: none
-
                     float: right
                     right: 0.5em
                     text-align: right
