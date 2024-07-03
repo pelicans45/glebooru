@@ -98,14 +98,12 @@ class PostListController {
     }
 
     _evtNavigate(e) {
-		const params = e.detail.parameters;
+        const params = e.detail.parameters;
         if (params.r && !params.q.includes("sort:random")) {
             params.r = null;
         }
 
-        this._ctx = router.showNoDispatch(
-            uri.formatPostsLink(params)
-        );
+        this._ctx = router.showNoDispatch(uri.formatPostsLink(params));
 
         Object.assign(this._ctx.parameters, params);
         this._bulkEditTags.map((tagName) =>
@@ -113,24 +111,24 @@ class PostListController {
                 .resolveTagAndCategory(tagName)
                 .catch((error) => window.alert(error.message))
         );
+
         this._syncPageController();
+        this._headerView._addQuerySpace();
+        this._headerView.focusSearchInputIfSet();
+		/*
+		if (params.q === "") {
+			this._headerView._autoCompleteControl._displayDefaultMatches();
+		}
+		*/
+
         const selected = {
             random: this._ctx.parameters.q.includes("sort:random"),
             score: this._ctx.parameters.q.includes("sort:score"),
         };
 
-        //let buttonSort = false;
         for (const [sortType, isSelected] of Object.entries(selected)) {
-			this._headerView.toggleButtonSelected(sortType, isSelected);
-        };
-
-		this._headerView._addQuerySpace();
-		this._headerView.focusSearchInputIfSet();
-		/*
-        if (!buttonSort) {
-            this._headerView.focusSearchInputIfSet();
+            this._headerView.toggleButtonSelected(sortType, isSelected);
         }
-		*/
     }
 
     _evtTag(e) {
@@ -256,6 +254,7 @@ class PostListController {
 
     _syncPageController() {
         this._pageController.run({
+			controllerType: "post_list",
             parameters: this._ctx.parameters,
             browserState: this._ctx.state,
             defaultLimit: parseInt(settings.get().postsPerPage),
@@ -291,7 +290,7 @@ class PostListController {
                         relations: this._ctx.parameters.relations,
                         delete: this._postsMarkedForDeletion,
                     },
-                    postFlow: settings.get().postFlow,
+                    postFlow: false,
                 });
                 const view = new PostsPageView(pageCtx);
                 view.addEventListener("tag", (e) => this._evtTag(e));

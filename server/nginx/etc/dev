@@ -2,6 +2,10 @@ upstream client {
     server client:80;
 }
 
+map $http_user_agent $embed_prefix {
+    ~*(discordbot|twitterbot|facebookexternalhit)/  /api/embed;
+}
+
 server {
     server_name booru bagg bfilter bfilter2;
     listen 4000;
@@ -10,7 +14,13 @@ server {
 
     location / {
         proxy_pass http://client;
-        #proxy_set_header X-Original-Host $host;
+        proxy_set_header X-Original-Host $host;
+        include /etc/nginx/include/proxy;
+    }
+
+    location ~ ^/[0-9]+ {
+        proxy_pass http://client$embed_prefix$request_uri;
+        proxy_set_header X-Original-Host $host;
         include /etc/nginx/include/proxy;
     }
 

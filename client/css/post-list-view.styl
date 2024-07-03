@@ -51,13 +51,21 @@
                     height: 1em
 
                 .type
-                    display: none
+                    //display: none
                     float: left
-                    left: 0.5em
+                    //left: 0.5em
+                    left: 2em
                     &[data-type=image]
                         display: none
 
                 .stats
+                    .page-content-holder.show-score &
+                        display: initial
+                    display: none
+
+                    .post-favorites, .post-comments
+                        display: none
+
                     float: right
                     right: 0.5em
                     text-align: right

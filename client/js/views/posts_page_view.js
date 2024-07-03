@@ -83,6 +83,10 @@ class PostsPageView extends events.EventTarget {
                 );
             }
         });
+
+		const query = this._ctx.parameters.q || "";
+		const scoreSort = query.includes("sort:score");
+		this._hostNode.classList.toggle("show-score", scoreSort);
     }
 
     get _listItemNodes() {

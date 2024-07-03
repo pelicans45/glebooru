@@ -42,7 +42,7 @@ def _docker_config() -> Dict:
 
 def _file_config(filename: str) -> Dict:
     with open(filename) as handle:
-        return yaml.load(handle.read(), Loader=yaml.SafeLoader) or {}
+        return yaml.safe_load(handle.read()) or {}
 
 
 def _read_config() -> Dict:
@@ -54,6 +54,9 @@ def _read_config() -> Dict:
 
     if os.path.exists("/.dockerenv"):
         ret = _merge(ret, _docker_config())
+
+    with open("sites.yaml") as f:
+        ret["sites"] = yaml.safe_load(f.read()) or {}
 
     secret = os.environ.get("SECRET")
     if not secret:

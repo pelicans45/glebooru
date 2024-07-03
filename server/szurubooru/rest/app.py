@@ -12,8 +12,6 @@ from szurubooru import db
 from szurubooru.func import util
 from szurubooru.rest import context, errors, middleware, routes
 
-from szurubooru.rest import context, errors, middleware, routes
-
 
 def _json_serializer(obj: Any) -> str:
     """JSON serializer for objects not serializable by default JSON code"""
@@ -81,11 +79,13 @@ def application(
 ) -> Tuple[bytes]:
     try:
         ctx = _create_context(env)
+        """
         accept_header = ctx.get_header("Accept")
         if "application/json" not in accept_header and "*/*" not in accept_header:
             raise errors.HttpNotAcceptable(
                 "ValidationError", "This API only supports JSON responses."
             )
+        """
 
         for url, allowed_methods in routes.routes.items():
             match = re.fullmatch(url, ctx.url)

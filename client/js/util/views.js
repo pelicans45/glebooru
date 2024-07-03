@@ -324,8 +324,8 @@ function makeUserLinkForSidebar(user) {
     if (!api.hasPrivilege("users:view")) {
         return "";
     }
-    let text = makeThumbnail(user ? user.avatarUrl : null);
-    text += user && user.name ? misc.escapeHtml(user.name) : "Anonymous";
+    //let text = makeThumbnail(user ? user.avatarUrl : null);
+    let text = user && user.name ? misc.escapeHtml(user.name) : "Anonymous";
     const link = user
         ? makeElement(
               "a",

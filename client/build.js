@@ -93,11 +93,13 @@ const baseManifest = {
             type: "image/png",
             sizes: "192x192",
         },
+		/*
         {
             src: baseUrl() + "img/android-chrome-512x512.png",
             type: "image/png",
             sizes: "512x512",
         },
+		*/
     ],
     start_url: baseUrl(),
     background_color: "#1a1a1a",

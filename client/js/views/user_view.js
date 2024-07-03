@@ -1,6 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
+const api = require("../api.js");
 const views = require("../util/views.js");
 const UserDeleteView = require("./user_delete_view.js");
 const UserTokensView = require("./user_tokens_view.js");
@@ -17,6 +18,7 @@ class UserView extends events.EventTarget {
         this._ctx = ctx;
         ctx.user.addEventListener("change", (e) => this._evtChange(e));
         ctx.section = ctx.section || "summary";
+        ctx.currentUsername = api.userName;
 
         this._hostNode = document.getElementById("content-holder");
         this._install();

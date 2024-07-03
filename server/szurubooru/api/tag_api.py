@@ -61,14 +61,30 @@ def _create_if_needed(tag_names: List[str], user: model.User) -> None:
         snapshots.create(tag, user)
 
 
-@rest.routes.get("/tags/?")
-def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    auth.verify_privilege(ctx.user, "tags:list")
-    return _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
+@rest.routes.get("/lens-tags/(?P<tag_name>.+)")
+def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
+    # auth.verify_privilege(ctx.user, "tags:view")
+    tag_name = params["tag_name"]
+    cached = get_cached_tag_list(tag_name)
+    if cached:
+        return cached
+
+    tag = _get_tag(params)
+    result = tags.get_tag_siblings(tag, limit=5000)
+    serialized_siblings = []
+    for sibling, occurrences in result:
+        serialized_siblings.append(
+            {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
+        )
+
+    resp = {"results": serialized_siblings}
+    set_cached_tag_list(tag_name, resp)
+    return resp
+
 
 @rest.routes.get("/all-tags/?")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    #auth.verify_privilege(ctx.user, "tags:list")
+    # auth.verify_privilege(ctx.user, "tags:list")
     cached = get_cached_tag_list("all")
     if cached:
         return cached
@@ -76,6 +92,25 @@ def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respon
     resp = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
     set_cached_tag_list("all", resp)
     return resp
+
+
+@rest.routes.get("/tags/?")
+def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+    auth.verify_privilege(ctx.user, "tags:list")
+    return _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
+
+
+@rest.routes.get("/tag-siblings/(?P<tag_name>.+)")
+def get_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
+    auth.verify_privilege(ctx.user, "tags:view")
+    tag = _get_tag(params)
+    result = tags.get_tag_siblings(tag, limit=50)
+    serialized_siblings = []
+    for sibling, occurrences in result:
+        serialized_siblings.append(
+            {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
+        )
+    return {"results": serialized_siblings}
 
 
 """
@@ -185,37 +220,3 @@ def merge_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response
     snapshots.merge(source_tag, target_tag, ctx.user)
     ctx.session.commit()
     return _serialize(ctx, target_tag)
-
-
-@rest.routes.get("/tag-siblings/(?P<tag_name>.+)")
-def get_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
-    auth.verify_privilege(ctx.user, "tags:view")
-    tag = _get_tag(params)
-    result = tags.get_tag_siblings(tag, limit=50)
-    serialized_siblings = []
-    for sibling, occurrences in result:
-        serialized_siblings.append(
-            {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
-        )
-    return {"results": serialized_siblings}
-
-
-@rest.routes.get("/lens-tags/(?P<tag_name>.+)")
-def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
-    #auth.verify_privilege(ctx.user, "tags:view")
-    tag_name = params["tag_name"]
-    cached = get_cached_tag_list(tag_name)
-    if cached:
-        return cached
-
-    tag = _get_tag(params)
-    result = tags.get_tag_siblings(tag, limit=5000)
-    serialized_siblings = []
-    for sibling, occurrences in result:
-        serialized_siblings.append(
-            {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
-        )
-
-    resp = {"results": serialized_siblings}
-    set_cached_tag_list(tag_name, resp)
-    return resp

@@ -1,5 +1,9 @@
 #proxy_cache_path /var/cache/nginx_booru levels=1:2 keys_zone=main_cache:10m max_size=100m inactive=60m use_temp_path=off;
 
+map $http_user_agent $embed_prefix {
+    ~*(discordbot|twitterbot|facebookexternalhit)/  /api/embed;
+}
+
 server {
     server_name jej.lol lole.meme glegle.gallery bury.pink flube.supply spikedog.school yosho.io;
     listen 80;
@@ -8,6 +12,13 @@ server {
 
     location / {
         proxy_pass http://127.0.0.1:8080;
+        proxy_set_header X-Original-Host $host;
+        include /opt/booru/server/nginx/etc/include/proxy;
+    }
+
+    location ~ ^/[0-9]+ {
+        proxy_pass http://127.0.0.1:8080$embed_prefix$request_uri;
+        proxy_set_header X-Original-Host $host;
         include /opt/booru/server/nginx/etc/include/proxy;
     }
 

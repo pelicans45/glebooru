@@ -242,9 +242,9 @@ class Post(Base):
         lazy="joined",
         backref="related_by",
     )
-    features = sa.orm.relationship(
-        "PostFeature", cascade="all, delete-orphan", lazy="joined", overlaps="post"
-    )
+    #features = sa.orm.relationship(
+    #    "PostFeature", cascade="all, delete-orphan", lazy="joined", overlaps="post"
+    #)
     scores = sa.orm.relationship(
         "PostScore", cascade="all, delete-orphan", lazy="joined", overlaps="post"
     )

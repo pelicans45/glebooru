@@ -134,7 +134,7 @@
         <nav class='similar'>
             <h2>Similar</h2>
             <ul></ul>
-            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id}) %>' style='display: block'>See more</a>
+            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id + " -id:" + ctx.post.id}) %>' style='display: block'>See more</a>
         </nav>
 
         <nav class='lookalikes'>

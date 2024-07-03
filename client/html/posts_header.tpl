@@ -3,7 +3,7 @@
         %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.q ? ctx.parameters.q.trim() + " " : "", placeholder: '\uf002'}) %><%
         %><wbr/><%
         %><!--<input class='mousetrap' type='submit' value='Search'/>--><%
-        %><span id='score-sort-button' class='icon-button' title="Sort by most liked"><%
+        %><span id='score-sort-button' class='icon-button' title="Sort by likes"><%
             %><i class="la la-thumbs-up"><%
         %></span><%
         %><span title="Random sort" id='randomize-button' class='icon-button'><%

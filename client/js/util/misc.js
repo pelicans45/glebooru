@@ -94,7 +94,8 @@ function formatRelativeTime(timeString) {
     if (text === "a day") {
         return future ? "tomorrow" : "yesterday";
     }
-    return future ? "in " + text : text + " ago";
+    //return future ? "in " + text : text + " ago";
+	return text + " ago";
 }
 
 function formatMarkdown(text) {

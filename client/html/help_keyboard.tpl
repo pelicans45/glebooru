@@ -59,11 +59,6 @@
             <td><kbd>Command/Ctrl+S</kbd></td>
             <td>(In edit mode) Save changes</td>
         </tr>
-
-        <tr>
-            <td><kbd>Delete</kbd></td>
-            <td>(In edit mode) Delete image</td>
-        </tr>
     </tbody>
 </table>
 

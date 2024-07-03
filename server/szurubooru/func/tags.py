@@ -77,6 +77,9 @@ def _verify_name_validity(name: str) -> None:
     if name.isdigit():
         raise InvalidTagNameError("Tag name cannot contain only digits.")
 
+    if name.startswith(("-", "_")) or name.endswith(("-", "_")):
+        raise InvalidTagNameError("Tag name cannot start or end with a non-alphanumeric character.")
+
 
 def _get_names(tag: model.Tag) -> List[str]:
     # assert tag

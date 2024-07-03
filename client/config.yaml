@@ -69,7 +69,7 @@ privileges:
 
     'users:create:any':             administrator
     'users:list':                   power
-    'users:view':                   power
+    'users:view':                   anonymous
     'users:edit:any:name':          moderator
     'users:edit:any:pass':          moderator
     'users:edit:any:email':         moderator

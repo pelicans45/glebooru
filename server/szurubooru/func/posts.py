@@ -42,12 +42,12 @@ class PostAlreadyFeaturedError(errors.ValidationError):
 
 
 class PostAlreadyUploadedError(errors.ValidationError):
-    def __init__(self, other_post: model.Post) -> None:
+    def __init__(self, other_post_id: int) -> None:
         super().__init__(
-            "File already uploaded (#%d)" % other_post.post_id,
+            "File already uploaded (#%d)" % other_post_id,
             {
-                "otherPostUrl": get_post_content_url(other_post),
-                "otherPostId": other_post.post_id,
+                #"otherPostUrl": get_post_content_url(other_post),
+                "otherPostId": other_post_id,
             },
         )
 
@@ -385,7 +385,8 @@ def serialize_micro_post(
     )
 
 def get_post_relations(post_id: int) -> List[model.Post]:
-    return db.session.query(model.PostRelation).filter(model.PostRelation.parent_id == post_id).all()
+    #return db.session.query(model.PostRelation).filter(model.PostRelation.parent_id == post_id).all()
+    return db.session.query(model.PostRelation).from_statement(sa.text("select * from post_relation where parent_id = :id")).params(id=post_id).all()
 
 def get_post_count() -> int:
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
@@ -397,11 +398,11 @@ def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
     return db.session.query(model.Post).from_statement(post_select_statement).params(id=post_id).first()
     #return get_post_query.params(id=post_id).first()
 
-    return (
-        db.session.query(model.Post)
-        .filter(model.Post.post_id == post_id)
-        .one_or_none()
-    )
+    #return (
+    #    db.session.query(model.Post)
+    #    .filter(model.Post.post_id == post_id)
+    #    .one_or_none()
+    #)
 
 
 def get_post_by_id(post_id: int) -> model.Post:
@@ -570,12 +571,14 @@ def get_default_flags(content: bytes) -> List[str]:
 
 
 def purge_post_signature(post: model.Post) -> None:
+    """
     (
         db.session.query(model.PostSignature)
         .filter(model.PostSignature.post_id == post.post_id)
         .delete()
     )
-
+    """
+    db.session.execute("delete from post_signature where post_id=:id", {"id": post.post_id})
 
 def generate_post_signature(post: model.Post, content: bytes) -> None:
     try:
@@ -635,7 +638,7 @@ def update_all_md5_checksums() -> None:
             logging.exception(ex)
 
 
-def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
+def update_post_content(post: model.Post, content: Optional[bytes], content_changed=False) -> None:
     # assert post
     if not content:
         raise InvalidPostContentError("Post content missing.")
@@ -643,7 +646,10 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
     update_signature = False
     post.mime_type = mime.get_mime_type(content)
     if mime.is_flash(post.mime_type):
-        post.type = model.Post.TYPE_FLASH
+        #post.type = model.Post.TYPE_FLASH
+        raise InvalidPostContentError(
+            "Unhandled file type: %r" % post.mime_type
+        )
     elif mime.is_image(post.mime_type):
         update_signature = True
         if mime.is_animated_gif(content):
@@ -659,21 +665,31 @@ def update_post_content(post: model.Post, content: Optional[bytes]) -> None:
 
     post.checksum = util.get_sha1(content)
     post.checksum_md5 = util.get_md5(content)
+
+    """
     other_post = (
         db.session.query(model.Post)
         .filter(model.Post.checksum == post.checksum)
         .filter(model.Post.post_id != post.post_id)
         .one_or_none()
     )
+    """
+
+    post_id = post.post_id
+    if post_id is None:
+        post_id = 0
+    other_post = db.session.execute("select id from post where checksum=:checksum and id != :id", {"checksum": post.checksum, "id": post_id}).first()
+
     if (
         other_post
-        and other_post.post_id
-        and other_post.post_id != post.post_id
+        and other_post["id"]
+        and other_post["id"] != post.post_id
     ):
-        raise PostAlreadyUploadedError(other_post)
+        raise PostAlreadyUploadedError(other_post["id"])
 
     if update_signature:
-        purge_post_signature(post)
+        if content_changed:
+            purge_post_signature(post)
         post.signature = generate_post_signature(post, content)
 
     post.file_size = len(content)
@@ -951,11 +967,13 @@ def merge_posts(
     db.session.flush()
 
     if content is not None:
-        update_post_content(target_post, content)
+        update_post_content(target_post, content, content_changed=True)
 
 
 def search_by_image_exact(image_content: bytes) -> Optional[model.Post]:
     checksum = util.get_sha1(image_content)
+
+    return db.session.query(model.Post).from_statement(sa.text("select * from post where checksum=:checksum")).params(checksum=checksum).first()
     return (
         db.session.query(model.Post)
         .filter(model.Post.checksum == checksum)

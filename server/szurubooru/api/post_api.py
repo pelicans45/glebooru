@@ -20,7 +20,9 @@ from szurubooru.func import (
     snapshots,
     versions,
 )
-from . import tag_api
+
+
+
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
@@ -45,11 +47,32 @@ def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Respo
 
 @rest.routes.get("/posts/?")
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    #auth.verify_privilege(ctx.user, "posts:list")
+    # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     return _search_executor.execute_and_serialize(
         ctx, lambda post: _serialize_post(ctx, post)
     )
+
+
+@rest.routes.get("/post/(?P<post_id>[^/]+)/?")
+def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
+    # auth.verify_privilege(ctx.user, "posts:view")
+    # post = _get_post(params)
+    """
+    post_id = int(params["post_id"])
+    post = get_post_query.params(id=post_id).first()
+    if not post:
+        raise posts.PostNotFoundError("Post %d not found." % post_id)
+    """
+    post = (
+        db.session.query(model.Post)
+        .from_statement(posts.post_select_statement)
+        .params(id=int(params["post_id"]))
+        .first()
+    )
+    if not post:
+        raise posts.PostNotFoundError("Post not found.")
+    return _serialize_post(ctx, post)
 
 
 @rest.routes.get("/random-image/?")
@@ -62,7 +85,7 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
 
     if query_text.isdigit():
         post = posts.get_post_by_id(int(query_text))
-        return _serialize_post(ctx, post)
+        return posts.get_post_content_url(post)
 
     query_text = "sort:random type:image,animation " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
@@ -70,6 +93,7 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
         return ""
     return posts.get_post_content_url(_posts[0])
 
+from . import tag_api
 
 @rest.routes.post("/posts/?")
 def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
@@ -108,6 +132,7 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
     ctx.session.add(post)
     ctx.session.flush()
     create_snapshots_for_post(post, new_tags, None if anonymous else ctx.user)
+    """
     alternate_format_posts = posts.generate_alternate_formats(post, content)
     for alternate_post, alternate_post_new_tags in alternate_format_posts:
         create_snapshots_for_post(
@@ -115,6 +140,7 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
             alternate_post_new_tags,
             None if anonymous else ctx.user,
         )
+    """
     ctx.session.commit()
     if tag_names:
         tag_api.clear_all_cached_tag_lists()
@@ -127,23 +153,6 @@ def create_snapshots_for_post(
     snapshots.create(post, user)
     for tag in new_tags:
         snapshots.create(tag, user)
-
-#get_post_query = db.session.query(model.Post).from_statement(sa.text("select * from post where id = :id"))
-
-@rest.routes.get("/post/(?P<post_id>[^/]+)/?")
-def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
-    #auth.verify_privilege(ctx.user, "posts:view")
-    #post = _get_post(params)
-    """
-    post_id = int(params["post_id"])
-    post = get_post_query.params(id=post_id).first()
-    if not post:
-        raise posts.PostNotFoundError("Post %d not found." % post_id)
-    """
-    post = db.session.query(model.Post).from_statement(posts.post_select_statement).params(id=int(params["post_id"])).first()
-    if not post:
-        raise posts.PostNotFoundError("Post not found.")
-    return _serialize_post(ctx, post)
 
 
 @rest.routes.put("/post/(?P<post_id>[^/]+)/?")
@@ -160,6 +169,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
                 use_video_downloader=auth.has_privilege(
                     ctx.user, "uploads:use_downloader"
                 ),
+            content_changed=True,
             ),
         )
     new_tags = []
@@ -207,6 +217,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
 
+
 @rest.routes.delete("/post/(?P<post_id>[^/]+)/?")
 def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:delete")
@@ -215,7 +226,7 @@ def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     versions.verify_version(post, ctx)
     snapshots.delete(post, ctx.user)
     posts.delete(post)
-    #ctx.session.delete(post)
+    # ctx.session.delete(post)
     ctx.session.commit()
     logging.info("%s deleted post %d", ctx.user.name, post_id)
     return {}

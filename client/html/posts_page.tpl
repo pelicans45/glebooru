@@ -2,45 +2,45 @@
     <% if (ctx.response.results.length) { %>
         <ul>
             <%
-            for (let post of ctx.response.results) {
+            for (const post of ctx.response.results) {
                 const postTags = ctx.excludeRedundantTags(post.tags);
+                let postTitle = postTags.map(tag => tag.names[0]).join(' ') || '(no tags)';
+                if (post.type === "video") {
+                    postTitle = `(video)\n\n${postTitle}`;
+                }
             %>
                 <li data-post-id='<%= post.id %>'>
                     <a class='thumbnail-wrapper <%= postTags.length > 2 ? "tags" : "no-tags" %>'
-                            title='<%- postTags.map(tag => tag.names[0]).join(' ') || '(no tags)' %>'
-                            href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
+                            title='<%- postTitle %>'
+                            href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
-                        <span class='type' data-type='<%- post.type %>'>
-                            <% if (post.type == 'video' || post.type == 'flash' || post.type == 'animation') { %>
-                                <span class='icon'><i class='la la-film'></i></span>
-                            <% } else { %>
-                                <%- post.type %>
-                            <% } %>
-                        </span>
-                        <!--
+                        <% if (post.type === 'video') { %>
+                            <span class='type' data-type='<%- post.type %>'>
+                                <span class='icon'><i class='la la-video'></i></span>
+                            </span>
+                        <% } %>
                         <% if (post.score || post.favoriteCount || post.commentCount) { %>
                             <span class='stats'>
                                 <% if (post.score) { %>
-                                    <span class='icon'>
+                                    <span class='icon post-score'>
                                         <i class='la la-thumbs-up'></i>
                                         <%- post.score %>
                                     </span>
                                 <% } %>
                                 <% if (post.favoriteCount) { %>
-                                    <span class='icon'>
+                                    <span class='icon post-favorites'>
                                         <i class='la la-heart'></i>
                                         <%- post.favoriteCount %>
                                     </span>
                                 <% } %>
                                 <% if (post.commentCount) { %>
-                                    <span class='icon'>
+                                    <span class='icon post-comments'>
                                         <i class='lar la-comment-dots'></i>
                                         <%- post.commentCount %>
                                     </span>
                                 <% } %>
                             </span>
                         <% } %>
-                        -->
                     </a>
                     <span class='edit-overlay'>
                         <% if (ctx.canBulkEditTags && ctx.parameters && ctx.parameters.tag) { %>
@@ -66,7 +66,7 @@
                     </span>
                 </li>
             <% } %>
-            <%= ctx.makeFlexboxAlign() %>
+            <!-- <%= ctx.makeFlexboxAlign() %> -->
         </ul>
     <% } %>
 </div>

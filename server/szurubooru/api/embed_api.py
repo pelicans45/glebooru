@@ -48,9 +48,13 @@ def get_post(
     #auth.verify_privilege(ctx.user, "posts:view")
 
     url = url or ctx.get_param_as_string("url")
-    match = re.match(r".*?/post/(?P<post_id>\d+)", url)
+    match = re.match(r".*?/(?P<post_id>\d+)", url)
     if not match:
         raise posts.InvalidPostIdError("Invalid post ID.")
+
+    host = ctx.get_header('X-Original-Host')
+    home_url = f"https://{host}"
+    site = config.config["sites"][host]
 
     post_id = _get_post_id(match)
     post = _get_post(post_id)
@@ -58,21 +62,21 @@ def get_post(
     embed = {
         "version": "1.0",
         "type": "photo",
-        "title": f"{config.config['name']} – #{post_id}",
+        "title": f"{site['name']} – #{post_id}",
         "author_name": serialized["user"]["name"] if serialized["user"] else None,
-        "provider_name": config.config["name"],
-        "provider_url": config.config["homepage_url"],
-        "thumbnail_url": f"{config.config['site_url']}/{serialized['thumbnailUrl']}",
+        "provider_name": site["name"],
+        "provider_url": home_url,
+        "thumbnail_url": f"{home_url}{serialized['thumbnailUrl']}",
         "thumbnail_width": int(config.config["thumbnails"]["post_width"]),
         "thumbnail_height": int(config.config["thumbnails"]["post_height"]),
-        "url": f"{config.config['site_url']}/{serialized['thumbnailUrl']}",
+        "url": f"{home_url}{serialized['thumbnailUrl']}",
         "width": int(config.config["thumbnails"]["post_width"]),
         "height": int(config.config["thumbnails"]["post_height"])
     }
     return embed
 
 
-@rest.routes.get("/post-embed-index(?P<path>/.+)")
+@rest.routes.get("/embed(?P<path>/.+)")
 def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     path = _index_path(params)
     try:
@@ -80,9 +84,12 @@ def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     except posts.PostNotFoundError:
         return {"return_type": "custom", "status_code": "404", "content": index_html}
 
-    url = config.config["site_url"] + path
+    host = ctx.get_header('X-Original-Host')
+    home_url = f"https://{host}"
+    site = config.config["sites"][host]
+    url = home_url + path
     new_html = index_html.replace("</head>", f'''
-<meta property="og:site_name" content="{config.config["name"]}">
+<meta property="og:site_name" content="{site["name"]}">
 <meta property="og:url" content="{html.escape(url)}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{html.escape(oembed['title'])}">
@@ -93,6 +100,6 @@ def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 <meta property="og:image:width" content="{oembed['width']}">
 <meta property="og:image:height" content="{oembed['height']}">
 <meta property="article:author" content="{html.escape(oembed['author_name'] or '')}">
-<link rel="alternate" type="application/json+oembed" href="{config.config["site_url"]}/api/oembed?url={quote(html.escape(url))}" title="{html.escape(config.config["name"])}"></head>
-''').replace("<html>", '<html prefix="og: http://ogp.me/ns#">').replace("<title>Loading...</title>", f"<title>{html.escape(oembed['title'])}</title>")
+<link rel="alternate" type="application/json+oembed" href="{home_url}/api/oembed?url={quote(html.escape(url))}" title="{html.escape(site["name"])}"></head>
+''').replace("<html>", '<html prefix="og: http://ogp.me/ns#">').replace("<title>Loading...</title>", f"<title>{html.escape(oembed['title'])}</title>").replace("$THEME_COLOR$", site["color"]).replace("<!-- Base HTML Placeholder -->", f'<title>{site["name"]}</title><base id="base" href="/"/>')
     return {"return_type": "custom", "content": new_html}

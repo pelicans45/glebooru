@@ -51,9 +51,19 @@ class EndlessPageView {
                     }
                 }
             );
+
+            /*
+			.then(
+                (pageNode) => {
+                    if (initialOffset !== 0) {
+                        pageNode.scrollIntoView();
+                    }
+                }
+            );
+			*/
         }
 
-		// TODO: replace with scroll listener?
+        // TODO: replace with scroll listener?
 
         this._timeout = window.setInterval(() => {
             window.requestAnimationFrame(() => {
@@ -179,7 +189,7 @@ class EndlessPageView {
             cache !== null &&
             cache !== undefined &&
             cache.path === history.state.path &&
-			//(!cache.r || cache.r.toString() === localStorage.r) &&
+            //(!cache.r || cache.r.toString() === localStorage.r) &&
             cache.pages !== undefined &&
             cache.pages !== null
         );
@@ -208,7 +218,6 @@ class EndlessPageView {
         });
     }
 
-	
     _loadPage(ctx, offset, limit, append) {
         this._runningRequests++;
         return new Promise((resolve, reject) => {
@@ -283,18 +292,29 @@ class EndlessPageView {
                 this.totalRecords--;
             });
 
-            if (append) {
-                this._pagesHolderNode.appendChild(pageNode);
-                if (this._initialPageLoad && response.offset > 0) {
-                    window.scroll(0, pageNode.getBoundingClientRect().top);
+            if (!this._initialPageLoad && ctx.controllerType === "post_list") {
+                const els = pageNode.querySelectorAll(".post-list li");
+                const list =
+                    this._pagesHolderNode.querySelector(".post-list ul");
+                if (append) {
+                    list.append(...els);
+                } else {
+                    list.prepend(...els);
                 }
             } else {
-                this._pagesHolderNode.prepend(pageNode);
+                if (append) {
+                    this._pagesHolderNode.appendChild(pageNode);
+                    if (this._initialPageLoad && response.offset > 0) {
+                        window.scroll(0, pageNode.getBoundingClientRect().top);
+                    }
+                } else {
+                    this._pagesHolderNode.prepend(pageNode);
 
-                window.scroll(
-                    window.scrollX,
-                    window.scrollY + pageNode.offsetHeight
-                );
+                    window.scroll(
+                        window.scrollX,
+                        window.scrollY + pageNode.offsetHeight
+                    );
+                }
             }
         } else if (!response.results.length) {
             this.showInfo("No results");

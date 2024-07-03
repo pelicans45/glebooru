@@ -10,6 +10,8 @@ const KEY_ESCAPE = 27;
 const KEY_UP = 38;
 const KEY_DOWN = 40;
 
+let backspaced = false;
+
 function _getSelectionStart(input) {
     if ("selectionStart" in input) {
         return input.selectionStart;
@@ -23,7 +25,6 @@ function _getSelectionStart(input) {
     }
     return 0;
 }
-
 
 class AutoCompleteControl {
     constructor(sourceInputNode, options) {
@@ -49,6 +50,7 @@ class AutoCompleteControl {
         this._showTimeout = null;
         this._results = [];
         this._activeResult = -1;
+        this._backspaced = false;
 
         this._install();
     }
@@ -130,6 +132,9 @@ class AutoCompleteControl {
         this._sourceInputNode.addEventListener("blur", (e) =>
             this._evtBlur(e)
         );
+        this._sourceInputNode.addEventListener("input", (e) =>
+            this._showOrHide()
+        );
 
         this._suggestionDiv = views.htmlToDom(
             '<div class="autocomplete"><ul></ul></div>'
@@ -180,11 +185,14 @@ class AutoCompleteControl {
                 func = () => {
                     this.hide();
                 };
+                /*
             } else if (key === KEY_DELETE && this._activeResult >= 0) {
                 func = () => {
                     this._delete(this._getActiveSuggestion());
                     this.hide();
                 };
+            }
+			*/
             }
         }
 
@@ -193,25 +201,26 @@ class AutoCompleteControl {
             e.stopPropagation();
             e.stopImmediatePropagation();
             func();
+        }
+        /*
         } else {
             //this._showOrHide();
-            window.clearTimeout(this._showTimeout);
+            //window.clearTimeout(this._showTimeout);
             this._showTimeout = window.setTimeout(() => {
                 this._showOrHide();
             }, 0);
         }
+		*/
     }
 
     _evtBlur(e) {
+        /*
         window.clearTimeout(this._showTimeout);
         window.setTimeout(() => {
             this.hide();
         }, 0);
-        //this.hide();
-    }
-
-    _evtFocus(e) {
-        return;
+		*/
+        this.hide();
     }
 
     _getActiveSuggestion() {
@@ -245,15 +254,17 @@ class AutoCompleteControl {
     }
 
     _updateResults(textToFind) {
-        //console.log("update results");
         this._options.getMatches(textToFind).then((matches) => {
             const oldResults = this._results.slice();
             this._results = matches.slice(0, this._options.maxResults);
             const oldResultsHash = JSON.stringify(oldResults);
             const newResultsHash = JSON.stringify(this._results);
-            if (oldResultsHash !== newResultsHash) {
+            if (oldResultsHash !== newResultsHash || this._backspaced) {
                 this._activeResult = -1;
                 this._refreshList();
+            }
+            if (this._backspaced) {
+                this._backspaced = false;
             }
             // TODO: keep refresh here?
             //this._refreshList();
@@ -272,7 +283,6 @@ class AutoCompleteControl {
             this._suggestionList.removeChild(this._suggestionList.firstChild);
         }
 		*/
-        // TODO: test
 
         this._suggestionList.innerHTML = "";
 

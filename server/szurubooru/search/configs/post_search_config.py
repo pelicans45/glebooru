@@ -153,6 +153,7 @@ def _similar_filter(
             .join(pt_alias, pt_alias.post_id == model.Post.post_id)
             .filter(pt_alias.tag_id.in_(tag_query))
             .group_by(model.Post.post_id)
+            .having(sa.func.count(pt_alias.tag_id) > 2)
             .join(subquery, pt_alias.post_id == subquery.c.id)
             .order_by(sa.func.count(pt_alias.tag_id).desc())
         )

@@ -20,6 +20,7 @@ services:
     volumes:
       - "${MOUNT_DATA}:/data"
       - "./client/config.yaml:/opt/app/config.yaml:ro"
+      - "./client/sites.yaml:/opt/app/sites.yaml:ro"
       - "./client/html/index.html:/opt/app/index.html:ro"
 
   client:
