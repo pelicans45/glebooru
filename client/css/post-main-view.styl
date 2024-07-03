@@ -45,6 +45,11 @@
             width: 1em
             text-align: right
 
+        #add-comment-button
+            h3
+                margin: 0
+                font-size: 1em
+
     >.content
         display: flex
         flex-direction: column
@@ -67,7 +72,9 @@
 
         width: fit-content
         .la
-            font-size: 160%
+            font-size: 32px
+        .dims
+            display: none
 
     .post-container
         margin-top: 2.5em
@@ -106,7 +113,6 @@
                 @media (max-width: 1000px)
                     width: 75vw
 
-                margin-left: 18px
                 header
                     white-space: normal
                     a
@@ -165,9 +171,6 @@
                 font-size: 85%
                 //color: #b4b4b4
                 display: block
-
-        .dims
-            display: none
 
         .zoom
             display: none
@@ -239,6 +242,9 @@
         .tag-link-posts
             &:hover
                 opacity: 0.9
+        p
+            margin-bottom: .3em
+        
 
 .post-view .edit-sidebar
     .expander-content
