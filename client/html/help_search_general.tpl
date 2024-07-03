@@ -89,5 +89,4 @@ by prepending them with a backslash: <code>\\</code>.</p>
 
 <pre><code>sea -fav-count:8.. uploader:Pirate</code></pre>
 
-<p>will show files tagged as sea, that were liked by seven people at
-most, uploaded by user Pirate.</p>
+<p>will show files tagged as sea, that were liked by less than 8 people, uploaded by user Pirate.</p>

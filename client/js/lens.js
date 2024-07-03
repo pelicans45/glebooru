@@ -19,12 +19,15 @@ const isUniversal = location.hostname === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
 let excludedTags = new Set(getExcludedTags());
+const implies = site.implies || [];
 
 let siteExcludedTags = new Set();
-if (site.exclude && site.exclude.length) {
-    siteExcludedTags = new Set(site.exclude);
+if (site.implies && site.implies.length) {
+    siteExcludedTags = new Set(site.implies);
 }
 excludedTags = new Set([...excludedTags, ...siteExcludedTags]);
+
+const siteTags = [site.query, ...implies];
 
 function objectFlip(obj) {
     const ret = {};
@@ -61,6 +64,17 @@ function addHostnameFilter(text) {
     }
 
     return text;
+}
+
+function containsFilter(tags) {
+	for (const tag of tags) {
+		if (tag.names[0] === hostnameFilter) {
+			return true;
+		}
+	}
+
+	return false;
+
 }
 
 function isLensTag(tag) {
@@ -130,11 +144,13 @@ module.exports = {
     name: name,
     hostnameFilter: hostnameFilter,
     isUniversal: isUniversal,
+    siteTags,
     addHostnameFilter: addHostnameFilter,
     checkHostnameFilterRedirect: checkHostnameFilterRedirect,
     hostnameExcludedTag: hostnameExcludedTag,
     hostnameFilterTags: hostnameFilterTags,
     excludeRedundantTags: excludeRedundantTags,
     isHostnameTagName: isHostnameTagName,
-	isLensTag,
+    isLensTag,
+    containsFilter,
 };

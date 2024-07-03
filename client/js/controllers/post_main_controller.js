@@ -71,10 +71,12 @@ class PostMainController extends BasePostController {
                     this._view.sidebarControl.addEventListener("score", (e) =>
                         this._evtScorePost(e)
                     );
+					/*
                     this._view.sidebarControl.addEventListener(
                         "fitModeChange",
                         (e) => this._evtFitModeChange(e)
                     );
+					*/
                     this._view.sidebarControl.addEventListener("change", (e) =>
                         this._evtPostChange(e)
                     );

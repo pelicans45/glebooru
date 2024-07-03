@@ -101,6 +101,8 @@ class EndlessPageView {
     }
 
     get _topPageNode() {
+		return document.querySelector(".page");
+
         let topPageNode = null;
         let element = document.elementFromPoint(
             window.innerWidth / 2,

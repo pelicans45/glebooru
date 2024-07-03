@@ -18,7 +18,7 @@ bfilter:
   name: booru filter dev
   description: booru filter dev
   query: filter1
-  exclude: [agg]
+  implies: [agg]
   color: "#0000ff"
   tips: [Extra site tip 1]
 
@@ -26,6 +26,6 @@ bfilter2:
   name: booru filter dev 2
   description: booru filter dev 2
   query: filter2
-  exclude: [agg]
+  implies: [agg]
   color: "#ff0000"
   tips: [Extra site tip 2]

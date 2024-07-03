@@ -51,8 +51,10 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
         this._installFav();
         this._installScore();
+		/*
         this._installFitButtons();
         this._syncFitButton();
+		*/
         /*
         if (this._metricsListNode) {
             this._metricsControl = new PostMetricListControl(
@@ -192,6 +194,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
             e.preventDefault();
             e.target.blur();
             func();
+			/*
             this._syncFitButton();
             this.dispatchEvent(
                 new CustomEvent("fitModeChange", {
@@ -200,6 +203,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
                     },
                 })
             );
+			*/
         };
     }
 

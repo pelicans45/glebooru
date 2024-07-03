@@ -28,7 +28,7 @@ glegle.gallery:
   name: glebooru
   description: glegle
   query: glegle
-  exclude: [character]
+  implies: [character]
   color: "#6824dd"
   tips: [Let's all love Glegle]
 
@@ -36,7 +36,7 @@ bury.pink:
   name: burybooru
   description: bury pink girl
   query: bury
-  exclude: [character]
+  implies: [character]
   color: "#ff74eb"
   tips: [This is nice booru]
 
@@ -44,7 +44,7 @@ flube.supply:
   name: flube supply
   description: let the flube oils seep in
   query: flube
-  exclude: [character]
+  implies: [character]
   color: "#484848"
   tips: ["Stay in touch with your Yuji Sakai", "Call before you get memeical care", "Be sure to get care if you feel worse or you think it is an emergency"]
 
@@ -52,7 +52,7 @@ spikedog.school:
   name: spikedog school
   description: spikedog scampering about
   query: spikedog
-  exclude: [character]
+  implies: [character]
   color: "#cdcdcd"
   tips: ["Greed tastes like sin", "Spike dog, dog, dog, dog", "Spikes are pulling, are pull- are pull- are pull- are pull- are pull-", "Greed tastes like sin", "Spike dog, dog, dog, dog", "Massive"]
 
@@ -60,6 +60,6 @@ yosho.io:
   name: yosho dot io
   description: yosho must travel back in time to 1999 to stop the spikeman
   query: yosho
-  exclude: [character]
+  implies: [character]
   color: "#3fd104"
   tips: [Yosho must travel back in time to 1999 to stop the Spikeman]

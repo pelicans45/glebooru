@@ -278,10 +278,16 @@ class PostUploadController {
         post.flags = uploadable.flags;
 
         if (lens.hostnameFilter) {
-            uploadable.tags = uploadable.tags.filter(
-                (tag) => tag.toLowerCase() !== lens.hostnameFilter
-            );
-            uploadable.tags.unshift(lens.hostnameFilter);
+			console.log(lens.siteTags);
+            for (const tag of lens.siteTags) {
+                if (!uploadable.tags.includes(tag)) {
+                    uploadable.tags.push(tag);
+                } else if (tag === lens.hostnameFilter) {
+                    alert(
+                        `There is no need to add the "${lens.hostnameFilter}" tag when uploading to ${location.hostname}. It is added automatically.`
+                    );
+                }
+            }
         }
 
         for (const tagName of uploadable.tags) {
@@ -289,6 +295,7 @@ class PostUploadController {
             tag.names = [tagName];
             post.tags.add(tag);
         }
+
         post.relations = uploadable.relations;
         post.newContent = uploadable.url || uploadable.file;
         // if uploadable.source is ever going to be a valid field (e.g when setting source directly in the upload window)
