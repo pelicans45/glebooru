@@ -14,6 +14,7 @@ class PostContentControl {
         this._hostNode = hostNode;
         this._template = views.getTemplate("post-content");
 
+		/*
         let fitMode = settings.get().fitMode;
         if (typeof fitFunctionOverride !== "undefined") {
             fitMode = fitFunctionOverride;
@@ -26,6 +27,7 @@ class PostContentControl {
                 "fit-width": this.fitWidth,
                 "fit-height": this.fitHeight,
             }[fitMode] || this.fitBoth;
+		*/
 
         this._install();
 
@@ -153,9 +155,11 @@ class PostContentControl {
     _install() {
         this._reinstall();
         // Don't auto-resize on mobile, to prevent size jerk when scrolling
+		/*
         if (window.innerWidth > 1000) {
             optimizedResize.add(() => this._refreshSize());
         }
+		*/
         views.monitorNodeRemoval(this._hostNode, () => {
             this._uninstall();
         });
@@ -166,20 +170,22 @@ class PostContentControl {
             post: this._post,
             autoplay: settings.get().autoplayVideos,
         });
+		/*
         if (settings.get().transparencyGrid) {
             newNode.classList.add("transparency-grid");
         }
+		*/
         if (this._postContentNode) {
             this._hostNode.replaceChild(newNode, this._postContentNode);
         } else {
             this._hostNode.appendChild(newNode);
         }
         this._postContentNode = newNode;
-        this._refreshSize();
+        //this._refreshSize();
     }
 
     _uninstall() {
-        optimizedResize.remove(() => this._refreshSize());
+        //optimizedResize.remove(() => this._refreshSize());
     }
 }
 
