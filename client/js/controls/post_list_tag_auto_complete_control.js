@@ -32,9 +32,13 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
         this._setDefaultMatches();
     }
 
-	static setReloadDefaultTagMatches() {
-		reloadDefaultTagMatches = true;
-	}
+    static setReloadDefaultTagMatches() {
+        reloadDefaultTagMatches = true;
+    }
+
+    static unsetReloadDefaultTagMatches() {
+        reloadDefaultTagMatches = false;
+    }
 
     _setDefaultMatches() {
         return TagList.getTopRelevantMatches().then((results) => {
@@ -49,7 +53,7 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
         const val = this._sourceInputNode.value;
         //if (!val || /^ *sort:\S+ *$/.test(val)) {
         if (!val) {
-			console.log("reload default matches", reloadDefaultTagMatches);
+            console.log("reload default matches", reloadDefaultTagMatches);
             if (!(this._valueEntered || reloadDefaultTagMatches)) {
                 this._show();
                 return;
@@ -58,8 +62,8 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
             this._activeResult = -1;
             this._setDefaultMatches().then(() => {
                 this._show();
-				this._valueEntered = false;
-				reloadDefaultTagMatches = false;
+                this._valueEntered = false;
+                reloadDefaultTagMatches = false;
             });
             return;
         }

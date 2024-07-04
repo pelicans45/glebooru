@@ -140,6 +140,7 @@ class PostUploadController {
                     if (hasTags) {
                         TagList.refreshRelevant().then(() => {
                             ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
+                            ctx.controller._headerView._autoCompleteControl.constructor.unsetReloadDefaultTagMatches();
                         });
                     }
                 },
