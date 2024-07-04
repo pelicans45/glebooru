@@ -13,6 +13,7 @@ const Tag = require("../models/tag.js");
 const PostMainView = require("../views/post_main_view.js");
 const BasePostController = require("./base_post_controller.js");
 const EmptyView = require("../views/empty_view.js");
+const TagList = require("../models/tag_list.js");
 
 class PostMainController extends BasePostController {
     constructor(ctx, editMode) {
@@ -30,7 +31,7 @@ class PostMainController extends BasePostController {
                     return;
                 }
 
-				/*
+                /*
                 //post.tags = lens.excludeRedundantTags(post.tags);
                 post.tags.splice(
                     0,
@@ -71,7 +72,7 @@ class PostMainController extends BasePostController {
                     this._view.sidebarControl.addEventListener("score", (e) =>
                         this._evtScorePost(e)
                     );
-					/*
+                    /*
                     this._view.sidebarControl.addEventListener(
                         "fitModeChange",
                         (e) => this._evtFitModeChange(e)
@@ -194,6 +195,9 @@ class PostMainController extends BasePostController {
                 this._view.sidebarControl.showSuccess("Post saved");
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
+                if (e.detail.tags && e.detail.tags.length > 0) {
+                    TagList.refreshRelevant();
+                }
             },
             (error) => {
                 this._view.sidebarControl.showError(error.message);

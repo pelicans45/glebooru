@@ -158,6 +158,7 @@ def create_snapshots_for_post(
 @rest.routes.put("/post/(?P<post_id>[^/]+)/?")
 def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     post = _get_post(params)
+    previous_post_tag_count = len(post.tags)
     versions.verify_version(post, ctx)
     versions.bump_version(post)
     if ctx.has_file("content"):
@@ -213,7 +214,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
-    if new_tags:
+    if previous_post_tag_count != len(post.tags):
         tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
 

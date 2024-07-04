@@ -14,7 +14,6 @@ const PoolInputControl = require("./pool_input_control.js");
 const ExpanderControl = require("../controls/expander_control.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
 const PostMetricInputControl = require("./post_metric_input_control.js");
-const TagList = require("../models/tag_list.js");
 
 const template = views.getTemplate("post-edit-sidebar");
 
@@ -514,9 +513,6 @@ class PostEditSidebarControl extends events.EventTarget {
                 },
             })
         );
-		if (this._tagControl.tags.length > 0) {
-			TagList.refreshRelevant();
-		}
     }
 
     get _formNode() {
