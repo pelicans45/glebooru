@@ -45,7 +45,7 @@ class TagMetricView extends events.EventTarget {
     _evtDelete(e) {
         e.preventDefault();
         if (!this._deleteConfirmationNode.checked) {
-            this.showError('Please confirm deletion.')
+            this.showError('Please confirm deletion')
         } else {
             this.dispatchEvent(new CustomEvent('delete', {
                 detail: {tag: this._tag},

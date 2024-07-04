@@ -40,7 +40,7 @@ class PostDetailView extends events.EventTarget {
             if (!this._ctx.canMerge) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to merge posts."
+                    "You don't have privileges to merge posts"
                 );
             } else {
                 this._view = new PostMergeView(ctx);

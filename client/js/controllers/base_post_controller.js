@@ -12,7 +12,7 @@ class BasePostController {
 		/*
         if (!api.hasPrivilege("posts:view")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view posts.");
+            this._view.showError("You don't have privileges to view posts");
             return;
         }
 		*/

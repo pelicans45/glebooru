@@ -17,7 +17,7 @@ class PoolController {
 
         if (!api.hasPrivilege("pools:view")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view pools.");
+            this._view.showError("You don't have privileges to view pools");
             return;
         }
 
@@ -111,7 +111,7 @@ class PoolController {
         }
         e.detail.pool.save().then(
             () => {
-                this._view.showSuccess("Pool saved.");
+                this._view.showSuccess("Pool saved");
                 this._view.enableForm();
             },
             (error) => {
@@ -126,7 +126,7 @@ class PoolController {
         this._view.disableForm();
         e.detail.pool.merge(e.detail.targetPoolId, e.detail.addAlias).then(
             () => {
-                this._view.showSuccess("Pool merged.");
+                this._view.showSuccess("Pool merged");
                 this._view.enableForm();
                 router.replace(
                     uri.formatClientLink(
@@ -151,7 +151,7 @@ class PoolController {
         e.detail.pool.delete().then(
             () => {
                 const ctx = router.show(uri.formatClientLink("pools"));
-                ctx.controller.showSuccess("Pool deleted.");
+                ctx.controller.showSuccess("Pool deleted");
             },
             (error) => {
                 this._view.showError(error.message);

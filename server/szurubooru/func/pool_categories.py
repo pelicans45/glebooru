@@ -33,7 +33,7 @@ def _verify_name_validity(name: str) -> None:
     name_regex = config.config["pool_category_name_regex"]
     if not re.match(name_regex, name):
         raise InvalidPoolCategoryNameError(
-            "Name must satisfy regex %r." % name_regex
+            "Name must satisfy regex %r" % name_regex
         )
 
 
@@ -86,7 +86,7 @@ def create_category(name: str, color: str) -> model.PoolCategory:
 def update_category_name(category: model.PoolCategory, name: str) -> None:
     # assert category
     if not name:
-        raise InvalidPoolCategoryNameError("Name cannot be empty.")
+        raise InvalidPoolCategoryNameError("Name cannot be empty")
     expr = sa.func.lower(model.PoolCategory.name) == name.lower()
     if category.pool_category_id:
         expr = expr & (
@@ -97,10 +97,10 @@ def update_category_name(category: model.PoolCategory, name: str) -> None:
     )
     if already_exists:
         raise PoolCategoryAlreadyExistsError(
-            "A category with this name already exists."
+            "A category with this name already exists"
         )
     if util.value_exceeds_column_size(name, model.PoolCategory.name):
-        raise InvalidPoolCategoryNameError("Name is too long.")
+        raise InvalidPoolCategoryNameError("Name is too long")
     _verify_name_validity(name)
     category.name = name
     cache.remove(DEFAULT_CATEGORY_NAME_CACHE_KEY)
@@ -109,11 +109,11 @@ def update_category_name(category: model.PoolCategory, name: str) -> None:
 def update_category_color(category: model.PoolCategory, color: str) -> None:
     # assert category
     if not color:
-        raise InvalidPoolCategoryColorError("Color cannot be empty.")
+        raise InvalidPoolCategoryColorError("Color cannot be empty")
     if not re.match(r"^#?[0-9a-z]+$", color):
-        raise InvalidPoolCategoryColorError("Invalid color.")
+        raise InvalidPoolCategoryColorError("Invalid color")
     if util.value_exceeds_column_size(color, model.PoolCategory.color):
-        raise InvalidPoolCategoryColorError("Color is too long.")
+        raise InvalidPoolCategoryColorError("Color is too long")
     category.color = color
 
 
@@ -131,7 +131,7 @@ def try_get_category_by_name(
 def get_category_by_name(name: str, lock: bool = False) -> model.PoolCategory:
     category = try_get_category_by_name(name, lock)
     if not category:
-        raise PoolCategoryNotFoundError("Pool category %r not found." % name)
+        raise PoolCategoryNotFoundError("Pool category %r not found" % name)
     return category
 
 
@@ -171,7 +171,7 @@ def try_get_default_category(
 def get_default_category(lock: bool = False) -> model.PoolCategory:
     category = try_get_default_category(lock)
     if not category:
-        raise PoolCategoryNotFoundError("No pool category created yet.")
+        raise PoolCategoryNotFoundError("No pool category created yet")
     return category
 
 
@@ -198,7 +198,7 @@ def set_default_category(category: model.PoolCategory) -> None:
 def delete_category(category: model.PoolCategory) -> None:
     # assert category
     if len(get_all_category_names()) == 1:
-        raise PoolCategoryIsInUseError("Cannot delete the last category.")
+        raise PoolCategoryIsInUseError("Cannot delete the last category")
     if (category.pool_count or 0) > 0:
         raise PoolCategoryIsInUseError(
             "Pool category has some usages and cannot be deleted. "

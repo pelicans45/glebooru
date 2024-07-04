@@ -109,7 +109,7 @@ def parse_time_range(value: str) -> Tuple[datetime, datetime]:
 
     value = value.lower()
     if not value:
-        raise errors.ValidationError("Empty date format.")
+        raise errors.ValidationError("Empty date format")
 
     if value == "today":
         now = datetime.utcnow()
@@ -149,7 +149,7 @@ def parse_time_range(value: str) -> Tuple[datetime, datetime]:
             datetime(year, month, day + 1) - one_second,
         )
 
-    raise errors.ValidationError("Invalid date format: %r." % value)
+    raise errors.ValidationError("Invalid date format: %r" % value)
 
 
 def icase_unique(source: List[str]) -> List[str]:

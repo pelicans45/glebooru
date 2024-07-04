@@ -45,7 +45,7 @@ class UserView extends events.EventTarget {
             if (!this._ctx.canEditAnything) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to edit users."
+                    "You don't have privileges to edit users"
                 );
             } else {
                 this._view = new UserEditView(ctx);
@@ -55,7 +55,7 @@ class UserView extends events.EventTarget {
             if (!this._ctx.canListTokens) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to view user tokens."
+                    "You don't have privileges to view user tokens"
                 );
             } else {
                 this._view = new UserTokensView(ctx);
@@ -67,7 +67,7 @@ class UserView extends events.EventTarget {
             if (!this._ctx.canDelete) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to delete users."
+                    "You don't have privileges to delete users"
                 );
             } else {
                 this._view = new UserDeleteView(ctx);

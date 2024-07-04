@@ -195,7 +195,7 @@ def try_get_user_by_name(name: str) -> Optional[model.User]:
 def get_user_by_name(name: str) -> model.User:
     user = try_get_user_by_name(name)
     if not user:
-        raise UserNotFoundError("User %r not found." % name)
+        raise UserNotFoundError("User %r not found" % name)
     return user
 
 
@@ -213,7 +213,7 @@ def try_get_user_by_name_or_email(name_or_email: str) -> Optional[model.User]:
 def get_user_by_name_or_email(name_or_email: str) -> model.User:
     user = try_get_user_by_name_or_email(name_or_email)
     if not user:
-        raise UserNotFoundError("User %r not found." % name_or_email)
+        raise UserNotFoundError("User %r not found" % name_or_email)
     return user
 
 
@@ -235,18 +235,18 @@ def create_user(name: str, password: str, email: str) -> model.User:
 def update_user_name(user: model.User, name: str) -> None:
     # assert user
     if not name:
-        raise InvalidUserNameError("Name cannot be empty.")
+        raise InvalidUserNameError("Name cannot be empty")
     if util.value_exceeds_column_size(name, model.User.name):
-        raise InvalidUserNameError("Username is too long.")
+        raise InvalidUserNameError("Username is too long")
     name = name.strip()
     name_regex = config.config["user_name_regex"]
     if not re.match(name_regex, name):
         raise InvalidUserNameError(
-            "Username %r must satisfy regex %r." % (name, name_regex)
+            "Username %r must satisfy regex %r" % (name, name_regex)
         )
     other_user = try_get_user_by_name(name)
     if other_user and other_user.user_id != user.user_id:
-        raise UserAlreadyExistsError("User %r already exists." % name)
+        raise UserAlreadyExistsError("User %r already exists" % name)
     if user.name and files.has(get_avatar_path(user.name)):
         files.move(get_avatar_path(user.name), get_avatar_path(name))
     user.name = name
@@ -255,11 +255,11 @@ def update_user_name(user: model.User, name: str) -> None:
 def update_user_password(user: model.User, password: str) -> None:
     # assert user
     if not password:
-        raise InvalidPasswordError("Password cannot be empty.")
+        raise InvalidPasswordError("Password cannot be empty")
     password_regex = config.config["password_regex"]
     if not re.match(password_regex, password):
         raise InvalidPasswordError(
-            "Password must satisfy regex %r." % password_regex
+            "Password must satisfy regex %r" % password_regex
         )
     user.password_salt = auth.create_password()
     password_hash, revision = auth.get_password_hash(
@@ -273,9 +273,9 @@ def update_user_email(user: model.User, email: str) -> None:
     # assert user
     email = email.strip()
     if util.value_exceeds_column_size(email, model.User.email):
-        raise InvalidEmailError("Email is too long.")
+        raise InvalidEmailError("Email is too long")
     if not util.is_valid_email(email):
-        raise InvalidEmailError("Email is invalid.")
+        raise InvalidEmailError("Email is invalid")
     user.email = email or None
 
 
@@ -284,18 +284,18 @@ def update_user_rank(
 ) -> None:
     # assert user
     if not rank:
-        raise InvalidRankError("Rank cannot be empty.")
+        raise InvalidRankError("Rank cannot be empty")
     rank = util.flip(auth.RANK_MAP).get(rank.strip(), None)
     all_ranks = list(auth.RANK_MAP.values())
     if not rank:
-        raise InvalidRankError("Rank can be either of %r." % all_ranks)
+        raise InvalidRankError("Rank can be either of %r" % all_ranks)
     if rank in (model.User.RANK_ANONYMOUS, model.User.RANK_NOBODY):
-        raise InvalidRankError("Rank %r cannot be used." % auth.RANK_MAP[rank])
+        raise InvalidRankError("Rank %r cannot be used" % auth.RANK_MAP[rank])
     if (
         all_ranks.index(auth_user.rank) < all_ranks.index(rank)
         and get_user_count() > 0
     ):
-        raise errors.AuthError("Trying to set higher rank than your own.")
+        raise errors.AuthError("Trying to set higher rank than your own")
     user.rank = rank
 
 
@@ -311,7 +311,7 @@ def update_user_avatar(
         if not avatar_content:
             if files.has(avatar_path):
                 return
-            raise InvalidAvatarError("Avatar content missing.")
+            raise InvalidAvatarError("Avatar content missing")
         image = images.Image(avatar_content)
         image.resize_fill(
             int(config.config["thumbnails"]["avatar_width"]),
@@ -320,7 +320,7 @@ def update_user_avatar(
         files.save(avatar_path, image.to_png())
     else:
         raise InvalidAvatarError(
-            "Avatar style %r is invalid. Valid avatar styles: %r."
+            "Avatar style %r is invalid. Valid avatar styles: %r"
             % (avatar_style, ["gravatar", "manual"])
         )
 

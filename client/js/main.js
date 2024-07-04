@@ -112,7 +112,7 @@ Promise.resolve()
 if (config.environment === "development") {
     const ws = new WebSocket(`ws://${location.hostname}:9999`);
     ws.addEventListener("open", function (event) {
-        console.log("Live-reloading websocket connected.");
+        console.log("Live-reloading websocket connected");
     });
     ws.addEventListener("message", (event) => {
         console.log(event);

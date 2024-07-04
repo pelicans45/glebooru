@@ -4,7 +4,7 @@
             <li>
                 <%= ctx.makeCheckbox({
                     name: 'confirm-deletion',
-                    text: 'I confirm that I want to delete this account.',
+                    text: 'I confirm that I want to delete this account',
                     required: true,
                 }) %>
             </li>

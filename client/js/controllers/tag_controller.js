@@ -16,7 +16,7 @@ class TagController {
         topNavigation.activate("tags");
         if (!api.hasPrivilege("tags:view")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view tags.");
+            this._view.showError("You don't have privileges to view tags");
             return;
         }
 
@@ -118,7 +118,7 @@ class TagController {
         }
         e.detail.tag.save().then(
             () => {
-                this._view.showSuccess("Tag saved.");
+                this._view.showSuccess("Tag saved");
                 this._view.enableForm();
             },
             (error) => {
@@ -138,7 +138,7 @@ class TagController {
 
         e.detail.tag.save().then(
             () => {
-                this._view.showSuccess("Metric updated.");
+                this._view.showSuccess("Metric updated");
                 this._view.enableForm();
             },
             (error) => {
@@ -153,7 +153,7 @@ class TagController {
         this._view.disableForm();
         e.detail.tag.deleteMetric().then(
             () => {
-                this._view.showSuccess("Metric deleted.");
+                this._view.showSuccess("Metric deleted");
                 this._view.enableForm();
             },
             (error) => {
@@ -168,7 +168,7 @@ class TagController {
         this._view.disableForm();
         e.detail.tag.merge(e.detail.targetTagName, e.detail.addAlias).then(
             () => {
-                this._view.showSuccess("Tag merged.");
+                this._view.showSuccess("Tag merged");
                 this._view.enableForm();
                 router.replace(
                     uri.formatClientLink(
@@ -193,7 +193,7 @@ class TagController {
         e.detail.tag.delete().then(
             () => {
                 const ctx = router.show(uri.formatClientLink("tags"));
-                ctx.controller.showSuccess("Tag deleted.");
+                ctx.controller.showSuccess("Tag deleted");
             },
             (error) => {
                 this._view.showError(error.message);

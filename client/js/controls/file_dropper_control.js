@@ -142,10 +142,10 @@ class FileDropperControl extends events.EventTarget {
         e.preventDefault();
         this._dropperNode.classList.remove("active");
         if (!e.dataTransfer.files.length) {
-            window.alert("Only files are supported.");
+            window.alert("Only files are supported");
         }
         if (!this._options.allowMultiple && e.dataTransfer.files.length > 1) {
-            window.alert("Cannot select multiple files.");
+            window.alert("Cannot select multiple files");
         }
         this._emitFiles(e.dataTransfer.files);
     }
@@ -162,7 +162,7 @@ class FileDropperControl extends events.EventTarget {
 
         if (fileList.length > 0) {
             if (!this._options.allowMultiple && fileList.length > 1) {
-                window.alert("Cannot select multiple files.");
+                window.alert("Cannot select multiple files");
             } else {
                 this._emitFiles(fileList);
             }
@@ -183,7 +183,7 @@ class FileDropperControl extends events.EventTarget {
 
         if (urls.length > 0) {
             if (!this._options.allowMultiple && urlList.length > 1) {
-                window.alert("Cannot select multiple URLs.");
+                window.alert("Cannot select multiple URLs");
             } else {
                 this._emitUrls(urls);
             }

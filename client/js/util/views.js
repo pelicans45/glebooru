@@ -243,7 +243,7 @@ function getMetricSorterUrl(id, parameters) {
 function makePostLink(id, includeHash) {
     let text = id;
     if (includeHash) {
-        text = "@" + id;
+        text = "#" + id;
     }
     return api.hasPrivilege("posts:view")
         ? makeElement(
@@ -427,7 +427,7 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
-	const timeout = className === "error" ? 6000 : 2500;
+	const timeout = className === "error" ? 8000 : 4000;
     setTimeout(() => {
         wrapperNode.remove();
     }, timeout);

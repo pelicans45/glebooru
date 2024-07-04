@@ -70,7 +70,7 @@ class Image:
                 ] + cli
         content = self._execute(cli, ignore_error_if_data=True)
         if not content:
-            raise errors.ProcessingError("Error while resizing image.")
+            raise errors.ProcessingError("Error while resizing image")
         self.content = content
         self._reload_info()
 
@@ -312,5 +312,5 @@ class Image:
         # assert "format" in self.info
         # assert "streams" in self.info
         if len(self.info["streams"]) < 1:
-            logging.warning("The video contains no video streams.")
-            raise errors.ProcessingError("The video contains no video streams.")
+            logging.warning("The video contains no video streams")
+            raise errors.ProcessingError("The video contains no video streams")

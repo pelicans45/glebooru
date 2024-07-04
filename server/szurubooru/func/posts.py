@@ -408,7 +408,7 @@ def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
 def get_post_by_id(post_id: int) -> model.Post:
     post = try_get_post_by_id(post_id)
     if not post:
-        raise PostNotFoundError("Post %r not found." % post_id)
+        raise PostNotFoundError("Post %r not found" % post_id)
     return post
 
 
@@ -462,7 +462,7 @@ def update_post_safety(post: model.Post, safety: str) -> None:
     safety = util.flip(SAFETY_MAP).get(safety, None)
     if not safety:
         raise InvalidPostSafetyError(
-            "Safety can be either of %r." % list(SAFETY_MAP.values())
+            "Safety can be either of %r" % list(SAFETY_MAP.values())
         )
     post.safety = safety
 
@@ -470,7 +470,7 @@ def update_post_safety(post: model.Post, safety: str) -> None:
 def update_post_source(post: model.Post, source: Optional[str]) -> None:
     # assert post
     if util.value_exceeds_column_size(source, model.Post.source):
-        raise InvalidPostSourceError("Source is too long.")
+        raise InvalidPostSourceError("Source is too long")
     post.source = source or None
 
 
@@ -594,7 +594,7 @@ def generate_post_signature(post: model.Post, content: bytes) -> None:
     except errors.ProcessingError:
         if not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError(
-                "Unable to generate image hash data."
+                "Unable to generate image hash data"
             )
 
 
@@ -641,7 +641,7 @@ def update_all_md5_checksums() -> None:
 def update_post_content(post: model.Post, content: Optional[bytes], content_changed=False) -> None:
     # assert post
     if not content:
-        raise InvalidPostContentError("Post content missing.")
+        raise InvalidPostContentError("Post content missing")
 
     update_signature = False
     post.mime_type = mime.get_mime_type(content)
@@ -761,7 +761,7 @@ def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
     try:
         new_post_ids = [int(id) for id in new_post_ids]
     except ValueError:
-        raise InvalidPostRelationError("A relation must be numeric post ID.")
+        raise InvalidPostRelationError("A relation must be a numeric post ID")
     old_posts = get_post_relations(post.post_id)
     old_post_ids = [int(p.child_id) for p in old_posts]
     if new_post_ids:
@@ -773,9 +773,9 @@ def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
     else:
         new_posts = []
     if len(new_posts) != len(new_post_ids):
-        raise InvalidPostRelationError("One of relations does not exist.")
+        raise InvalidPostRelationError("One of relations does not exist")
     if post.post_id in new_post_ids:
-        raise InvalidPostRelationError("Post cannot relate to itself.")
+        raise InvalidPostRelationError("Post cannot relate to itself")
 
     relations_to_del = [p for p in old_posts if p.child_id not in new_post_ids]
     relations_to_add = [p for p in new_posts if p.post_id not in old_post_ids]
@@ -793,39 +793,39 @@ def update_post_notes(post: model.Post, notes: Any) -> None:
     for note in notes:
         for field in ("polygon", "text"):
             if field not in note:
-                raise InvalidPostNoteError("Note is missing %r field." % field)
+                raise InvalidPostNoteError("Note is missing %r field" % field)
         if not note["text"]:
-            raise InvalidPostNoteError("A note's text cannot be empty.")
+            raise InvalidPostNoteError("A note's text cannot be empty")
         if not isinstance(note["polygon"], (list, tuple)):
             raise InvalidPostNoteError(
-                "A note's polygon must be a list of points."
+                "A note's polygon must be a list of points"
             )
         if len(note["polygon"]) < 3:
             raise InvalidPostNoteError(
-                "A note's polygon must have at least 3 points."
+                "A note's polygon must have at least 3 points"
             )
         for point in note["polygon"]:
             if not isinstance(point, (list, tuple)):
                 raise InvalidPostNoteError(
-                    "A note's polygon point must be a list of length 2."
+                    "A note's polygon point must be a list of length 2"
                 )
             if len(point) != 2:
                 raise InvalidPostNoteError(
-                    "A point in note's polygon must have two coordinates."
+                    "A point in note's polygon must have two coordinates"
                 )
             try:
                 pos_x = float(point[0])
                 pos_y = float(point[1])
                 if not 0 <= pos_x <= 1 or not 0 <= pos_y <= 1:
                     raise InvalidPostNoteError(
-                        "All points must fit in the image (0..1 range)."
+                        "All points must fit in the image (0..1 range)"
                     )
             except ValueError:
                 raise InvalidPostNoteError(
-                    "A point in note's polygon must be numeric."
+                    "A point in note's polygon must be numeric"
                 )
         if util.value_exceeds_column_size(note["text"], model.PostNote.text):
-            raise InvalidPostNoteError("Note text is too long.")
+            raise InvalidPostNoteError("Note text is too long")
         post.notes.append(
             model.PostNote(polygon=note["polygon"], text=str(note["text"]))
         )
@@ -838,7 +838,7 @@ def update_post_flags(post: model.Post, flags: List[str]) -> None:
         flag = util.flip(FLAG_MAP).get(flag, None)
         if not flag:
             raise InvalidPostFlagError(
-                "Flag must be one of %r." % list(FLAG_MAP.values())
+                "Flag must be one of %r" % list(FLAG_MAP.values())
             )
         target_flags.append(flag)
     post.flags = target_flags
@@ -864,7 +864,7 @@ def merge_posts(
     # assert source_post
     # assert target_post
     if source_post.post_id == target_post.post_id:
-        raise InvalidPostRelationError("Cannot merge post with itself.")
+        raise InvalidPostRelationError("Cannot merge post with itself")
 
     def merge_tables(
         table: model.Base,

@@ -18,7 +18,7 @@ class SettingsController {
     _evtSubmit(e) {
         this._view.clearMessages();
         settings.save(e.detail);
-        this._view.showSuccess("Settings saved.");
+        this._view.showSuccess("Settings saved");
     }
 }
 

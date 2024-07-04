@@ -22,7 +22,7 @@ class UserController {
             !api.isLoggedIn({ name: userName })
         ) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view users.");
+            this._view.showError("You don't have privileges to view users");
             return;
         }
 
@@ -213,7 +213,7 @@ class UserController {
             })
             .then(
                 () => {
-                    this._view.showSuccess("Settings updated.");
+                    this._view.showSuccess("Settings updated");
                     this._view.enableForm();
                 },
                 (error) => {
@@ -235,10 +235,10 @@ class UserController {
                 }
                 if (api.hasPrivilege("users:list")) {
                     const ctx = router.show(uri.formatClientLink("users"));
-                    ctx.controller.showSuccess("Account deleted.");
+                    ctx.controller.showSuccess("Account deleted");
                 } else {
                     const ctx = router.show(uri.formatClientLink());
-                    ctx.controller.showSuccess("Account deleted.");
+                    ctx.controller.showSuccess("Account deleted");
                 }
             },
             (error) => {
@@ -265,7 +265,7 @@ class UserController {
                     )
                 );
                 ctx.controller.showSuccess(
-                    "Token " + response.token + " created."
+                    "Token " + response.token + " created"
                 );
             },
             (error) => {
@@ -291,7 +291,7 @@ class UserController {
                         )
                     );
                     ctx.controller.showSuccess(
-                        "Token " + e.detail.userToken.token + " deleted."
+                        "Token " + e.detail.userToken.token + " deleted"
                     );
                 },
                 (error) => {
@@ -320,7 +320,7 @@ class UserController {
                     )
                 );
                 ctx.controller.showSuccess(
-                    "Token " + response.token + " updated."
+                    "Token " + response.token + " updated"
                 );
             },
             (error) => {

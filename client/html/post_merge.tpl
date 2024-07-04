@@ -10,7 +10,7 @@
                 <p>Tags, relations, scores, favorites and comments will be
                 merged. All other properties need to be handled manually.</p>
 
-                <%= ctx.makeCheckbox({required: true, text: 'I confirm that I want to merge these posts.'}) %>
+                <%= ctx.makeCheckbox({required: true, text: 'I confirm that I want to merge these posts'}) %>
             </li>
         </ul>
 

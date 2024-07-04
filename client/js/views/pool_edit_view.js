@@ -67,7 +67,7 @@ class PoolEditView extends events.EventTarget {
 
         if (!list.length) {
             this._namesFieldNode.setCustomValidity(
-                "Pools must have at least one name."
+                "Pools must have at least one name"
             );
             return;
         }
@@ -75,7 +75,7 @@ class PoolEditView extends events.EventTarget {
         for (let item of list) {
             if (!regex.test(item)) {
                 this._namesFieldNode.setCustomValidity(
-                    `Pool name "${item}" contains invalid symbols.`
+                    `Pool name "${item}" contains invalid symbols`
                 );
                 return;
             }

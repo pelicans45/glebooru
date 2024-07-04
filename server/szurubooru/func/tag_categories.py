@@ -33,7 +33,7 @@ def _verify_name_validity(name: str) -> None:
     name_regex = config.config["tag_category_name_regex"]
     if not re.match(name_regex, name):
         raise InvalidTagCategoryNameError(
-            "Name must satisfy regex %r." % name_regex
+            "Name must satisfy regex %r" % name_regex
         )
 
 
@@ -91,7 +91,7 @@ def create_category(name: str, color: str, order: int) -> model.TagCategory:
 def update_category_name(category: model.TagCategory, name: str) -> None:
     # assert category
     if not name:
-        raise InvalidTagCategoryNameError("Name cannot be empty.")
+        raise InvalidTagCategoryNameError("Name cannot be empty")
     expr = sa.func.lower(model.TagCategory.name) == name.lower()
     if category.tag_category_id:
         expr = expr & (
@@ -102,10 +102,10 @@ def update_category_name(category: model.TagCategory, name: str) -> None:
     )
     if already_exists:
         raise TagCategoryAlreadyExistsError(
-            "A category with this name already exists."
+            "A category with this name already exists"
         )
     if util.value_exceeds_column_size(name, model.TagCategory.name):
-        raise InvalidTagCategoryNameError("Name is too long.")
+        raise InvalidTagCategoryNameError("Name is too long")
     _verify_name_validity(name)
     category.name = name
     cache.remove(DEFAULT_CATEGORY_NAME_CACHE_KEY)
@@ -114,11 +114,11 @@ def update_category_name(category: model.TagCategory, name: str) -> None:
 def update_category_color(category: model.TagCategory, color: str) -> None:
     # assert category
     if not color:
-        raise InvalidTagCategoryColorError("Color cannot be empty.")
+        raise InvalidTagCategoryColorError("Color cannot be empty")
     if not re.match(r"^#?[0-9a-z]+$", color):
-        raise InvalidTagCategoryColorError("Invalid color.")
+        raise InvalidTagCategoryColorError("Invalid color")
     if util.value_exceeds_column_size(color, model.TagCategory.color):
-        raise InvalidTagCategoryColorError("Color is too long.")
+        raise InvalidTagCategoryColorError("Color is too long")
     category.color = color
 
 
@@ -141,7 +141,7 @@ def try_get_category_by_name(
 def get_category_by_name(name: str, lock: bool = False) -> model.TagCategory:
     category = try_get_category_by_name(name, lock)
     if not category:
-        raise TagCategoryNotFoundError("Tag category %r not found." % name)
+        raise TagCategoryNotFoundError("Tag category %r not found" % name)
     return category
 
 
@@ -181,7 +181,7 @@ def try_get_default_category(
 def get_default_category(lock: bool = False) -> model.TagCategory:
     category = try_get_default_category(lock)
     if not category:
-        raise TagCategoryNotFoundError("No tag category created yet.")
+        raise TagCategoryNotFoundError("No tag category created yet")
     return category
 
 
@@ -208,10 +208,10 @@ def set_default_category(category: model.TagCategory) -> None:
 def delete_category(category: model.TagCategory) -> None:
     # assert category
     if len(get_all_category_names()) == 1:
-        raise TagCategoryIsInUseError("Cannot delete the last category.")
+        raise TagCategoryIsInUseError("Cannot delete the last category")
     if (category.tag_count or 0) > 0:
         raise TagCategoryIsInUseError(
             "Tag category has some usages and cannot be deleted. "
-            + "Please remove this category from relevant tags first.."
+            + "Please remove this category from relevant tags first."
         )
     db.session.delete(category)

@@ -268,11 +268,11 @@ class PostUploadView extends events.EventTarget {
             if (duplicatesFound < uploadables.length) {
                 message =
                     "Some of the files were already added " +
-                    "and have been skipped.";
+                    "and have been skipped";
             } else if (duplicatesFound === 1) {
-                message = "This file was already added.";
+                message = "This file was already added";
             } else {
-                message = "These files were already added.";
+                message = "These files were already added";
             }
             alert(message);
         }

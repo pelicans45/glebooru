@@ -151,7 +151,7 @@ class Executor:
         for anon_token in search_query.anonymous_tokens:
             if not self.config.anonymous_filter:
                 raise errors.SearchError(
-                    "Anonymous tokens are not valid in this context."
+                    "Anonymous tokens are not valid in this context"
                 )
             db_query = self.config.anonymous_filter(
                 db_query, anon_token.criterion, anon_token.negated

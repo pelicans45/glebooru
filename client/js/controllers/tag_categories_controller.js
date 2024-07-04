@@ -15,7 +15,7 @@ class TagCategoriesController {
         if (!api.hasPrivilege("tag_categories:list")) {
             this._view = new EmptyView();
             this._view.showError(
-                "You don't have privileges to view tag categories."
+                "You don't have privileges to view tag categories"
             );
             return;
         }
@@ -56,7 +56,7 @@ class TagCategoriesController {
             () => {
                 tags.refreshCategoryColorMap();
                 this._view.enableForm();
-                this._view.showSuccess("Changes saved.");
+                this._view.showSuccess("Changes saved");
             },
             (error) => {
                 this._view.enableForm();

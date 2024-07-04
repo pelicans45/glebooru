@@ -14,7 +14,7 @@ class PostContentControl {
         this._hostNode = hostNode;
         this._template = views.getTemplate("post-content");
 
-		/*
+        /*
         let fitMode = settings.get().fitMode;
         if (typeof fitFunctionOverride !== "undefined") {
             fitMode = fitFunctionOverride;
@@ -53,7 +53,11 @@ class PostContentControl {
         downloadListener = (e) => {
             if (
                 e.key === "s" &&
-                !["INPUT", "TEXTAREA"].includes(e.target.tagName)
+                !(
+                    e.ctrlKey ||
+                    e.metaKey ||
+                    ["INPUT", "TEXTAREA"].includes(e.target.tagName)
+                )
             ) {
                 misc.downloadURL(post.contentUrl, post.getDownloadFilename());
                 e.preventDefault();
@@ -155,7 +159,7 @@ class PostContentControl {
     _install() {
         this._reinstall();
         // Don't auto-resize on mobile, to prevent size jerk when scrolling
-		/*
+        /*
         if (window.innerWidth > 1000) {
             optimizedResize.add(() => this._refreshSize());
         }
@@ -170,7 +174,7 @@ class PostContentControl {
             post: this._post,
             autoplay: settings.get().autoplayVideos,
         });
-		/*
+        /*
         if (settings.get().transparencyGrid) {
             newNode.classList.add("transparency-grid");
         }

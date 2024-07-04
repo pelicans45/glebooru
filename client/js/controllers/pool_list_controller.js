@@ -28,7 +28,7 @@ class PoolListController {
 
         if (!api.hasPrivilege("pools:list")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view pools.");
+            this._view.showError("You don't have privileges to view pools");
             return;
         }
 
@@ -62,7 +62,7 @@ class PoolListController {
         e.detail.pool.save().then(
             () => {
                 this._installView(e.detail.pool, "edit");
-                this._view.showSuccess("Pool created.");
+                this._view.showSuccess("Pool created");
                 router.replace(
                     uri.formatClientLink("pool", e.detail.pool.id, "edit"),
                     null,

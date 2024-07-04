@@ -17,7 +17,7 @@ const TagList = require("../models/tag_list.js");
 
 const genericErrorMessage =
     "One or more posts needs your attention; " +
-    'click "resume upload" when you\'re ready.';
+    'click "resume upload" when you\'re ready';
 
 class PostUploadController {
     constructor() {
@@ -28,12 +28,12 @@ class PostUploadController {
 
         if (!api.hasPrivilege("posts:create")) {
             this._view = new EmptyView();
-            //const msg = "You don't have privileges to upload posts.";
+            //const msg = "You don't have privileges to upload posts";
             /*
             const msg =
                 "A privileged account is required to upload images. [Register](/register) an account if you don't have one and join [our Discord](/discord/) to request upload permissions.";
 			*/
-            const msg = "[Register](/register) an account to upload images.";
+            const msg = "[Register](/register) an account to upload images";
             this._view.showError(msg);
             return;
         }
@@ -136,7 +136,7 @@ class PostUploadController {
                     this._view.clearMessages();
                     misc.disableExitConfirmation();
                     const ctx = router.show(uri.formatClientLink(""));
-                    ctx.controller.showSuccess("Uploaded.");
+                    ctx.controller.showSuccess("Uploaded");
                     if (hasTags) {
                         TagList.refreshRelevant();
                     }
@@ -278,11 +278,10 @@ class PostUploadController {
         post.flags = uploadable.flags;
 
         if (lens.hostnameFilter) {
-			console.log(lens.siteTags);
             for (const tag of lens.siteTags) {
                 if (!uploadable.tags.includes(tag)) {
                     uploadable.tags.push(tag);
-                } else if (tag === lens.hostnameFilter) {
+                } else if (tag === lens.hostnameFilter && lens.siteTags.length > 1) {
                     alert(
                         `There is no need to add the "${lens.hostnameFilter}" tag when uploading to ${location.hostname}. It is added automatically.`
                     );

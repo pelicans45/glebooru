@@ -38,7 +38,7 @@
                     <form class='token' data-token-id='<%= index %>'>
                         <% if (token.isCurrentAuthToken) { %>
                             <input type='submit' value='Delete and logout'
-                                title='This token is used to authenticate this client, deleting it will force a logout.'/>
+                                title='This token is used to authenticate this client; deleting it will force a logout'/>
                         <% } else { %>
                             <input type='submit' value='Delete'/>
                         <% } %>

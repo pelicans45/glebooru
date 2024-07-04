@@ -46,10 +46,10 @@ class InvalidPoolNonexistentPostError(errors.ValidationError):
 
 def _verify_name_validity(name: str) -> None:
     if util.value_exceeds_column_size(name, model.PoolName.name):
-        raise InvalidPoolNameError("Name is too long.")
+        raise InvalidPoolNameError("Name is too long")
     name_regex = config.config["pool_name_regex"]
     if not re.match(name_regex, name):
-        raise InvalidPoolNameError("Name must satisfy regex %r." % name_regex)
+        raise InvalidPoolNameError("Name must satisfy regex %r" % name_regex)
 
 
 def _get_names(pool: model.Pool) -> List[str]:
@@ -169,7 +169,7 @@ def try_get_pool_by_id(pool_id: int) -> Optional[model.Pool]:
 def get_pool_by_id(pool_id: int) -> model.Pool:
     pool = try_get_pool_by_id(pool_id)
     if not pool:
-        raise PoolNotFoundError("Pool %r not found." % pool_id)
+        raise PoolNotFoundError("Pool %r not found" % pool_id)
     return pool
 
 
@@ -185,7 +185,7 @@ def try_get_pool_by_name(name: str) -> Optional[model.Pool]:
 def get_pool_by_name(name: str) -> model.Pool:
     pool = try_get_pool_by_name(name)
     if not pool:
-        raise PoolNotFoundError("Pool %r not found." % name)
+        raise PoolNotFoundError("Pool %r not found" % name)
     return pool
 
 
@@ -239,7 +239,7 @@ def merge_pools(source_pool: model.Pool, target_pool: model.Pool) -> None:
     # assert source_pool
     # assert target_pool
     if source_pool.pool_id == target_pool.pool_id:
-        raise InvalidPoolRelationError("Cannot merge pool with itself.")
+        raise InvalidPoolRelationError("Cannot merge pool with itself")
 
     def merge_pool_posts(source_pool_id: int, target_pool_id: int) -> None:
         alias1 = model.PoolPost
@@ -280,7 +280,7 @@ def update_pool_names(pool: model.Pool, names: List[str]) -> None:
     # assert pool
     names = util.icase_unique([name for name in names if name])
     if not len(names):
-        raise InvalidPoolNameError("At least one name must be specified.")
+        raise InvalidPoolNameError("At least one name must be specified")
     for name in names:
         _verify_name_validity(name)
 
@@ -293,7 +293,7 @@ def update_pool_names(pool: model.Pool, names: List[str]) -> None:
     existing_pools = db.session.query(model.PoolName).filter(expr).all()
     if len(existing_pools):
         raise PoolAlreadyExistsError(
-            "One of names is already used by another pool."
+            "One of names is already used by another pool"
         )
 
     # remove unwanted items
@@ -315,7 +315,7 @@ def update_pool_names(pool: model.Pool, names: List[str]) -> None:
 def update_pool_description(pool: model.Pool, description: str) -> None:
     # assert pool
     if util.value_exceeds_column_size(description, model.Pool.description):
-        raise InvalidPoolDescriptionError("Description is too long.")
+        raise InvalidPoolDescriptionError("Description is too long")
     pool.description = description or None
 
 

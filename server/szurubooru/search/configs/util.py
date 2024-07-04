@@ -97,7 +97,7 @@ def apply_num_criterion_to_column(
             raise ValueError("num criterion error")
     except ValueError:
         raise errors.SearchError(
-            "Criterion value %r must be a number." % (criterion,)
+            "Criterion value %r must be a number" % (criterion,)
         )
     return expr
 

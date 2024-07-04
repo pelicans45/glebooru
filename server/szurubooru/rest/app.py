@@ -50,7 +50,7 @@ def _create_context(env: Dict[str, Any]) -> context.Context:
     if "multipart" in env.get("CONTENT_TYPE", ""):
         form = cgi.FieldStorage(fp=env["wsgi.input"], environ=env)
         if not form.list:
-            raise errors.HttpBadRequest("ValidationError", "No files attached.")
+            raise errors.HttpBadRequest("ValidationError", "No files attached")
         body = form.getvalue("metadata")
         for key in form:
             files[key] = form.getvalue(key)
@@ -83,7 +83,7 @@ def application(
         accept_header = ctx.get_header("Accept")
         if "application/json" not in accept_header and "*/*" not in accept_header:
             raise errors.HttpNotAcceptable(
-                "ValidationError", "This API only supports JSON responses."
+                "ValidationError", "This API only supports JSON responses"
             )
         """
 
@@ -100,7 +100,7 @@ def application(
         else:
             raise errors.HttpNotFound(
                 "ValidationError",
-                "Requested path " + ctx.url + " was not found.",
+                "Requested path " + ctx.url + " was not found",
             )
 
         try:

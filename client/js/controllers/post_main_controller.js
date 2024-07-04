@@ -137,7 +137,7 @@ class PostMainController extends BasePostController {
         this._view.sidebarControl.clearMessages();
         e.detail.post.feature().then(
             () => {
-                this._view.sidebarControl.showSuccess("Post featured.");
+                this._view.sidebarControl.showSuccess("Post featured");
                 this._view.sidebarControl.enableForm();
             },
             (error) => {
@@ -158,7 +158,7 @@ class PostMainController extends BasePostController {
             () => {
                 misc.disableExitConfirmation();
                 const ctx = router.show(uri.formatClientLink(""));
-                ctx.controller.showSuccess("Post deleted.");
+                ctx.controller.showSuccess("Post deleted");
             },
             (error) => {
                 this._view.sidebarControl.showError(error.message);
@@ -191,7 +191,7 @@ class PostMainController extends BasePostController {
         }
         post.save().then(
             () => {
-                this._view.sidebarControl.showSuccess("Post saved.");
+                this._view.sidebarControl.showSuccess("Post saved");
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
             },

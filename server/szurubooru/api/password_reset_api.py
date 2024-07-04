@@ -59,7 +59,7 @@ def finish_password_reset(
     good_token = auth.generate_authentication_token(user)
     token = ctx.get_param_as_string("token")
     if _hash(token) != _hash(good_token):
-        raise errors.ValidationError("Invalid password reset token.")
+        raise errors.ValidationError("Invalid password reset token")
     new_password = users.reset_user_password(user)
     versions.bump_version(user)
     ctx.session.commit()

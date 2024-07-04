@@ -434,8 +434,8 @@ class PostEditSidebarControl extends events.EventTarget {
         document.body.removeChild(textarea);
         alert(
             success
-                ? "Notes copied to clipboard."
-                : "Failed to copy the text to clipboard. Sorry."
+                ? "Notes copied to clipboard"
+                : "Failed to copy the text to clipboard"
         );
     }
 

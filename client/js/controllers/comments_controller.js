@@ -18,7 +18,7 @@ class CommentsController {
         if (!api.hasPrivilege("comments:list")) {
             this._view = new EmptyView();
             this._view.showError(
-                "You don't have privileges to view comments."
+                "You don't have privileges to view comments"
             );
             return;
         }

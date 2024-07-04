@@ -45,7 +45,7 @@ class PoolView extends events.EventTarget {
             if (!this._ctx.canEditAnything) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to edit pools."
+                    "You don't have privileges to edit pools"
                 );
             } else {
                 this._view = new PoolEditView(ctx);
@@ -55,7 +55,7 @@ class PoolView extends events.EventTarget {
             if (!this._ctx.canMerge) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to merge pools."
+                    "You don't have privileges to merge pools"
                 );
             } else {
                 this._view = new PoolMergeView(ctx);
@@ -65,7 +65,7 @@ class PoolView extends events.EventTarget {
             if (!this._ctx.canDelete) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to delete pools."
+                    "You don't have privileges to delete pools"
                 );
             } else {
                 this._view = new PoolDeleteView(ctx);

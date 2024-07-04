@@ -137,7 +137,7 @@ function minifyHtml(html) {
 function bundleHtml(domain, data) {
     let baseHtml = readTextFile("./html/index.html").replace(
         "<!-- Base HTML Placeholder -->",
-        `<title>${data.name}</title><base id="base" href="${baseUrl()}"/>`
+        `<title>${data.name}</title><base id="base" href="${baseUrl()}"/><meta name="description" content="${data.meta_description || ""}"/>`
     );
 
     baseHtml = baseHtml.replaceAll(

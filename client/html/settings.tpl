@@ -1,5 +1,5 @@
 <div class='content-wrapper' id='settings'>
-    <form onsubmit="setTimeout(() => location.reload(), 200)">
+    <form onsubmit="setTimeout(() => location.reload(), 600)">
         <strong style="font-size: 110%">Settings</strong>
         <p style="display: none">(These settings only apply to your browser.)</p>
         <ul class='input'>

@@ -3,6 +3,7 @@ main_domain: booru
 booru:
   name: booru dev
   description: booru dev
+  meta_description: Test description
   query: ""
   #color: "#435dbd" ##6a86ea
   color: "#6a86ea"
@@ -13,6 +14,7 @@ bagg:
   description: booru aggregation dev
   query: agg
   color: "#00ff00"
+  tips: []
 
 bfilter:
   name: booru filter dev

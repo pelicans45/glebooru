@@ -29,7 +29,7 @@ class TagListController {
 
         if (!api.hasPrivilege("tags:list")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view tags.");
+            this._view.showError("You don't have privileges to view tags");
             return;
         }
 

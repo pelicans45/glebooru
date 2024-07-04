@@ -155,7 +155,7 @@ class EndlessPageView {
             return;
         }
 
-        const scrollThreshold = topPageNode.scrollHeight * 0.2;
+        const scrollThreshold = topPageNode.scrollHeight * 0.35;
 
         if (this.minOffsetShown > 0 && window.scrollY < scrollThreshold) {
             this._loadPage(

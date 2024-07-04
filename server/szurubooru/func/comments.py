@@ -84,7 +84,7 @@ def get_comment_by_id(comment_id: int) -> model.Comment:
     comment = try_get_comment_by_id(comment_id)
     if comment:
         return comment
-    raise CommentNotFoundError("Comment %r not found." % comment_id)
+    raise CommentNotFoundError("Comment %r not found" % comment_id)
 
 
 def create_comment(
@@ -101,5 +101,5 @@ def create_comment(
 def update_comment_text(comment: model.Comment, text: str) -> None:
     # assert comment
     if not text:
-        raise EmptyCommentTextError("Comment text cannot be empty.")
+        raise EmptyCommentTextError("Comment text cannot be empty")
     comment.text = text

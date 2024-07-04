@@ -137,7 +137,7 @@ function enableExitConfirmation() {
     window.onbeforeunload = (e) => {
         return (
             "Are you sure you want to leave? " +
-            "Data you've entered may not be saved."
+            "Data you've entered may not be saved"
         );
     };
 }

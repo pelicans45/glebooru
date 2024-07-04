@@ -38,7 +38,7 @@ class PostListController {
         /*
         if (!api.hasPrivilege("posts:list")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view posts.");
+            this._view.showError("You don't have privileges to view posts");
             return;
         }
 		*/

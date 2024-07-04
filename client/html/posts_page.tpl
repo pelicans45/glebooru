@@ -66,7 +66,6 @@
                     </span>
                 </li>
             <% } %>
-            <!-- <%= ctx.makeFlexboxAlign() %> -->
         </ul>
     <% } %>
 </div>

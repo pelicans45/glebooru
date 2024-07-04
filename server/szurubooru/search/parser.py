@@ -49,7 +49,7 @@ def _parse_sort(value: str, negated: bool) -> tokens.SortToken:
     elif value.count(",") == 1:
         value, order_str = value.split(",")
     else:
-        raise errors.SearchError("Too many commas in sort style token.")
+        raise errors.SearchError("Too many commas in sort style token")
     try:
         order = {
             "asc": tokens.SortToken.SORT_ASC,
@@ -58,7 +58,7 @@ def _parse_sort(value: str, negated: bool) -> tokens.SortToken:
             None: tokens.SortToken.SORT_DEFAULT,
         }[order_str]
     except KeyError:
-        raise errors.SearchError("Unknown search direction: %r." % order_str)
+        raise errors.SearchError("Unknown search direction: %r" % order_str)
     if negated:
         order = {
             tokens.SortToken.SORT_ASC: tokens.SortToken.SORT_DESC,
@@ -80,7 +80,7 @@ class Parser:
                 chunk = chunk[1:]
                 negated = True
             if not chunk:
-                raise errors.SearchError("Empty negated token.")
+                raise errors.SearchError("Empty negated token")
             match = re.match(r"^(.*?)(?<!\\):(.*)$", chunk)
             if match:
                 key, value = list(match.groups())

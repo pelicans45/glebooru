@@ -263,7 +263,7 @@ class PostSearchConfig(BaseSearchConfig):
                 # assert self.user
                 if self.user.rank == "anonymous":
                     raise errors.SearchError(
-                        "Must be logged in to use this feature."
+                        "Must be logged in to use this feature"
                     )
                 criterion = criteria.PlainCriterion(
                     original_text=self.user.name, value=self.user.name

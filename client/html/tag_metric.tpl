@@ -20,7 +20,7 @@
         <% if (ctx.tag.metric && ctx.canDeleteMetric) { %>
         <div class='confirmation'>
             <%= ctx.makeCheckbox({name: 'confirm-delete',
-                text: 'I confirm that I want to delete this metric.'}) %>
+                text: 'I confirm that I want to delete this metric'}) %>
         </div>
         <% } %>
 

@@ -77,7 +77,7 @@ def _get_youtube_dl_content_url(url: str) -> str:
         )
     except subprocess.CalledProcessError:
         raise errors.ThirdPartyError(
-            "Could not extract content location from URL.",
+            "Could not extract content location from URL",
             extra_fields={"URL": url},
         ) from None
 

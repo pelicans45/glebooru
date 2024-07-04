@@ -3,6 +3,7 @@ main_domain: jej.lol
 jej.lol:
   name: jej
   description: jej; lol
+  meta_description: jej.lol is an image gallery for memes, characters, and other fun things
   query: ""
   #color: "#435dbd" ##6a86ea
   color: "#6a86ea"
@@ -11,6 +12,7 @@ jej.lol:
 lole.meme:
   name: lole meme
   description: lole
+  meta_description: lole.meme is an image gallery for memes and characters
   query: character
   color: "#ffe3aa"
   tips:
@@ -27,6 +29,7 @@ lole.meme:
 glegle.gallery:
   name: glebooru
   description: glegle
+  meta_description: glegle.gallery is an image gallery for Glegle
   query: glegle
   implies: [character]
   color: "#6824dd"
@@ -35,6 +38,7 @@ glegle.gallery:
 bury.pink:
   name: burybooru
   description: bury pink girl
+  meta_description: bury.pink is an image gallery for Bury Pink Girl
   query: bury
   implies: [character]
   color: "#ff74eb"
@@ -43,6 +47,7 @@ bury.pink:
 flube.supply:
   name: flube supply
   description: let the flube oils seep in
+  meta_description: flube.supply is an image gallery for flubes
   query: flube
   implies: [character]
   color: "#484848"
@@ -51,6 +56,7 @@ flube.supply:
 spikedog.school:
   name: spikedog school
   description: spikedog scampering about
+  meta_description: spikedog.school is an image gallery for spikedog
   query: spikedog
   implies: [character]
   color: "#cdcdcd"
@@ -59,6 +65,7 @@ spikedog.school:
 yosho.io:
   name: yosho dot io
   description: yosho must travel back in time to 1999 to stop the spikeman
+  meta_description: yosho.io is an image gallery for yosho
   query: yosho
   implies: [character]
   color: "#3fd104"

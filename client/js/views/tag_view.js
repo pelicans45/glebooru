@@ -46,7 +46,7 @@ class TagView extends events.EventTarget {
             if (!this._ctx.canEditAnything) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don't have privileges to edit tags."
+                    "You don't have privileges to edit tags"
                 );
             } else {
                 this._view = new TagEditView(ctx);
@@ -58,7 +58,7 @@ class TagView extends events.EventTarget {
             if (!metricExists && !this._ctx.canCreateMetric) {
                 this._view = new EmptyView();
                 this._view.showError(
-                    "You don\"t have privileges to create metrics.");
+                    "You don't have privileges to create metrics");
             } else {
                 this._view = new TagMetricView(ctx);
                 events.proxyEvent(this._view, this, "submit", "metricUpdate");

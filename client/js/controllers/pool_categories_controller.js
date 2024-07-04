@@ -15,7 +15,7 @@ class PoolCategoriesController {
         if (!api.hasPrivilege("pool_categories:list")) {
             this._view = new EmptyView();
             this._view.showError(
-                "You don't have privileges to view pool categories."
+                "You don't have privileges to view pool categories"
             );
             return;
         }
@@ -53,7 +53,7 @@ class PoolCategoriesController {
             () => {
                 pools.refreshCategoryColorMap();
                 this._view.enableForm();
-                this._view.showSuccess("Changes saved.");
+                this._view.showSuccess("Changes saved");
             },
             (error) => {
                 this._view.enableForm();

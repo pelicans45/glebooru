@@ -12,7 +12,7 @@ class PoolCreateController {
     constructor(ctx) {
         if (!api.hasPrivilege("pools:create")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to create pools.");
+            this._view.showError("You don't have privileges to create pools");
             return;
         }
 
@@ -48,7 +48,7 @@ class PoolCreateController {
                 this._view.clearMessages();
                 misc.disableExitConfirmation();
                 const ctx = router.show(uri.formatClientLink("pools"));
-                ctx.controller.showSuccess("Pool created.");
+                ctx.controller.showSuccess("Pool created");
             },
             (error) => {
                 this._view.showError(error.message);

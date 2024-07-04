@@ -459,7 +459,7 @@ class Api extends events.EventTarget {
                 req.abort(); // does *NOT* call the callback passed in .end()
                 progress.done();
                 reject(
-                    new Error("The request was aborted due to user cancel.")
+                    new Error("The request was aborted due to user cancellation")
                 );
             };
 

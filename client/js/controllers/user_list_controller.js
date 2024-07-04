@@ -16,7 +16,7 @@ class UserListController {
 
         if (!api.hasPrivilege("users:list")) {
             this._view = new EmptyView();
-            this._view.showError("You don't have privileges to view users.");
+            this._view.showError("You don't have privileges to view users");
             return;
         }
 

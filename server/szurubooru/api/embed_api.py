@@ -15,7 +15,7 @@ def _index_path(params: Dict[str, str]) -> int:
         return params["path"]
     except (TypeError, ValueError):
         raise posts.InvalidPostIdError(
-            "Invalid post ID."
+            "Invalid post ID"
         )
 
 
@@ -29,7 +29,7 @@ def _get_post_id(match: re.Match) -> int:
         return int(post_id)
     except (TypeError, ValueError):
         raise posts.InvalidPostIdError(
-            "Invalid post ID: %r." % post_id
+            "Invalid post ID: %r" % post_id
         )
 
 
@@ -50,7 +50,7 @@ def get_post(
     url = url or ctx.get_param_as_string("url")
     match = re.match(r".*?/(?P<post_id>\d+)", url)
     if not match:
-        raise posts.InvalidPostIdError("Invalid post ID.")
+        raise posts.InvalidPostIdError("Invalid post ID")
 
     host = ctx.get_header('X-Original-Host')
     home_url = f"https://{host}"
@@ -101,5 +101,5 @@ def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 <meta property="og:image:height" content="{oembed['height']}">
 <meta property="article:author" content="{html.escape(oembed['author_name'] or '')}">
 <link rel="alternate" type="application/json+oembed" href="{home_url}/api/oembed?url={quote(html.escape(url))}" title="{html.escape(site["name"])}"></head>
-''').replace("<html>", '<html prefix="og: http://ogp.me/ns#">').replace("<title>Loading...</title>", f"<title>{html.escape(oembed['title'])}</title>").replace("$THEME_COLOR$", site["color"]).replace("<!-- Base HTML Placeholder -->", f'<title>{site["name"]}</title><base id="base" href="/"/>')
+''').replace("<html>", '<html prefix="og: http://ogp.me/ns#">').replace("<title>Loading...</title>", f"<title>{html.escape(oembed['title'])}</title>").replace("$THEME_COLOR$", site["color"]).replace("<!-- Base HTML Placeholder -->", f'<title>{site["name"]}</title><base id="base" href="/"/><meta name="description" content="{site.get("meta_description", "")}"/>')
     return {"return_type": "custom", "content": new_html}

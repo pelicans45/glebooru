@@ -74,7 +74,7 @@ class TagEditView extends events.EventTarget {
 
         if (!list.length) {
             this._namesFieldNode.setCustomValidity(
-                "Tags must have at least one name."
+                "Tags must have at least one name"
             );
             return;
         }
@@ -82,7 +82,7 @@ class TagEditView extends events.EventTarget {
         for (let item of list) {
             if (!regex.test(item)) {
                 this._namesFieldNode.setCustomValidity(
-                    `Tag name "${item}" contains invalid symbols.`
+                    `Tag name "${item}" contains invalid symbols`
                 );
                 return;
             }

@@ -32,7 +32,7 @@ def _get_post_id(params: Dict[str, str]) -> int:
     try:
         return int(params["post_id"])
     except TypeError:
-        raise posts.InvalidPostIdError("Invalid post ID: %r." % params["post_id"])
+        raise posts.InvalidPostIdError("Invalid post ID: %r" % params["post_id"])
 
 
 def _get_post(params: Dict[str, str]) -> model.Post:
@@ -62,7 +62,7 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     post_id = int(params["post_id"])
     post = get_post_query.params(id=post_id).first()
     if not post:
-        raise posts.PostNotFoundError("Post %d not found." % post_id)
+        raise posts.PostNotFoundError("Post %d not found" % post_id)
     """
     post = (
         db.session.query(model.Post)
@@ -71,7 +71,7 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         .first()
     )
     if not post:
-        raise posts.PostNotFoundError("Post not found.")
+        raise posts.PostNotFoundError("Post not found")
     return _serialize_post(ctx, post)
 
 
@@ -263,7 +263,7 @@ def set_featured_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.R
     post = posts.get_post_by_id(post_id)
     featured_post = posts.try_get_featured_post()
     if featured_post and featured_post.post_id == post.post_id:
-        raise posts.PostAlreadyFeaturedError("Post %r is already featured." % post_id)
+        raise posts.PostAlreadyFeaturedError("Post %r is already featured" % post_id)
     posts.feature_post(post, ctx.user)
     snapshots.modify(post, ctx.user)
     ctx.session.commit()

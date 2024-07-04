@@ -25,7 +25,7 @@ class MetricSorterController {
         ) {
             this._view = new EmptyView();
             this._view.showError(
-                "You don't have privileges to edit post metric values."
+                "You don't have privileges to edit post metric values"
             );
             return;
         }
