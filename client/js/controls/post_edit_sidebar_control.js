@@ -66,7 +66,7 @@ class PostEditSidebarControl extends events.EventTarget {
         );
         this._tagsExpander = new ExpanderControl(
             "post-tags",
-            `Tags (${this._post.tags.length})`,
+            `Tags (${this._post.tagNames.length})`,
             this._hostNode.querySelectorAll(".tags")
         );
 		/*
@@ -312,7 +312,7 @@ class PostEditSidebarControl extends events.EventTarget {
 
     _syncExpanderTitles() {
         this._notesExpander.title = `Notes (${this._post.notes.length})`;
-        this._tagsExpander.title = `Tags (${this._post.tags.length})`;
+        this._tagsExpander.title = `Tags (${this._post.tagNames.length})`;
         this._poolsExpander.title = `Pools (${this._post.pools.length})`;
 		/*
         let metricCount = this._post.tags.filterMetrics().length;

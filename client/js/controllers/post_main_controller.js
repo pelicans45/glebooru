@@ -14,6 +14,7 @@ const PostMainView = require("../views/post_main_view.js");
 const BasePostController = require("./base_post_controller.js");
 const EmptyView = require("../views/empty_view.js");
 const TagList = require("../models/tag_list.js");
+const PostListTagAutoCompleteControl = require("../controls/post_list_tag_auto_complete_control.js");
 
 class PostMainController extends BasePostController {
     constructor(ctx, editMode) {
@@ -196,7 +197,9 @@ class PostMainController extends BasePostController {
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
                 if (post.tagNames.length > 0) {
-                    TagList.refreshRelevant();
+                    TagList.refreshRelevant().then(() => {
+						PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
+					});
                 }
             },
             (error) => {

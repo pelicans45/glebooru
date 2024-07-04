@@ -194,6 +194,7 @@ class TagController {
             () => {
                 const ctx = router.show(uri.formatClientLink("tags"));
                 ctx.controller.showSuccess("Tag deleted");
+				setTimeout(() => location.reload(), 600);
             },
             (error) => {
                 this._view.showError(error.message);

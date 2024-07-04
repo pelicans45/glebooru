@@ -46,10 +46,10 @@ class UserRegistrationController {
                 () => {
                     if (isLoggedIn) {
                         const ctx = router.show(uri.formatClientLink("users"));
-                        ctx.controller.showSuccess("User added!");
+                        ctx.controller.showSuccess("User added");
                     } else {
                         const ctx = router.show(uri.formatClientLink());
-                        ctx.controller.showSuccess("Welcome aboard!");
+                        ctx.controller.showSuccess("Registration complete");
                     }
                 },
                 (error) => {

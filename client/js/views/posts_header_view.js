@@ -8,7 +8,7 @@ const search = require("../util/search.js");
 const views = require("../util/views.js");
 const TagList = require("../models/tag_list.js");
 const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js");
-const PostsListTagAutoCompleteControl = require("../controls/posts_list_tag_auto_complete_control.js");
+const PostListTagAutoCompleteControl = require("../controls/post_list_tag_auto_complete_control.js");
 const MetricHeaderControl = require("../controls/metric_header_control");
 
 const template = views.getTemplate("posts-header");
@@ -205,7 +205,7 @@ class PostsHeaderView extends events.EventTarget {
         this._hostNode = ctx.hostNode;
         views.replaceContent(this._hostNode, template(ctx));
 
-        this._autoCompleteControl = new PostsListTagAutoCompleteControl(
+        this._autoCompleteControl = new PostListTagAutoCompleteControl(
             this._queryInputNode,
             {
                 confirm: (tag) => {

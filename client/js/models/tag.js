@@ -11,6 +11,7 @@ class Tag extends events.EventTarget {
         super();
         this._orig = {};
 		this.TagList = TagList;
+		this.PostListTagAutoCompleteControl = require("../controls/post_list_tag_auto_complete_control.js");
 
         for (let obj of [this, this._orig]) {
             obj._suggestions = new TagList();
@@ -126,7 +127,9 @@ class Tag extends events.EventTarget {
                     },
                 })
             );
-			this.TagList.refreshRelevant();
+			this.TagList.refreshRelevant().then(() => {
+				this.PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
+			});
             return Promise.resolve();
         });
     }

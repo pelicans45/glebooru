@@ -205,6 +205,7 @@ def delete_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(tag, ctx.user)
     tags.delete(tag)
     ctx.session.commit()
+    clear_all_cached_tag_lists()
     return {}
 
 
@@ -221,4 +222,5 @@ def merge_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response
     tags.merge_tags(source_tag, target_tag)
     snapshots.merge(source_tag, target_tag, ctx.user)
     ctx.session.commit()
+    clear_all_cached_tag_lists()
     return _serialize(ctx, target_tag)

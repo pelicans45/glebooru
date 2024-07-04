@@ -1,7 +1,9 @@
 const TagList = require("../models/tag_list.js");
 const TagAutoCompleteControl = require("./tag_auto_complete_control.js");
 
-class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
+let reloadDefaultTagMatches = false;
+
+class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
         super(input, options);
 
@@ -30,6 +32,10 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
         this._setDefaultMatches();
     }
 
+	static setReloadDefaultTagMatches() {
+		reloadDefaultTagMatches = true;
+	}
+
     _setDefaultMatches() {
         return TagList.getTopRelevantMatches().then((results) => {
             this._suggestionDiv.style.display = "none !important";
@@ -43,24 +49,18 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
         const val = this._sourceInputNode.value;
         //if (!val || /^ *sort:\S+ *$/.test(val)) {
         if (!val) {
-            if (!this._valueEntered) {
+			console.log("reload default matches", reloadDefaultTagMatches);
+            if (!(this._valueEntered || reloadDefaultTagMatches)) {
                 this._show();
                 return;
             }
 
             this._activeResult = -1;
             this._setDefaultMatches().then(() => {
-                this._valueEntered = false;
                 this._show();
+				this._valueEntered = false;
+				reloadDefaultTagMatches = false;
             });
-
-            /*
-			this._activeResult = -1;
-			this._setDefaultMatches();
-			this._valueEntered = false;
-			this._show();
-			*/
-
             return;
         }
 
@@ -69,4 +69,4 @@ class PostsListTagAutoCompleteControl extends TagAutoCompleteControl {
     }
 }
 
-module.exports = PostsListTagAutoCompleteControl;
+module.exports = PostListTagAutoCompleteControl;
