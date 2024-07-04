@@ -10,7 +10,7 @@
                 }
             %>
                 <li data-post-id='<%= post.id %>'>
-                    <a class='thumbnail-wrapper <%= postTags.length > 2 ? "tags" : "no-tags" %>'
+                    <a class='thumbnail-wrapper <%= post.tags.length > 2 ? "tags" : "no-tags" %>'
                             title='<%- postTitle %>'
                             href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>

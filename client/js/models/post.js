@@ -13,6 +13,7 @@ const Pool = require("./pool.js");
 //const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 const vars = require("../vars.js");
+const lens = require("../lens.js");
 
 const baseUrl = document.getElementById("base").href;
 
@@ -121,7 +122,7 @@ class Post extends events.EventTarget {
     }
 
     get tagNames() {
-        return this._tags.map((tag) => tag.names[0]);
+        return lens.excludeRedundantTags(this._tags).map((tag) => tag.names[0]);
     }
 
     get notes() {

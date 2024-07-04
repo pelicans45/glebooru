@@ -195,7 +195,7 @@ class PostMainController extends BasePostController {
                 this._view.sidebarControl.showSuccess("Post saved");
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
-                if (e.detail.tags && e.detail.tags.length > 0) {
+                if (post.tagNames.length > 0) {
                     TagList.refreshRelevant();
                 }
             },
