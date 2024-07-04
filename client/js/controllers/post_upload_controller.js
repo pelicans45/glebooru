@@ -138,7 +138,9 @@ class PostUploadController {
                     const ctx = router.show(uri.formatClientLink(""));
                     ctx.controller.showSuccess("Uploaded");
                     if (hasTags) {
-                        TagList.refreshRelevant();
+                        TagList.refreshRelevant().then(() => {
+                            ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
+                        });
                     }
                 },
                 (error) => {
@@ -281,7 +283,10 @@ class PostUploadController {
             for (const tag of lens.siteTags) {
                 if (!uploadable.tags.includes(tag)) {
                     uploadable.tags.push(tag);
-                } else if (tag === lens.hostnameFilter && lens.siteTags.length > 1) {
+                } else if (
+                    tag === lens.hostnameFilter &&
+                    lens.siteTags.length > 1
+                ) {
                     alert(
                         `There is no need to add the "${lens.hostnameFilter}" tag when uploading to ${location.hostname}. It is added automatically.`
                     );

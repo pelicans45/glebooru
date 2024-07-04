@@ -132,7 +132,7 @@ class TagList extends AbstractList {
 
     static refreshRelevant() {
         console.log("refreshing relevant tags");
-        this.getTopRelevantMatches(true);
+        return this.getTopRelevantMatches(true);
     }
 
     findByName(testName) {
