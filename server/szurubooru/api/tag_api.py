@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -39,6 +40,7 @@ def clear_cached_tag_list(tag):
 
 
 def clear_all_cached_tag_lists():
+    logging.info("Clearing cached tag lists")
     TAG_LIST_CACHE.clear()
 
 
