@@ -11,7 +11,11 @@
         <% } %>
     </div>
 
-    <div class='comment'>
+    <% if (ctx.canEditComment || ctx.canDeleteComment) { %>
+        <div class='comment can-edit-comment'>
+    <% } else { %>
+        <div class='comment'>
+    <% } %>
         <header>
             <nav class='edit tabs'>
                 <ul>

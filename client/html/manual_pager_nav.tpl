@@ -7,7 +7,6 @@
                 <a rel='prev' class='prev disabled'>
             <% } %>
                 <i class='la la-chevron-left'></i>
-                <span class='vim-nav-hint'>&lt; Previous page</span>
             </a>
         </li>
 
@@ -32,7 +31,6 @@
                 <a rel='next' class='next disabled'>
             <% } %>
                 <i class='la la-chevron-right'></i>
-                <span class='vim-nav-hint'>Next page &gt;</span>
             </a>
         </li>
     </ul>

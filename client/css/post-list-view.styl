@@ -1,54 +1,64 @@
 @require colors
 
 .post-list
-    //@media (min-width: 1000px)
     ul.default-layout
         display: flex
         flex-wrap: wrap
-        justify-content: center
 
-        li
-            height: 15vw
+        li:not(.flexbox-dummy)
             min-height: 10em
-            max-width: 30em
+            height: 15vw
 
             flex-grow: 1
 
             margin: .1em .25em .3em .25em
 
-            .thumbnail-wrapper
-                height: 100%
-                width: 100%
-            .thumbnail img
-                object-fit: cover
+        .thumbnail img
+            opacity: 0
+
+    ul.column-layout
+        display: block
+        column-gap: 2vmin
+        column-width: 20vh
+
+        @media (max-width: 50rem)
+            column-width: 10em
+
+        li
+            min-height: unset !important
+            height: unset !important
+            width: 100% !important
+            margin: 0 0 2vmin !important
 
     ul.grid-layout
         display: grid
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
-        column-gap: 20px
+        //grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+        grid-template-columns: repeat(auto-fit, minmax(200px, 200px))
+        
+        column-gap: 30px
+        row-gap: 10px
+
+        justify-content: center
         li
             display: flex
             align-items: center
             justify-content: center
 
-            margin-top: 5px
-
             .thumbnail-wrapper
                 height: auto
-                width: unset
+                width: auto
             .thumbnail img
                 max-width: 200px
                 max-height: 200px
 
-
-    ul.column-layout
+    /*ul.column-layout
         column-width: 20vh
         column-count: 6
         li
             min-width: 100%
             .gallery-thumb
                 max-height: 350px
-                min-height: 100px
+                min-height: 100px*/
 
     ul
         list-style-type: none
@@ -60,8 +70,8 @@
             margin: .4em .2em
             float: left
 
-            @media (max-width: 100vh)
-                margin: 0 0 2vmin;
+            //@media (max-width: 100vh)
+                //margin: 0 0 2vmin;
 
             .thumbnail-wrapper
                 display: inline-block
@@ -233,14 +243,17 @@
                     outline: 2px solid $main-color !important
 
     ul.default-layout
-        li
-            a
-                &:hover
-                    background: $post-thumbnail-border-color
-    ul.column-layout
-        li
-            &:hover
-                background: $post-thumbnail-border-color
+            li
+                a
+                    &:hover
+                        background: $post-thumbnail-border-color
+    //ul.column-layout
+    //ul.default-layout
+    ul.grid-layout
+            li
+                a
+                    &:hover
+                        background: $post-thumbnail-border-color
 
 .post-flow
     ul
@@ -492,3 +505,11 @@
 
     .query-shortcut[data-term="special:liked"]
         margin-left: 0.55em
+
+.page-nav
+    display: flex
+    justify-content: center
+    
+    nav
+        ul
+                display: flex

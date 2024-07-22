@@ -6,6 +6,7 @@ const lens = require("../lens.js");
 const templates = require("../templates.js");
 const misc = require("./misc.js");
 const uri = require("./uri.js");
+const settings = require("../models/settings.js");
 
 function _imbueId(options) {
     if (!options.id) {
@@ -51,7 +52,10 @@ function makeThumbnail(url) {
         url
             ? {
                   class: "thumbnail",
-                  //style: `background-image: url(\'${url}\')`,
+                  style:
+                      settings.get().layoutType === "default"
+                          ? `background-image: url(\'${url}\')`
+                          : ``,
               }
             : { class: "thumbnail empty" },
         makeElement("img", {
@@ -427,7 +431,7 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
-	const timeout = className === "error" ? 6000 : 2500;
+    const timeout = className === "error" ? 6000 : 2500;
     setTimeout(() => {
         wrapperNode.remove();
     }, timeout);
@@ -435,13 +439,12 @@ function showMessage(target, message, className) {
 }
 
 function appendExclamationMark() {
-	const prefix = "** ERROR ** | ";
+    const prefix = "** ERROR ** | ";
     if (!document.title.startsWith(prefix)) {
         document.oldTitle = document.title;
         document.title = `${prefix} ${document.title}`;
     }
 }
-
 
 function showError(target, message) {
     appendExclamationMark();

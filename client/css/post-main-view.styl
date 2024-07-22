@@ -6,51 +6,63 @@
     flex-direction: column
     position: relative
 
-    >.sidebar
+    .sidebar
         width: 21em
         @media (max-width: 800px)
             min-width: 100%
             max-width: 0
+            
+            margin-top: 1em
+
 
         line-height: 160%
 
         a:active
             border: 0
             outline: 0
+        @media (min-width: 801px)
+            nav.buttons
+                display: flex
+                flex-wrap: wrap
 
-        nav.buttons
-            margin-top: 0
-            display: flex
-            flex-wrap: wrap
+                margin-top: 0
 
-            article
-                flex: 1 0 25%
-                a
-                    display: inline-block
-                    width: 100%
-                    padding: 0.3em 0
+                article
+                    flex: 1 0 25%
+                    a
+                        display: inline-block
+
+                        width: 100%
+
+                        padding: 0.3em 0
+
+                        text-align: center
+                        vertical-align: middle
+
+                        //transition: background 0.2s linear, box-shadow 0.2s linear
+                        transition: background 0.15s linear, box-shadow 0.15s linear
+                        &:not(.inactive):hover
+                            background: darken($main-color, 90%)
+                    i
+                        font-size: 140%
                     text-align: center
-                    vertical-align: middle
-                    //transition: background 0.2s linear, box-shadow 0.2s linear
-                    transition: background 0.15s linear, box-shadow 0.15s linear
-                    &:not(.inactive):hover
-                        background: darken($main-color, 90%)
-                i
-                    font-size: 140%
-                text-align: center
-            /*@media (max-width: 800px)
-                margin-top: 1em
-                margin-bottom: 0*/
         .tag-icon
             width: 1em
             text-align: right
 
         #add-comment-button
+            display: block
+            width: fit-content
+
             h3
                 margin: 0
-                font-size: 1em
+                margin-top: .7em
 
-    >.content
+                font-size: 1em
+                @media (max-width: 800px)
+                    font-size: 1.1em
+
+    .content
         display: flex
         flex-direction: column
         align-items: center
@@ -59,33 +71,35 @@
         pointer-events: none
 
         width: 100%
-        > *
+        >*
             pointer-events: all
 
+    @media (min-width: 801px)
+        .download
+            display: flex
+            flex-direction: column
+            align-items: center
+
+            position: absolute
+            align-self: flex-end
+
+            width: fit-content
+            .la
+                font-size: 32px
+        
     .download
-        display: flex
-        flex-direction: column
-        align-items: center
-
-        position: absolute
-        align-self: flex-end
-
-        width: fit-content
-        .la
-            font-size: 32px
         .dims
             display: none
 
     .post-container
-        margin-top: 2.5em
-
-        /*@media (max-width: 800px)
-            margin: -1em // to counter the padding of #content-holder
-            margin-bottom: 0*/
+        @media (min-width: 801px) {
+            margin-top: 2.5em
+        }
 
         .post-content
             margin: 0
             height: fit-content !important
+
     @media (max-width: 800px)
         .content
             .buttons
@@ -93,33 +107,47 @@
                 justify-content: center
 
                 font-size: 20px
-                //width: 100%
 
                 margin-top: 20px
                 gap: 15vw
 
     .comments-container
-        margin-top: 2em
+        width: 100%
 
+        margin-top: 2em
+        margin-bottom: 2em
+
+        pointer-events: none
         .comment-container
-            display: flex
             justify-content: center
+
+            >*
+                pointer-events: all
             .comment
                 display: flex
                 flex-direction: column
-                //flex-wrap: wrap
 
-                width: calc(100% - 200px)
-                @media (max-width: 1000px)
-                    width: 75vw
+                width: 72vw
+                max-width: 450px
+                &.can-edit-comment
+                    max-width: 600px
 
                 header
                     white-space: normal
                     a
                         white-space: nowrap
+                .comment-content p
+                    margin: 0
 
     .comment-form-container
         margin-top: 2em
+
+    @media (max-width: 800px)
+        .sidebar 
+            .sidebar-container
+                .readonly-sidebar
+                    display: flex
+                    justify-content: space-between
 
 
 .darktheme .post-view
@@ -161,6 +189,8 @@
             color: $safety-unsafe
 
         .upload-info
+            max-width: 17vw
+
             margin-top: 5px
 
             .thumbnail
@@ -187,18 +217,27 @@
             display: none
 
         .social
-            //display: none
+            display: flex
+            flex-wrap: wrap
+
             font-size: 105%
 
             margin-top: 1em
+
             .score-container
                 float: left
                 margin-bottom: 5px
+
                 .downvote i
                     text-align: right
+
+            .fav-container
+                margin-left: 2em
+
             i
                 text-align: left
                 margin: 0
+
             .value
                 text-align: center
                 display: inline-block
@@ -215,15 +254,59 @@
         h1
             margin-bottom: 0.5em
         .thumbnail
-            //background-position: 50% 30%
-            width: 4em
-            height: 3em
+            //width: 4em
+            //height: 3em
         li
             margin: 0 0.3em 0.3em 0
             display: inline-block
-        /*@media (max-width: 800px)
-            h1
-                margin-top: 0.5em*/
+
+    .similar
+        flex-direction: column
+        @media (min-width: 801px)
+            //display: flex
+            position: absolute
+            right: 0
+            top: 0
+            margin-top: 35px
+            align-items: flex-end
+
+        @media (max-width: 800px)
+            align-items: flex-end
+
+        a
+            margin-top: 5px
+
+        h2
+            width: fit-content
+
+            font-size: 1.3em
+            margin-bottom: .5em
+        ul
+            display: flex
+            gap: 5px
+
+            @media (max-width: 550px), (min-width: 801px)
+                flex-direction: column
+
+            li
+                margin: 0
+                a .thumbnail
+                    @media (max-width: 800px)
+                        width: auto
+                        height: 4em
+
+                        .gallery-thumb
+                            min-width: 2em
+                            max-width: 6em
+
+                    @media (max-width: 550px), (min-width: 801px)
+                        width: 4em
+                        height: auto
+
+                        .gallery-thumb
+                            min-height: 2em
+                            max-height: 6em
+
 
     .tags, .metrics
         h1
@@ -234,7 +317,10 @@
                 display: none*/
 
     .tags
-        //margin-top: 1em
+        max-width: 17vw
+        @media (max-width: 800px)
+            max-width: 50vw
+
         margin-top: 0.3em
         .tag-link-info
             &:hover
@@ -245,6 +331,16 @@
         p
             margin-bottom: .3em
         
+.edit-sidebar
+    position: relative
+
+    background-color: #1a1a1a
+    border: 1px solid #474747
+
+    padding: 5px
+    padding-top: 10px
+
+    z-index: 50
 
 .post-view .edit-sidebar
     .expander-content
