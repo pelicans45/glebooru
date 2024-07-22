@@ -27,7 +27,7 @@
             <% } %>
 
             <% if (ctx.canEditEmail) { %>
-                <li>
+                <li style='display: none'>
                     <%= ctx.makeEmailInput({
                         text: 'Email',
                         name: 'email',
@@ -53,14 +53,14 @@
                     <div id='avatar-content'></div>
                     <div id='avatar-radio'>
                         <%= ctx.makeRadio({
-                            text: 'Gravatar',
+                            text: 'Automatically generated',
                             name: 'avatar-style',
                             value: 'gravatar',
                             selectedValue: ctx.user.avatarStyle,
                         }) %>
 
                         <%= ctx.makeRadio({
-                            text: 'Manual avatar',
+                            text: 'Custom',
                             name: 'avatar-style',
                             value: 'manual',
                             selectedValue: ctx.user.avatarStyle,

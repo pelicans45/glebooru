@@ -37,7 +37,7 @@ class PostContentControl {
 
         hostNode
             .querySelector(".main-content")
-            .addEventListener("click", (e) => {
+            .addEventListener("mousedown", (e) => {
                 if (!e.shiftKey) {
                     return;
                 }

@@ -3,14 +3,14 @@
         <table>
             <thead>
                 <th class='names'>
-                    <% if (ctx.parameters.q == 'sort:name' || !ctx.parameters.q) { %>
+                    <% if (ctx.parameters.q == 'sort:name') { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: '-sort:name'}) %>'>Tag name</a>
                     <% } else { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: 'sort:name'}) %>'>Tag name</a>
                     <% } %>
                 </th>
                 <th class='usages'>
-                    <% if (ctx.parameters.q == 'sort:usages') { %>
+                    <% if (ctx.parameters.q == 'sort:usages' || !ctx.parameters.q) { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: '-sort:usages'}) %>'>Usages</a>
                     <% } else { %>
                         <a href='<%- ctx.formatClientLink('tags', {q: 'sort:usages'}) %>'>Usages</a>

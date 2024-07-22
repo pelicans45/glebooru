@@ -242,18 +242,18 @@ class PostsHeaderView extends events.EventTarget {
             this._evtFormSubmit(e)
         );
 
-        this._randomSortButtonNode.addEventListener("click", (e) => {
+        this._randomSortButtonNode.addEventListener("mousedown", (e) => {
             this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
             this._handleSortButtonClick(e, "random");
         });
 
-        this._scoreSortButtonNode.addEventListener("click", (e) => {
+        this._scoreSortButtonNode.addEventListener("mousedown", (e) => {
             this._handleSortButtonClick(e, "score");
         });
 
         for (let shortcut of this._shortcutButtonNodes) {
             this._setupQueryShortcutButton(shortcut, ctx.parameters.q);
-            shortcut.addEventListener("click", (e) =>
+            shortcut.addEventListener("mousedown", (e) =>
                 this._evtToggleQueryShortcut(e)
             );
             this.addEventListener("navigate", (e) =>
@@ -350,11 +350,11 @@ class PostsHeaderView extends events.EventTarget {
     }
 
     toggleButtonSelected(button, buttonState) {
-		const nodes = {
-			"random": this._randomSortButtonNode,
-			"score": this._scoreSortButtonNode
-		}
-		nodes[button].classList.toggle("selected", buttonState);
+        const nodes = {
+            random: this._randomSortButtonNode,
+            score: this._scoreSortButtonNode,
+        };
+        nodes[button].classList.toggle("selected", buttonState);
     }
 
     focusQueryInput() {
@@ -559,34 +559,6 @@ class PostsHeaderView extends events.EventTarget {
             this._metricControl.refreshQuery(this._queryInputNode.value);
         }
 		*/
-    }
-    _evtRandomSortButtonClick(e) {
-        e.preventDefault();
-        const sort = "sort:random";
-        const query = this._queryInputNode.value.trim();
-        if (!this._queryInputNode.value.includes(sort)) {
-            const space = query ? " " : "";
-            this._queryInputNode.value = query + space + `${sort} `;
-        }
-        this._ctx.parameters.r = Math.round(Math.random() * 998) + 1;
-        this._navigate();
-    }
-
-    _evtScoreSortButtonClick(e) {
-        e.preventDefault();
-        const sort = "sort:score";
-        let query = this._queryInputNode.value.trim();
-        if (!this._queryInputNode.value.includes(sort)) {
-            if (query) {
-                query += " ";
-            }
-            this._queryInputNode.value = `${query}${sort} `;
-        } else {
-            this._queryInputNode.value = this._queryInputNode.value
-                .replace(` ${sort}`, "")
-                .replace(sort, "");
-        }
-        this._navigate();
     }
 
     _handleSortButtonClick(e, sort) {

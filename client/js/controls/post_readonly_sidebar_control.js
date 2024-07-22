@@ -129,19 +129,19 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     _installFitButtons() {
         this._fitBothButtonNode.addEventListener(
-            "click",
+            "mousedown",
             this._eventZoomProxy(() => this._postContentControl.fitBoth())
         );
         this._fitOriginalButtonNode.addEventListener(
-            "click",
+            "mousedown",
             this._eventZoomProxy(() => this._postContentControl.fitOriginal())
         );
         this._fitWidthButtonNode.addEventListener(
-            "click",
+            "mousedown",
             this._eventZoomProxy(() => this._postContentControl.fitWidth())
         );
         this._fitHeightButtonNode.addEventListener(
-            "click",
+            "mousedown",
             this._eventZoomProxy(() => this._postContentControl.fitHeight())
         );
     }
@@ -157,12 +157,12 @@ class PostReadonlySidebarControl extends events.EventTarget {
         );
 
         if (this._addFavButtonNode) {
-            this._addFavButtonNode.addEventListener("click", (e) =>
+            this._addFavButtonNode.addEventListener("mousedown", (e) =>
                 this._evtAddToFavoritesClick(e)
             );
         }
         if (this._remFavButtonNode) {
-            this._remFavButtonNode.addEventListener("click", (e) =>
+            this._remFavButtonNode.addEventListener("mousedown", (e) =>
                 this._evtRemoveFromFavoritesClick(e)
             );
         }
@@ -178,12 +178,12 @@ class PostReadonlySidebarControl extends events.EventTarget {
             })
         );
         if (this._upvoteButtonNode) {
-            this._upvoteButtonNode.addEventListener("click", (e) =>
+            this._upvoteButtonNode.addEventListener("mousedown", (e) =>
                 this._evtScoreClick(e, 1)
             );
         }
         if (this._downvoteButtonNode) {
-            this._downvoteButtonNode.addEventListener("click", (e) =>
+            this._downvoteButtonNode.addEventListener("mousedown", (e) =>
                 this._evtScoreClick(e, -1)
             );
         }

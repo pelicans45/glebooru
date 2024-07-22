@@ -27,7 +27,7 @@ class PostMainView {
         const topNavigationNode =
             document.body.querySelector("#top-navigation");
 
-		/*
+        /*
         this._postContentControl = new PostContentControl(
             postContainerNode,
             ctx.post,
@@ -44,7 +44,7 @@ class PostMainView {
         this._postContentControl = new PostContentControl(
             postContainerNode,
             ctx.post,
-            null,
+            null
         );
 
         this._postNotesOverlayControl = new PostNotesOverlayControl(
@@ -91,8 +91,8 @@ class PostMainView {
 
         const showRandomImage = () => {
             if (ctx.randomPostId) {
-				const params = Object.assign({}, ctx.parameters);
-				params.r = Math.round(Math.random() * 998) + 1;
+                const params = Object.assign({}, ctx.parameters);
+                params.r = Math.round(Math.random() * 998) + 1;
                 router.show(ctx.getPostUrl(ctx.randomPostId, params));
             }
         };
@@ -103,10 +103,22 @@ class PostMainView {
             } else {
                 router.show(uri.formatClientLink("", ctx.post.id, "edit"));
             }
-			e.preventDefault();
+            e.preventDefault();
         });
         keyboard.bind(["a", "left"], showPreviousImage);
         keyboard.bind(["d", "right"], showNextImage);
+
+        keyboard.bind(["alt+left"], (e) => {
+            showPreviousImage();
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+        keyboard.bind(["alt+right"], (e) => {
+            showNextImage();
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+
         keyboard.bind("r", showRandomImage);
         keyboard.bind("del", (e) => {
             if (ctx.editMode) {

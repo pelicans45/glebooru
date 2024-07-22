@@ -2,6 +2,7 @@
 
 const api = require("../api.js");
 const events = require("../events.js");
+const misc = require("../util/misc.js");
 
 const defaultSettings = {
     listPosts: {
@@ -18,7 +19,7 @@ const defaultSettings = {
     tagSuggestions: true,
     autoplayVideos: false,
     postsPerPage: 48,
-    similarPosts: 5,
+    similarPosts: 4,
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
     postFlow: false,
@@ -26,9 +27,7 @@ const defaultSettings = {
     layoutType: "default",
 };
 
-const isMobile = "ontouchstart" in document.documentElement;
-
-if (isMobile) {
+if (misc.isMobile) {
     defaultSettings.navbarFollow = true;
 }
 

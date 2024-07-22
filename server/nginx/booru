@@ -35,6 +35,22 @@ server {
         return 302 "https://discord.gg/tN9GPvbPpf";
     }
 
+    location /posts/ {
+        add_header 'Cache-Control' 'public, max-age=2592000, immutable';
+        alias /mnt/volume_nyc3_04/szurubooru/data/posts/;
+
+        error_page 403 @unauthorized;
+        error_page 404 @notfound;
+    }
+
+    location /thumbnails/ {
+        add_header 'Cache-Control' 'public, max-age=2592000, immutable';
+        alias /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/;
+
+        error_page 403 @unauthorized;
+        error_page 404 @notfound;
+    }
+
     location @err {
         return 500 "internal server error";
         default_type text/plain;

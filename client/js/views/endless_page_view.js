@@ -1,21 +1,11 @@
 "use strict";
 
+const settings = require("../models/settings.js");
 const router = require("../router.js");
 const views = require("../util/views.js");
 
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
-
-/*
-function isScrolledIntoView(element) {
-    let top = 0;
-    do {
-        top += element.offsetTop || 0;
-        element = element.offsetParent;
-    } while (element);
-    return top >= window.scrollY && top <= window.scrollY + window.innerHeight;
-}
-*/
 
 class EndlessPageView {
     constructor(ctx) {
@@ -101,7 +91,7 @@ class EndlessPageView {
     }
 
     get _topPageNode() {
-		return document.querySelector(".page");
+        return document.querySelector(".page");
 
         let topPageNode = null;
         let element = document.elementFromPoint(
@@ -258,11 +248,13 @@ class EndlessPageView {
         let pageNode = null;
 
         if (response.total) {
+            const totalPages = Math.ceil(response.total / response.limit);
+            const page = Math.ceil(
+                (response.offset + response.limit) / response.limit
+            );
             pageNode = pageTemplate({
-                totalPages: Math.ceil(response.total / response.limit),
-                page: Math.ceil(
-                    (response.offset + response.limit) / response.limit
-                ),
+                totalPages: totalPages,
+                page: page,
             });
             pageNode.setAttribute("data-offset", response.offset);
             pageNode.setAttribute("data-limit", response.limit);
@@ -270,6 +262,9 @@ class EndlessPageView {
             ctx.pageRenderer({
                 parameters: ctx.parameters,
                 response: response,
+                addFlexAlignment:
+                    settings.get().layoutMode === "default" &&
+                    page === totalPages,
                 hostNode: pageNode.querySelector(".page-content-holder"),
             });
 
@@ -294,7 +289,21 @@ class EndlessPageView {
                 this.totalRecords--;
             });
 
-            if (!this._initialPageLoad && ctx.controllerType === "post_list") {
+            /*
+            if (
+                page === totalPages &&
+                ctx.controllerType === "post_list" &&
+                settings.get().layoutMode === "default"
+            ) {
+                pageNode.innerHTML += views.makeFlexboxAlign();
+            }
+			*/
+
+            if (
+                !this._initialPageLoad &&
+                ctx.controllerType === "post_list" &&
+                settings.get().layoutMode !== "column"
+            ) {
                 const els = pageNode.querySelectorAll(".post-list li");
                 const list =
                     this._pagesHolderNode.querySelector(".post-list ul");

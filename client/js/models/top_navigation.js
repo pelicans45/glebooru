@@ -181,6 +181,16 @@ function _makeTopNavigation() {
         )
     );
     ret.add(
+        "discord",
+        new TopNavigationItem(
+            null,
+            "Join Discord server",
+            "<i class='lab la-discord'></i>",
+            "discord/",
+            "right"
+        )
+    );
+    ret.add(
         "account",
         new TopNavigationItem("A", "Account", "", "user/{me}", "right")
     );

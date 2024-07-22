@@ -15,11 +15,11 @@ To add tags when uploading or editing an image:
     <ul>
     <li>Type a tag name and press <code>Space</code> or <code>Enter</code></li>
     <li>Or type the start of a tag name, press <code>Tab</code> to select the first suggestion, use the up/down arrow keys and <code>Enter</code> to select a suggestion, or click a suggestion</li>
-    <li>If the tag doesn't exist, it will be created</li>
+    <li>If the tag doesn't exist, it will be created automatically</li>
     </ul>
 </li>
 <li>A dashed red background around a gallery thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
-<li>The upload page supports folders and multiple files</li>
+<li>Multiple files can be uploaded at once</li>
 <li>Use underscores to search for tags that contain spaces ("<code>concept art</code>" -> "<code>concept_art</code>")</li>
 <% for (const tip of ctx.tips) { %>
 <li><%- tip %></li>

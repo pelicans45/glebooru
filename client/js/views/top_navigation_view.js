@@ -12,6 +12,9 @@ const extraNavLinkTabs = new Set([
     "login",
     //"logout",
     "register",
+	"comments",
+	"pools",
+	"discord",
 ]);
 
 class TopNavigationView {
@@ -93,7 +96,7 @@ class TopNavigationView {
             this._siteNameNodeClick(e)
         );
 
-        for (let navigationLinkNode of this._navigationLinkNodes) {
+        for (const navigationLinkNode of this._navigationLinkNodes) {
             navigationLinkNode.forEach((element) => {
                 element.addEventListener("click", (e) =>
                     this._navigationLinkClick()

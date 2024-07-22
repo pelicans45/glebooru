@@ -75,6 +75,7 @@ class ManualPageView {
         ctx.requestPage(offset, limit).then(
             (response) => {
                 ctx.pageRenderer({
+					manualPageView: true,
                     parameters: ctx.parameters,
                     response: response,
                     hostNode: this._pageContentHolderNode,

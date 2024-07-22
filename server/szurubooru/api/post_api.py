@@ -117,8 +117,9 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
         "flags", default=posts.get_default_flags(content)
     )
 
+    host = ctx.get_header("X-Original-Host")
     post, new_tags = posts.create_post(
-        content, tag_names, None if anonymous else ctx.user
+        host, content, tag_names, None if anonymous else ctx.user
     )
     if len(new_tags):
         auth.verify_privilege(ctx.user, "tags:create")

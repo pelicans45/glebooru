@@ -70,10 +70,10 @@ privileges:
     'users:create:any':             administrator
     'users:list':                   power
     'users:view':                   anonymous
-    'users:edit:any:name':          moderator
-    'users:edit:any:pass':          moderator
-    'users:edit:any:email':         moderator
-    'users:edit:any:avatar':        moderator
+    'users:edit:any:name':          administrator
+    'users:edit:any:pass':          administrator
+    'users:edit:any:email':         administrator
+    'users:edit:any:avatar':        administrator
     'users:edit:any:rank':          moderator
     'users:edit:self:name':         regular
     'users:edit:self:pass':         regular

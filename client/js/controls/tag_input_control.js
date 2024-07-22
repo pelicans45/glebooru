@@ -330,7 +330,7 @@ class TagInputControl extends events.EventTarget {
             })
         );
         searchLinkNode.textContent = tag.names[0] + " ";
-        searchLinkNode.addEventListener("click", (e) => {
+        searchLinkNode.addEventListener("mousedown", (e) => {
             e.preventDefault();
             this._suggestions.clear();
             if (tag.postCount > 0) {

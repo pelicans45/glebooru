@@ -66,6 +66,9 @@
                     </span>
                 </li>
             <% } %>
+            <% if (ctx.manualPageView || ctx.addFlexAlignment) { %>
+                <%= ctx.makeFlexboxAlign() %>
+            <% } %>
         </ul>
     <% } %>
 </div>

@@ -2,7 +2,8 @@
 
 const markdown = require("./markdown.js");
 const uri = require("./uri.js");
-const settings = require("../models/settings.js");
+
+const isMobile = "ontouchstart" in document.documentElement;
 
 function decamelize(str, sep) {
     sep = sep === undefined ? "-" : sep;
@@ -244,4 +245,5 @@ module.exports = {
     dataURItoBlob: dataURItoBlob,
     getPrettyName: getPrettyName,
 	downloadURL: downloadURL,
+	isMobile,
 };

@@ -198,12 +198,16 @@ function makeDateInput(options) {
 }
 
 function getPostUrl(id, parameters) {
+	let q = parameters.q ? parameters.q.trim() : "";
+	if (/^\d+(\b|$)/.test(q)) {
+		q = null;
+	}
     return uri.formatClientLink(
         "",
         id,
         parameters
             ? {
-                  q: parameters.q ? parameters.q.trim() : "",
+                  q: q,
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -212,13 +216,18 @@ function getPostUrl(id, parameters) {
 }
 
 function getPostEditUrl(id, parameters) {
+	let q = (parameters && parameters.q) ? parameters.q.trim() : "";
+	console.log("q: " + q);
+    if (/^\d+(\b|$)/.test(q)) {
+        q = null;
+    }
     return uri.formatClientLink(
         "",
         id,
         "edit",
         parameters
             ? {
-                  q: parameters.q ? parameters.q.trim() : "",
+                  q: q,
                   metrics: parameters.metrics,
                   r: parameters.r,
               }
@@ -654,12 +663,14 @@ document.addEventListener("input", (e) => {
     }
 });
 
+/*
 // prevent opening buttons in new tabs
 document.addEventListener("click", (e) => {
     if (e.target.getAttribute("href") === "" && e.which === 2) {
         e.preventDefault();
     }
 });
+*/
 
 module.exports = {
     htmlToDom: htmlToDom,
@@ -674,6 +685,7 @@ module.exports = {
     makePoolLink: makePoolLink,
     makeCheckbox: makeCheckbox,
     makeRadio: makeRadio,
+	makeFlexboxAlign: makeFlexboxAlign,
     syncScrollPosition: syncScrollPosition,
     slideDown: slideDown,
     slideUp: slideUp,

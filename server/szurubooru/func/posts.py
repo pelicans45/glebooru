@@ -24,7 +24,6 @@ from szurubooru.func import (
 )
 from szurubooru.func.image_hash import NpMatrix
 from szurubooru.log import logger
-from szurubooru import config, db, errors, model, rest
 
 EMPTY_PIXEL = (
     b"\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00"
@@ -46,7 +45,7 @@ class PostAlreadyUploadedError(errors.ValidationError):
         super().__init__(
             "File already uploaded (#%d)" % other_post_id,
             {
-                #"otherPostUrl": get_post_content_url(other_post),
+                # "otherPostUrl": get_post_content_url(other_post),
                 "otherPostId": other_post_id,
             },
         )
@@ -192,14 +191,14 @@ class PostSerializer(serialization.BaseSerializer):
             "commentCount": self.serialize_comment_count,
             "noteCount": self.serialize_note_count,
             "relationCount": self.serialize_relation_count,
-            #"featureCount": self.serialize_feature_count,
-            #"lastFeatureTime": self.serialize_last_feature_time,
+            # "featureCount": self.serialize_feature_count,
+            # "lastFeatureTime": self.serialize_last_feature_time,
             "favoritedBy": self.serialize_favorited_by,
             "hasCustomThumbnail": self.serialize_has_custom_thumbnail,
             "notes": self.serialize_notes,
             "comments": self.serialize_comments,
-            #"metrics": self.serialize_metrics,
-            #"metricRanges": self.serialize_metric_ranges,
+            # "metrics": self.serialize_metrics,
+            # "metricRanges": self.serialize_metric_ranges,
             "pools": self.serialize_pools,
         }
 
@@ -246,7 +245,9 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
-        if (self.post.type == "image" or self.post.type == "animation") and self.post.file_size < config.config["thumbnails"]["min_file_size"]:
+        if (
+            self.post.type == "image" or self.post.type == "animation"
+        ) and self.post.file_size < config.config["thumbnails"]["min_file_size"]:
             return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
 
@@ -259,9 +260,9 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
                 "usages": tag.post_count,
-                #"metric": {"min": tag.metric.min, "max": tag.metric.max}
-                #if tag.metric
-                #else None,
+                # "metric": {"min": tag.metric.min, "max": tag.metric.max}
+                # if tag.metric
+                # else None,
             }
             for tag in tags.sort_tags(self.post.tags)
         ]
@@ -271,7 +272,9 @@ class PostSerializer(serialization.BaseSerializer):
             {
                 post["id"]: post
                 for post in [
-                    serialize_micro_post(try_get_post_by_id(rel.child_id), self.auth_user)
+                    serialize_micro_post(
+                        try_get_post_by_id(rel.child_id), self.auth_user
+                    )
                     for rel in get_post_relations(self.post.post_id)
                 ]
             }.values(),
@@ -346,9 +349,7 @@ class PostSerializer(serialization.BaseSerializer):
     def serialize_pools(self) -> List[Any]:
         return [
             pools.serialize_micro_pool(pool)
-            for pool in sorted(
-                self.post.pools, key=lambda pool: pool.creation_time
-            )
+            for pool in sorted(self.post.pools, key=lambda pool: pool.creation_time)
         ]
 
     def serialize_metrics(self) -> Any:
@@ -380,13 +381,18 @@ def serialize_post(
 def serialize_micro_post(
     post: model.Post, auth_user: model.User
 ) -> Optional[rest.Response]:
-    return serialize_post(
-        post, auth_user=auth_user, options=["id", "thumbnailUrl"]
-    )
+    return serialize_post(post, auth_user=auth_user, options=["id", "thumbnailUrl"])
+
 
 def get_post_relations(post_id: int) -> List[model.Post]:
-    #return db.session.query(model.PostRelation).filter(model.PostRelation.parent_id == post_id).all()
-    return db.session.query(model.PostRelation).from_statement(sa.text("select * from post_relation where parent_id = :id")).params(id=post_id).all()
+    # return db.session.query(model.PostRelation).filter(model.PostRelation.parent_id == post_id).all()
+    return (
+        db.session.query(model.PostRelation)
+        .from_statement(sa.text("select * from post_relation where parent_id = :id"))
+        .params(id=post_id)
+        .all()
+    )
+
 
 def get_post_count() -> int:
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
@@ -394,15 +400,21 @@ def get_post_count() -> int:
 
 post_select_statement = sa.text("select * from post where id = :id")
 
-def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
-    return db.session.query(model.Post).from_statement(post_select_statement).params(id=post_id).first()
-    #return get_post_query.params(id=post_id).first()
 
-    #return (
+def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
+    return (
+        db.session.query(model.Post)
+        .from_statement(post_select_statement)
+        .params(id=post_id)
+        .first()
+    )
+    # return get_post_query.params(id=post_id).first()
+
+    # return (
     #    db.session.query(model.Post)
     #    .filter(model.Post.post_id == post_id)
     #    .one_or_none()
-    #)
+    # )
 
 
 def get_post_by_id(post_id: int) -> model.Post:
@@ -437,8 +449,37 @@ def try_get_featured_post() -> Optional[model.Post]:
     return post_feature.post if post_feature else None
 
 
+TAG_IMPLICATIONS = {
+    "bury": "character",
+    "spikedog": "character",
+    "glegle": "character",
+    "flube": "character",
+    "yosho": "character",
+}
+
+SITE_TAGS = {
+    "bury.pink": "bury",
+    "spikedog.school": "spikedog",
+    "glegle.gallery": "glegle",
+    "flube.supply": "flube",
+    "yosho.io": "yosho",
+}
+
+
+def add_extra_tags(host, tag_names):
+    site = config.config["sites"][host]
+    site_tag = site.get("query")
+    if site_tag and site_tag not in tag_names:
+        tag_names.append(site_tag)
+
+    implications = site.get("implies", [])
+    for implication in implications:
+        if implication not in tag_names:
+            tag_names.append(implication)
+
+
 def create_post(
-    content: bytes, tag_names: List[str], user: Optional[model.User]
+    host: str, content: bytes, tag_names: List[str], user: Optional[model.User]
 ) -> Tuple[model.Post, List[model.Tag]]:
     post = model.Post()
     post.safety = model.Post.SAFETY_SAFE
@@ -451,6 +492,13 @@ def create_post(
     post.mime_type = ""
 
     update_post_content(post, content)
+
+    if post.type == model.Post.TYPE_ANIMATION and "gif" not in tag_names:
+        tag_names.append("gif")
+    elif post.type == model.Post.TYPE_VIDEO and "video" not in tag_names:
+        tag_names.append("video")
+
+    add_extra_tags(host, tag_names)
     new_tags = update_post_tags(post, tag_names)
 
     db.session.add(post)
@@ -475,23 +523,17 @@ def update_post_source(post: model.Post, source: Optional[str]) -> None:
 
 
 @listens_for(model.Post, "after_insert")
-def _after_post_insert(
-    _mapper: Any, _connection: Any, post: model.Post
-) -> None:
+def _after_post_insert(_mapper: Any, _connection: Any, post: model.Post) -> None:
     _sync_post_content(post)
 
 
 @listens_for(model.Post, "after_update")
-def _after_post_update(
-    _mapper: Any, _connection: Any, post: model.Post
-) -> None:
+def _after_post_update(_mapper: Any, _connection: Any, post: model.Post) -> None:
     _sync_post_content(post)
 
 
 @listens_for(model.Post, "before_delete")
-def _before_post_delete(
-    _mapper: Any, _connection: Any, post: model.Post
-) -> None:
+def _before_post_delete(_mapper: Any, _connection: Any, post: model.Post) -> None:
     if post.post_id:
         if config.config["delete_source_files"]:
             files.delete(get_post_content_path(post))
@@ -578,7 +620,10 @@ def purge_post_signature(post: model.Post) -> None:
         .delete()
     )
     """
-    db.session.execute("delete from post_signature where post_id=:id", {"id": post.post_id})
+    db.session.execute(
+        "delete from post_signature where post_id=:id", {"id": post.post_id}
+    )
+
 
 def generate_post_signature(post: model.Post, content: bytes) -> None:
     try:
@@ -587,15 +632,11 @@ def generate_post_signature(post: model.Post, content: bytes) -> None:
         words = image_hash.generate_words(unpacked_signature)
 
         db.session.add(
-            model.PostSignature(
-                post=post, signature=packed_signature, words=words
-            )
+            model.PostSignature(post=post, signature=packed_signature, words=words)
         )
     except errors.ProcessingError:
         if not config.config["allow_broken_uploads"]:
-            raise InvalidPostContentError(
-                "Unable to generate image hash data"
-            )
+            raise InvalidPostContentError("Unable to generate image hash data")
 
 
 def update_all_post_signatures() -> None:
@@ -611,11 +652,9 @@ def update_all_post_signatures() -> None:
     )
     for post in posts_to_hash:
         try:
-            generate_post_signature(
-                post, files.get(get_post_content_path(post))
-            )
+            generate_post_signature(post, files.get(get_post_content_path(post)))
             db.session.commit()
-            #logging.info("Created Signature - Post %d", post.post_id)
+            # logging.info("Created Signature - Post %d", post.post_id)
         except Exception as ex:
             logging.exception(ex)
 
@@ -629,16 +668,16 @@ def update_all_md5_checksums() -> None:
     )
     for post in posts_to_hash:
         try:
-            post.checksum_md5 = util.get_md5(
-                files.get(get_post_content_path(post))
-            )
+            post.checksum_md5 = util.get_md5(files.get(get_post_content_path(post)))
             db.session.commit()
-            #logging.info("Created MD5 - Post %d", post.post_id)
+            # logging.info("Created MD5 - Post %d", post.post_id)
         except Exception as ex:
             logging.exception(ex)
 
 
-def update_post_content(post: model.Post, content: Optional[bytes], content_changed=False) -> None:
+def update_post_content(
+    post: model.Post, content: Optional[bytes], content_changed=False
+) -> None:
     # assert post
     if not content:
         raise InvalidPostContentError("Post content missing")
@@ -646,10 +685,8 @@ def update_post_content(post: model.Post, content: Optional[bytes], content_chan
     update_signature = False
     post.mime_type = mime.get_mime_type(content)
     if mime.is_flash(post.mime_type):
-        #post.type = model.Post.TYPE_FLASH
-        raise InvalidPostContentError(
-            "Unhandled file type: %r" % post.mime_type
-        )
+        # post.type = model.Post.TYPE_FLASH
+        raise InvalidPostContentError("Unhandled file type: %r" % post.mime_type)
     elif mime.is_image(post.mime_type):
         update_signature = True
         if mime.is_animated_gif(content):
@@ -659,9 +696,7 @@ def update_post_content(post: model.Post, content: Optional[bytes], content_chan
     elif mime.is_video(post.mime_type):
         post.type = model.Post.TYPE_VIDEO
     else:
-        raise InvalidPostContentError(
-            "Unhandled file type: %r" % post.mime_type
-        )
+        raise InvalidPostContentError("Unhandled file type: %r" % post.mime_type)
 
     post.checksum = util.get_sha1(content)
     post.checksum_md5 = util.get_md5(content)
@@ -678,13 +713,12 @@ def update_post_content(post: model.Post, content: Optional[bytes], content_chan
     post_id = post.post_id
     if post_id is None:
         post_id = 0
-    other_post = db.session.execute("select id from post where checksum=:checksum and id != :id", {"checksum": post.checksum, "id": post_id}).first()
+    other_post = db.session.execute(
+        "select id from post where checksum=:checksum and id != :id",
+        {"checksum": post.checksum, "id": post_id},
+    ).first()
 
-    if (
-        other_post
-        and other_post["id"]
-        and other_post["id"] != post.post_id
-    ):
+    if other_post and other_post["id"] and other_post["id"] != post.post_id:
         raise PostAlreadyUploadedError(other_post["id"])
 
     if update_signature:
@@ -717,9 +751,7 @@ def update_post_content(post: model.Post, content: Optional[bytes], content_chan
     setattr(post, "__content", content)
 
 
-def update_post_thumbnail(
-    post: model.Post, content: Optional[bytes] = None
-) -> None:
+def update_post_thumbnail(post: model.Post, content: Optional[bytes] = None) -> None:
     # assert post
     setattr(post, "__thumbnail", content)
 
@@ -727,7 +759,9 @@ def update_post_thumbnail(
 def generate_post_thumbnail(post: model.Post) -> None:
     # assert post
 
-    if (post.type == "image" or post.type == "animation") and post.file_size < config.config["thumbnails"]["min_file_size"]:
+    if (
+        post.type == "image" or post.type == "animation"
+    ) and post.file_size < config.config["thumbnails"]["min_file_size"]:
         return
 
     backup_path = get_post_thumbnail_backup_path(post)
@@ -747,9 +781,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
         files.save(get_post_thumbnail_path(post), EMPTY_PIXEL)
 
 
-def update_post_tags(
-    post: model.Post, tag_names: List[str]
-) -> List[model.Tag]:
+def update_post_tags(post: model.Post, tag_names: List[str]) -> List[model.Tag]:
     # assert post
     existing_tags, new_tags = tags.get_or_create_tags_by_names(tag_names)
     post.tags = existing_tags + new_tags
@@ -797,13 +829,9 @@ def update_post_notes(post: model.Post, notes: Any) -> None:
         if not note["text"]:
             raise InvalidPostNoteError("A note's text cannot be empty")
         if not isinstance(note["polygon"], (list, tuple)):
-            raise InvalidPostNoteError(
-                "A note's polygon must be a list of points"
-            )
+            raise InvalidPostNoteError("A note's polygon must be a list of points")
         if len(note["polygon"]) < 3:
-            raise InvalidPostNoteError(
-                "A note's polygon must have at least 3 points"
-            )
+            raise InvalidPostNoteError("A note's polygon must have at least 3 points")
         for point in note["polygon"]:
             if not isinstance(point, (list, tuple)):
                 raise InvalidPostNoteError(
@@ -821,9 +849,7 @@ def update_post_notes(post: model.Post, notes: Any) -> None:
                         "All points must fit in the image (0..1 range)"
                     )
             except ValueError:
-                raise InvalidPostNoteError(
-                    "A point in note's polygon must be numeric"
-                )
+                raise InvalidPostNoteError("A point in note's polygon must be numeric")
         if util.value_exceeds_column_size(note["text"], model.PostNote.text):
             raise InvalidPostNoteError("Note text is too long")
         post.notes.append(
@@ -973,7 +999,12 @@ def merge_posts(
 def search_by_image_exact(image_content: bytes) -> Optional[model.Post]:
     checksum = util.get_sha1(image_content)
 
-    return db.session.query(model.Post).from_statement(sa.text("select * from post where checksum=:checksum")).params(checksum=checksum).first()
+    return (
+        db.session.query(model.Post)
+        .from_statement(sa.text("select * from post where checksum=:checksum"))
+        .params(checksum=checksum)
+        .first()
+    )
     return (
         db.session.query(model.Post)
         .filter(model.Post.checksum == checksum)
@@ -1008,9 +1039,7 @@ def search_by_signature(
     ORDER BY score DESC LIMIT :limit;
     """
 
-    candidates = db.session.execute(
-        dbquery, {"q": query_words, "limit": limit}
-    )
+    candidates = db.session.execute(dbquery, {"q": query_words, "limit": limit})
     data = tuple(
         zip(
             *[
@@ -1024,9 +1053,7 @@ def search_by_signature(
         distances = image_hash.normalized_distance(sigarray, signature)
         return [
             (distance, try_get_post_by_id(candidate_post_id))
-            for candidate_post_id, distance in zip(
-                candidate_post_ids, distances
-            )
+            for candidate_post_id, distance in zip(candidate_post_ids, distances)
             if distance < distance_cutoff
         ]
     else:

@@ -13,6 +13,7 @@ const PostsHeaderView = require("../views/posts_header_view.js");
 const PostsPageView = require("../views/posts_page_view.js");
 const EmptyView = require("../views/empty_view.js");
 const Post = require("../models/post.js");
+const misc = require("../util/misc.js");
 
 const fields = [
     "id",
@@ -114,8 +115,10 @@ class PostListController {
 
         this._syncPageController();
         this._headerView._addQuerySpace();
-        this._headerView.focusSearchInputIfSet();
-		/*
+        if (!misc.isMobile) {
+            this._headerView.focusSearchInputIfSet();
+        }
+        /*
 		if (params.q === "") {
 			this._headerView._autoCompleteControl._displayDefaultMatches();
 		}
@@ -254,7 +257,7 @@ class PostListController {
 
     _syncPageController() {
         this._pageController.run({
-			controllerType: "post_list",
+            controllerType: "post_list",
             parameters: this._ctx.parameters,
             browserState: this._ctx.state,
             defaultLimit: parseInt(settings.get().postsPerPage),

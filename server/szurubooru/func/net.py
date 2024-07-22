@@ -6,12 +6,14 @@ from threading import Thread
 from typing import Any, Dict, List
 
 import orjson as json
-import orjson as json
 
 from szurubooru import config, errors
 from szurubooru.func import mime
 
 _dl_chunk_size = 2**15
+
+VALID_DOMAINS = ["i.4cdn.org"]
+VALID_URL_PREFIXES = ("https://" + d for d in VALID_DOMAINS)
 
 
 class DownloadError(errors.ProcessingError):
@@ -24,6 +26,8 @@ class DownloadTooLargeError(DownloadError):
 
 def download(url: str, use_video_downloader: bool = False) -> bytes:
     # assert url
+    if not url.startswith(VALID_URL_PREFIXES):
+        raise DownloadError("This URL cannot be downloaded from")
     youtube_dl_error = None
     if use_video_downloader:
         try:

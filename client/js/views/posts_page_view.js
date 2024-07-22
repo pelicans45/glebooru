@@ -74,15 +74,16 @@ class PostsPageView extends events.EventTarget {
         this._syncBulkEditorsHighlights();
 
         const elements = this._hostNode.querySelectorAll(".post-list > ul");
+        const layoutType = settings.get().layoutType;
         elements.forEach((element) => {
-            if (!element.classList.contains("layout")) {
-                element.classList.add(settings.get().layoutType + "-layout");
-            }
+            //if (!element.classList.contains("layout")) {
+            element.classList.add(`${layoutType}-layout`);
+            //}
         });
 
-		const query = this._ctx.parameters.q || "";
-		const scoreSort = query.includes("sort:score");
-		this._hostNode.classList.toggle("show-score", scoreSort);
+        const query = this._ctx.parameters.q || "";
+        const scoreSort = query.includes("sort:score");
+        this._hostNode.classList.toggle("show-score", scoreSort);
     }
 
     get _listItemNodes() {

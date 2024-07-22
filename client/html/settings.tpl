@@ -64,7 +64,7 @@
                     checked: ctx.browsingSettings.upscaleSmallPosts}) %>
             </li>
 
-            <li>
+            <li style='display: none'>
                 <%= ctx.makeCheckbox({
                     text: 'Dark theme',
                     name: 'dark-theme',

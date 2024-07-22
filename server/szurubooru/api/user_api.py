@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from szurubooru import model, rest, search
 from szurubooru.func import auth, serialization, users, versions
+from szurubooru import errors
 
 _search_executor = search.Executor(search.configs.UserSearchConfig())
 
@@ -68,6 +69,9 @@ def update_user(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     versions.verify_version(user, ctx)
     versions.bump_version(user)
     infix = "self" if ctx.user.user_id == user.user_id else "any"
+
+    if infix == "any" and user.rank == model.User.RANK_ADMINISTRATOR and ctx.user.rank != model.User.RANK_ADMINISTRATOR:
+        raise errors.ValidationError("Cannot edit administrator")
     if ctx.has_param("name"):
         auth.verify_privilege(ctx.user, "users:edit:%s:name" % infix)
         users.update_user_name(user, ctx.get_param_as_string("name"))

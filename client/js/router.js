@@ -1,19 +1,9 @@
 "use strict";
 
-// modified page.js by visionmedia
-// - changed regexes to components
-// - removed unused crap
-// - refactored to classes
-// - simplified method chains
-// - added ability to call .save() in .exit() without side effects
-// - page refresh recovers state from history
-// - rename .save() to .replaceState()
-// - offer .url
-
 const uri = require("./util/uri.js");
 const mousetrap = require("mousetrap");
 
-const clickEvent = document.ontouchstart ? "touchstart" : "click";
+const clickEvent = document.ontouchstart ? "touchstart" : "mousedown";
 const location = window.history.location || window.location;
 
 const origin = _getOrigin();
@@ -128,7 +118,7 @@ class Route {
                 }
 
                 if (name === "variable") {
-                    for (let word of (value || "").split(";")) {
+                    for (const word of (value || "").split(";")) {
                         const [key, subvalue] = word.split("=", 2);
                         parameters[key] = uri.unescapeParam(subvalue);
                     }
@@ -143,10 +133,10 @@ class Route {
                         continue;
                     }
                     parameters["q"] = uri.unescapeParam(
-                        query.replace(/\+/g, "%20")//.replace(/:/g, "%3A")
+                        query.replace(/\+/g, "%20") //.replace(/:/g, "%3A")
                     );
 
-                    for (let word of parts.slice(1)) {
+                    for (const word of parts.slice(1)) {
                         const [key, subvalue] = word.split("=", 2);
                         parameters[key] = uri.unescapeParam(subvalue);
                     }
@@ -189,8 +179,10 @@ class Router {
         this._running = true;
         this._onPopState = _onPopState(this);
         this._onClick = _onClick(this);
+		this._onClickDisable = _onClickDisable(this);
         window.addEventListener("popstate", this._onPopState, false);
         document.addEventListener(clickEvent, this._onClick, false);
+		document.addEventListener("click", this._onClickDisable, false);
         const url = location.pathname + location.search + location.hash;
         // clear cached page data, in case we are refreshing the page:
         const initialState = Object.assign({}, history.state);
@@ -205,6 +197,7 @@ class Router {
         }
         this._running = false;
         document.removeEventListener(clickEvent, this._onClick, false);
+		document.removeEventListener("click", this._onClickDisable, false);
         window.removeEventListener("popstate", this._onPopState, false);
     }
 
@@ -346,7 +339,7 @@ const _onClick = (router) => {
 
         const orig = el.pathname + el.search + (el.hash || "");
 
-		/*
+        /*
         const path = !orig.indexOf(base) ? orig.slice(base.length) : orig;
 
         if (orig === path) {
@@ -361,6 +354,50 @@ const _onClick = (router) => {
 
         e.preventDefault();
         router.show(orig);
+    };
+};
+
+const _onClickDisable = (router) => {
+    return (e) => {
+        if (
+            _which(e) !== 1 ||
+            e.metaKey ||
+            e.ctrlKey ||
+            e.shiftKey ||
+            e.defaultPrevented
+        ) {
+            return;
+        }
+
+        let el = e.path ? e.path[0] : e.target;
+        while (el && el.nodeName !== "A") {
+            el = el.parentNode;
+        }
+		if (!el) {
+			return
+		}
+
+
+        if (
+            el.hasAttribute("download") ||
+            el.getAttribute("rel") === "external"
+        ) {
+            return;
+        }
+
+        const link = el.getAttribute("href");
+        if (
+            (el.pathname === location.pathname && (el.hash || link === "#")) ||
+            el.target ||
+            !_isSameOrigin(el.href)
+        ) {
+            return;
+        }
+
+        if (el.nodeName === "A") {
+            e.preventDefault();
+            return;
+        }
     };
 };
 

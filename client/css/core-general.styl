@@ -264,12 +264,14 @@ nav
             &[data-name=tags],
             &[data-name=pools],
             &[data-name=comments],
+            &[data-name=discord],
             &[data-name=users]
-                i.la
+                i.la, i.lab
                     font-size: 32px
                     position: relative
 
             &[data-name=home],
+            &[data-name=pools],
             &[data-name=register],
             &[data-name=logout]
                 display: none
@@ -288,17 +290,23 @@ nav
                 &[data-name=login],
                 &[data-name=logout],
                 &[data-name=account],
-                &[data-name=help]
+                &[data-name=help],
+                &[data-name=comments],
+                &[data-name=users],
+                &[data-name=discord]
                     display: none !important
 
         &.show-extra-nav-links
             ul li
+                &[data-name=settings],
                 &[data-name=register],
                 &[data-name=login],
                 &[data-name=logout],
                 &[data-name=account],
-                &[data-name=settings],
-                &[data-name=help]
+                &[data-name=help],
+                &[data-name=comments],
+                &[data-name=users],
+                &[data-name=discord]
                     &:not(.active) a
                         background: $extra-nav-link-background-color
                         color: $extra-nav-link-color !important
@@ -354,6 +362,8 @@ nav.buttons&:not(#top-navigation)
         display: inline-block
         text-align: left
         padding: 0.5em 1em
+        a
+            text-decoration: underline
         &.info
             border: 1px solid $message-info-border-color
             background: $message-info-background-color

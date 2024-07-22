@@ -13,7 +13,7 @@ from szurubooru.func import (
 )
 
 TAG_LIST_CACHE = {}
-TAG_LIST_CACHE_EXPIRATION_SECONDS = 600
+TAG_LIST_CACHE_EXPIRATION_SECONDS = 1800
 
 _search_executor = search.Executor(search.configs.TagSearchConfig())
 
@@ -40,7 +40,7 @@ def clear_cached_tag_list(tag):
 
 
 def clear_all_cached_tag_lists():
-    logging.info("Clearing cached tag lists")
+    #logging.info("Clearing cached tag lists")
     TAG_LIST_CACHE.clear()
 
 
