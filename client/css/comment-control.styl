@@ -7,11 +7,11 @@
     .comment-container
         .comment
             min-width: 45em
-            @media (max-width: 1000px)
+            @media (max-width: 800px)
                 min-width: 70vw
 
 .comment-container
-    //padding: 0 0 0 60px
+    display: flex
 
     .avatar
         float: left
@@ -28,11 +28,12 @@
         display: none
 
     .comment
-        border: 1px solid $comment-border-color
         width: fit-content
         max-width: 1000px
+
         margin-left: 18px
 
+        border: 1px solid $comment-border-color
         header
             white-space: nowrap
             font-size: 95%
@@ -60,7 +61,7 @@
 
             nav.readonly
                 padding: 0 1em
-                line-height: 2.25em
+                line-height: 2em
 
                 .date, .score-container, .edit
                     margin-right: 2em

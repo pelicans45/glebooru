@@ -39,7 +39,42 @@
             <a target="_blank" href='https://danbooru.donmai.us/posts?tags=md5:<%- ctx.post.checksumMD5 %>'>Danbooru</a> &middot;
             <a target="_blank" href='https://www.google.com/searchbyimage?&image_url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
         </section>
-
+        <% if (window.innerWidth <= 800) { %>
+            <nav class='tags'>
+                <!-- <h2>Tags</h2> -->
+                <% if (ctx.tags.length) { %>
+                    <ul class='compact-tags'><!--
+                        --><% for (let tag of ctx.tags) { %><!--
+                            --><li><!--
+                                --><% if (ctx.canViewTags) { %><!--
+                                --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='tag-link-info <%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                                    --><i class='la la-tag'></i><!--
+                                --><% } %><!--
+                                --><% if (ctx.canViewTags) { %><!--
+                                    --></a><!--
+                                --><% } %><!--
+                                --><% if (ctx.canListPosts) { %><!--
+                                    --><a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category %>)'><!--
+                                --><% } %><!--
+                                    --><%- ctx.getPrettyName(tag.names[0]) %><!--
+                                --><% if (ctx.canListPosts) { %><!--
+                                    --></a><!--
+                                --><% } %>&#32;<!--
+                                --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
+                            --></li><!--
+                        --><% } %><!--
+                    --></ul>
+                <% } else { %>
+                    <p>
+                        No tags yet
+                        <br>
+                        <% if (ctx.canEditPosts) { %>
+                            <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>' title='Add tags'>Add tags</a>
+                        <% } %>
+                    </p>
+                <% } %>
+            </nav>
+        <% } %>
     </article>
 
     <% if (ctx.post.relations.length) { %>
@@ -56,41 +91,42 @@
             --></ul>
         </nav>
     <% } %>
-
-    <nav class='tags'>
-        <!-- <h2>Tags</h2> -->
-        <% if (ctx.tags.length) { %>
-            <ul class='compact-tags'><!--
-                --><% for (let tag of ctx.tags) { %><!--
-                    --><li><!--
-                        --><% if (ctx.canViewTags) { %><!--
-                        --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='tag-link-info <%= ctx.makeCssName(tag.category, 'tag') %>'><!--
-                            --><i class='la la-tag'></i><!--
-                        --><% } %><!--
-                        --><% if (ctx.canViewTags) { %><!--
-                            --></a><!--
-                        --><% } %><!--
-                        --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category.replace("_", " ") %>)'><!--
-                        --><% } %><!--
-                            --><%- ctx.getPrettyName(tag.names[0]) %><!--
-                        --><% if (ctx.canListPosts) { %><!--
-                            --></a><!--
-                        --><% } %>&#32;<!--
-                        --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
-                    --></li><!--
-                --><% } %><!--
-            --></ul>
-        <% } else { %>
-            <p>
-                No tags yet
-                <br>
-                <% if (ctx.canEditPosts) { %>
-                    <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add tags</a>
-                <% } %>
-            </p>
-        <% } %>
-    </nav>
+    <% if (window.innerWidth >= 801) { %>
+        <nav class='tags'>
+            <!-- <h2>Tags</h2> -->
+            <% if (ctx.tags.length) { %>
+                <ul class='compact-tags'><!--
+                    --><% for (let tag of ctx.tags) { %><!--
+                        --><li><!--
+                            --><% if (ctx.canViewTags) { %><!--
+                            --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='tag-link-info <%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                                --><i class='la la-tag'></i><!--
+                            --><% } %><!--
+                            --><% if (ctx.canViewTags) { %><!--
+                                --></a><!--
+                            --><% } %><!--
+                            --><% if (ctx.canListPosts) { %><!--
+                                --><a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(tag.names[0])}) %>' class='tag-link-posts <%= ctx.makeCssName(tag.category, 'tag') %>' title='(<%- tag.category.replace("_", " ") %>)'><!--
+                            --><% } %><!--
+                                --><%- ctx.getPrettyName(tag.names[0]) %><!--
+                            --><% if (ctx.canListPosts) { %><!--
+                                --></a><!--
+                            --><% } %>&#32;<!--
+                            --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
+                        --></li><!--
+                    --><% } %><!--
+                --></ul>
+            <% } else { %>
+                <p>
+                    No tags yet
+                    <br>
+                    <% if (ctx.canEditPosts) { %>
+                        <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add tags</a>
+                    <% } %>
+                </p>
+            <% } %>
+        </nav>
+    <% } %>
 
     <% /* if (ctx.post.metrics.length + ctx.post.metricRanges.length) { %>
         <nav class='metrics'>
@@ -103,7 +139,7 @@
         <nav class='similar'>
             <h2>Similar</h2>
             <ul></ul>
-            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id + " -id:" + ctx.post.id}) %>' style='display: block'>See more</a>
+            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id + " -id:" + ctx.post.id}) %>' title='View similar images' >See more</a>
         </nav>
 
         <nav class='lookalikes'>

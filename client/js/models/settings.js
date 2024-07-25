@@ -31,6 +31,10 @@ if (misc.isMobile) {
     defaultSettings.navbarFollow = true;
 }
 
+if (window.innerWidth <= window.innerHeight || window.innerWidth <= 1000) {
+    defaultSettings.layoutType = "column";
+}
+
 class Settings extends events.EventTarget {
     constructor() {
         super();

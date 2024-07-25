@@ -76,9 +76,6 @@ a
     //    outline: 2px solid $main-color
     &:hover
         color: lighten($link-color, 15%) !important
-    .vim-nav-hint
-        position: absolute
-        visibility: hidden
 .darktheme a
     &.inactive
         color: $inactive-link-color-darktheme
@@ -238,8 +235,6 @@ nav
                 justify-content: space-between
                 background-color: #1a1a1a
                 padding-right: 1em
-            .toggle-icon
-                margin-right: 1em
         ul
             li
                 a
@@ -280,8 +275,6 @@ nav
             height: 1.5em
             //margin: 0 0.5em;
             //margin-left: .58em;
-            @media (max-width: 1000px)
-                padding: 4px 0 4px 0
 
     @media (min-width: 1000px)
         &:not(.show-extra-nav-links)
@@ -393,7 +386,7 @@ nav.buttons&:not(#top-navigation)
     /*background-image: attr(data-src url)*/ /* not available yet */
     vertical-align: middle
     background-repeat: no-repeat
-    background-size: contain //cover
+    background-size: cover
     background-position: center
     display: inline-block
     //overflow: hidden
