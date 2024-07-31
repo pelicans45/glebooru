@@ -3,7 +3,7 @@
 const uri = require("./util/uri.js");
 const mousetrap = require("mousetrap");
 
-const clickEvent = document.ontouchstart ? "touchstart" : "mousedown";
+const clickEvent = document.ontouchstart ? "touchstart" : "click";
 const location = window.history.location || window.location;
 
 const origin = _getOrigin();
@@ -179,10 +179,10 @@ class Router {
         this._running = true;
         this._onPopState = _onPopState(this);
         this._onClick = _onClick(this);
-		this._onClickDisable = _onClickDisable(this);
+		//this._onClickDisable = _onClickDisable(this);
         window.addEventListener("popstate", this._onPopState, false);
         document.addEventListener(clickEvent, this._onClick, false);
-		document.addEventListener("click", this._onClickDisable, false);
+		//document.addEventListener("click", this._onClickDisable, false);
         const url = location.pathname + location.search + location.hash;
         // clear cached page data, in case we are refreshing the page:
         const initialState = Object.assign({}, history.state);

@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 from szurubooru import model, rest, search
@@ -27,7 +28,6 @@ def get_users(
         ctx, lambda user: _serialize(ctx, user)
     )
 
-
 @rest.routes.post("/users/?")
 def create_user(
     ctx: rest.Context, _params: Dict[str, str] = {}
@@ -36,6 +36,9 @@ def create_user(
         auth.verify_privilege(ctx.user, "users:create:self")
     else:
         auth.verify_privilege(ctx.user, "users:create:any")
+
+
+    logging.info("ctx: %s", ctx)
 
     name = ctx.get_param_as_string("name")
     password = ctx.get_param_as_string("password")
@@ -49,6 +52,10 @@ def create_user(
             ctx.get_param_as_string("avatarStyle"),
             ctx.get_file("avatar", default=b""),
         )
+
+    # get the IP from the ctx headers and log the IP
+    ip = ctx.get_header("X-Real-IP")
+    logging.info("[REGISTRATION] User %s created by %s", name, ip)
     ctx.session.add(user)
     ctx.session.commit()
 

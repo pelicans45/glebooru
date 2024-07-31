@@ -30,12 +30,18 @@ def _dump_json(obj: Any) -> str:
 
 
 def _get_headers(env: Dict[str, Any]) -> Dict[str, str]:
+    """
     headers = {}  # type: Dict[str, str]
     for key, value in env.items():
         if key.startswith("HTTP_"):
             key = util.snake_case_to_upper_train_case(key[5:])
             headers[key] = value
     return headers
+    """
+    return {
+        util.snake_case_to_upper_train_case(key[5:]): value
+        for key, value in env.items() if key.startswith("HTTP_")
+    }
 
 
 def _create_context(env: Dict[str, Any]) -> context.Context:
@@ -62,8 +68,9 @@ def _create_context(env: Dict[str, Any]) -> context.Context:
             if isinstance(body, bytes):
                 body = body.decode("utf-8")
 
-            for key, value in json.loads(body).items():
-                params[key] = value
+            #for key, value in json.loads(body).items():
+            #    params[key] = value
+            params.update(json.loads(body))
         except (ValueError, UnicodeDecodeError):
             raise errors.HttpBadRequest(
                 "ValidationError",
