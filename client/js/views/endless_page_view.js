@@ -263,7 +263,7 @@ class EndlessPageView {
                 parameters: ctx.parameters,
                 response: response,
                 addFlexAlignment:
-                    settings.get().layoutMode === "default" &&
+                    settings.get().layoutType === "default" &&
                     page === totalPages,
                 hostNode: pageNode.querySelector(".page-content-holder"),
             });
@@ -293,7 +293,7 @@ class EndlessPageView {
             if (
                 page === totalPages &&
                 ctx.controllerType === "post_list" &&
-                settings.get().layoutMode === "default"
+                settings.get().layoutType === "default"
             ) {
                 pageNode.innerHTML += views.makeFlexboxAlign();
             }
@@ -302,7 +302,7 @@ class EndlessPageView {
             if (
                 !this._initialPageLoad &&
                 ctx.controllerType === "post_list" &&
-                settings.get().layoutMode !== "column"
+                settings.get().layoutType !== "column"
             ) {
                 const els = pageNode.querySelectorAll(".post-list li");
                 const list =

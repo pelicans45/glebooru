@@ -171,22 +171,22 @@ function _makeTopNavigation() {
         )
     );
     ret.add(
-        "help",
-        new TopNavigationItem(
-            "H",
-            "Help",
-            "<i class='la la-info'></i>",
-            "help",
-            "right"
-        )
-    );
-    ret.add(
         "discord",
         new TopNavigationItem(
             null,
             "Join Discord server",
             "<i class='lab la-discord'></i>",
             "discord/",
+            "right"
+        )
+    );
+    ret.add(
+        "help",
+        new TopNavigationItem(
+            "H",
+            "Help",
+            "<i class='la la-info'></i>",
+            "help",
             "right"
         )
     );

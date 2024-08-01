@@ -7,14 +7,15 @@
 
         li:not(.flexbox-dummy)
             min-height: 10em
-            height: 15vw
-
+            height: 14vw
+        li
             flex-grow: 1
-
             margin: .1em .25em .3em .25em
 
-        .thumbnail img
-            opacity: 0
+        .thumbnail
+            min-width: 50px
+            img
+                opacity: 0
 
     ul.column-layout
         display: block
@@ -29,6 +30,9 @@
             height: unset !important
             width: 100% !important
             margin: 0 0 2vmin !important
+            .thumbnail
+                img
+                    max-height: 2000px
 
     ul.grid-layout
         display: grid
