@@ -221,7 +221,6 @@ function getPostUrl(id, parameters) {
 
 function getPostEditUrl(id, parameters) {
 	let q = (parameters && parameters.q) ? parameters.q.trim() : "";
-	console.log("q: " + q);
     if (/^\d+(\b|$)/.test(q)) {
         q = null;
     }

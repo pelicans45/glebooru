@@ -513,6 +513,7 @@ class PostEditSidebarControl extends events.EventTarget {
                 },
             })
         );
+		misc.disableExitConfirmation();
     }
 
     get _formNode() {
