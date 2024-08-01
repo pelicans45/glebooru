@@ -1,5 +1,6 @@
 "use strict";
 
+const settings = require("../models/settings.js");
 const router = require("../router.js");
 const keyboard = require("../util/keyboard.js");
 const views = require("../util/views.js");
@@ -75,9 +76,10 @@ class ManualPageView {
         ctx.requestPage(offset, limit).then(
             (response) => {
                 ctx.pageRenderer({
-					manualPageView: true,
+                    manualPageView: true,
                     parameters: ctx.parameters,
                     response: response,
+                    addFlexAlignment: settings.get().layoutType === "default",
                     hostNode: this._pageContentHolderNode,
                 });
 

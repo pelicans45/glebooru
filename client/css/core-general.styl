@@ -159,9 +159,11 @@ hr
         height: unset
         right: 0
         width: 100%
+        /*
         pointer-events: none
         *
             pointer-events: all
+        */
         //background: $window-color-darktheme !important
 nav
     .nav-bar
@@ -235,6 +237,8 @@ nav
                 justify-content: space-between
                 background-color: #1a1a1a
                 padding-right: 1em
+            .toggle-icon
+                margin-right: 1em
         ul
             li
                 a
@@ -247,6 +251,11 @@ nav
                 i.la.la-cog
                     font-size: 24px
                     @media (max-width: 1000px)
+                        padding: 4px 0 4px 0
+
+            @media (max-width: 1000px)
+                &[data-name=account]
+                    a
                         padding: 4px 0 4px 0
             &[data-name=posts],
             &[data-name=upload],

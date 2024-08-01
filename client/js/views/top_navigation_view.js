@@ -12,10 +12,10 @@ const extraNavLinkTabs = new Set([
     "login",
     //"logout",
     "register",
-	"comments",
-	"users",
-	"pools",
-	"discord",
+    "comments",
+    "users",
+    "pools",
+    "discord",
 ]);
 
 class TopNavigationView {
