@@ -22,19 +22,19 @@ can be of the following form:</p>
         </tr>
         <tr>
             <td><code>sort:&lt;style&gt;</code></td>
-            <td>sort style tokens</td>
+            <td>sort tokens</td>
             <td>used to sort the results</td>
         </tr>
         <tr>
             <td><code>special:&lt;value&gt;</code></td>
             <td>special tokens</td>
-            <td>filters usually tied to the logged in user</td>
+            <td>used for filters tied to the logged-in user</td>
         </tr>
     </tbody>
 </table>
 
-<p>Most of anonymous and named tokens support ranged and composite values that
-take following form:</p>
+<p>Most anonymous and named tokens support ranged and composite values that
+take the following form:</p>
 
 <table>
     <tbody>
@@ -62,7 +62,7 @@ take following form:</p>
 <code>-max</code> to the key, for example like this:
 <code>score-min:1</code>.</p>
 
-<p>Date/time values can be of following form:</p>
+<p>Date/time values can be of the following form:</p>
 
 <ul>
     <li><code>today</code></li>
@@ -76,16 +76,16 @@ take following form:</p>
 
 <p>All tokens can be negated by prepending them with <code>-</code>.</p>
 
-<p>Sort style token values can be appended with <code>,asc</code> or
-<code>,desc</code> to control the sort direction, which can be also controlled
-by negating the whole token.</p>
+<p>Sort token values can be appended with <code>,asc</code> or
+<code>,desc</code> to control the sort direction, which can also be controlled
+by negating the whole token with <code>-sort:field</code>.</p>
 
 <p>You can escape special characters such as <code>:</code> and <code>-</code>
-by prepending them with a backslash: <code>\\</code>.</p>
+by prepending them with a backslash: <code>\:</code>.</p>
 
 <h1>Example</h1>
 
-<p>Searching for posts with following query:</p>
+<p>Searching for posts with the following query:</p>
 
 <pre><code>sea -fav-count:8.. uploader:Pirate</code></pre>
 

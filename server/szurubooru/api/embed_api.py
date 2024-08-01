@@ -33,7 +33,7 @@ def _get_post_id(match: re.Match) -> int:
 
 
 def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Response:
-    return posts.serialize_post(post, ctx.user, options=["thumbnailUrl", "user"])
+    return posts.serialize_post(post, ctx.user, options=["thumbnailUrl", "tags"])
 
 
 def get_tag_string(site, tags):
