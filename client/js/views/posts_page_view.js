@@ -15,6 +15,7 @@ class PostsPageView extends events.EventTarget {
         this._ctx = ctx;
         this._hostNode = ctx.hostNode;
         ctx.excludeRedundantTags = lens.excludeRedundantTags;
+        ctx.layoutType = settings.get().layoutType;
         //ctx.needsTagsThreshold = lens.ctx.isUniversal ? 0 : 2;
         views.replaceContent(this._hostNode, template(ctx));
 

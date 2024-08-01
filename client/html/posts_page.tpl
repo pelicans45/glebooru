@@ -2,7 +2,7 @@
     <% if (ctx.response.results.length) { %>
         <ul>
             <%
-            const useBackgroundImage = settings.get().layoutType === "default";
+            const useBackgroundImage = ctx.layoutType === "default";
             for (const post of ctx.response.results) {
                 const postTags = ctx.excludeRedundantTags(post.tags);
                 let postTitle = postTags.map(tag => tag.names[0]).join(' ') || '(no tags)';
