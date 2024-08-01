@@ -46,14 +46,14 @@ function makeRelativeTime(time) {
     );
 }
 
-function makeThumbnail(url) {
+function makeThumbnail(url, useBackgroundImage) {
     return makeElement(
         "span",
         url
             ? {
                   class: "thumbnail",
                   style:
-                      settings.get().layoutType === "default"
+                      useBackgroundImage
                           ? `background-image: url(\'${url}\')`
                           : ``,
               }
@@ -202,7 +202,7 @@ function makeDateInput(options) {
 }
 
 function getPostUrl(id, parameters) {
-	let q = parameters.q ? parameters.q.trim() : "";
+	let q = (parameters && parameters.q) ? parameters.q.trim() : "";
 	if (/^\d+(\b|$)/.test(q)) {
 		q = null;
 	}

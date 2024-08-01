@@ -1,5 +1,6 @@
 <div class='content-wrapper' id='user-registration'>
-    <h1>Register</h1>
+    <h1 style="margin-bottom: 0.3em">Register</h1>
+    <div style="margin-bottom: 1.3em"><a href="/login">Or click here to login</a></div>
     <form autocomplete='off'>
         <input class='anticomplete' type='text' name='fakeuser'/>
         <input class='anticomplete' type='password' name='fakepass'/>

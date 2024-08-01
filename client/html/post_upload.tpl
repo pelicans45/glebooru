@@ -33,7 +33,7 @@
                 <%= ctx.makeCheckbox({
                     text: 'Pause on error',
                     name: 'pause-remain-on-error',
-                    checked: false,
+                    checked: true,
                 }) %>
             </span>
 

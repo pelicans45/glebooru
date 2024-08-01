@@ -2,6 +2,7 @@
     <% if (ctx.response.results.length) { %>
         <ul>
             <%
+            const useBackgroundImage = settings.get().layoutType === "default";
             for (const post of ctx.response.results) {
                 const postTags = ctx.excludeRedundantTags(post.tags);
                 let postTitle = postTags.map(tag => tag.names[0]).join(' ') || '(no tags)';
@@ -13,7 +14,7 @@
                     <a class='thumbnail-wrapper <%= post.tags.length > 2 ? "tags" : "no-tags" %>'
                             title='<%- postTitle %>'
                             href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'>
-                        <%= ctx.makeThumbnail(post.thumbnailUrl) %>
+                        <%= ctx.makeThumbnail(post.thumbnailUrl, useBackgroundImage) %>
                         <% if (post.type === 'video') { %>
                             <span class='type' data-type='<%- post.type %>'>
                                 <span class='icon'><i class='la la-video'></i></span>

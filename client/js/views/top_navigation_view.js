@@ -13,6 +13,7 @@ const extraNavLinkTabs = new Set([
     //"logout",
     "register",
 	"comments",
+	"users",
 	"pools",
 	"discord",
 ]);
