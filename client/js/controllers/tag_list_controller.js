@@ -81,7 +81,7 @@ class TagListController {
                     return TagList.getAllRelevant().then((response) => {
 						const r = {};
 						r.results = response.results.copy().slice(offset, offset + limit);
-						r.total = r.results.length;
+						r.total = response.results.length;
 						r.q = "";
 						r.limit = limit;
 						r.offset = offset;

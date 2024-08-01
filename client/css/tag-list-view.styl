@@ -1,6 +1,8 @@
 @require colors
 
 .tag-list
+    .page:not([data-offset="0"]) & thead
+        display: none
     table
         width: 100%
         border-spacing: 0
@@ -12,7 +14,8 @@
             .tags-list-row-search
                 display: inline
         th, td
-            padding: 0.1em 0.5em
+            //padding: 0.1em 0.5em
+            padding-top: 0.2em
         th
             white-space: nowrap
             background: $top-navigation-color

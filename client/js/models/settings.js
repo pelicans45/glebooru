@@ -18,7 +18,7 @@ const defaultSettings = {
     fitMode: "fit-both",
     tagSuggestions: true,
     autoplayVideos: false,
-    postsPerPage: 48,
+    postsPerPage: 60,
     similarPosts: 4,
     tagUnderscoresAsSpaces: true,
     darkTheme: true,
