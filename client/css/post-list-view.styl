@@ -235,11 +235,13 @@
                 */
 
             .thumbnail-wrapper.no-tags
+                /*
                 .thumbnail
                     outline: 1.75px dashed $post-thumbnail-no-tags-border-color
 
                 .thumbnail
                     opacity: .9
+                */
 
             &:hover a, a:active, a:focus
                 .thumbnail
@@ -269,7 +271,7 @@
                 outline-offset: -1px
             .thumbnail-wrapper.no-tags
                 .thumbnail
-                    outline: 1.75px dashed $post-thumbnail-no-tags-border-color
+                    //outline: 1.75px dashed $post-thumbnail-no-tags-border-color
             &:hover a, a:active, a:focus
                 .thumbnail
                     outline: 2px solid $main-color !important
@@ -472,13 +474,18 @@
                 @media (max-width: 1000px)
                     margin-left: 0
         &:not(.opened)
-            .start
+            .start, .select-all
                 display: none
         .append.open
             @media (max-width: 1000px)
                 margin-left: 0
         .start
             margin-left: 1em
+        .select-all
+            margin-left: 0
+            vertical-align: middle
+            margin-right: 1em
+            font-size: 0.95em
     .safety
         display: none
         margin-right: 0.25em

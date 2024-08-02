@@ -20,7 +20,6 @@
                         <% } %>
                         <br/>
                         Registered: <%= ctx.makeRelativeTime(user.creationTime) %><br/>
-                        Last seen: <%= ctx.makeRelativeTime(user.lastLoginTime) %>
                     </div>
                 </div>
             </li><!--

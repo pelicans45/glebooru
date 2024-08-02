@@ -156,6 +156,13 @@ class BulkDeleteEditor extends BulkEditor {
         this._hostNode.addEventListener("submit", (e) =>
             this._evtFormSubmit(e)
         );
+        this._hostNode
+            .querySelector(".select-all")
+            .addEventListener("click", (e) => {
+                document.querySelectorAll(".delete-flipper").forEach((node) => {
+                    node.click();
+                });
+            });
     }
 
     _evtFormSubmit(e) {
