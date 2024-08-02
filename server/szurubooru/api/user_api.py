@@ -92,6 +92,8 @@ def update_user(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 
     if infix == "any" and user.rank == model.User.RANK_ADMINISTRATOR and ctx.user.rank != model.User.RANK_ADMINISTRATOR:
         raise errors.ValidationError("Cannot edit administrator")
+    if infix == "any" and user.rank == model.User.RANK_MODERATOR and not (ctx.user.rank == model.User.RANK_ADMINISTRATOR or ctx.user.rank == model.User.RANK_MODERATOR):
+        raise errors.ValidationError("Cannot edit moderator")
     if ctx.has_param("name"):
         auth.verify_privilege(ctx.user, "users:edit:%s:name" % infix)
         users.update_user_name(user, ctx.get_param_as_string("name"))

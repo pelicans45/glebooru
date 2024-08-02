@@ -68,7 +68,7 @@ privileges:
     'users:create:self':            anonymous
 
     'users:create:any':             administrator
-    'users:list':                   power
+    'users:list':                   moderator
     'users:view':                   anonymous
     'users:edit:any:name':          administrator
     'users:edit:any:pass':          administrator

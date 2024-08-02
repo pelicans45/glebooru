@@ -22,7 +22,8 @@ class UserSearchConfig(BaseSearchConfig):
         raise NotImplementedError()
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
-        return query.order_by(model.User.name.asc())
+        #return query.order_by(model.User.name.asc())
+        return query.order_by(model.User.creation_time.asc())
 
     @property
     def anonymous_filter(self) -> Filter:

@@ -2,7 +2,9 @@
     <%= ctx.makeThumbnail(ctx.user.avatarUrl) %>
     <ul class='basic-info'>
         <li>Registered: <%= ctx.makeRelativeTime(ctx.user.creationTime) %></li>
-        <li>Last seen: <%= ctx.makeRelativeTime(ctx.user.lastLoginTime) %></li>
+        <% if (ctx.canEditAnything) { %>
+            <li>Last seen: <%= ctx.makeRelativeTime(ctx.user.lastLoginTime) %></li>
+        <% } %>
         <li>Rank: <%- ctx.user.rankName.toLowerCase() %></li>
     </ul>
 
