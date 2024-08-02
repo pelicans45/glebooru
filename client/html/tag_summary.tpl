@@ -36,6 +36,6 @@
     <section class='description'>
         <hr/>
         <%= ctx.makeMarkdown(ctx.tag.description || 'This tag has no description yet') %>
-        <p>This tag has <a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(ctx.tag.names[0])}) %>'><%- ctx.tag.postCount %> <%= ctx.tag.postCount === 1 ? "usage" : "usages" %></a>.</p>
+        <p>This tag has <a href='<%- ctx.formatPostsLink({q: ctx.escapeTagName(ctx.tag.names[0])}) %>'><%- ctx.tag.postCount %> <%= ctx.tag.postCount === 1 ? "usage" : "usages" %></a> across all sub-boorus.</p>
     </section>
 </div>
