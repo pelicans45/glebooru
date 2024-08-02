@@ -19,8 +19,8 @@ To add tags when uploading or editing an image:
     </ul>
 </li>
 <li>A dashed red background around a gallery thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
+<li>Use underscores to search for tags that contain spaces ("<code>red hair</code>" -> "<code>red_hair</code>")</li>
 <li>Multiple files can be uploaded at once</li>
-<li style="display: none">Use underscores to search for tags that contain spaces ("<code>concept art</code>" -> "<code>concept_art</code>")</li>
 <% for (const tip of ctx.tips) { %>
 <li><%- tip %></li>
 <% } %>
