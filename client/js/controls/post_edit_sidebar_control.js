@@ -69,7 +69,7 @@ class PostEditSidebarControl extends events.EventTarget {
             `Tags (${this._post.tagNames.length})`,
             this._hostNode.querySelectorAll(".tags")
         );
-		/*
+        /*
         this._metricsExpander = new ExpanderControl(
             "post-metrics",
             `Metrics (${this._post.tags.filterMetrics().length})`,
@@ -254,7 +254,7 @@ class PostEditSidebarControl extends events.EventTarget {
             this._tagControl.addEventListener("change", (e) => {
                 this.dispatchEvent(new CustomEvent("change"));
                 this._syncExpanderTitles();
-				/*
+                /*
                 this._post.removeMetricsWithoutTag();
                 if (this._metricControl) {
                     this._metricControl.refreshContent();
@@ -263,7 +263,7 @@ class PostEditSidebarControl extends events.EventTarget {
             });
         }
 
-		/*
+        /*
         if (this._metricControl) {
             this._metricControl.addEventListener("change", (e) => {
                 this.dispatchEvent(new CustomEvent("change"));
@@ -314,7 +314,7 @@ class PostEditSidebarControl extends events.EventTarget {
         this._notesExpander.title = `Notes (${this._post.notes.length})`;
         this._tagsExpander.title = `Tags (${this._post.tagNames.length})`;
         this._poolsExpander.title = `Pools (${this._post.pools.length})`;
-		/*
+        /*
         let metricCount = this._post.tags.filterMetrics().length;
         if (metricCount > 0) {
             this._metricsExpander.containerNode.style.display = "block";
@@ -469,51 +469,70 @@ class PostEditSidebarControl extends events.EventTarget {
 
     _evtSubmit(e) {
         e.preventDefault();
-        this.dispatchEvent(
-            new CustomEvent("submit", {
-                detail: {
-                    post: this._post,
 
-                    safety: this._safetyButtonNodes.length
-                        ? Array.from(this._safetyButtonNodes)
-                              .filter((node) => node.checked)[0]
-                              .value.toLowerCase()
-                        : undefined,
+        /*
+        let tags = this._tagInputNode
+            ? misc.splitByWhitespace(this._tagInputNode.value)
+            : undefined;
+		*/
 
-                    flags: this._videoFlags,
+        const dispatch = () => {
+            this.dispatchEvent(
+                new CustomEvent("submit", {
+                    detail: {
+                        post: this._post,
 
-                    tags: this._tagInputNode
-                        ? misc.splitByWhitespace(this._tagInputNode.value)
-                        : undefined,
-
-                    pools: this._poolInputNode
-                        ? misc.splitByWhitespace(this._poolInputNode.value)
-                        : undefined,
-
-                    relations: this._relationsInputNode
-                        ? misc
-                              .splitByWhitespace(
-                                  this._relationsInputNode.value
-                              )
-                              .map((x) => parseInt(x))
-                        : undefined,
-
-                    content: this._newPostContent
-                        ? this._newPostContent
-                        : undefined,
-
-                    thumbnail:
-                        this._newPostThumbnail !== undefined
-                            ? this._newPostThumbnail
+                        safety: this._safetyButtonNodes.length
+                            ? Array.from(this._safetyButtonNodes)
+                                  .filter((node) => node.checked)[0]
+                                  .value.toLowerCase()
                             : undefined,
 
-                    source: this._sourceInputNode
-                        ? this._sourceInputNode.value
-                        : undefined,
-                },
-            })
-        );
-		misc.disableExitConfirmation();
+                        flags: this._videoFlags,
+
+                        //tags: tags,
+
+                        pools: this._poolInputNode
+                            ? misc.splitByWhitespace(this._poolInputNode.value)
+                            : undefined,
+
+                        relations: this._relationsInputNode
+                            ? misc
+                                  .splitByWhitespace(
+                                      this._relationsInputNode.value
+                                  )
+                                  .map((x) => parseInt(x))
+                            : undefined,
+
+                        content: this._newPostContent
+                            ? this._newPostContent
+                            : undefined,
+
+                        thumbnail:
+                            this._newPostThumbnail !== undefined
+                                ? this._newPostThumbnail
+                                : undefined,
+
+                        source: this._sourceInputNode
+                            ? this._sourceInputNode.value
+                            : undefined,
+                    },
+                })
+            );
+            misc.disableExitConfirmation();
+        };
+
+        const realTagInput = this._formNode.querySelector(".tag-input input");
+        const inputTag = realTagInput && realTagInput.value;
+
+        if (inputTag) {
+            realTagInput.value = "";
+            this._tagControl
+                .addTagByText(inputTag.trim(), "user-input")
+                .then(dispatch);
+        } else {
+            dispatch();
+        }
     }
 
     get _formNode() {

@@ -18,8 +18,8 @@ def get_mime_type(content: bytes) -> str:
     if content[0:6] in (b"GIF87a", b"GIF89a"):
         return "image/gif"
 
-    if content[8:12] == b"WEBP":
-        return "image/webp"
+    #if content[8:12] == b"WEBP":
+    #    return "image/webp"
 
     if content[0:2] == b"BM":
         return "image/bmp"

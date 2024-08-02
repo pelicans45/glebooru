@@ -5,6 +5,19 @@ const uri = require("./uri.js");
 
 const isMobile = "ontouchstart" in document.documentElement;
 
+
+
+let tagAddInProgress = false;
+
+function tagAddPending() {
+    return tagAddInProgress;
+}
+
+function setTagAddInProgress(value) {
+	tagAddInProgress = value;
+}
+
+
 function decamelize(str, sep) {
     sep = sep === undefined ? "-" : sep;
     return str
@@ -245,5 +258,7 @@ module.exports = {
     dataURItoBlob: dataURItoBlob,
     getPrettyName: getPrettyName,
 	downloadURL: downloadURL,
+	tagAddPending: tagAddPending,
+	setTagAddInProgress: setTagAddInProgress,
 	isMobile,
 };

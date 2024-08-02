@@ -155,9 +155,9 @@ class TagInputControl extends events.EventTarget {
 
         // add existing tags
         for (let tag of [...this.tags]) {
-			if (lens.isLensTag(tag)) {
-				continue
-			}
+            if (lens.isLensTag(tag)) {
+                continue;
+            }
             const listItemNode = this._createListItemNode(tag);
             this._tagListNode.appendChild(listItemNode);
         }
@@ -166,8 +166,12 @@ class TagInputControl extends events.EventTarget {
     }
 
     addTagByText(text, source) {
-        tags.resolveTagAndCategory(text).then(
-            (tag) => this.addTag(tag, source),
+        //misc.setTagAddInProgress(true);
+        return tags.resolveTagAndCategory(text).then(
+            (tag) => {
+                this.addTag(tag, source);
+                //misc.setTagAddInProgress(false);
+            },
             (error) => window.alert(error.message)
         );
     }
@@ -295,10 +299,12 @@ class TagInputControl extends events.EventTarget {
     _evtBlur(e) {
         //e.preventDefault();
         this._hideAutoComplete();
+        /*
         if (this._tagInputNode.value) {
             this.addTagByText(this._tagInputNode.value, SOURCE_USER_INPUT);
             this._tagInputNode.value = "";
         }
+		*/
     }
 
     _createListItemNode(tag) {

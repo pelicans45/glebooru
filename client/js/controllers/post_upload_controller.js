@@ -47,6 +47,18 @@ class PostUploadController {
         this._view.addEventListener("change", (e) => this._evtChange(e));
         this._view.addEventListener("submit", (e) => this._evtSubmit(e));
         this._view.addEventListener("cancel", (e) => this._evtCancel(e));
+
+        /*
+        this._view.addEventListener("submit", (e) => {
+            const fn = () => this._evtSubmit(e);
+            if (misc.tagAddPending()) {
+                console.log("tagAddPending");
+                setTimeout(fn, 700);
+            } else {
+                fn();
+            }
+        });
+		*/
     }
 
     _evtChange(e) {
@@ -226,6 +238,7 @@ class PostUploadController {
 
                 // no duplicates, proceed with saving
                 let post = this._uploadableToPost(uploadable);
+
                 let savePromise = post.save(uploadable.anonymous).then(() => {
                     this._view.removeUploadable(uploadable);
                     return Promise.resolve();

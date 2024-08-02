@@ -193,13 +193,13 @@ class PostMainController extends BasePostController {
         }
         post.save().then(
             () => {
-                this._view.sidebarControl.showSuccess("Post saved");
+                this._view.sidebarControl.showSuccess("Saved");
                 this._view.sidebarControl.enableForm();
                 misc.disableExitConfirmation();
                 if (post.tagNames.length > 0) {
                     TagList.refreshRelevant().then(() => {
-						PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
-					});
+                        PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
+                    });
                 }
             },
             (error) => {

@@ -7,6 +7,16 @@ from szurubooru import errors
 
 _search_executor = search.Executor(search.configs.UserSearchConfig())
 
+USERNAME_BLACKLIST = [
+    "fagg",
+    "nigg",
+    "jew",
+    "kike",
+    "cunt",
+    "jeet",
+    "tran"
+]
+
 
 def _serialize(
     ctx: rest.Context, user: model.User, **kwargs: Any
@@ -41,6 +51,9 @@ def create_user(
     logging.info("ctx: %s", ctx)
 
     name = ctx.get_param_as_string("name")
+    if any(s in name for s in USERNAME_BLACKLIST):
+        raise errors.ValidationError("Invalid username")
+
     password = ctx.get_param_as_string("password")
     email = ctx.get_param_as_string("email", default="")
     user = users.create_user(name, password, email)

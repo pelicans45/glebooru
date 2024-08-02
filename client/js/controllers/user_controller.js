@@ -215,6 +215,7 @@ class UserController {
                 () => {
                     this._view.showSuccess("Settings updated");
                     this._view.enableForm();
+                    misc.disableExitConfirmation();
                 },
                 (error) => {
                     this._view.showError(error.message);

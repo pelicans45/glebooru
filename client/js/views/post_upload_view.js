@@ -200,7 +200,7 @@ class PostUploadView extends events.EventTarget {
 
         if (this._tagInputNode) {
             const tagList = new TagList();
-			/*
+            /*
             if (lens.hostnameFilter) {
                 tagList.addByName(lens.hostnameFilter);
             }
@@ -276,7 +276,7 @@ class PostUploadView extends events.EventTarget {
             }
             alert(message);
         }
-		this._tagControl._tagInputNode.focus();
+        this._tagControl._tagInputNode.focus();
     }
 
     removeUploadable(uploadable) {
@@ -347,6 +347,14 @@ class PostUploadView extends events.EventTarget {
         uploadable.tags = [];
         if (this._tagControl) {
             uploadable.tags = this._tagControl.tags.map((tag) => tag.names[0]);
+        }
+
+        const realTagInput = this._formNode.querySelector(".tag-input input");
+        const inputTag = realTagInput && realTagInput.value;
+
+        if (inputTag) {
+            uploadable.tags.push(inputTag.trim());
+            realTagInput.value = "";
         }
 
         uploadable.relations = [];

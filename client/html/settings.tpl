@@ -101,14 +101,14 @@
                     text: 'Default'}) %>
                     <%= ctx.makeRadio({
                     name: 'layout-type',
-                    value: 'column',
-                    selectedValue: ctx.browsingSettings.layoutType,
-                    text: 'Column'}) %>
-                    <%= ctx.makeRadio({
-                    name: 'layout-type',
                     value: 'grid',
                     selectedValue: ctx.browsingSettings.layoutType,
                     text: 'Grid'}) %>
+                    <%= ctx.makeRadio({
+                    name: 'layout-type',
+                    value: 'column',
+                    selectedValue: ctx.browsingSettings.layoutType,
+                    text: 'Column'}) %>
                 </div>
             </li>
 
