@@ -166,11 +166,11 @@ privileges:
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
 
-    'comments:create':              power
+    'comments:create':              regular
     'comments:delete:any':          moderator
-    'comments:delete:own':          power
+    'comments:delete:own':          regular
     'comments:edit:any':            moderator
-    'comments:edit:own':            power
+    'comments:edit:own':            regular
     'comments:list':                anonymous
     'comments:view':                anonymous
     'comments:score':               regular
