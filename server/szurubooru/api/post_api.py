@@ -81,17 +81,17 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("q", default="").strip()
     if not query_text:
-        return ""
+        return {"url": ""}
 
     if query_text.isdigit():
         post = posts.get_post_by_id(int(query_text))
-        return posts.get_post_content_url(post)
+        return {"url": posts.get_post_content_url(post)}
 
     query_text = "sort:random type:image,animation " + query_text
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
-        return ""
-    return posts.get_post_content_url(_posts[0])
+        return {"url": ""}
+    return {"url": posts.get_post_content_url(_posts[0])}
 
 from . import tag_api
 
