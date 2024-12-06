@@ -146,7 +146,7 @@ def parse_time_range(value: str) -> Tuple[datetime, datetime]:
         day = int(match.group(3))
         return (
             datetime(year, month, day),
-            datetime(year, month, day + 1) - one_second,
+            datetime(year, month, day) + almost_one_day
         )
 
     raise errors.ValidationError("Invalid date format: %r" % value)
