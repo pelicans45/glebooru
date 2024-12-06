@@ -266,6 +266,20 @@ function makePostLink(id, includeHash) {
         : misc.escapeHtml(text);
 }
 
+function makeNewTabPostLink(id, includeHash) {
+    let text = id;
+    if (includeHash) {
+        text = "#" + id;
+    }
+    return api.hasPrivilege("posts:view")
+        ? makeElement(
+              "a",
+              { href: uri.formatClientLink("", id), target: "_blank" },
+              misc.escapeHtml(text)
+          )
+        : misc.escapeHtml(text);
+}
+
 function makeTagLink(name, includeHash, includeCount, tag) {
     const category = tag && tag.category ? tag.category : "unknown";
     let text = misc.getPrettyName(name);
@@ -439,7 +453,7 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
-	const timeout = className === "error" ? 8000 : 4000;
+	const timeout = className === "error" ? 12000 : 4000;
     setTimeout(() => {
         wrapperNode.remove();
     }, timeout);
@@ -698,4 +712,5 @@ module.exports = {
     showSuccess: showSuccess,
     showInfo: showInfo,
     getMetricSorterUrl: getMetricSorterUrl,
+	makeNewTabPostLink: makeNewTabPostLink,
 };

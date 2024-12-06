@@ -5,7 +5,6 @@ booru:
   description: booru dev
   meta_description: Test description
   query: ""
-  #color: "#435dbd" ##6a86ea
   color: "#6a86ea"
   tips: []
 

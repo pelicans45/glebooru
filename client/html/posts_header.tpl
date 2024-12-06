@@ -63,6 +63,7 @@
                 %><wbr/><%
                 %><%= ctx.makeTextInput({name: 'tag', value: ctx.parameters.tag}) %><%
                 %><input class='mousetrap start' type='submit' value='Start tagging'/><%
+                %><a class='mousetrap button select-all'>Select all posts</a><%
                 %><a class='mousetrap button append close'>Stop tagging</a><%
             %></form><%
 

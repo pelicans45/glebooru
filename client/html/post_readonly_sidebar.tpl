@@ -34,10 +34,11 @@
         <% } %>
 
         <section class='search'>
-            Search on
-            <a target="_blank" href='http://iqdb.org/?url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>IQDB</a> &middot;
-            <a target="_blank" href='https://danbooru.donmai.us/posts?tags=md5:<%- ctx.post.checksumMD5 %>'>Danbooru</a> &middot;
-            <a target="_blank" href='https://www.google.com/searchbyimage?&image_url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
+            <% const base64md5 = encodeURIComponent(ctx.post.checksumMD5Base64); %>
+            Search
+            <a target="_blank" href='https://archive.4plebs.org/_/search/image/<%- base64md5 %>'>4plebs</a> &middot;
+            <a target="_blank" href='https://archived.moe/_/search/image/<%- base64md5 %>'>moe</a> &middot;
+            <a target="_blank" href='https://desuarchive.org/_/search/image/<%- base64md5 %>'>desuarchive</a>
         </section>
         <% if (window.innerWidth <= 800) { %>
             <nav class='tags'>

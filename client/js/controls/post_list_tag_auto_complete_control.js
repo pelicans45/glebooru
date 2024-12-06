@@ -7,8 +7,6 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
         super(input, options);
 
-		
-
         this._valueEntered = false;
 
         this._sourceInputNode.addEventListener("focus", (e) => {

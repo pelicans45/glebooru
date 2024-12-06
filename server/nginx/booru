@@ -5,9 +5,9 @@ map $http_user_agent $embed_prefix {
 }
 
 server {
-    server_name jej.lol lole.meme glegle.gallery bury.pink flube.supply spikedog.school yosho.io;
+    server_name jej.lol lole.meme glegle.gallery bury.pink flube.supply spikedog.school yosho.io politics.lol boymoders.com;
     listen 80;
-    client_max_body_size 40M;
+    client_max_body_size 250M;
     client_body_timeout 30s;
 
     location / {
@@ -32,23 +32,25 @@ server {
     #}
 
     location ~ /discord/? {
-        return 302 "https://discord.gg/tN9GPvbPpf";
+        return 302 "https://discord.gg/kMm8XtHmpE";
     }
 
-    location /posts/ {
+    location ~ /posts/.+([0-9]+\.[a-z0-9]+$) {
         add_header 'Cache-Control' 'public, max-age=2592000, immutable';
-        alias /mnt/volume_nyc3_04/szurubooru/data/posts/;
+        #alias /mnt/volume_nyc3_04/szurubooru/data/posts/;
+        try_files /mnt/volume_nyc3_04/szurubooru/data/posts/$1 =404;
 
-        error_page 403 @unauthorized;
-        error_page 404 @notfound;
+        #error_page 403 @unauthorized;
+        #error_page 404 @notfound;
     }
 
-    location /thumbnails/ {
+    location /thumbnails/.+([0-9]+\.[a-z0-9]+$) {
         add_header 'Cache-Control' 'public, max-age=2592000, immutable';
-        alias /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/;
+        #alias /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/;
+        try_files /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/$1 =404;
 
-        error_page 403 @unauthorized;
-        error_page 404 @notfound;
+        #error_page 403 @unauthorized;
+        #error_page 404 @notfound;
     }
 
     location @err {
@@ -61,4 +63,5 @@ server {
     }
 
     include /etc/nginx/include/cloudflare;
+    include /etc/nginx/include/robots;
 }

@@ -43,7 +43,7 @@ class PostAlreadyFeaturedError(errors.ValidationError):
 class PostAlreadyUploadedError(errors.ValidationError):
     def __init__(self, other_post_id: int) -> None:
         super().__init__(
-            "File already uploaded (#%d)" % other_post_id,
+            "File already uploaded (@%d)" % other_post_id,
             {
                 # "otherPostUrl": get_post_content_url(other_post),
                 "otherPostId": other_post_id,
@@ -89,6 +89,7 @@ TYPE_MAP = {
     model.Post.TYPE_IMAGE: "image",
     model.Post.TYPE_ANIMATION: "animation",
     model.Post.TYPE_VIDEO: "video",
+    model.Post.TYPE_AUDIO: "audio",
     model.Post.TYPE_FLASH: "flash",
 }
 
@@ -108,45 +109,29 @@ def get_post_security_hash(id: int) -> str:
 
 def get_post_content_url(post: model.Post) -> str:
     # assert post
-    return "/posts/%d_%s.%s" % (
-        post.post_id,
-        get_post_security_hash(post.post_id),
-        mime.get_extension(post.mime_type) or "dat",
-    )
+    return f"/posts/{post.post_id}.{mime.get_extension(post.mime_type) or 'dat'}"
+
 
 
 def get_post_thumbnail_url(post: model.Post) -> str:
     # assert post
-    return "/thumbnails/%d_%s.jpg" % (
-        post.post_id,
-        get_post_security_hash(post.post_id),
-    )
+    return f"/thumbnails/{post.post_id}.jpg"
 
 
 def get_post_content_path(post: model.Post) -> str:
     # assert post
     # assert post.post_id
-    return "posts/%d_%s.%s" % (
-        post.post_id,
-        get_post_security_hash(post.post_id),
-        mime.get_extension(post.mime_type) or "dat",
-    )
+    return f"posts/{post.post_id}.{mime.get_extension(post.mime_type) or 'dat'}"
 
 
 def get_post_thumbnail_path(post: model.Post) -> str:
     # assert post
-    return "generated-thumbnails/%d_%s.jpg" % (
-        post.post_id,
-        get_post_security_hash(post.post_id),
-    )
+    return f"generated-thumbnails/{post.post_id}.jpg"
 
 
 def get_post_thumbnail_backup_path(post: model.Post) -> str:
     # assert post
-    return "posts/custom-thumbnails/%d_%s.dat" % (
-        post.post_id,
-        get_post_security_hash(post.post_id),
-    )
+    return f"posts/custom-thumbnails/{post.post_id}.dat"
 
 
 def serialize_note(note: model.PostNote) -> rest.Response:
@@ -463,6 +448,8 @@ SITE_TAGS = {
     "glegle.gallery": "glegle",
     "flube.supply": "flube",
     "yosho.io": "yosho",
+    "politics.lol": "politics",
+    "boymoders.com": "boymoder",
 }
 
 
@@ -497,6 +484,8 @@ def create_post(
         tag_names.append("gif")
     elif post.type == model.Post.TYPE_VIDEO and "video" not in tag_names:
         tag_names.append("video")
+    elif post.type == model.Post.TYPE_AUDIO and "audio" not in tag_names:
+        tag_names.append("audio")
 
     add_extra_tags(host, tag_names)
     new_tags = update_post_tags(post, tag_names)
@@ -695,6 +684,8 @@ def update_post_content(
             post.type = model.Post.TYPE_IMAGE
     elif mime.is_video(post.mime_type):
         post.type = model.Post.TYPE_VIDEO
+    elif mime.is_audio(post.mime_type):
+        post.type = model.Post.TYPE_AUDIO
     else:
         raise InvalidPostContentError("Unhandled file type: %r" % post.mime_type)
 
@@ -762,6 +753,9 @@ def generate_post_thumbnail(post: model.Post) -> None:
     if (
         post.type == "image" or post.type == "animation"
     ) and post.file_size < config.config["thumbnails"]["min_file_size"]:
+        return
+
+    if post.type == "audio":
         return
 
     backup_path = get_post_thumbnail_backup_path(post)
@@ -912,7 +906,9 @@ def merge_posts(
             )
 
         update_stmt = update_stmt.values(post_id=target_post_id)
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt, execution_options={"synchronize_session": "fetch"}
+        )
 
     def merge_tags(source_post_id: int, target_post_id: int) -> None:
         merge_tables(

@@ -14,12 +14,17 @@ When viewing an image:
 To add tags when uploading or editing an image:
     <ul>
     <li>Type a tag name and press <code>Space</code> or <code>Enter</code></li>
-    <li>Or type the start of a tag name, press <code>Tab</code> to select the first suggestion, use the up/down arrow keys and <code>Enter</code> to select a suggestion, or click a suggestion</li>
-    <li>If the tag doesn't exist, it will be created automatically</li>
+    <li>Type the start of a tag name and
+        <ul>
+            <li>Press <code>Tab</code> to select the first suggestion, or</li>
+            <li>Use the up/down arrow keys and press <code>Enter</code> to select a suggestion, or<li>
+            <li>Click a suggestion</li>
+        </ul>
+        <li>If the tag doesn't exist, it will be created automatically</li>
     </ul>
 </li>
-<li>A dashed red background around a gallery thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
-<li>Use underscores to search for tags that contain spaces ("<code>red hair</code>" -> "<code>red_hair</code>")</li>
+<li style="display: none">A dashed red background around a gallery thumbnail means the image has no tags yet - if you see one, consider adding tags to it</li>
+<li>Use underscores to search for tags that contain spaces (<code>"red hair" -> "red_hair"</code>)</li>
 <li>Multiple files can be uploaded at once</li>
 <% for (const tip of ctx.tips) { %>
 <li><%- tip %></li>

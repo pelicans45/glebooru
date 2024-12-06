@@ -42,7 +42,10 @@ class PostContentControl {
                     return;
                 }
 
-                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+                misc.downloadURL(
+                    post.contentUrl,
+                    post.getTaggedEnrichedFilename()
+                );
                 e.preventDefault();
             });
 
@@ -59,7 +62,10 @@ class PostContentControl {
                     ["INPUT", "TEXTAREA"].includes(e.target.tagName)
                 )
             ) {
-                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+                misc.downloadURL(
+                    post.contentUrl,
+                    post.getTaggedEnrichedFilename()
+                );
                 e.preventDefault();
                 e.stopImmediatePropagation();
             }

@@ -66,7 +66,8 @@ class TagPermalinkFixWrapper extends BaseMarkdownWrapper {
 class EntityPermalinkWrapper extends BaseMarkdownWrapper {
     preprocess(text) {
         // URL-based permalinks
-        text = text.replace(new RegExp("\\b/(\\d+)/?\\b", "g"), "@$1");
+        //text = text.replace(new RegExp("\\b/(\\d+)/?\\b", "g"), "@$1");
+		text = text.replace(new RegExp("\\bhttps?://[^\\s]+/(\\d+)/?\\b", "g"), "@$1");
         text = text.replace(
             new RegExp("\\b/tag/([a-zA-Z0-9_-]+?)/?", "g"),
             "#$1"
@@ -123,7 +124,7 @@ class StrikeThroughWrapper extends BaseMarkdownWrapper {
 
 function createRenderer() {
     function sanitize(str) {
-        return str.replace(/&<"/g, (m) => {
+        return str.replace(/[&<"]/g, (m) => {
             if (m === "&") {
                 return "&amp;";
             }
@@ -151,6 +152,7 @@ function createRenderer() {
 }
 
 function formatMarkdown(text) {
+	text = text.replaceAll(/[<>]/g, "");
     const renderer = createRenderer();
     const options = {
         renderer: renderer,
@@ -179,6 +181,7 @@ function formatMarkdown(text) {
 }
 
 function formatInlineMarkdown(text) {
+	text = text.replaceAll(/[<>]/g, "");
     const renderer = createRenderer();
     const options = {
         renderer: renderer,

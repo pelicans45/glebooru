@@ -26,7 +26,7 @@
     </td>
     <td class='usages'>
         <% if (ctx.tagCategory.name) { %>
-            <a href='<%- ctx.formatClientLink('tags', {a: 'category:' + ctx.tagCategory.name}) %>'>
+            <a href='<%- ctx.formatClientLink('tags', {q: 'category:' + ctx.tagCategory.name}) %>'>
                 <%- ctx.tagCategory.tagCount %>
             </a>
         <% } else { %>

@@ -418,7 +418,7 @@
                         margin-bottom: 0.5em
             &:not(.opened)
                 [type=text],
-                .start
+                .start, .select-all
                     display: none
                 .hint
                     display: none
@@ -430,8 +430,12 @@
                     margin-bottom: 0.5em
             .hint
                 margin-right: 1em
-
                 display: none
+            .select-all
+                margin-left: 0
+                vertical-align: middle
+                margin-right: 1em
+                font-size: 0.95em
         input[name=tag]
             width: 24em
             @media (max-width: 1000px)

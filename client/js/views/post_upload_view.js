@@ -26,6 +26,11 @@ function _mimeTypeToPostType(mimeType) {
             "video/mp4": "video",
             "video/webm": "video",
             "video/quicktime": "video",
+            "audio/mpeg": "audio",
+            "audio/ogg": "audio",
+            "audio/aac": "audio",
+            "audio/flac": "audio",
+            "audio/wav": "audio"
         }[mimeType] || "unknown"
     );
 }
@@ -126,6 +131,11 @@ class Url extends Uploadable {
             mp4: "video/mp4",
             mov: "video/quicktime",
             webm: "video/webm",
+            mp3: "audio/mpeg",
+            ogg: "audio/ogg",
+            aac: "audio/aac",
+            flac: "audio/flac",
+            wav: "audio/wav"
         };
         for (let extension of Object.keys(mime)) {
             if (this.url.toLowerCase().indexOf("." + extension) !== -1) {

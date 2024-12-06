@@ -70,3 +70,19 @@ yosho.io:
   implies: [character]
   color: "#3fd104"
   tips: [Yosho must travel back in time to 1999 to stop the Spikeman]
+
+politics.lol:
+  name: politics, lol
+  description: politics
+  meta_description: politics.lol is an image gallery for politics and stuff
+  query: politics
+  color: "#00a651"
+  tips: []
+
+boymoders.com:
+  name: boymoders
+  description: boymoders
+  meta_description: boymoders.com is an image gallery for boymoders
+  query: boymoder
+  color: "#d6daf0"
+  tips: ['What would you do if you came across a boymoder booru?']

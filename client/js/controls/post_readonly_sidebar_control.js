@@ -64,7 +64,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         }
 			*/
         this._loadSimilarPosts();
-        //this._loadLookalikePosts();
+        this._loadLookalikePosts();
     }
 
     get _scoreContainerNode() {
@@ -301,7 +301,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
     _loadLookalikePosts() {
         const limit = similarPostCount;
         const fields = ["id", "thumbnailUrl"];
-        const threshold = 1;
+        const threshold = 0.60;
         return PostList.reverseSearch(
             this._post.id,
             limit,

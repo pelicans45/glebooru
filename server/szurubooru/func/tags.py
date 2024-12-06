@@ -114,7 +114,8 @@ def sort_tags(tags: List[model.Tag]) -> List[model.Tag]:
         tags,
         key=lambda tag: (
             tag.category.order,
-            -tag.post_count,
+            tag.category.name,
+            #-tag.post_count,
             tag.names[0].name,
         ),
     )

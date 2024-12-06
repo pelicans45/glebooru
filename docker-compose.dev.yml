@@ -55,6 +55,7 @@ services:
       POSTGRES_PASSWORD:
     volumes:
       - "db:/var/lib/postgresql/data"
+      - "/opt/backup:/opt/backup"
 
   nginx:
     image: nginx:1.27.0

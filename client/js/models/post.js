@@ -56,6 +56,10 @@ class Post extends events.EventTarget {
         return this._checksumMD5;
     }
 
+    get checksumMD5Base64() {
+        return misc.hexToBase64(this._checksumMD5);
+    }
+
     get creationTime() {
         return this._creationTime;
     }
@@ -122,7 +126,9 @@ class Post extends events.EventTarget {
     }
 
     get tagNames() {
-        return lens.excludeRedundantTags(this._tags).map((tag) => tag.names[0]);
+        return lens
+            .excludeRedundantTags(this._tags)
+            .map((tag) => tag.names[0]);
     }
 
     get notes() {
@@ -223,9 +229,11 @@ class Post extends events.EventTarget {
     }
 
     static get(id) {
-        return api.get(uri.formatApiLink("post", id), {noProgress: true}).then((response) => {
-            return Promise.resolve(Post.fromResponse(response));
-        });
+        return api
+            .get(uri.formatApiLink("post", id), { noProgress: true })
+            .then((response) => {
+                return Promise.resolve(Post.fromResponse(response));
+            });
     }
 
     _savePoolPosts() {
@@ -291,7 +299,7 @@ class Post extends events.EventTarget {
                 text: note.text,
             }));
         }
-		/*
+        /*
         if (misc.arraysDiffer(this._metrics, this._orig._metrics)) {
             detail.metrics = this._metrics.map((metric) => ({
                 tag_name: metric.tagName,
@@ -381,7 +389,7 @@ class Post extends events.EventTarget {
                         error.response &&
                         error.response.name === "PostAlreadyUploadedError"
                     ) {
-                        error.message = `File already uploaded (#${error.response.otherPostId})`;
+                        error.message = `File already uploaded (@${error.response.otherPostId})`;
                     }
                     return Promise.reject(error);
                 }
@@ -525,7 +533,7 @@ class Post extends events.EventTarget {
             .map((pmr) => this._metricRanges.remove(pmr));
     }
 
-    getDownloadFilename() {
+    getTaggedEnrichedFilename() {
         const tagNames = [];
 
         // 4 characters for the file extension
@@ -539,14 +547,25 @@ class Post extends events.EventTarget {
             tagNames.push(name);
         }
 
-        tagNames.push(this.id);
-
         const joinedTags = tagNames.join(" ");
-		let hostname = location.hostname;
-		if (!hostname.includes("www.")) {
-			hostname = "www." + hostname;
-		}
-        return `[${hostname}] ${joinedTags}.${this.fileExtension}`;
+        let hostname = location.hostname;
+
+        if (!hostname.includes("www.")) {
+            hostname = "www." + hostname;
+        }
+        return `[${hostname}] ${joinedTags} - ${this.id}.${this.fileExtension}`;
+    }
+
+    getEnrichedFilename() {
+        let hostname = location.hostname;
+        if (!hostname.includes("www.")) {
+            hostname = "www." + hostname;
+        }
+        return `[${hostname}] ${this.id}.${this.fileExtension}`;
+    }
+
+    replaceFilename(path, filename) {
+        return path.split("/").slice(0, -1).join("/") + "/" + filename;
     }
 
     mutateContentUrl() {
@@ -554,8 +573,29 @@ class Post extends events.EventTarget {
             this._orig._contentUrl + "?" + Math.round(Math.random() * 998) + 1;
     }
 
+    get enrichedContentUrl() {
+        return this.replaceFilename(
+            this._contentUrl,
+            this.getEnrichedFilename()
+        );
+    }
+
+    get enrichedThumbnailUrl() {
+        return this.replaceFilename(
+            this._thumbnailUrl,
+            this.getEnrichedFilename()
+        );
+    }
+
+    get taggedEnrichedContentUrl() {
+        return this.replaceFilename(
+            this._contentUrl,
+            this.getTaggedEnrichedFilename()
+        );
+    }
+
     _updateFromResponse(response) {
-        const map = () => ({
+        const map = {
             _version: response.version,
             _id: response.id,
             _type: response.type,
@@ -582,21 +622,33 @@ class Post extends events.EventTarget {
             _ownScore: response.ownScore,
             _ownFavorite: response.ownFavorite,
             _hasCustomThumbnail: response.hasCustomThumbnail,
-        });
+        };
 
-        for (let obj of [this, this._orig]) {
+        for (const obj of [this, this._orig]) {
             obj._tags.sync(response.tags);
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
             obj._pools.sync(response.pools);
-			/*
+            /*
             obj._metrics.sync(response.metrics);
             obj._metricRanges.sync(response.metricRanges);
 			*/
         }
 
-        Object.assign(this, map());
-        Object.assign(this._orig, map());
+        Object.assign(this, map);
+        Object.assign(this._orig, map);
+
+        const filename = this.getEnrichedFilename();
+
+        this._thumbnailUrl = this._orig._thumbnailUrl = this.replaceFilename(
+            this._thumbnailUrl,
+            filename
+        );
+
+        this._contentUrl = this._orig._contentUrl = this.replaceFilename(
+            this._contentUrl,
+            filename
+        );
     }
 }
 

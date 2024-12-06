@@ -115,9 +115,9 @@ privileges:
     'posts:score':                  regular
     'posts:merge':                  moderator
     'posts:favorite':               regular
-    'posts:bulk-edit:tags':         power
+    'posts:bulk-edit:tags':         regular
     'posts:bulk-edit:safety':       power
-    'posts:bulk-edit:delete':       power
+    'posts:bulk-edit:delete':       moderator
 
     # Can see new posts in gallery
     'posts:list:new':               anonymous
@@ -133,10 +133,10 @@ privileges:
     'tags:merge':                   moderator
     'tags:delete':                  moderator
 
-    'tag_categories:create':        moderator
-    'tag_categories:edit:name':     moderator
-    'tag_categories:edit:color':    moderator
-    'tag_categories:edit:order':    moderator
+    'tag_categories:create':        power
+    'tag_categories:edit:name':     power
+    'tag_categories:edit:color':    power
+    'tag_categories:edit:order':    power
     'tag_categories:list':          anonymous
     'tag_categories:view':          anonymous
     'tag_categories:delete':        moderator
@@ -175,7 +175,7 @@ privileges:
     'comments:view':                anonymous
     'comments:score':               regular
 
-    'snapshots:list':               power
+    'snapshots:list':               moderator
 
     'uploads:create':               regular
     'uploads:use_downloader':       administrator

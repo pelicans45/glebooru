@@ -69,7 +69,7 @@
     <% } %>
     <% if (window.innerWidth >= 801) { %>
         <article class='download' title='Download'>
-            <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
+            <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
                 <i class='la la-download'></i>
                 <!--
                 <span style="display: none">
@@ -87,6 +87,11 @@
                     'video/mp4': 'MPEG-4',
                     'video/quicktime': 'MOV',
                     'application/x-shockwave-flash': 'SWF',
+                    'audio/ogg': 'OGG',
+                    'audio/aac': 'AAC',
+                    'audio/mpeg': 'MP3',
+                    'audio/flac': 'FLAC',
+                    'audio/wav': 'WAV'
                 }[ctx.post.mimeType] %>
                 </span>
                 -->
@@ -164,7 +169,7 @@
                     <% } %>
                 </article>
                 <article class='download' title='Download'>
-                    <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getDownloadFilename() %>'>
+                    <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
                         <i class='la la-download'></i>
                         <!--
                         <span style="display: none">
@@ -182,6 +187,11 @@
                             'video/mp4': 'MPEG-4',
                             'video/quicktime': 'MOV',
                             'application/x-shockwave-flash': 'SWF',
+                            'audio/ogg': 'OGG',
+                            'audio/aac': 'AAC',
+                            'audio/mpeg': 'MP3',
+                            'audio/flac': 'FLAC',
+                            'audio/wav': 'WAV'
                         }[ctx.post.mimeType] %>
                         </span>
                         -->

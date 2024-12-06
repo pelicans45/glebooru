@@ -23,6 +23,7 @@ def _type_transformer(value: str) -> str:
         "gif": model.Post.TYPE_ANIMATION,
         "video": model.Post.TYPE_VIDEO,
         "webm": model.Post.TYPE_VIDEO,
+        "audio": model.Post.TYPE_AUDIO,
         "flash": model.Post.TYPE_FLASH,
         "swf": model.Post.TYPE_FLASH,
     }

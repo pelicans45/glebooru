@@ -107,6 +107,16 @@ class BulkTagEditor extends BulkEditor {
         this._hostNode.addEventListener("submit", (e) =>
             this._evtFormSubmit(e)
         );
+
+        this._hostNode
+            .querySelector(".select-all")
+            .addEventListener("click", (e) => {
+                document
+                    .querySelectorAll(".tag-flipper")
+                    .forEach((node) => {
+                        node.click();
+                    });
+            });
     }
 
     get value() {
@@ -159,9 +169,11 @@ class BulkDeleteEditor extends BulkEditor {
         this._hostNode
             .querySelector(".select-all")
             .addEventListener("click", (e) => {
-                document.querySelectorAll(".delete-flipper").forEach((node) => {
-                    node.click();
-                });
+                document
+                    .querySelectorAll(".delete-flipper")
+                    .forEach((node) => {
+                        node.click();
+                    });
             });
     }
 

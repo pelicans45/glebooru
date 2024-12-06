@@ -15,9 +15,7 @@ const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
 const TagList = require("../models/tag_list.js");
 
-const genericErrorMessage =
-    "One or more posts needs your attention; " +
-    'click "resume upload" when you\'re ready';
+const genericErrorMessage = `One or more files need your attention; click "resume upload" when ready`;
 
 class PostUploadController {
     constructor() {
@@ -194,7 +192,7 @@ class PostUploadController {
                         } else {
                             let error = new Error(
                                 "File already uploaded " +
-                                    `(#${searchResult.exactPost.id})`
+                                    `(@${searchResult.exactPost.id})`
                             );
                             error.uploadable = uploadable;
                             error.similarPosts = [

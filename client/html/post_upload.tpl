@@ -7,7 +7,7 @@
 
             <span class='skip-duplicates control-checkbox' style="display: none">
                 <%= ctx.makeCheckbox({
-                    text: 'Skip duplicate',
+                    text: 'Skip duplicates',
                     name: 'skip-duplicates',
                     checked: false,
                 }) %>

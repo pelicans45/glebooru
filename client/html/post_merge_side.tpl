@@ -32,18 +32,23 @@
             text: 'Use this file<br/><small>' +
                 ctx.makeFileSize(ctx.post.fileSize) + ' ' +
                 {
-                    'image/gif': 'GIF',
-                    'image/jpeg': 'JPEG',
-                    'image/png': 'PNG',
-                    'image/webp': 'WEBP',
-                    'image/bmp': 'BMP',
-                    'image/avif': 'AVIF',
-                    'image/heif': 'HEIF',
-                    'image/heic': 'HEIC',
-                    'video/webm': 'WEBM',
-                    'video/mp4': 'MPEG-4',
-                    'video/quicktime': 'MOV',
-                    'application/x-shockwave-flash': 'SWF',
+                        'image/gif': 'GIF',
+                        'image/jpeg': 'JPEG',
+                        'image/png': 'PNG',
+                        'image/webp': 'WEBP',
+                        'image/bmp': 'BMP',
+                        'image/avif': 'AVIF',
+                        'image/heif': 'HEIF',
+                        'image/heic': 'HEIC',
+                        'video/webm': 'WEBM',
+                        'video/mp4': 'MPEG-4',
+                        'video/quicktime': 'MOV',
+                        'application/x-shockwave-flash': 'SWF',
+                        'audio/ogg': 'OGG',
+                        'audio/aac': 'AAC',
+                        'audio/mpeg': 'MP3',
+                        'audio/flac': 'FLAC',
+                        'audio/wav': 'WAV'
                 }[ctx.post.mimeType] +
                 ' (' +
                 (ctx.post.canvasWidth ?

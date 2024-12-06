@@ -128,10 +128,6 @@ def post_index(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 """,
         )
         .replace("<html>", '<html prefix="og: http://ogp.me/ns#">')
-        .replace(
-            "<title>Loading...</title>",
-            f"<title>{html.escape(oembed['title'])}</title>",
-        )
         .replace("$THEME_COLOR$", site["color"])
         .replace(
             "<!-- Base HTML Placeholder -->",

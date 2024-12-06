@@ -36,7 +36,7 @@ class PostsPageView extends events.EventTarget {
                     return;
                 }
 
-                misc.downloadURL(post.contentUrl, post.getDownloadFilename());
+                misc.downloadURL(post.contentUrl, post.getTaggedEnrichedFilename());
                 e.preventDefault();
             });
 
@@ -193,7 +193,9 @@ class PostsPageView extends events.EventTarget {
                 let tagged = true;
                 for (let tag of this._ctx.bulkEdit.tags) {
                     let tagData = tags.parseTagAndCategory(tag);
-                    tagged &= post.tags.isTaggedWith(tagData.name);
+                    if (post) {
+                        tagged &= post.tags.isTaggedWith(tagData.name);
+                    }
                 }
                 tagFlipperNode.classList.toggle("tagged", tagged);
             }

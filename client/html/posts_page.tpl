@@ -14,7 +14,14 @@
                     <a class='thumbnail-wrapper <%= post.tags.length > 2 ? "tags" : "no-tags" %>'
                             title='<%- postTitle %>'
                             href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'>
-                        <%= ctx.makeThumbnail(post.thumbnailUrl, useBackgroundImage) %>
+                        <% if (post.type === 'audio') { %>
+                            <audio>
+                                <source type='<%- post.mimeType %>' src='<%- post.contentUrl %>' />
+                            </audio>
+                            <span>words</span>
+                        <% } else { %>
+                            <%= ctx.makeThumbnail(post.thumbnailUrl, useBackgroundImage) %>
+                        <% } %>
                         <% if (post.type === 'video') { %>
                             <span class='type' data-type='<%- post.type %>'>
                                 <span class='icon'><i class='la la-video'></i></span>

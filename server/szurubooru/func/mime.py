@@ -6,9 +6,6 @@ def get_mime_type(content: bytes) -> str:
     if not content:
         return "application/octet-stream"
 
-    if content[0:3] in (b"CWS", b"FWS", b"ZWS"):
-        return "application/x-shockwave-flash"
-
     if content[0:3] == b"\xFF\xD8\xFF":
         return "image/jpeg"
 
@@ -17,6 +14,9 @@ def get_mime_type(content: bytes) -> str:
 
     if content[0:6] in (b"GIF87a", b"GIF89a"):
         return "image/gif"
+
+    if content[0:3] in (b"CWS", b"FWS", b"ZWS"):
+        return "application/x-shockwave-flash"
 
     #if content[8:12] == b"WEBP":
     #    return "image/webp"
@@ -41,6 +41,18 @@ def get_mime_type(content: bytes) -> str:
 
     if content[4:12] == b"ftypqt  ":
         return "video/quicktime"
+
+    if content[0:4] == b"OggS":
+        return "audio/ogg"
+
+    if content[0:4] == b"fLaC":
+        return "audio/flac"
+
+    if content[0:3] == b"ID3" or content[0:2] == b"\xFF\xFB":
+        return "audio/mpeg"
+
+    if content[0:4] == b"RIFF" and content[8:12] == b"WAVE":
+        return "audio/wav"
 
     return "application/octet-stream"
 
@@ -74,6 +86,15 @@ def is_video(mime_type: str) -> bool:
         "video/mp4",
         "video/quicktime",
         "video/webm",
+    )
+
+def is_audio(mime_type: str) -> bool:
+    return mime_type.lower() in (
+        "audio/ogg",
+        "audio/aac",
+        "audio/mpeg",
+        "audio/flac",
+        "audio/wav",
     )
 
 

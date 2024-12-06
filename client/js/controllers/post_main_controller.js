@@ -28,8 +28,21 @@ class PostMainController extends BasePostController {
         ]).then(
             (responses) => {
                 const [post, aroundResponse] = responses;
+				/*
                 if (lens.checkHostnameFilterRedirect(post)) {
                     return;
+                }
+				*/
+                if (parameters.q) {
+                    ctx.state.parameters = parameters;
+                    const url = editMode
+                        ? uri.formatClientLink(
+                              "",
+                              ctx.parameters.id,
+                              "edit"
+                          )
+                        : uri.formatClientLink("", ctx.parameters.id);
+                    router.replace(url, ctx.state, false);
                 }
 
                 /*

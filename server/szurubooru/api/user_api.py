@@ -48,7 +48,7 @@ def create_user(
         auth.verify_privilege(ctx.user, "users:create:any")
 
 
-    logging.info("ctx: %s", ctx)
+    logging.info("ctx: %s", ctx._headers)
 
     name = ctx.get_param_as_string("name")
     if any(s in name for s in USERNAME_BLACKLIST):

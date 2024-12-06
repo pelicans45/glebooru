@@ -5,8 +5,6 @@ const uri = require("./uri.js");
 
 const isMobile = "ontouchstart" in document.documentElement;
 
-
-
 let tagAddInProgress = false;
 
 function tagAddPending() {
@@ -14,9 +12,8 @@ function tagAddPending() {
 }
 
 function setTagAddInProgress(value) {
-	tagAddInProgress = value;
+    tagAddInProgress = value;
 }
-
 
 function decamelize(str, sep) {
     sep = sep === undefined ? "-" : sep;
@@ -75,8 +72,8 @@ function formatRelativeTime(timeString) {
     const then = Date.parse(timeString);
     ///const now = Date.now();
 
-	//
-	const now = new Date().getUTCTime();
+    //
+    const now = new Date().getUTCTime();
     const difference = Math.abs(now - then) / 1000.0;
     const future = now < then;
 
@@ -109,7 +106,7 @@ function formatRelativeTime(timeString) {
         return future ? "tomorrow" : "yesterday";
     }
     //return future ? "in " + text : text + " ago";
-	return text + " ago";
+    return text + " ago";
 }
 
 function formatMarkdown(text) {
@@ -177,7 +174,6 @@ function downloadURL(url, filename) {
     a.click();
 }
 
-
 function makeCssName(text, suffix) {
     return suffix + "-" + text.replace(/[^a-z0-9]/g, "_");
 }
@@ -239,6 +235,17 @@ function getPrettyName(tag) {
     return tag.replace(/_/g, " ");
 }
 
+function hexToBase64(hexStr) {
+    return btoa(
+        hexStr
+            .match(/\w{2}/g)
+            .map(function (a) {
+                return String.fromCharCode(parseInt(a, 16));
+            })
+            .join("")
+    );
+}
+
 module.exports = {
     range: range,
     formatRelativeTime: formatRelativeTime,
@@ -257,8 +264,9 @@ module.exports = {
     escapeSearchTerm: escapeSearchTerm,
     dataURItoBlob: dataURItoBlob,
     getPrettyName: getPrettyName,
-	downloadURL: downloadURL,
-	tagAddPending: tagAddPending,
-	setTagAddInProgress: setTagAddInProgress,
-	isMobile,
+    downloadURL: downloadURL,
+    tagAddPending: tagAddPending,
+    setTagAddInProgress: setTagAddInProgress,
+    isMobile,
+    hexToBase64,
 };

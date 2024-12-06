@@ -56,7 +56,7 @@
         -->
 
         <tr>
-            <td><kbd>Command/Ctrl+S</kbd></td>
+            <td><kbd>Ctrl/Command+S</kbd></td>
             <td>(In edit mode) Save changes</td>
         </tr>
     </tbody>

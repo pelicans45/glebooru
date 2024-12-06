@@ -16,6 +16,16 @@
                 </a>
             </div>
 
+        <% } else if (['audio'].includes(ctx.uploadable.type)) { %>
+
+            <div class='thumbnail'>
+                <a href='<%= ctx.uploadable.previewUrl %>'>
+                    <audio id='audio' nocontrols>
+                        <source type='<%- ctx.uploadable.mimeType %>' src='<%- ctx.uploadable.previewUrl %>'/>
+                    </video>
+                </a>
+            </div>
+
         <% } else { %>
 
             <%= ctx.makeThumbnail(null) %>
@@ -78,7 +88,7 @@
                                 <%= ctx.makeThumbnail(lookalike.post.thumbnailUrl) %>
                             </a>
                             <div class='description'>
-                                Similar post: <%= ctx.makePostLink(lookalike.post.id, true) %>
+                                Similar post: <%= ctx.makeNewTabPostLink(lookalike.post.id, true) %>
                                 <br/>
                                 <%- Math.round((1-lookalike.distance) * 100) %>% match
                             </div>
