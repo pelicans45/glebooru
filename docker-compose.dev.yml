@@ -1,7 +1,7 @@
 services:
   server:
     build: server
-    platform: linux/arm64
+    #platform: linux/arm64
     restart: unless-stopped
     depends_on:
       - sql
@@ -29,7 +29,7 @@ services:
       context: client
       args:
         DEV: 1
-    platform: linux/arm64
+    #platform: linux/arm64
     restart: unless-stopped
     depends_on:
       - server
