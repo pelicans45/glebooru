@@ -595,7 +595,7 @@ class Post extends events.EventTarget {
     }
 
     _updateFromResponse(response) {
-        const map = {
+        const map = () => ({
             _version: response.version,
             _id: response.id,
             _type: response.type,
@@ -622,9 +622,9 @@ class Post extends events.EventTarget {
             _ownScore: response.ownScore,
             _ownFavorite: response.ownFavorite,
             _hasCustomThumbnail: response.hasCustomThumbnail,
-        };
+        });
 
-        for (const obj of [this, this._orig]) {
+        for (let obj of [this, this._orig]) {
             obj._tags.sync(response.tags);
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
@@ -635,8 +635,8 @@ class Post extends events.EventTarget {
 			*/
         }
 
-        Object.assign(this, map);
-        Object.assign(this._orig, map);
+        Object.assign(this, map());
+        Object.assign(this._orig, map());
 
         const filename = this.getEnrichedFilename();
 
