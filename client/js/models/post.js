@@ -547,6 +547,10 @@ class Post extends events.EventTarget {
             tagNames.push(name);
         }
 
+		if (!tagNames.length) {
+            return this.getEnrichedFilename();
+        }
+
         const joinedTags = tagNames.join(" ");
         let hostname = location.hostname;
 
@@ -637,6 +641,10 @@ class Post extends events.EventTarget {
 
         Object.assign(this, map);
         Object.assign(this._orig, map);
+
+        if (!response.contentUrl) {
+            return;
+        }
 
         const filename = this.getEnrichedFilename();
 

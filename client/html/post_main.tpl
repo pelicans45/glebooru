@@ -69,7 +69,7 @@
     <% } %>
     <% if (window.innerWidth >= 801) { %>
         <article class='download' title='Download'>
-            <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
+            <a rel='external' href='<%- ctx.post.taggedEnrichedContentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
                 <i class='la la-download'></i>
                 <!--
                 <span style="display: none">
@@ -169,7 +169,7 @@
                     <% } %>
                 </article>
                 <article class='download' title='Download'>
-                    <a rel='external' href='<%- ctx.post.contentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
+                    <a rel='external' href='<%- ctx.post.taggedEnrichedContentUrl %>' download='<%- ctx.post.getTaggedEnrichedFilename() %>'>
                         <i class='la la-download'></i>
                         <!--
                         <span style="display: none">

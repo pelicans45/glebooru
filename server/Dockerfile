@@ -27,6 +27,8 @@ RUN mkdir -p /opt/app /data \
 COPY . ./
 RUN rm -rf /opt/app/szurubooru/tests
 
+RUN chown -R app /opt/app && chmod +x /opt/app/docker-start.sh
+
 USER app
 ARG PORT=6666
 ENV PORT=${PORT}

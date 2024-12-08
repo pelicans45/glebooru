@@ -15,7 +15,7 @@ const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
 const TagList = require("../models/tag_list.js");
 
-const genericErrorMessage = `One or more files need your attention; click "resume upload" when ready`;
+const genericErrorMessage = `One or more files need your attention; click "resume upload" to confirm`;
 
 class PostUploadController {
     constructor() {

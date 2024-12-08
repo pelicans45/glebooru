@@ -15,5 +15,6 @@ COPY . ./
 
 RUN node build.js
 
+ENTRYPOINT ["/bin/bash"]
 CMD ["./docker-start.sh"]
 VOLUME ["/data"]
