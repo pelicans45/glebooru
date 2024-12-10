@@ -22,7 +22,7 @@
             },
             ctx.makeElement('source', {
                 type: ctx.post.mimeType,
-                src: ctx.post.contentUrl,
+                src: ctx.post.taggedEnrichedContentUrl,
             }),
             'Your browser doesn\'t support HTML5 videos')
         %>
@@ -39,7 +39,7 @@
             },
             ctx.makeElement('source', {
                 type: ctx.post.mimeType,
-                src: ctx.post.contentUrl,
+                src: ctx.post.taggedEnrichedContentUrl,
             }),
             'Your browser doesn\'t support HTML5 audio')
         %>
