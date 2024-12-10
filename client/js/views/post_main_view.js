@@ -19,24 +19,18 @@ class PostMainView {
         this._hostNode = document.getElementById("content-holder");
 
         window.loadMainContentTaggedUrl = () => {
-            //const taggedUrl = ctx.post.taggedEnrichedContentUrl;
+            if (ctx.post.type !== "image") {
+                return;
+            }
             const mainContent = this._hostNode.querySelector(".main-content");
-			if (mainContent) {
-				mainContent.src = ctx.post.taggedEnrichedContentUrl;
-			}
-
-            /*
-            const tagImg = new Image();
-            tagImg.addEventListener("load", () => {
-                img.src = taggedUrl;
-            })
-            tagImg.src = taggedUrl;
-            */
+            if (mainContent) {
+                mainContent.src = ctx.post.taggedEnrichedContentUrl;
+            }
         };
 
         const sourceNode = template(ctx);
         const postContainerNode = sourceNode.querySelector(".post-container");
-        const sidebarNode = sourceNode.querySelector(".sidebar");
+        //const sidebarNode = sourceNode.querySelector(".sidebar");
         views.replaceContent(this._hostNode, sourceNode);
         views.syncScrollPosition();
 

@@ -648,10 +648,12 @@ class Post extends events.EventTarget {
 
         const filename = this.getEnrichedFilename();
 
-        this._thumbnailUrl = this._orig._thumbnailUrl = this.replaceFilename(
-            this._thumbnailUrl,
-            filename
-        );
+		if (["image", "animation"].includes(this._type)) {
+			this._thumbnailUrl = this._orig._thumbnailUrl = this.replaceFilename(
+				this._thumbnailUrl,
+				filename
+			);
+		}
 
         this._contentUrl = this._orig._contentUrl = this.replaceFilename(
             this._contentUrl,
