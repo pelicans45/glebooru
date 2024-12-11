@@ -35,7 +35,7 @@ server {
         return 302 "https://discord.gg/kMm8XtHmpE";
     }
 
-    location ~ /posts/.+([0-9]+\.[a-z0-9]+$) {
+    location ~ /posts/.+\s?([0-9]+\.[a-z0-9]+$) {
         add_header 'Cache-Control' 'public, max-age=2592000, immutable';
         #alias /mnt/volume_nyc3_04/szurubooru/data/posts/;
         try_files /mnt/volume_nyc3_04/szurubooru/data/posts/$1 =404;
@@ -44,7 +44,7 @@ server {
         #error_page 404 @notfound;
     }
 
-    location /thumbnails/.+([0-9]+\.[a-z0-9]+$) {
+    location /thumbnails/.+\s?([0-9]+\.[a-z0-9]+$) {
         add_header 'Cache-Control' 'public, max-age=2592000, immutable';
         #alias /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/;
         try_files /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/$1 =404;
