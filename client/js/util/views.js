@@ -52,10 +52,9 @@ function makeThumbnail(url, useBackgroundImage) {
         url
             ? {
                   class: "thumbnail",
-                  style:
-                      useBackgroundImage
-                          ? `background-image: url(\'${url}\')`
-                          : ``,
+                  style: useBackgroundImage
+                      ? `background-image: url(\'${url}\')`
+                      : ``,
               }
             : { class: "thumbnail empty" },
         makeElement("img", {
@@ -202,10 +201,10 @@ function makeDateInput(options) {
 }
 
 function getPostUrl(id, parameters) {
-	let q = (parameters && parameters.q) ? parameters.q.trim() : "";
-	if (/^\d+(\b|$)/.test(q)) {
-		q = null;
-	}
+    let q = parameters && parameters.q ? parameters.q.trim() : "";
+    if (/^\d+(\b|$)/.test(q)) {
+        q = null;
+    }
     return uri.formatClientLink(
         "",
         id,
@@ -220,7 +219,7 @@ function getPostUrl(id, parameters) {
 }
 
 function getPostEditUrl(id, parameters) {
-	let q = (parameters && parameters.q) ? parameters.q.trim() : "";
+    let q = parameters && parameters.q ? parameters.q.trim() : "";
     if (/^\d+(\b|$)/.test(q)) {
         q = null;
     }
@@ -453,7 +452,7 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
-	const timeout = className === "error" ? 12000 : 4000;
+    const timeout = className === "error" ? 12000 : 4000;
     setTimeout(() => {
         wrapperNode.remove();
     }, timeout);
@@ -559,6 +558,7 @@ function getTemplate(templatePath) {
             makeColorInput: makeColorInput,
             makeDateInput: makeDateInput,
             makePostLink: makePostLink,
+            makeNewTabPostLink: makeNewTabPostLink,
             makeTagLink: makeTagLink,
             makePoolLink: makePoolLink,
             makeUserLink: makeUserLink,
@@ -701,7 +701,7 @@ module.exports = {
     makePoolLink: makePoolLink,
     makeCheckbox: makeCheckbox,
     makeRadio: makeRadio,
-	makeFlexboxAlign: makeFlexboxAlign,
+    makeFlexboxAlign: makeFlexboxAlign,
     syncScrollPosition: syncScrollPosition,
     slideDown: slideDown,
     slideUp: slideUp,
@@ -712,5 +712,5 @@ module.exports = {
     showSuccess: showSuccess,
     showInfo: showInfo,
     getMetricSorterUrl: getMetricSorterUrl,
-	makeNewTabPostLink: makeNewTabPostLink,
+    makeNewTabPostLink: makeNewTabPostLink,
 };

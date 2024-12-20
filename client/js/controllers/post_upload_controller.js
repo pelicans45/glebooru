@@ -99,9 +99,13 @@ class PostUploadController {
                                 if (error.similarPosts) {
                                     error.uploadable.lookalikes =
                                         error.similarPosts;
-                                    this._view.updateUploadable(
-                                        error.uploadable
-                                    );
+                                    try {
+                                        this._view.updateUploadable(
+                                            error.uploadable
+                                        );
+                                    } catch (err) {
+                                        throw err;
+                                    }
                                     if (
                                         error.message.includes(
                                             "already uploaded"
