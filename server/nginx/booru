@@ -63,5 +63,5 @@ server {
     }
 
     include /etc/nginx/include/cloudflare;
-    include /etc/nginx/include/robots;
+    #include /etc/nginx/include/robots;
 }
