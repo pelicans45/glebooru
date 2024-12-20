@@ -64,7 +64,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
         }
 			*/
         this._loadSimilarPosts();
-        this._loadLookalikePosts();
+        //this._loadLookalikePosts();
     }
 
     get _scoreContainerNode() {
