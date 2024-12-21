@@ -17,15 +17,27 @@ const template = views.getTemplate("post-main");
 class PostMainView {
     constructor(ctx) {
         this._hostNode = document.getElementById("content-holder");
+		this._loaded = false;
 
         window.loadMainContentTaggedUrl = () => {
+			if (this._loaded) {
+				return;
+			}
+			this._loaded = true;
+
             if (ctx.post.type !== "image") {
                 return;
             }
             const mainContent = this._hostNode.querySelector(".main-content");
-            if (mainContent) {
-                mainContent.src = ctx.post.taggedEnrichedContentUrl;
+            if (!mainContent) {
+                return;
             }
+            const taggedUrl = ctx.post.taggedEnrichedContentUrl;
+            if (mainContent.src === taggedUrl) {
+                return;
+            }
+
+            mainContent.src = taggedUrl;
         };
 
         const sourceNode = template(ctx);
@@ -34,8 +46,7 @@ class PostMainView {
         views.replaceContent(this._hostNode, sourceNode);
         views.syncScrollPosition();
 
-        const topNavigationNode =
-            document.body.querySelector("#top-navigation");
+        //const topNavigationNode = document.body.querySelector("#top-navigation");
 
         /*
         this._postContentControl = new PostContentControl(
