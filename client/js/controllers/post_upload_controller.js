@@ -222,9 +222,9 @@ class PostUploadController {
                             }
                         }
                         if (similarFound) {
+							const noun = searchResult.similarPosts.length === 1 ? "post" : "posts";
                             const error = new Error(
-                                `Found ${searchResult.similarPosts.length} similar ` +
-                                    "posts.\nYou can resume or discard this upload."
+                                `Found ${searchResult.similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
                             );
                             error.uploadable = uploadable;
                             error.similarPosts = searchResult.similarPosts;
