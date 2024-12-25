@@ -64,17 +64,18 @@ webhooks:
 
 default_rank: regular
 
+
 privileges:
     # Registration permission
     'users:create:self':            anonymous
 
     'users:create:any':             administrator
-    'users:list':                   power
+    'users:list':                   moderator
     'users:view':                   anonymous
-    'users:edit:any:name':          moderator
-    'users:edit:any:pass':          moderator
-    'users:edit:any:email':         moderator
-    'users:edit:any:avatar':        moderator
+    'users:edit:any:name':          administrator
+    'users:edit:any:pass':          administrator
+    'users:edit:any:email':         administrator
+    'users:edit:any:avatar':        administrator
     'users:edit:any:rank':          moderator
     'users:edit:self:name':         regular
     'users:edit:self:pass':         regular
@@ -96,9 +97,8 @@ privileges:
     'user_tokens:delete:any':       administrator
     'user_tokens:delete:self':      regular
 
-    #'posts:create':                 regular
-    'posts:create:anonymous':       power
-    'posts:create:identified':      power
+    'posts:create:anonymous':       anonymous
+    'posts:create:identified':      regular
     'posts:list':                   anonymous
     'posts:reverse_search':         anonymous
     'posts:view':                   anonymous
@@ -110,21 +110,21 @@ privileges:
     'posts:edit:relations':         power
     'posts:edit:safety':            power
     'posts:edit:source':            power
-    'posts:edit:tags':              power
+    'posts:edit:tags':              anonymous
     'posts:edit:thumbnail':         power
     'posts:feature':                administrator
     'posts:delete':                 moderator
     'posts:score':                  regular
     'posts:merge':                  moderator
     'posts:favorite':               regular
-    'posts:bulk-edit:tags':         power
+    'posts:bulk-edit:tags':         regular
     'posts:bulk-edit:safety':       power
-    'posts:bulk-edit:delete':       power
+    'posts:bulk-edit:delete':       moderator
 
     # Can see new posts in gallery
     'posts:list:new':               anonymous
 
-    'tags:create':                  power
+    'tags:create':                  anonymous
     'tags:edit:names':              power
     'tags:edit:category':           power
     'tags:edit:description':        power
@@ -135,27 +135,27 @@ privileges:
     'tags:merge':                   moderator
     'tags:delete':                  moderator
 
-    'tag_categories:create':        moderator
-    'tag_categories:edit:name':     moderator
-    'tag_categories:edit:color':    moderator
-    'tag_categories:edit:order':    moderator
+    'tag_categories:create':        power
+    'tag_categories:edit:name':     power
+    'tag_categories:edit:color':    power
+    'tag_categories:edit:order':    power
     'tag_categories:list':          anonymous
     'tag_categories:view':          anonymous
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
 
-    'metrics:create':               moderator
-    'metrics:edit:bounds':          moderator
-    'metrics:edit:posts':           moderator
-    'metrics:list':                 moderator
-    'metrics:delete':               moderator
+    'metrics:create':               administrator
+    'metrics:edit:bounds':          administrator
+    'metrics:edit:posts':           administrator
+    'metrics:list':                 administrator
+    'metrics:delete':               administrator
 
     'pools:create':                 power
     'pools:edit:names':             power
     'pools:edit:category':          power
     'pools:edit:description':       power
     'pools:edit:posts':             power
-    'pools:list':                   regular
+    'pools:list':                   anonymous
     'pools:view':                   anonymous
     'pools:merge':                  moderator
     'pools:delete':                 moderator
@@ -168,18 +168,18 @@ privileges:
     'pool_categories:delete':       moderator
     'pool_categories:set_default':  moderator
 
-    'comments:create':              power
+    'comments:create':              regular
     'comments:delete:any':          moderator
-    'comments:delete:own':          power
+    'comments:delete:own':          regular
     'comments:edit:any':            moderator
-    'comments:edit:own':            power
+    'comments:edit:own':            regular
     'comments:list':                anonymous
     'comments:view':                anonymous
     'comments:score':               regular
 
-    'snapshots:list':               power
+    'snapshots:list':               moderator
 
-    'uploads:create':               power
+    'uploads:create':               anonymous
     'uploads:use_downloader':       administrator
 
 ## ONLY SET THESE IF DEPLOYING OUTSIDE OF DOCKER

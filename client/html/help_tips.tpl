@@ -17,7 +17,7 @@ To add tags when uploading or editing an image:
     <li>Type the start of a tag name and
         <ul>
             <li>Press <code>Tab</code> to select the first suggestion, or</li>
-            <li>Use the up/down arrow keys and press <code>Enter</code> to select a suggestion, or<li>
+            <li>Use the up/down arrow keys and press <code>Enter</code> to select a suggestion, or</li>
             <li>Click a suggestion</li>
         </ul>
         <li>If the tag doesn't exist, it will be created automatically</li>

@@ -123,7 +123,6 @@ class PostList extends AbstractList {
         }
 
         text = lens.addHostnameFilter(text);
-        text = `${text} -ai`;
         return text.trim();
     }
 
