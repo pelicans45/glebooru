@@ -91,8 +91,17 @@
                 }) %>
             </li>
 
+            <li>
+                <%= ctx.makeCheckbox({
+                    text: 'Hide AI',
+                    name: 'hide-ai',
+                    checked: ctx.browsingSettings.hideAI,
+                    title: 'Hide files with ai tag',
+                }) %>
+            </li>
+
             <li class='layoutType'>
-                <label>Gallery Layout</label>
+                <label>Gallery layout</label>
                 <div class='radio-wrapper'>
                     <%= ctx.makeRadio({
                     name: 'layout-type',

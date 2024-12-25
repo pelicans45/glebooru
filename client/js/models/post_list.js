@@ -123,6 +123,13 @@ class PostList extends AbstractList {
         }
 
         text = lens.addHostnameFilter(text);
+
+        if (settings.get().hideAI) {
+            if (!text.match(/\bai\b/i)) {
+                text += " -tag:ai";
+            }
+        }
+
         return text.trim();
     }
 
