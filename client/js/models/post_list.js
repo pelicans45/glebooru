@@ -22,13 +22,17 @@ class PostList extends AbstractList {
     static search(text, offset, limit, fields, r, canSeeNewPosts) {
         return api
             .get(
-                uri.formatApiLink("posts", {
-                    q: PostList.decorateSearchQuery(text || ""),
-                    offset: offset,
-                    limit: limit,
-                    fields: fields.join(","),
-                    r: r,
-                }, {showProgress: false})
+                uri.formatApiLink(
+                    "posts",
+                    {
+                        q: PostList.decorateSearchQuery(text || ""),
+                        offset: offset,
+                        limit: limit,
+                        fields: fields.join(","),
+                        r: r,
+                    },
+                    { showProgress: false }
+                )
             )
             .then((response) => {
                 let results;
@@ -119,6 +123,13 @@ class PostList extends AbstractList {
         }
 
         text = lens.addHostnameFilter(text);
+
+        if (settings.get().hideAI) {
+            if (!text.match(/\bai\b/i)) {
+                text += " -tag:ai";
+            }
+        }
+
         return text.trim();
     }
 

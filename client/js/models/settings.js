@@ -25,6 +25,7 @@ const defaultSettings = {
     postFlow: false,
     navbarFollow: false,
     layoutType: "default",
+    hideAI: true,
 };
 
 if (misc.isMobile) {
