@@ -15,13 +15,13 @@ booru:
 #  color: "#00ff00"
 #  tips: []
 
-#bfilter:
-#  name: booru filter dev
-#  description: booru filter dev
-#  query: filter1
-#  implies: [agg]
-#  color: "#0000ff"
-#  tips: [Extra site tip 1]
+bfilter:
+  name: booru filter dev
+  description: booru filter dev
+  query: filter1
+  implies: [agg]
+  color: "#0000ff"
+  tips: [Extra site tip 1]
 
 #bfilter2:
 #  name: booru filter dev 2

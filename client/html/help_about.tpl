@@ -4,9 +4,9 @@
 
 <!--
 <p>A privileged account is required to upload images, add tags, and access other features. <a href="/register">Register</a> an account if you don't have one and join our <a href="/discord/">Discord</a> to request privileges</p>.
--->
 
 <p style="margin-top: 1.25em"><a href="/register">Register</a> an account to upload and tag images</p>
+-->
 
 <p style="margin-top: 1.25em">Check out our other sites</p>
 <ul>

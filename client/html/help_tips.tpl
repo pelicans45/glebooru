@@ -1,5 +1,5 @@
 <ul>
-<li><a href="/register">Register</a> an account to upload and tag images</a></li>
+<!-- <li><a href="/register">Register</a> an account to upload and tag images</a></li> -->
 <!-- <li>A privileged account is required to upload and tag images - <a href="/register">register</a> an account and join our <a target="_blank" href="/discord/">Discord</a> to request privileges</li> -->
 <li>Download images by shift-clicking (gallery thumbnails or full images), pressing <code>S</code> on an image page, or clicking the download button at the top right of the image page</li>
 <li>
