@@ -125,6 +125,12 @@ class Post extends events.EventTarget {
         return this._tags;
     }
 
+    get tagNames() {
+        return lens
+            .excludeRedundantTags(this._tags)
+            .map((tag) => tag.names[0]);
+    }
+
     get tagsExcludedRedundant() {
         return lens.excludeRedundantTags(this._tags);
     }
@@ -537,7 +543,7 @@ class Post extends events.EventTarget {
         // 4 characters for the file extension
         let nameLength = this.id.length + 4;
 
-        const sortedTags = [...this.tagsExcludedRedundant].sort(
+        const sortedTags = [...lens.excludeRedundantTags(this._tags)].sort(
             (a, b) => b.postCount - a.postCount
         );
 
