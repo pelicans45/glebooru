@@ -67,7 +67,7 @@ def create_user(
         )
 
     # get the IP from the ctx headers and log the IP
-    ip = ctx.get_header("X-Real-IP")
+    ip = ctx.get_header("X-Real-Ip")
     logging.info("[REGISTRATION] User %s created by %s", name, ip)
     ctx.session.add(user)
     ctx.session.commit()

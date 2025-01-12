@@ -2,7 +2,7 @@
 
 const events = require("../events.js");
 const views = require("../util/views.js");
-const iosCorrectedInnerHeight = require("ios-inner-height");
+//const iosCorrectedInnerHeight = require("ios-inner-height");
 const PostContentControl = require("../controls/post_content_control.js");
 
 const template = views.getTemplate("metric-sorter");
@@ -61,7 +61,7 @@ class MetricSorterView extends events.EventTarget {
         return new PostContentControl(containerNode, post, () => {
             // TODO: come up with a more reliable resizing mechanism
             return window.innerWidth < 1000
-                ? [window.innerWidth, iosCorrectedInnerHeight() / 2]
+                ? [window.innerWidth, window.innerHeight/ 2]
                 : [
                       containerNode.getBoundingClientRect().width,
                       window.innerHeight -

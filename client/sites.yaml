@@ -27,7 +27,7 @@ lole.meme:
     - 'Consider flube. It''s just a jiggly bird. Sometimes we like to imply it has memetic mind control powers. There''s no message or commentary to be found anywhere in that meme. I suppose you could stretch it well beyond its text and claim the bird is round and jiggly because it''s obese, and further connect its weight to its mind control powers to suggest scathing commentary on consumerism, but that sort of analysis is post-ironic humor in and of itself, in that what makes it funny is that it''s clearly not a sincere attempt at discussion'
 
 glegle.gallery:
-  name: glebooru
+  name: glegle gallery
   description: glegle
   meta_description: glegle.gallery is an image gallery for Glegle
   query: glegle

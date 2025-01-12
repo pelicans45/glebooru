@@ -464,6 +464,11 @@ def add_extra_tags(host, tag_names):
         if implication not in tag_names:
             tag_names.append(implication)
 
+    for tag in tag_names:
+        implication = TAG_IMPLICATIONS.get(tag)
+        if implication and implication not in tag_names:
+            tag_names.append(implication)
+
 
 def create_post(
     host: str, content: bytes, tag_names: List[str], user: Optional[model.User]
