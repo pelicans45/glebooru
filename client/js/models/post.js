@@ -539,7 +539,12 @@ class Post extends events.EventTarget {
         // 4 characters for the file extension
         let nameLength = this.id.length + 4;
 
-        for (const name of this.tagNames) {
+        const sortedTags = [...lens.excludeRedundantTags(this._tags)].sort(
+            (a, b) => b.postCount - a.postCount
+        );
+
+        for (const tag of sortedTags) {
+            const name = tag.names[0];
             nameLength += name.length;
             if (nameLength > maxNameLength) {
                 break;
@@ -547,7 +552,7 @@ class Post extends events.EventTarget {
             tagNames.push(name);
         }
 
-		if (!tagNames.length) {
+        if (!tagNames.length) {
             return this.getEnrichedFilename();
         }
 
@@ -648,12 +653,10 @@ class Post extends events.EventTarget {
 
         const filename = this.getEnrichedFilename();
 
-		if (["image", "animation"].includes(this._type)) {
-			this._thumbnailUrl = this._orig._thumbnailUrl = this.replaceFilename(
-				this._thumbnailUrl,
-				filename
-			);
-		}
+        if (["image", "animation"].includes(this._type)) {
+            this._thumbnailUrl = this._orig._thumbnailUrl =
+                this.replaceFilename(this._thumbnailUrl, filename);
+        }
 
         this._contentUrl = this._orig._contentUrl = this.replaceFilename(
             this._contentUrl,
