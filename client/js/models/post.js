@@ -131,10 +131,6 @@ class Post extends events.EventTarget {
             .map((tag) => tag.names[0]);
     }
 
-    get tagsExcludedRedundant() {
-        return lens.excludeRedundantTags(this._tags);
-    }
-
     get notes() {
         return this._notes;
     }
