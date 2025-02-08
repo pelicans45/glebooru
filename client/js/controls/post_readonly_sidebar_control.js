@@ -63,8 +63,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
             );
         }
 			*/
-        this._loadSimilarPosts();
-        //this._loadLookalikePosts();
+        this._loadLookalikePosts().then(() => this._loadSimilarPosts());
     }
 
     get _scoreContainerNode() {
@@ -120,11 +119,11 @@ class PostReadonlySidebarControl extends events.EventTarget {
     }
 
     get _lookalikesNode() {
-        return this._hostNode.querySelector("nav.lookalikes");
+        return this._hostNode.querySelector("nav.similar");
     }
 
     get _lookalikesListNode() {
-        return this._hostNode.querySelector("nav.lookalikes ul");
+        return this._hostNode.querySelector("nav.similar ul");
     }
 
     _installFitButtons() {
@@ -270,8 +269,9 @@ class PostReadonlySidebarControl extends events.EventTarget {
 
     _loadSimilarPosts() {
         if (this._post.tags.length < 3) {
-            return;
+            return Promise.resolve();
         }
+
         return PostList.search(
             "similar:" + this._post.id + " -id:" + this._post.id,
             0,
@@ -284,15 +284,30 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 return;
             }
 
-            this._similarNode.style.display = "flex";
+            const existingIds = Array.from(this._similarListNode.children).map(
+                (node) =>
+                    node
+                        .querySelector("a")
+                        .getAttribute("href")
+                        .split("/")
+                        .pop()
+            );
 
             const listNode = this._similarListNode;
 
             for (let post of response.results) {
+                // prevent duplicates
+                if (existingIds.includes(post.id.toString())) {
+                    continue;
+                }
+
                 let postNode = similarItemTemplate({
                     id: post.id,
                     thumbnailUrl: post.thumbnailUrl,
                 });
+
+                postNode.classList.add("similar-item");
+
                 listNode.appendChild(postNode);
             }
         });
@@ -301,7 +316,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
     _loadLookalikePosts() {
         const limit = similarPostCount;
         const fields = ["id", "thumbnailUrl"];
-        const threshold = 0.60;
+        const threshold = 0.6;
         return PostList.reverseSearch(
             this._post.id,
             limit,
@@ -312,8 +327,6 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 return;
             }
 
-            this._lookalikesNode.style.display = "block";
-
             const listNode = this._lookalikesListNode;
 
             for (let post of response.results) {
@@ -321,6 +334,9 @@ class PostReadonlySidebarControl extends events.EventTarget {
                     id: post.id,
                     thumbnailUrl: post.thumbnailUrl,
                 });
+
+                postNode.classList.add("lookalike-item");
+
                 listNode.appendChild(postNode);
             }
         });

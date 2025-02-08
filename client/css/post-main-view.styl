@@ -249,10 +249,7 @@
             order: 2
             margin-top: 1em*/
 
-    .similar, .lookalikes
-        display: none
-
-    .relations, .similar, .lookalikes
+    .relations
         h1
             margin-bottom: 0.5em
         .thumbnail
@@ -262,53 +259,65 @@
             margin: 0 0.3em 0.3em 0
             display: inline-block
 
-    .similar
-        flex-direction: column
+    .see-more
+        &:not(:has(img))
+            display: none
+
+        &:not(:has(.similar-item))
+            .see-more-link
+                display: none
+
+    .see-more
+        h2
+            font-size: 1.3em
+
+            justify-self: center
+
+            margin-bottom: 0.5em
+
+        &:has(.similar > ul > li:only-child)
+            h2
+                justify-self: end
+
         @media (min-width: 801px)
-            //display: flex
             position: absolute
             right: 0
-            top: 0
-            margin-top: 35px
-            align-items: flex-end
+            top: 2em
 
-        @media (max-width: 800px)
-            align-items: flex-end
+        nav
+            margin-bottom: 0.8em
+            ul
+                gap: 0.8em
 
-        a
-            margin-top: 5px
+        .see-more-link
+            margin-top: 0.4em
 
-        h2
-            width: fit-content
 
-            font-size: 1.3em
-            margin-bottom: .5em
+    .similar
+        display: flex
+        flex-direction: column
+
+        align-items: flex-end
+
         ul
-            display: flex
-            gap: 5px
+            display: grid
+            grid-template-columns: repeat(2, 1fr)
 
-            @media (max-width: 550px), (min-width: 801px)
-                flex-direction: column
+            direction: rtl;
 
             li
-                margin: 0
                 a .thumbnail
-                    @media (max-width: 800px)
-                        width: auto
-                        height: 4em
+                    width: 4em
+                    height: auto
 
-                        .gallery-thumb
-                            min-width: 2em
-                            max-width: 6em
+                    .gallery-thumb
+                        min-height: 2em
+                        max-height: 6em
 
-                    @media (max-width: 550px), (min-width: 801px)
-                        width: 4em
-                        height: auto
-
-                        .gallery-thumb
-                            min-height: 2em
-                            max-height: 6em
-
+        span
+            transition: transform 0.16s ease-in
+            &:hover
+                transform: scale(1.1)
 
     .tags, .metrics
         h1

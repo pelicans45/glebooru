@@ -137,15 +137,12 @@
     <% } */ %>
 
     <% if (ctx.canViewSimilar) { %>
-        <nav class='similar'>
+        <nav class='see-more'>
             <h2>Similar</h2>
-            <ul></ul>
-            <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id + " -id:" + ctx.post.id}) %>' title='View similar images' >See more</a>
-        </nav>
-
-        <nav class='lookalikes'>
-            <h2>Lookalikes</h2>
-            <ul></ul>
+            <nav class='similar'>
+                <ul></ul>
+                <a href='<%- ctx.formatPostsLink({q: "similar:" + ctx.post.id + " -id:" + ctx.post.id}) %>' class='see-more-link' title='View similar images' >See more</a>
+            </nav>
         </nav>
     <% } %>
 </div>
