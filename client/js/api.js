@@ -139,9 +139,17 @@ class Api extends events.EventTarget {
 
     loginFromCookies() {
         const auth = cookies.getJSON("auth");
-        return auth && auth.user && auth.token
-            ? this.loginWithToken(auth.user, auth.token, true)
-            : Promise.resolve();
+        if (!auth || !auth.user || !auth.token) {
+            return Promise.resolve();
+        }
+        return this.loginWithToken(auth.user, auth.token, true).catch(
+            (error) => {
+                this.forget();
+                this._logout();
+
+                return Promise.reject(error);
+            }
+        );
     }
 
     loginWithToken(userName, token, doRemember) {
@@ -161,15 +169,14 @@ class Api extends events.EventTarget {
                         options
                     );
                     this.user = response;
-					if (this.user.rank) {
-						document.body.classList.add(`rank-${this.user.rank}`)
-					}
+                    if (this.user.rank) {
+                        document.body.classList.add(`rank-${this.user.rank}`);
+                    }
                     resolve();
                     this.dispatchEvent(new CustomEvent("login"));
                 },
                 (error) => {
                     reject(error);
-                    this.logout();
                 }
             );
         });
@@ -459,7 +466,9 @@ class Api extends events.EventTarget {
                 req.abort(); // does *NOT* call the callback passed in .end()
                 progress.done();
                 reject(
-                    new Error("The request was aborted due to user cancellation")
+                    new Error(
+                        "The request was aborted due to user cancellation"
+                    )
                 );
             };
 
@@ -470,11 +479,13 @@ class Api extends events.EventTarget {
                 abortFunction = () => {};
                 if (error) {
                     if (response && response.body) {
-						if (response.body.description.includes("Invalid token")) {
-							document.cookie = "";
-							location.reload();
-							return;
-						}
+                        if (
+                            response.body.description.includes("Invalid token")
+                        ) {
+                            this.forget();
+                            location.reload();
+                            return;
+                        }
                         error = new Error(
                             response.body.description || "Unknown error"
                         );
