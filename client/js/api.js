@@ -479,13 +479,6 @@ class Api extends events.EventTarget {
                 abortFunction = () => {};
                 if (error) {
                     if (response && response.body) {
-                        if (
-                            response.body.description.includes("Invalid token")
-                        ) {
-                            this.forget();
-                            location.reload();
-                            return;
-                        }
                         error = new Error(
                             response.body.description || "Unknown error"
                         );
