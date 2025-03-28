@@ -2,6 +2,10 @@ upstream client {
     server client:80;
 }
 
+upstream renderer {
+    server renderer:3000;
+}
+
 map $http_user_agent $embed_prefix {
     ~*(discordbot|twitterbot|facebookexternalhit)/  /api/embed;
 }
@@ -13,15 +17,48 @@ server {
     client_body_timeout 30s;
 
     location / {
-        proxy_pass http://client;
-        proxy_set_header X-Original-Host $host;
-        include /etc/nginx/include/proxy;
+        # Set default upstream
+        set $proxy_target http://client;
+
+        # Check for crawlers and update target if needed
+        if ($http_user_agent ~* (googlebot|bingbot)) {
+            set $proxy_target http://renderer;
+            # Construct the URL for the renderer: /render/<client_url><original_uri>
+            set $proxy_path_target /render/http://client$request_uri;
+        }
+
+        # Pass to the selected target
+        proxy_pass $proxy_target;
+        proxy_http_version 1.1; # Often needed for keep-alive with Node.js
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host; # Pass original host
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location ~ ^/[0-9]+ {
-        proxy_pass http://client$embed_prefix$request_uri;
-        proxy_set_header X-Original-Host $host;
-        include /etc/nginx/include/proxy;
+        # Set default upstream and path
+        set $proxy_target http://client;
+        set $proxy_path_target $embed_prefix$request_uri;
+
+        # Check for crawlers and update target/path if needed
+        if ($http_user_agent ~* (googlebot|bingbot)) {
+            set $proxy_target http://renderer;
+            # Construct the URL for the renderer: /render/<client_url><original_uri>
+            set $proxy_path_target /render/http://client$request_uri;
+        }
+
+        # Pass to the selected target
+        proxy_pass $proxy_target$proxy_path_target;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location ~ /posts/.*?([0-9]+\.[a-z0-9]+$) {

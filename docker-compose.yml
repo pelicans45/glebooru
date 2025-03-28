@@ -1,47 +1,58 @@
 services:
-  server:
-    build: server
-    restart: unless-stopped
-    depends_on:
-      - sql
-    environment:
-      ## These should be the names of the dependent containers listed below,
-      ## or FQDNs/IP addresses if these services are running outside of Docker
-      POSTGRES_HOST: sql
-      ## Credentials for database:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-      ## Commented Values are Default:
-      #POSTGRES_DB: defaults to same as POSTGRES_USER
-      #POSTGRES_PORT: 5432
-      #LOG_SQL: 0 (1 for verbose SQL logs)
-      THREADS:
-      SECRET:
-    volumes:
-      - "${MOUNT_DATA}:/data"
-      - "./client/config.yaml:/opt/app/config.yaml:ro"
-      - "./client/sites.yaml:/opt/app/sites.yaml:ro"
-      - "./client/html/index.html:/opt/app/index.html:ro"
+    server:
+        build: server
+        restart: unless-stopped
+        depends_on:
+            - sql
+        environment:
+            ## These should be the names of the dependent containers listed below,
+            ## or FQDNs/IP addresses if these services are running outside of Docker
+            POSTGRES_HOST: sql
+            ## Credentials for database:
+            POSTGRES_USER:
+            POSTGRES_PASSWORD:
+            ## Commented Values are Default:
+            #POSTGRES_DB: defaults to same as POSTGRES_USER
+            #POSTGRES_PORT: 5432
+            #LOG_SQL: 0 (1 for verbose SQL logs)
+            THREADS:
+            SECRET:
+        volumes:
+            - "${MOUNT_DATA}:/data"
+            - "./client/config.yaml:/opt/app/config.yaml:ro"
+            - "./client/sites.yaml:/opt/app/sites.yaml:ro"
+            - "./client/html/index.html:/opt/app/index.html:ro"
 
-  client:
-    build: client
-    restart: unless-stopped
-    depends_on:
-      - server
-    environment:
-      BACKEND_HOST: server
-      BASE_URL:
-    volumes:
-      - "${MOUNT_DATA}:/data:ro"
-    ports:
-      - "${PORT}:80"
+    client:
+        build: client
+        restart: unless-stopped
+        depends_on:
+            - server
+        environment:
+            BACKEND_HOST: server
+            BASE_URL:
+        volumes:
+            - "${MOUNT_DATA}:/data:ro"
+        ports:
+            - "${PORT}:80"
 
-  sql:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-    volumes:
-      - "${MOUNT_SQL}:/var/lib/postgresql/data"
-      - /opt/backup:/opt/backup
+    renderer:
+        build: glebooru-renderer
+        restart: unless-stopped
+        ports:
+            - "127.0.0.1:3000:3000"
+        depends_on:
+            - client
+        environment:
+            # Adjust as needed for waiting strategies or runtime configs
+            NODE_ENV: production
+
+    sql:
+        image: postgres:16
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER:
+            POSTGRES_PASSWORD:
+        volumes:
+            - "${MOUNT_SQL}:/var/lib/postgresql/data"
+            - /opt/backup:/opt/backup

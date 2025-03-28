@@ -11,15 +11,48 @@ server {
     client_body_timeout 30s;
 
     location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header X-Original-Host $host;
-        include /opt/booru/server/nginx/etc/include/proxy;
+        # Set default upstream
+        set $proxy_target http://127.0.0.1:8080;
+
+        # Check for crawlers and update target if needed
+        if ($http_user_agent ~* (googlebot|bingbot)) {
+            set $proxy_target http://127.0.0.1:3000;
+            # Construct the URL for the renderer: /render/<client_url><original_uri>
+            set $proxy_path_target /render/http://127.0.0.1:8080$request_uri;
+        }
+
+        # Pass to the selected target
+        proxy_pass $proxy_target$proxy_path_target;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location ~ ^/[0-9]+ {
-        proxy_pass http://127.0.0.1:8080$embed_prefix$request_uri;
-        proxy_set_header X-Original-Host $host;
-        include /opt/booru/server/nginx/etc/include/proxy;
+        # Set default upstream and path
+        set $proxy_target http://127.0.0.1:8080;
+        set $proxy_path_target $embed_prefix$request_uri;
+
+        # Check for crawlers and update target/path if needed
+        if ($http_user_agent ~* (googlebot|bingbot)) {
+            set $proxy_target http://127.0.0.1:3000;
+            # Construct the URL for the renderer: /render/<client_url><original_uri>
+            set $proxy_path_target /render/http://127.0.0.1:8080$request_uri;
+        }
+
+        # Pass to the selected target
+        proxy_pass $proxy_target$proxy_path_target;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     #location ~ /api/(tag-siblings/lens|tags/all)(.*) {
