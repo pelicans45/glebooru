@@ -268,7 +268,7 @@ function makePostLink(id, includeHash) {
 function makeNewTabPostLink(id, includeHash) {
     let text = id;
     if (includeHash) {
-        text = "#" + id;
+        text = "@" + id;
     }
     return api.hasPrivilege("posts:view")
         ? makeElement(

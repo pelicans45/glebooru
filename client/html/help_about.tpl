@@ -20,5 +20,5 @@
 </ul>
 
 <p>
-<a href="https://github.com/pelicans45/glebooru">Source code</a>
+<a target="_blank" href="https://github.com/pelicans45/glebooru">Source code</a>
 </p>
