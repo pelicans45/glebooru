@@ -37,7 +37,7 @@ services:
             - "${PORT}:80"
 
     renderer:
-        build: glebooru-renderer
+        build: renderer
         restart: unless-stopped
         ports:
             - "127.0.0.1:3000:3000"

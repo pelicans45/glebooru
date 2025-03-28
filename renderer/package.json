@@ -1,5 +1,5 @@
 {
-  "name": "glebooru-renderer",
+  "name": "renderer",
   "version": "1.0.0",
   "description": "",
   "main": "renderer.js",

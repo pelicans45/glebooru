@@ -1,4 +1,3 @@
-// glebooru-renderer/renderer.js
 const express = require("express");
 const puppeteer = require("puppeteer");
 
@@ -93,7 +92,7 @@ app.get("/render/*", async (req, res) => {
         });
 
         console.log("Waiting fixed 15 seconds for JS rendering (test)...");
-        await delay(15000); // Use modern delay function
+        await delay(5000); // Use modern delay function
         console.log("Finished fixed wait.");
 
         const html = await page.content(); // Gets the full HTML content
@@ -133,7 +132,7 @@ getBrowser()
     .then(() => {
         app.listen(port, "0.0.0.0", () => {
             // Listen on all interfaces so it's accessible from other containers
-            console.log(`Glebooru Renderer listening on http://0.0.0.0:${port}`);
+            console.log(`Renderer listening on http://0.0.0.0:${port}`);
         });
     })
     .catch((err) => {
