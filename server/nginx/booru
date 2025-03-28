@@ -14,7 +14,7 @@ server {
         set $proxy_target http://127.0.0.1:8080;
 
         if ($http_user_agent ~* (googlebot|bingbot)) {
-            set $proxy_target http://renderer;
+            set $proxy_target http://127.0.0.1:3000;
             set $proxy_path_target /render/http://$http_host$request_uri;
         }
 
@@ -27,7 +27,7 @@ server {
         set $proxy_path_target $embed_prefix$request_uri;
 
         if ($http_user_agent ~* (googlebot|bingbot)) {
-            set $proxy_target http://renderer;
+            set $proxy_target http://127.0.0.1:3000;
             set $proxy_path_target /render/http://$http_host$request_uri;
         }
 
