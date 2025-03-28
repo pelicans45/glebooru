@@ -46,6 +46,17 @@ services:
         environment:
             # Adjust as needed for waiting strategies or runtime configs
             NODE_ENV: production
+        extra_hosts:
+            - "jej.lol:host-gateway"
+            - "lole.meme:host-gateway"
+            - "glegle.gallery:host-gateway"
+            - "bury.pink:host-gateway"
+            - "flube.supply:host-gateway"
+            - "spikedog.school:host-gateway"
+            - "yosho.io:host-gateway"
+            - "politics.lol:host-gateway"
+            - "boymoders.com:host-gateway"
+
 
     sql:
         image: postgres:16

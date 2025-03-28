@@ -2,11 +2,10 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 
 const app = express();
-const port = 3000; // Port the renderer will listen on
+const port = 3000;
 
-// Basic in-memory cache (replace with Redis or similar for production)
 const cache = new Map();
-const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour cache
+const CACHE_DURATION_MS = 60 * 60 * 1000;
 
 let browserInstance = null;
 
@@ -16,33 +15,23 @@ async function getBrowser() {
         try {
             browserInstance = await puppeteer.launch({
                 headless: true,
-                args: [
-                    "--no-sandbox", // Often required in containerized/CI environments
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage", // Avoid issues with limited /dev/shm size
-                ],
+                args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
             });
             browserInstance.on("disconnected", () => {
                 console.log("Browser disconnected.");
-                browserInstance = null; // Reset instance if it crashes or closes
+                browserInstance = null;
             });
             console.log("Browser launched successfully.");
         } catch (error) {
             console.error("Failed to launch browser:", error);
-            browserInstance = null; // Ensure it's null on failure
-            throw error; // Re-throw to signal failure
+            browserInstance = null;
+            throw error;
         }
     }
     return browserInstance;
 }
 
-// Helper function for modern fixed delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 app.get("/render/*", async (req, res) => {
-    // Extract the URL to render *after* '/render/'
-    // req.url includes the path and query string, e.g., /render/https://example.com?query=1
-    // We need to reconstruct the full URL
     const urlToRender = req.url.substring("/render/".length);
 
     if (!urlToRender || !urlToRender.startsWith("http")) {
@@ -52,7 +41,6 @@ app.get("/render/*", async (req, res) => {
 
     console.log(`Rendering request for: ${urlToRender}`);
 
-    // Check cache
     const cachedItem = cache.get(urlToRender);
     if (cachedItem && Date.now() < cachedItem.expiry) {
         console.log(`Serving from cache: ${urlToRender}`);
@@ -68,43 +56,30 @@ app.get("/render/*", async (req, res) => {
         }
         page = await browser.newPage();
 
-        // --- Capture Browser Console Logs ---
         page.on("console", (msg) => console.log(`Browser Console [${msg.type()}]: ${msg.text()}`));
         page.on("pageerror", (error) => console.error(`page.on("pageerror"):`, error));
         page.on("error", (error) => console.error(`page.on("error"):`, error));
         page.on("requestfailed", (request) =>
-            console.warn(`Browser Request Failed: ${request.url()} (${request.failure()?.errorText || "N/A"})`)
-        ); // Added null check for failure()
-        // -------------------------------------
+            console.warn(`Browser request failed: ${request.url()} (${request.failure()?.errorText || "N/A"})`)
+        );
 
-        // Explicitly ensure JavaScript is enabled
         await page.setJavaScriptEnabled(true);
-
-        // Set a reasonable viewport and user agent (optional, but can help)
         await page.setViewport({ width: 1280, height: 800 });
-        // Mimic Googlebot's user agent (optional)
-        // await page.setUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
 
         console.log(`Navigating to: ${urlToRender}`);
         await page.goto(urlToRender, {
-            waitUntil: "networkidle0", // Wait until network is idle (good starting point)
-            timeout: 30000, // 30 seconds timeout
+            waitUntil: "networkidle0",
+            timeout: 10000,
         });
+        const html = await page.content();
 
-        console.log("Waiting fixed 15 seconds for JS rendering (test)...");
-        await delay(5000); // Use modern delay function
-        console.log("Finished fixed wait.");
-
-        const html = await page.content(); // Gets the full HTML content
-
-        // Add to cache
         cache.set(urlToRender, {
             html: html,
             expiry: Date.now() + CACHE_DURATION_MS,
         });
-        // Clean up old cache entries periodically (simple example)
+
+        // Clean up old cache entries periodically
         if (cache.size > 1000) {
-            // Limit cache size
             const oldestKey = cache.keys().next().value;
             cache.delete(oldestKey);
         }
@@ -113,7 +88,6 @@ app.get("/render/*", async (req, res) => {
         res.send(html);
     } catch (error) {
         console.error(`Error rendering ${urlToRender}:`, error);
-        // Don't close the shared browser instance here on page errors
         res.status(500).send(`Failed to render page. ${error.message}`);
     } finally {
         if (page) {
@@ -127,11 +101,9 @@ app.get("/render/*", async (req, res) => {
     }
 });
 
-// Start browser and server
 getBrowser()
     .then(() => {
         app.listen(port, "0.0.0.0", () => {
-            // Listen on all interfaces so it's accessible from other containers
             console.log(`Renderer listening on http://0.0.0.0:${port}`);
         });
     })
@@ -140,7 +112,6 @@ getBrowser()
         process.exit(1);
     });
 
-// Graceful shutdown
 process.on("SIGINT", async () => {
     console.log("Caught interrupt signal, closing browser...");
     if (browserInstance) {
@@ -149,7 +120,6 @@ process.on("SIGINT", async () => {
     process.exit();
 });
 process.on("SIGTERM", async () => {
-    // Also handle SIGTERM for systemd/pm2
     console.log("Caught termination signal, closing browser...");
     if (browserInstance) {
         await browserInstance.close();

@@ -17,34 +17,26 @@ server {
     client_body_timeout 30s;
 
     location / {
-        # Set default upstream
         set $proxy_target http://client;
 
-        # Check for crawlers and update target if needed
         if ($http_user_agent ~* (googlebot|bingbot)) {
             set $proxy_target http://renderer;
-            # Construct the URL for the renderer: /render/<client_url><original_uri>
             set $proxy_path_target /render/http://$http_host$request_uri;
         }
 
-        # Pass to the selected target
-        proxy_pass $proxy_target;
+        proxy_pass $proxy_target$proxy_path_target;
         include /etc/nginx/include/proxy;
     }
 
     location ~ ^/[0-9]+ {
-        # Set default upstream and path
         set $proxy_target http://client;
         set $proxy_path_target $embed_prefix$request_uri;
 
-        # Check for crawlers and update target/path if needed
         if ($http_user_agent ~* (googlebot|bingbot)) {
             set $proxy_target http://renderer;
-            # Construct the URL for the renderer: /render/<client_url><original_uri>
             set $proxy_path_target /render/http://$http_host$request_uri;
         }
 
-        # Pass to the selected target
         proxy_pass $proxy_target$proxy_path_target;
         include /etc/nginx/include/proxy;
     }
