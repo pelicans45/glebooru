@@ -15,7 +15,12 @@ async function getBrowser() {
         try {
             browserInstance = await puppeteer.launch({
                 headless: true,
-                args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--ignore-certificate-errors",
+                ],
             });
             browserInstance.on("disconnected", () => {
                 console.log("Browser disconnected.");
