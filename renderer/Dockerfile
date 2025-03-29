@@ -14,12 +14,15 @@ WORKDIR /app
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
+COPY hosts /etc/hosts
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
 
 # Copy the rest of the application
 COPY . .
+
 
 # Expose the port the app runs on
 EXPOSE 3000
