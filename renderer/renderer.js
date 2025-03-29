@@ -66,6 +66,15 @@ app.get("/render/*", async (req, res) => {
         await page.setJavaScriptEnabled(true);
         await page.setViewport({ width: 1280, height: 800 });
 
+        await page.setRequestInterception(true);
+        page.on("request", (request) => {
+            if (request.resourceType() === "image") {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+
         console.log(`Navigating to: ${urlToRender}`);
         await page.goto(urlToRender, {
             waitUntil: "networkidle0",
