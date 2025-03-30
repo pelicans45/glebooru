@@ -8,6 +8,8 @@ const misc = require("./misc.js");
 const uri = require("./uri.js");
 const settings = require("../models/settings.js");
 
+const isSearchCrawler = /googlebot|bingbot/i.test(navigator.userAgent);
+
 function _imbueId(options) {
     if (!options.id) {
         options.id = "gen-" + Math.random().toString(36).substring(7);
@@ -460,6 +462,9 @@ function showMessage(target, message, className) {
 }
 
 function appendExclamationMark() {
+    if (isSearchCrawler) {
+        return;
+    }
     const prefix = "** ERROR ** | ";
     if (!document.title.startsWith(prefix)) {
         document.oldTitle = document.title;
