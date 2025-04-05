@@ -67,9 +67,6 @@ function _createTagByCategoryAndName(category, name) {
 
 function tagListToMatches(tags, options) {
     return [...tags]
-        .filter((tag) => {
-            return !options.isTaggedWith(tag.names[0]);
-        })
         .sort((tag1, tag2) => {
             return tag2.usages - tag1.usages;
         })
