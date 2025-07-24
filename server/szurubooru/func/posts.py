@@ -760,7 +760,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
     ) and post.file_size < config.config["thumbnails"]["min_file_size"]:
         return
 
-    if post.type == "audio":
+    if post.type == "audio" or post.mime_type == "image/gif":
         return
 
     backup_path = get_post_thumbnail_backup_path(post)
