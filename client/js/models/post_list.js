@@ -89,13 +89,14 @@ class PostList extends AbstractList {
             });
     }
 
-    static reverseSearch(id, limit, threshold, fields) {
+    static reverseSearch(id, limit, threshold, fields, query) {
         return api
             .get(
                 uri.formatApiLink("post", id, "reverse-search", {
                     limit: limit,
                     threshold: threshold,
                     fields: fields.join(","),
+                    q: query,
                 })
             )
             .then((response) => {

@@ -321,7 +321,8 @@ class PostReadonlySidebarControl extends events.EventTarget {
             this._post.id,
             limit,
             threshold,
-            fields
+            fields,
+            lens.hostnameFilter
         ).then((response) => {
             if (response.results.length === 0) {
                 return;
