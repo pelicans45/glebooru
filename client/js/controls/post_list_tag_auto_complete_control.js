@@ -7,10 +7,22 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
     constructor(input, options) {
         super(input, options);
 
+        this._setDefaultMatchesPromise = null;
         this._valueEntered = false;
 
         this._sourceInputNode.addEventListener("focus", (e) => {
-            this._displayDefaultMatches();
+            if (this._sourceInputNode.value) {
+                return;
+            }
+            if (this._results.length) {
+                this._displayDefaultMatches();
+            } else if (this._setDefaultMatchesPromise) {
+                this._setDefaultMatchesPromise.then(() => {
+                    if (document.activeElement === this._sourceInputNode) {
+                        this._displayDefaultMatches();
+                    }
+                });
+            }
         });
 
         this._sourceInputNode.addEventListener("input", (e) => {
@@ -41,12 +53,15 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
     }
 
     _setDefaultMatches() {
-        return TagList.getTopRelevantMatches().then((results) => {
-            this._suggestionDiv.style.display = "none !important";
-            this._results = results;
-            this._refreshList();
-            this.hide();
-        });
+        this._setDefaultMatchesPromise = TagList.getTopRelevantMatches().then(
+            (results) => {
+                this._suggestionDiv.style.display = "none !important";
+                this._results = results;
+                this._refreshList();
+                this.hide();
+            }
+        );
+        return this._setDefaultMatchesPromise;
     }
 
     _displayDefaultMatches() {
