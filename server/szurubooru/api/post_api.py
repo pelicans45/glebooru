@@ -87,7 +87,10 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
         post = posts.get_post_by_id(int(query_text))
         return {"url": posts.get_post_content_url(post)}
 
-    query_text = "sort:random type:image,animation " + query_text
+    types = "image,animation"
+    if "video" in query_text:
+        types += ",video"
+    query_text = f"sort:random type:{types} {query_text}"
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return {"url": ""}
