@@ -454,6 +454,8 @@ SITE_TAGS = {
 
 
 def add_extra_tags(host, tag_names):
+    if not host:
+        return
     site = config.config["sites"][host]
     site_tag = site.get("query")
     if site_tag and site_tag not in tag_names:
@@ -760,7 +762,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
     ) and post.file_size < config.config["thumbnails"]["min_file_size"]:
         return
 
-    if post.type == "audio":
+    if post.type == "audio" or post.mime_type == "image/gif":
         return
 
     backup_path = get_post_thumbnail_backup_path(post)
@@ -1024,6 +1026,7 @@ def search_by_signature(
     signature: NpMatrix,
     limit: int = 100,
     distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
+    query: str = None,
 ) -> List[Tuple[float, model.Post]]:
     query_words = image_hash.generate_words(signature)
     """
@@ -1037,12 +1040,28 @@ def search_by_signature(
     dbquery = """
     SELECT s.post_id, s.signature, count(a.query) AS score
     FROM post_signature AS s, unnest(s.words, :q) AS a(word, query)
-    WHERE a.word = a.query
+    {join_clause}
+    WHERE a.word = a.query {where_clause}
     GROUP BY s.post_id
     ORDER BY score DESC LIMIT :limit;
     """
 
-    candidates = db.session.execute(dbquery, {"q": query_words, "limit": limit})
+    join_clause = ""
+    where_clause = ""
+    params = {"q": query_words, "limit": limit}
+
+    if query:
+        join_clause = """
+        JOIN post_tag pt ON s.post_id = pt.post_id
+        JOIN tag t ON pt.tag_id = t.id
+        JOIN tag_name tn ON t.id = tn.tag_id
+        """
+        where_clause = "AND tn.name = :query"
+        params["query"] = query
+
+    dbquery = dbquery.format(join_clause=join_clause, where_clause=where_clause)
+
+    candidates = db.session.execute(dbquery, params)
     data = tuple(
         zip(
             *[

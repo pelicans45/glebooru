@@ -87,7 +87,10 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
         post = posts.get_post_by_id(int(query_text))
         return {"url": posts.get_post_content_url(post)}
 
-    query_text = "sort:random type:image,animation " + query_text
+    types = "image,animation"
+    if "video" in query_text:
+        types += ",video"
+    query_text = f"sort:random type:{types} {query_text}"
     count, _posts = _search_executor.execute(query_text, 0, 1)
     if count == 0:
         return {"url": ""}
@@ -352,6 +355,7 @@ def get_posts_lookalikes(
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
     threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
+    query = ctx.get_param_as_string("q", default=None)
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     if post.signature is None:
@@ -359,7 +363,7 @@ def get_posts_lookalikes(
 
     sig = image_hash.unpack_signature(post.signature.signature)
     # limit + 1 because the original post will be excluded
-    lookalikes = posts.search_by_signature(sig, limit + 1, threshold)
+    lookalikes = posts.search_by_signature(sig, limit + 1, threshold, query)
     # exclude the original post:
     lookalikes = filter(lambda la: la[1].post_id != post_id, lookalikes)
     lookalikes = sorted(lookalikes, key=lambda la: la[0])
