@@ -106,11 +106,13 @@ def is_valid_token(user_token: Optional[model.UserToken]) -> bool:
         return False
     if not user_token.enabled:
         return False
+    """
     if (
         user_token.expiration_time is not None
         and user_token.expiration_time < datetime.utcnow()
     ):
         return False
+    """
     return True
 
 

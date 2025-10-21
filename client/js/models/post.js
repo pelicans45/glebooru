@@ -94,7 +94,7 @@ class Post extends events.EventTarget {
     }
 
     get sourceSplit() {
-        return this._source.split("\n");
+        return this._source.split("\n").filter((s) => s);
     }
 
     get canvasWidth() {
@@ -228,9 +228,10 @@ class Post extends events.EventTarget {
         return returnedPromise;
     }
 
-    static get(id) {
+    static get(id, options) {
+		options.noProgress = true;
         return api
-            .get(uri.formatApiLink("post", id), { noProgress: true })
+            .get(uri.formatApiLink("post", id), options)
             .then((response) => {
                 return Promise.resolve(Post.fromResponse(response));
             });

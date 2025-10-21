@@ -54,7 +54,8 @@ class TildeWrapper extends BaseMarkdownWrapper {
 // prevent ^#... from being treated as headers, due to tag permalinks
 class TagPermalinkFixWrapper extends BaseMarkdownWrapper {
     preprocess(text) {
-        return text.replace(/^#/g, "%%%#");
+        //return text.replace(/^#/g, "%%%#");
+		return text.replace(/^#(?=[a-zA-Z0-9_-])/g, "%%%#");
     }
 
     postprocess(text) {

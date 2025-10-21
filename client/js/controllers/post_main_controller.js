@@ -53,16 +53,42 @@ class PostMainController extends BasePostController {
                     ...lens.excludeRedundantTags(post.tags)
                 );
 				*/
+
+                const prevPostId = aroundResponse.prev
+                    ? aroundResponse.prev.id
+                    : null;
+                const nextPostId = aroundResponse.next
+                    ? aroundResponse.next.id
+                    : null;
+
+                // Preload nearby posts
+                if (prevPostId) {
+                    Post.get(prevPostId, { noProgress: true }).then(
+                        misc.preloadPostImages
+                    );
+                    PostList.getAround(
+                        prevPostId,
+                        parameters ? parameters.query : null,
+                        { noProgress: true }
+                    );
+                }
+                if (nextPostId) {
+                    Post.get(nextPostId, { noProgress: true }).then(
+                        misc.preloadPostImages
+                    );
+                    PostList.getAround(
+                        nextPostId,
+                        parameters ? parameters.query : null,
+                        { noProgress: true }
+                    );
+                }
+
                 this._post = post;
                 this._view = new PostMainView({
                     post: post,
                     editMode: editMode,
-                    prevPostId: aroundResponse.prev
-                        ? aroundResponse.prev.id
-                        : null,
-                    nextPostId: aroundResponse.next
-                        ? aroundResponse.next.id
-                        : null,
+                    prevPostId: prevPostId,
+                    nextPostId: nextPostId,
                     randomPostId: aroundResponse.random
                         ? aroundResponse.random.id
                         : null,
@@ -311,6 +337,17 @@ module.exports = (router) => {
         if (ctx.state.parameters) {
             Object.assign(ctx.parameters, ctx.state.parameters);
         }
-        ctx.controller = new PostMainController(ctx, true);
+        const canEditPosts = api.hasPrivilege("posts:edit");
+        if (canEditPosts) {
+            ctx.controller = new PostMainController(ctx, true);
+        } else {
+            router.show(
+                uri.formatClientLink(
+                    "",
+                    ctx.parameters.id,
+                    ctx.parameters ? { q: ctx.parameters.q } : {}
+                )
+            );
+        }
     });
 };

@@ -96,7 +96,7 @@
                     text: 'Hide AI',
                     name: 'hide-ai',
                     checked: ctx.browsingSettings.hideAI,
-                    title: 'Hide files with ai tag',
+                    title: 'Hide files with the "ai" tag',
                 }) %>
             </li>
 

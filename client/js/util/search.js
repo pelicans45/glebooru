@@ -11,7 +11,8 @@ function focusInputNode(inputNode) {
 }
 
 function searchInputNodeFocusHelper(inputNode) {
-    keyboard.bind(["q", "/"], () => {
+    keyboard.bind(["q", "/"], (e) => {
+        e.preventDefault();
         focusInputNode(inputNode);
         return false;
     });

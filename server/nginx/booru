@@ -11,27 +11,12 @@ server {
     client_body_timeout 30s;
 
     location / {
-        set $proxy_target http://127.0.0.1:8080;
-
-        if ($http_user_agent ~* (googlebot|bingbot)) {
-            set $proxy_target http://127.0.0.1:3000;
-            set $proxy_path_target /render/http://$http_host$request_uri;
-        }
-
-        proxy_pass $proxy_target$proxy_path_target;
+        proxy_pass http://127.0.0.1:8080;
         include /opt/booru/server/nginx/etc/include/proxy;
     }
 
     location ~ ^/[0-9]+ {
-        set $proxy_target http://127.0.0.1:8080;
-        set $proxy_path_target $embed_prefix$request_uri;
-
-        if ($http_user_agent ~* (googlebot|bingbot)) {
-            set $proxy_target http://127.0.0.1:3000;
-            set $proxy_path_target /render/http://$http_host$request_uri;
-        }
-
-        proxy_pass $proxy_target$proxy_path_target;
+        proxy_pass http://127.0.0.1:8080$embed_prefix$request_uri;
         include /opt/booru/server/nginx/etc/include/proxy;
     }
 
