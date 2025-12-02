@@ -80,21 +80,43 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
     # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("q", default="").strip()
+    excluding_param = ctx.get_param_as_string("excluding", default="").strip()
+    excluding_id = None
+    if excluding_param:
+        try:
+            excluding_id = int(excluding_param)
+        except (TypeError, ValueError):
+            excluding_id = None
     if not query_text:
         return {"url": ""}
 
     if query_text.isdigit():
         post = posts.get_post_by_id(int(query_text))
-        return {"url": posts.get_post_content_url(post)}
+        return {
+            "url": posts.get_post_content_url(post),
+            "id": post.post_id,
+        }
 
     types = "image,animation"
-    if "video" in query_text:
+
+    words = query_text.split()
+    if "video" in words or "vid" in words:
         types += ",video"
     query_text = f"sort:random type:{types} {query_text}"
-    count, _posts = _search_executor.execute(query_text, 0, 1)
+    limit = 2 if excluding_id is not None else 1
+    count, _posts = _search_executor.execute(query_text, 0, limit)
     if count == 0:
         return {"url": ""}
-    return {"url": posts.get_post_content_url(_posts[0])}
+    selected_post = _posts[0]
+    if excluding_id is not None and len(_posts) > 1:
+        for candidate in _posts:
+            if candidate.post_id != excluding_id:
+                selected_post = candidate
+                break
+    return {
+        "url": posts.get_post_content_url(selected_post),
+        "id": selected_post.post_id,
+    }
 
 from . import tag_api
 
