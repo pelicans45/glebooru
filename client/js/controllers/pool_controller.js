@@ -28,7 +28,8 @@ class PoolController {
             (responses) => {
                 const [poolCategoriesResponse, pool] = responses;
 
-                topNavigation.setTitle("Pool #" + pool.names[0]);
+                // Set canonical to base pool URL (without section suffix like /edit, /merge)
+                topNavigation.setTitle("Pool #" + pool.names[0], "/pool/" + ctx.parameters.id);
 
                 this._name = ctx.parameters.name;
                 pool.addEventListener("change", (e) =>

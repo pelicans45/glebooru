@@ -27,7 +27,8 @@ class TagController {
             (responses) => {
                 const [tagCategoriesResponse, tag] = responses;
 
-                topNavigation.setTitle("Tag #" + tag.names[0]);
+                // Set canonical to base tag URL (without section suffix like /edit, /merge)
+                topNavigation.setTitle("Tag #" + tag.names[0], "/tag/" + encodeURIComponent(tag.names[0]));
 
                 this._name = ctx.parameters.name;
                 tag.addEventListener("change", (e) =>

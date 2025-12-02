@@ -1,6 +1,7 @@
 "use strict";
 
 const views = require("../util/views.js");
+const seo = require("../util/seo.js");
 
 const template = views.getTemplate("not-found");
 
@@ -10,6 +11,9 @@ class NotFoundView {
 			location.href = "/discord/";
 			return;
 		}
+
+        // Set noindex to prevent Google from indexing 404 pages (soft 404 fix)
+        seo.setNoIndex();
 
         this._hostNode = document.getElementById("content-holder");
 

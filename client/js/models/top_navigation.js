@@ -2,6 +2,7 @@
 
 const events = require("../events.js");
 const lens = require("../lens.js");
+const seo = require("../util/seo.js");
 
 class TopNavigationItem {
     constructor(accessKey, title, text, url, direction, available, imageUrl) {
@@ -56,9 +57,17 @@ class TopNavigation extends events.EventTarget {
         );
     }
 
-    setTitle(title) {
+    setTitle(title, canonicalPath) {
         document.title = lens.name + (title ? " – " + title : "");
         document.oldTitle = null;
+        // Clear noindex (in case we navigated away from a 404 page)
+        seo.clearNoIndex();
+        // Set canonical URL to help with duplicate content issues
+        if (canonicalPath !== undefined) {
+            seo.setCanonical(canonicalPath);
+        } else {
+            seo.setCanonicalFromPath();
+        }
     }
 
     showAll() {

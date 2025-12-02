@@ -15,7 +15,8 @@ class UserController {
     constructor(ctx, section) {
         const userName = ctx.parameters.name;
         topNavigation.activate("users");
-        topNavigation.setTitle("User " + userName);
+        // Set canonical to base user URL (without section suffix like /edit)
+        topNavigation.setTitle("User " + userName, "/user/" + encodeURIComponent(userName));
 
         if (
             !api.hasPrivilege("users:view") &&

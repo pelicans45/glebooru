@@ -6,7 +6,8 @@ const EmptyView = require("../views/empty_view.js");
 
 class BasePostController {
     constructor(ctx) {
-        topNavigation.setTitle(`#${ctx.parameters.id}`);
+        // Set canonical to clean post URL (without search/pagination params)
+        topNavigation.setTitle(`#${ctx.parameters.id}`, `/${ctx.parameters.id}`);
         topNavigation.activate("posts");
 
 		/*
