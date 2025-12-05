@@ -41,8 +41,8 @@
                 <%= ctx.makeTextInput({
                     text: 'Relations',
                     name: 'relations',
-                    placeholder: 'space-separated post IDs',
-                    pattern: '^[0-9 ]*$',
+                    placeholder: 'space- or comma-separated post IDs',
+                    pattern: '^[0-9 ,]*$',
                     value: ctx.post.relations.map(rel => rel.id).join(' '),
                 }) %>
             </section>
@@ -106,7 +106,8 @@
             </section>
         <% } %>
 
-        <% if (ctx.canEditPostThumbnail) { %>
+        <% // Thumbnail editing disabled %>
+        <% if (false && ctx.canEditPostThumbnail) { %>
             <section class='post-thumbnail'>
                 <label>Thumbnail</label>
                 <div class='dropper-container'></div>

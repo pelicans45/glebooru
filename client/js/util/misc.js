@@ -118,7 +118,7 @@ function formatInlineMarkdown(text) {
 }
 
 function splitByWhitespace(str) {
-    return str.split(/\s+/).filter((s) => s);
+    return str.split(/[\s,]+/).filter((s) => s);
 }
 
 function unindent(callSite, ...args) {

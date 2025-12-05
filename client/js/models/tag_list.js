@@ -131,7 +131,8 @@ class TagList extends AbstractList {
     }
 
     static refreshRelevant() {
-        //console.log("refreshing relevant tags");
+        allRelevantTags = null;
+        topRelevantMatches = null;
         return this.getTopRelevantMatches(true);
     }
 

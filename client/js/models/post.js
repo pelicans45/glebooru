@@ -228,10 +228,10 @@ class Post extends events.EventTarget {
         return returnedPromise;
     }
 
-    static get(id, options) {
-		options.noProgress = true;
+    static get(id, options = {}) {
+        const requestOptions = Object.assign({ noProgress: true }, options);
         return api
-            .get(uri.formatApiLink("post", id), options)
+            .get(uri.formatApiLink("post", id), requestOptions)
             .then((response) => {
                 return Promise.resolve(Post.fromResponse(response));
             });

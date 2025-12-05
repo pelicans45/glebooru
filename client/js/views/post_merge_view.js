@@ -18,7 +18,6 @@ class PostMergeView extends events.EventTarget {
         this._leftPost = ctx.post;
         this._rightPost = null;
         views.replaceContent(this._hostNode, template(this._ctx));
-        views.decorateValidator(this._formNode);
 
         this._refreshLeftSide();
         this._refreshRightSide();
@@ -85,6 +84,10 @@ class PostMergeView extends events.EventTarget {
 
     _evtSubmit(e) {
         e.preventDefault();
+        if (!this._rightPost) {
+            this.showError("Select a post to merge with first.");
+            return;
+        }
         const checkedTargetPost = this._formNode.querySelector(
             ".target-post :checked"
         ).value;

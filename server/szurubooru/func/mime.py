@@ -18,9 +18,6 @@ def get_mime_type(content: bytes) -> str:
     if content[0:3] in (b"CWS", b"FWS", b"ZWS"):
         return "application/x-shockwave-flash"
 
-    #if content[8:12] == b"WEBP":
-    #    return "image/webp"
-
     if content[0:2] == b"BM":
         return "image/bmp"
 
@@ -55,6 +52,15 @@ def get_mime_type(content: bytes) -> str:
         return "audio/wav"
 
     return "application/octet-stream"
+
+
+def is_webp_content(content: bytes) -> bool:
+    return (
+        isinstance(content, (bytes, bytearray))
+        and len(content) >= 12
+        and content[0:4] == b"RIFF"
+        and content[8:12] == b"WEBP"
+    )
 
 
 def get_extension(mime_type: str) -> Optional[str]:

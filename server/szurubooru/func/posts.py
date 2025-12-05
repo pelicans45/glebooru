@@ -1,4 +1,5 @@
 import hmac
+import io
 import logging
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -230,9 +231,16 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
+        has_custom_thumbnail = files.has(
+            get_post_thumbnail_backup_path(self.post)
+        )
         if (
-            self.post.type == "image" or self.post.type == "animation"
-        ) and self.post.file_size < config.config["thumbnails"]["min_file_size"]:
+            not has_custom_thumbnail
+            and (self.post.type == "image" or self.post.type == "animation")
+            and self.post.file_size is not None
+            and self.post.file_size
+            < config.config["thumbnails"]["min_file_size"]
+        ):
             return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
 
@@ -671,12 +679,55 @@ def update_all_md5_checksums() -> None:
             logging.exception(ex)
 
 
+def _convert_webp_to_supported(content: bytes) -> bytes:
+    try:
+        from PIL import Image
+    except ImportError:
+        raise InvalidPostContentError("Unhandled file type: 'image/webp'")
+
+    try:
+        with Image.open(io.BytesIO(content)) as image:
+            if getattr(image, "is_animated", False) and getattr(
+                image, "n_frames", 1
+            ) > 1:
+                frames = []
+                durations = []
+                for frame in range(image.n_frames):
+                    image.seek(frame)
+                    frame_rgba = image.convert("RGBA")
+                    frames.append(frame_rgba)
+                    durations.append(image.info.get("duration", 0))
+                buffer = io.BytesIO()
+                frames[0].save(
+                    buffer,
+                    format="GIF",
+                    save_all=True,
+                    append_images=frames[1:],
+                    duration=durations,
+                    loop=image.info.get("loop", 0),
+                    disposal=image.info.get("disposal", 2),
+                )
+                return buffer.getvalue()
+            if image.mode not in ("RGB", "RGBA"):
+                image = image.convert("RGBA")
+            buffer = io.BytesIO()
+            image.save(buffer, format="PNG")
+            return buffer.getvalue()
+    except Exception as ex:
+        logging.exception(ex)
+        raise InvalidPostContentError("Unable to convert WebP")
+
+
 def update_post_content(
     post: model.Post, content: Optional[bytes], content_changed=False
 ) -> None:
     # assert post
     if not content:
         raise InvalidPostContentError("Post content missing")
+
+    if mime.is_webp_content(content):
+        content = _convert_webp_to_supported(content)
+        content_changed = True
 
     update_signature = False
     post.mime_type = mime.get_mime_type(content)
@@ -757,16 +808,22 @@ def update_post_thumbnail(post: model.Post, content: Optional[bytes] = None) -> 
 def generate_post_thumbnail(post: model.Post) -> None:
     # assert post
 
-    if (
-        post.type == "image" or post.type == "animation"
-    ) and post.file_size < config.config["thumbnails"]["min_file_size"]:
-        return
-
-    if post.type == "audio" or post.mime_type == "image/gif":
-        return
-
     backup_path = get_post_thumbnail_backup_path(post)
-    if files.has(backup_path):
+    has_custom_thumbnail = files.has(backup_path)
+
+    if not has_custom_thumbnail:
+        if (
+            (post.type == "image" or post.type == "animation")
+            and post.file_size is not None
+            and post.file_size
+            < config.config["thumbnails"]["min_file_size"]
+        ):
+            return
+
+        if post.type == "audio" or post.mime_type == "image/gif":
+            return
+
+    if has_custom_thumbnail:
         content = files.get(backup_path)
     else:
         content = files.get(get_post_content_path(post))
@@ -795,8 +852,8 @@ def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
         new_post_ids = [int(id) for id in new_post_ids]
     except ValueError:
         raise InvalidPostRelationError("A relation must be a numeric post ID")
-    old_posts = get_post_relations(post.post_id)
-    old_post_ids = [int(p.child_id) for p in old_posts]
+    old_posts = list(post.relations)
+    old_post_ids = [int(p.post_id) for p in old_posts]
     if new_post_ids:
         new_posts = (
             db.session.query(model.Post)
@@ -810,14 +867,18 @@ def update_post_relations(post: model.Post, new_post_ids: List[int]) -> None:
     if post.post_id in new_post_ids:
         raise InvalidPostRelationError("Post cannot relate to itself")
 
-    relations_to_del = [p for p in old_posts if p.child_id not in new_post_ids]
+    relations_to_del = [p for p in old_posts if p.post_id not in new_post_ids]
     relations_to_add = [p for p in new_posts if p.post_id not in old_post_ids]
     for relation in relations_to_del:
-        post.relations.remove(relation)
-        relation.relations.remove(post)
+        if post in relation.relations:
+            relation.relations.remove(post)
+        if relation in post.relations:
+            post.relations.remove(relation)
     for relation in relations_to_add:
-        post.relations.append(relation)
-        relation.relations.append(post)
+        if relation not in post.relations:
+            post.relations.append(relation)
+        if post not in relation.relations:
+            relation.relations.append(post)
 
 
 def update_post_notes(post: model.Post, notes: Any) -> None:
@@ -960,7 +1021,9 @@ def merge_posts(
             )
             .values(parent_id=target_post_id)
         )
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt.execution_options(synchronize_session=False)
+        )
 
         update_stmt = (
             sa.sql.expression.update(alias1)
@@ -973,7 +1036,9 @@ def merge_posts(
             )
             .values(child_id=target_post_id)
         )
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt.execution_options(synchronize_session=False)
+        )
 
     merge_tags(source_post.post_id, target_post.post_id)
     merge_comments(source_post.post_id, target_post.post_id)

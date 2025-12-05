@@ -163,7 +163,10 @@ class Tag extends events.EventTarget {
                         },
                     })
                 );
-                return Promise.resolve();
+				return this.TagList.refreshRelevant().then(() => {
+					this.PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
+					return Promise.resolve();
+				});
             });
     }
 
@@ -180,7 +183,10 @@ class Tag extends events.EventTarget {
                         },
                     })
                 );
-                return Promise.resolve();
+				return this.TagList.refreshRelevant().then(() => {
+					this.PostListTagAutoCompleteControl.setReloadDefaultTagMatches();
+					return Promise.resolve();
+				});
             });
     }
 

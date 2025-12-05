@@ -75,8 +75,9 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     return _serialize_post(ctx, post)
 
 
+@rest.routes.get("/random-post/?")
 @rest.routes.get("/random-image/?")
-def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
+def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     query_text = ctx.get_param_as_string("q", default="").strip()
@@ -97,11 +98,7 @@ def get_random_image(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Re
             "id": post.post_id,
         }
 
-    types = "image,animation"
-
-    words = query_text.split()
-    if "video" in words or "vid" in words:
-        types += ",video"
+    types = "image,animation,video"
     query_text = f"sort:random type:{types} {query_text}"
     limit = 2 if excluding_id is not None else 1
     count, _posts = _search_executor.execute(query_text, 0, limit)
@@ -189,15 +186,16 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     versions.bump_version(post)
     if ctx.has_file("content"):
         auth.verify_privilege(ctx.user, "posts:edit:content")
+        content = ctx.get_file(
+            "content",
+            use_video_downloader=auth.has_privilege(
+                ctx.user, "uploads:use_downloader"
+            ),
+        )
         posts.update_post_content(
             post,
-            ctx.get_file(
-                "content",
-                use_video_downloader=auth.has_privilege(
-                    ctx.user, "uploads:use_downloader"
-                ),
+            content,
             content_changed=True,
-            ),
         )
     new_tags = []
     if ctx.has_param("tags"):
@@ -225,9 +223,10 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if ctx.has_param("flags"):
         auth.verify_privilege(ctx.user, "posts:edit:flags")
         posts.update_post_flags(post, ctx.get_param_as_string_list("flags"))
-    if ctx.has_file("thumbnail"):
-        auth.verify_privilege(ctx.user, "posts:edit:thumbnail")
-        posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
+    # Thumbnail editing disabled
+    # if ctx.has_file("thumbnail"):
+    #     auth.verify_privilege(ctx.user, "posts:edit:thumbnail")
+    #     posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
     if ctx.has_param("metrics"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
         metrics.update_or_create_post_metrics(post, ctx.get_param_as_list("metrics"))

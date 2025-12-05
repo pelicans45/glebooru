@@ -313,7 +313,9 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
             .where(alias2.tag_id == target_tag_id)
         )
         update_stmt = update_stmt.values(tag_id=target_tag_id)
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt.execution_options(synchronize_session=False)
+        )
 
     def merge_relations(
         table: model.Base, source_tag_id: int, target_tag_id: int
@@ -331,7 +333,9 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
             )
             .values(parent_id=target_tag_id)
         )
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt.execution_options(synchronize_session=False)
+        )
 
         update_stmt = (
             sa.sql.expression.update(alias1)
@@ -344,7 +348,9 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
             )
             .values(child_id=target_tag_id)
         )
-        db.session.execute(update_stmt)
+        db.session.execute(
+            update_stmt.execution_options(synchronize_session=False)
+        )
 
     def merge_suggestions(source_tag_id: int, target_tag_id: int) -> None:
         merge_relations(model.TagSuggestion, source_tag_id, target_tag_id)

@@ -23,6 +23,7 @@
         --></ul>
         </section>
 
+        <% if (false) { %>
         <section>
         Suggestions:<br/>
         <ul><!--
@@ -31,6 +32,7 @@
             --><% } %><!--
         --></ul>
         </section>
+        <% } %>
     </section>
 
     <section class='description'>
