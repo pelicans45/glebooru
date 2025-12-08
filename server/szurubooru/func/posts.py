@@ -114,9 +114,15 @@ def get_post_content_url(post: model.Post) -> str:
 
 
 
+def get_post_thumbnail_extension(post: model.Post) -> str:
+    if post.mime_type == "image/gif":
+        return "gif"
+    return "jpg"
+
+
 def get_post_thumbnail_url(post: model.Post) -> str:
     # assert post
-    return f"/thumbnails/{post.post_id}.jpg"
+    return f"/thumbnails/{post.post_id}.{get_post_thumbnail_extension(post)}"
 
 
 def get_post_content_path(post: model.Post) -> str:
@@ -127,7 +133,7 @@ def get_post_content_path(post: model.Post) -> str:
 
 def get_post_thumbnail_path(post: model.Post) -> str:
     # assert post
-    return f"generated-thumbnails/{post.post_id}.jpg"
+    return f"generated-thumbnails/{post.post_id}.{get_post_thumbnail_extension(post)}"
 
 
 def get_post_thumbnail_backup_path(post: model.Post) -> str:
@@ -820,7 +826,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
         ):
             return
 
-        if post.type == "audio" or post.mime_type == "image/gif":
+        if post.type == "audio":
             return
 
     if has_custom_thumbnail:
@@ -830,11 +836,14 @@ def generate_post_thumbnail(post: model.Post) -> None:
     try:
         # assert content
         image = images.Image(content)
-        image.resize_fill(
-            int(config.config["thumbnails"]["post_width"]),
-            int(config.config["thumbnails"]["post_height"]),
-        )
-        files.save(get_post_thumbnail_path(post), image.to_jpeg())
+        thumb_width = int(config.config["thumbnails"]["post_width"])
+        thumb_height = int(config.config["thumbnails"]["post_height"])
+        if get_post_thumbnail_extension(post) == "gif":
+            thumbnail_content = image.to_gif_thumbnail(thumb_width, thumb_height)
+        else:
+            image.resize_fill(thumb_width, thumb_height)
+            thumbnail_content = image.to_jpeg()
+        files.save(get_post_thumbnail_path(post), thumbnail_content)
     except errors.ProcessingError:
         files.save(get_post_thumbnail_path(post), EMPTY_PIXEL)
 

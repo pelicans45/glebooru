@@ -74,6 +74,39 @@ class Image:
         self.content = content
         self._reload_info()
 
+    def to_gif_thumbnail(
+        self, width: int, height: int, max_colors: int = 128
+    ) -> bytes:
+        width_greater = self.width > self.height
+        width, height = (-1, height) if width_greater else (width, -1)
+        scale_filter = "scale={width}:{height}".format(
+            width=width, height=height
+        )
+        with util.create_temp_file_path(suffix=".png") as palette_path:
+            self._execute(
+                [
+                    "-i",
+                    "{path}",
+                    "-vf",
+                    f"{scale_filter},palettegen=max_colors={max_colors}",
+                    "-y",
+                    palette_path,
+                ]
+            )
+            return self._execute(
+                [
+                    "-i",
+                    "{path}",
+                    "-i",
+                    palette_path,
+                    "-lavfi",
+                    f"{scale_filter},paletteuse=dither=bayer",
+                    "-f",
+                    "gif",
+                    "-",
+                ]
+            )
+
     def to_png(self) -> bytes:
         return self._execute(
             [

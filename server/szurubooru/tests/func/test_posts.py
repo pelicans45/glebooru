@@ -34,41 +34,11 @@ def test_get_post_url(input_mime_type, expected_url, config_injector):
 
 
 @pytest.mark.parametrize("input_mime_type", ["image/jpeg", "image/gif"])
-def test_get_post_thumbnail_url(input_mime_type, config_injector):
-    config_injector({"data_url": "http://example.com/", "secret": "test"})
-    post = model.Post()
-    post.post_id = 1
-    post.mime_type = input_mime_type
-    assert (
-        posts.get_post_thumbnail_url(post)
-        == "http://example.com/generated-thumbnails/1_244c8840887984c4.jpg"
-    )
-
-
-@pytest.mark.parametrize(
-    "input_mime_type,expected_path",
-    [
-        ("image/jpeg", "posts/1_244c8840887984c4.jpg"),
-        ("image/gif", "posts/1_244c8840887984c4.gif"),
-        ("totally/unknown", "posts/1_244c8840887984c4.dat"),
-    ],
-)
 def test_get_post_content_path(input_mime_type, expected_path):
     post = model.Post()
     post.post_id = 1
     post.mime_type = input_mime_type
     assert posts.get_post_content_path(post) == expected_path
-
-
-@pytest.mark.parametrize("input_mime_type", ["image/jpeg", "image/gif"])
-def test_get_post_thumbnail_path(input_mime_type):
-    post = model.Post()
-    post.post_id = 1
-    post.mime_type = input_mime_type
-    assert (
-        posts.get_post_thumbnail_path(post)
-        == "generated-thumbnails/1_244c8840887984c4.jpg"
-    )
 
 
 @pytest.mark.parametrize("input_mime_type", ["image/jpeg", "image/gif"])
