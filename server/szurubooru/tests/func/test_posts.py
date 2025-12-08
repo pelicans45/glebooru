@@ -327,7 +327,9 @@ def test_create_post(user_factory, fake_datetime):
         post, _new_tags = posts.create_post("content", ["tag"], auth_user)
         assert post.creation_time == datetime(1997, 1, 1)
         assert post.last_edit_time is None
-        posts.update_post_tags.assert_called_once_with(post, ["tag"])
+        posts.update_post_tags.assert_called_once_with(
+            post, ["tag"], category_overrides=None
+        )
         posts.update_post_content.assert_called_once_with(post, "content")
 
 
@@ -778,9 +780,11 @@ def test_update_post_content_convert_heif_to_png_when_processing(
 def test_update_post_tags(tag_factory):
     post = model.Post()
     with patch("szurubooru.func.tags.get_or_create_tags_by_names"):
-        tags.get_or_create_tags_by_names.side_effect = lambda tag_names: (
-            [tag_factory(names=[name]) for name in tag_names],
-            [],
+        tags.get_or_create_tags_by_names.side_effect = (
+            lambda tag_names, category_overrides=None: (
+                [tag_factory(names=[name]) for name in tag_names],
+                [],
+            )
         )
         posts.update_post_tags(post, ["tag1", "tag2"])
     assert len(post.tags) == 2

@@ -313,6 +313,14 @@ class PostUploadController {
         for (const tagName of uploadable.tags) {
             const tag = new Tag();
             tag.names = [tagName];
+            const matchingNewTag = (uploadable.newTags || []).find(
+                (newTag) =>
+                    newTag.name &&
+                    newTag.name.toLowerCase() === tagName.toLowerCase()
+            );
+            if (matchingNewTag && matchingNewTag.category) {
+                tag.category = matchingNewTag.category;
+            }
             post.tags.add(tag);
         }
 

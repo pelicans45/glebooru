@@ -41,7 +41,7 @@ function parseTagAndCategory(text) {
 }
 
 function resolveTagAndCategory(text) {
-    let tagData = parseTagAndCategory(text);
+    const tagData = parseTagAndCategory(text);
     return _createTagByCategoryAndName(tagData.category, tagData.name);
 }
 
@@ -60,7 +60,7 @@ function _createTagByCategoryAndName(category, name) {
             const tag = new Tag();
             tag.names = [name];
             tag.category = category;
-            return tag.save().then(() => Promise.resolve(tag));
+            return Promise.resolve(tag);
         }
     );
 }

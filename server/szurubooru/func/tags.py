@@ -233,12 +233,17 @@ def get_tags_by_names(names: List[str]) -> List[model.Tag]:
 
 
 def get_or_create_tags_by_names(
-    names: List[str],
+    names: List[str], category_overrides: Optional[Dict[str, str]] = None
 ) -> Tuple[List[model.Tag], List[model.Tag]]:
     names = util.icase_unique(names)
     existing_tags = get_tags_by_names(names)
     new_tags = []
     tag_category_name = tag_categories.get_default_category_name()
+    category_overrides = {
+        (name or "").lower(): category
+        for name, category in (category_overrides or {}).items()
+        if name
+    }
     for name in names:
         found = False
         for existing_tag in existing_tags:
@@ -248,9 +253,12 @@ def get_or_create_tags_by_names(
                 found = True
                 break
         if not found:
+            category_name = category_overrides.get(
+                name.lower(), tag_category_name
+            )
             new_tag = create_tag(
                 names=[name],
-                category_name=tag_category_name,
+                category_name=category_name,
                 suggestions=[],
                 implications=[],
             )

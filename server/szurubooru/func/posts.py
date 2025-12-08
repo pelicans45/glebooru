@@ -487,13 +487,18 @@ def add_extra_tags(host, tag_names):
 
 
 def create_post(
-    host: str, content: bytes, tag_names: List[str], user: Optional[model.User]
+    content: bytes,
+    tag_names: List[str],
+    user: Optional[model.User],
+    host: str = "",
+    category_overrides: Optional[Dict[str, str]] = None,
 ) -> Tuple[model.Post, List[model.Tag]]:
     post = model.Post()
     post.safety = model.Post.SAFETY_SAFE
     post.user = user
     post.creation_time = datetime.utcnow()
     post.flags = []
+    tag_names = tag_names or []
 
     post.type = ""
     post.checksum = ""
@@ -509,7 +514,9 @@ def create_post(
         tag_names.append("audio")
 
     add_extra_tags(host, tag_names)
-    new_tags = update_post_tags(post, tag_names)
+    new_tags = update_post_tags(
+        post, tag_names, category_overrides=category_overrides
+    )
 
     db.session.add(post)
     return post, new_tags
@@ -585,7 +592,10 @@ def generate_alternate_formats(
 
         if config.config["convert"]["gif"]["to_mp4"]:
             mp4_post, new_tags = create_post(
-                images.Image(content).to_mp4(), tag_names, post.user
+                host="",
+                content=images.Image(content).to_mp4(),
+                tag_names=tag_names,
+                user=post.user,
             )
             update_post_flags(mp4_post, ["loop"])
             update_post_safety(mp4_post, post.safety)
@@ -594,7 +604,10 @@ def generate_alternate_formats(
 
         if config.config["convert"]["gif"]["to_webm"]:
             webm_post, new_tags = create_post(
-                images.Image(content).to_webm(), tag_names, post.user
+                host="",
+                content=images.Image(content).to_webm(),
+                tag_names=tag_names,
+                user=post.user,
             )
             update_post_flags(webm_post, ["loop"])
             update_post_safety(webm_post, post.safety)
@@ -848,9 +861,15 @@ def generate_post_thumbnail(post: model.Post) -> None:
         files.save(get_post_thumbnail_path(post), EMPTY_PIXEL)
 
 
-def update_post_tags(post: model.Post, tag_names: List[str]) -> List[model.Tag]:
+def update_post_tags(
+    post: model.Post,
+    tag_names: List[str],
+    category_overrides: Optional[Dict[str, str]] = None,
+) -> List[model.Tag]:
     # assert post
-    existing_tags, new_tags = tags.get_or_create_tags_by_names(tag_names)
+    existing_tags, new_tags = tags.get_or_create_tags_by_names(
+        tag_names, category_overrides
+    )
     post.tags = existing_tags + new_tags
     return new_tags
 

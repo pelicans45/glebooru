@@ -43,6 +43,7 @@ class Uploadable extends events.EventTarget {
         this.safety = "safe";
         this.flags = [];
         this.tags = [];
+        this.newTags = [];
         this.relations = [];
         this.anonymous = !api.isLoggedIn();
         this.forceAnonymous = this.anonymous;
@@ -357,6 +358,12 @@ class PostUploadView extends events.EventTarget {
         uploadable.tags = [];
         if (this._tagControl) {
             uploadable.tags = this._tagControl.tags.map((tag) => tag.names[0]);
+            uploadable.newTags = this._tagControl.tags
+                .filter((tag) => !tag._origName)
+                .map((tag) => ({
+                    name: tag.names[0],
+                    category: tag.category || "default",
+                }));
         }
 
         const realTagInput = this._formNode.querySelector(".tag-input input");

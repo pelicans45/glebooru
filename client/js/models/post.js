@@ -290,6 +290,13 @@ class Post extends events.EventTarget {
         }
         if (misc.arraysDiffer(this._tags, this._orig._tags)) {
             detail.tags = this._tags.map((tag) => tag.names[0]);
+            const newTags = this._tags.filter((tag) => !tag._origName);
+            if (newTags.length) {
+                detail.newTags = newTags.map((tag) => ({
+                    name: tag.names[0],
+                    category: tag.category || "default",
+                }));
+            }
         }
         if (misc.arraysDiffer(this._relations, this._orig._relations)) {
             detail.relations = this._relations;

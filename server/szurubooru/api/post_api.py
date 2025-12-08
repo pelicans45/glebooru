@@ -14,6 +14,7 @@ from szurubooru.func import (
     metrics,
     mime,
     posts,
+    tag_categories,
     scores,
     serialization,
     similar,
@@ -43,6 +44,34 @@ def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Respo
     return posts.serialize_post(
         post, ctx.user, options=serialization.get_serialization_options(ctx)
     )
+
+
+def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
+    if not ctx.has_param("newTags"):
+        return {}
+    raw_new_tags = ctx.get_param("newTags")
+    if not isinstance(raw_new_tags, list):
+        raise errors.InvalidParameterError("Parameter 'newTags' must be a list")
+    normalized = {}
+    for entry in raw_new_tags:
+        if not isinstance(entry, dict):
+            raise errors.InvalidParameterError(
+                "Parameter 'newTags' must contain objects"
+            )
+        name = entry.get("name")
+        category = entry.get("category", None)
+        if not isinstance(name, str) or not name:
+            raise errors.InvalidParameterError(
+                "Each 'newTags' entry must include a tag name"
+            )
+        if category is not None and not isinstance(category, str):
+            raise errors.InvalidParameterError(
+                "Each 'newTags' entry must include a string category"
+            )
+        normalized[name.lower()] = (
+            category or tag_categories.get_default_category_name()
+        )
+    return normalized
 
 
 @rest.routes.get("/posts/?")
@@ -138,10 +167,15 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
     flags = ctx.get_param_as_string_list(
         "flags", default=posts.get_default_flags(content)
     )
+    new_tag_categories = _get_new_tag_categories(ctx)
 
     host = ctx.get_header("X-Original-Host")
     post, new_tags = posts.create_post(
-        host, content, tag_names, None if anonymous else ctx.user
+        content,
+        tag_names,
+        None if anonymous else ctx.user,
+        host=host,
+        category_overrides=new_tag_categories,
     )
     if len(new_tags):
         auth.verify_privilege(ctx.user, "tags:create")
@@ -184,6 +218,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     previous_post_tag_count = len(post.tags)
     versions.verify_version(post, ctx)
     versions.bump_version(post)
+    new_tag_categories = _get_new_tag_categories(ctx)
     if ctx.has_file("content"):
         auth.verify_privilege(ctx.user, "posts:edit:content")
         content = ctx.get_file(
@@ -200,7 +235,11 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     new_tags = []
     if ctx.has_param("tags"):
         auth.verify_privilege(ctx.user, "posts:edit:tags")
-        new_tags = posts.update_post_tags(post, ctx.get_param_as_string_list("tags"))
+        new_tags = posts.update_post_tags(
+            post,
+            ctx.get_param_as_string_list("tags"),
+            category_overrides=new_tag_categories,
+        )
         if len(new_tags):
             auth.verify_privilege(ctx.user, "tags:create")
             db.session.flush()
