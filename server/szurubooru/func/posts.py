@@ -1121,6 +1121,7 @@ def search_by_signature(
     distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
     query: str = None,
 ) -> List[Tuple[float, model.Post]]:
+    return []
     query_words = image_hash.generate_words(signature)
     """
     The unnest function is used here to expand one row containing the 'words'
