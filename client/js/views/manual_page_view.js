@@ -4,6 +4,7 @@ const settings = require("../models/settings.js");
 const router = require("../router.js");
 const keyboard = require("../util/keyboard.js");
 const views = require("../util/views.js");
+const seo = require("../util/seo.js");
 
 const holderTemplate = views.getTemplate("manual-pager");
 const navTemplate = views.getTemplate("manual-pager-nav");
@@ -103,6 +104,8 @@ class ManualPageView {
 
                 if (!response.results.length) {
                     this.showInfo("No results");
+                    // Set noindex for empty search results (soft 404)
+                    seo.setNoIndex();
                 }
 
                 response.results.addEventListener("remove", (e) => {

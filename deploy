@@ -1,0 +1,76 @@
+#!/bin/bash
+set -e
+
+# Deployment script for glebooru
+# Pushes to booru:/opt/booru and rebuilds docker containers
+
+REMOTE_HOST="booru"
+REMOTE_PATH="/opt/booru"
+GIT_REMOTE="server"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo_step() {
+    echo -e "${GREEN}==>${NC} $1"
+}
+
+echo_warn() {
+    echo -e "${YELLOW}Warning:${NC} $1"
+}
+
+echo_error() {
+    echo -e "${RED}Error:${NC} $1"
+}
+
+# Check for uncommitted local changes
+if ! git diff-index --quiet HEAD --; then
+    echo_error "You have uncommitted local changes. Please commit or stash them first."
+    git status --short
+    exit 1
+fi
+
+# Show what will be deployed
+echo_step "Commits to deploy:"
+git log --oneline ${GIT_REMOTE}/master..HEAD 2>/dev/null || echo "  (unable to compare - remote may not have been fetched)"
+echo ""
+
+# Confirm deployment
+if [ "$1" != "-y" ] && [ "$1" != "--yes" ]; then
+    read -p "Deploy to production? [y/N] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 0
+    fi
+fi
+
+# Check server status and stash any changes
+echo_step "Checking server status and stashing any local changes..."
+ssh "${REMOTE_HOST}" "cd ${REMOTE_PATH} && git status --short"
+
+STASH_OUTPUT=$(ssh "${REMOTE_HOST}" "cd ${REMOTE_PATH} && git stash push -m 'Auto-stash before deploy $(date +%Y%m%d-%H%M%S)'" 2>&1)
+echo "$STASH_OUTPUT"
+
+if [[ "$STASH_OUTPUT" != *"No local changes to save"* ]]; then
+    echo_warn "Server changes have been stashed. You may want to restore them later with 'git stash pop' on the server."
+fi
+
+# Push to server
+echo_step "Pushing to ${GIT_REMOTE}..."
+git push "${GIT_REMOTE}" master
+
+# Rebuild containers on server
+echo_step "Rebuilding docker containers on server..."
+ssh "${REMOTE_HOST}" "cd ${REMOTE_PATH} && docker compose up -d --build --force-recreate server client"
+
+echo_step "Deployment complete!"
+echo ""
+echo "Useful commands on server:"
+echo "  ssh ${REMOTE_HOST}"
+echo "  blogs      - tail server logs"
+echo "  dbs        - shell into server container"
+echo "  dbsql      - connect to database"
+echo "  git stash pop  - restore stashed changes (if any)"

@@ -3,6 +3,7 @@
 const settings = require("../models/settings.js");
 const router = require("../router.js");
 const views = require("../util/views.js");
+const seo = require("../util/seo.js");
 
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
@@ -329,6 +330,8 @@ class EndlessPageView {
             }
         } else if (!response.results.length) {
             this.showInfo("No results");
+            // Set noindex for empty search results (soft 404)
+            seo.setNoIndex();
         }
 
         this._initialPageLoad = false;
