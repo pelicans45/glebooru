@@ -1132,7 +1132,8 @@ def search_by_signature(
 
     dbquery = """
     SELECT s.post_id, s.signature, count(a.query) AS score
-    FROM post_signature AS s, unnest(s.words, :q) AS a(word, query)
+    FROM post_signature AS s
+    CROSS JOIN LATERAL unnest(s.words, :q) AS a(word, query)
     {join_clause}
     WHERE a.word = a.query {where_clause}
     GROUP BY s.post_id
