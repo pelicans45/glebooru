@@ -55,7 +55,16 @@ def _serialize_random_post(
     data = posts.serialize_post(
         post,
         ctx.user,
-        options=["id", "contentUrl", "thumbnailUrl", "mimeType", "type"],
+        options=[
+            "id",
+            "contentUrl",
+            "thumbnailUrl",
+            "mimeType",
+            "type",
+            "canvasWidth",
+            "canvasHeight",
+            "duration",
+        ],
     )
     if not data:
         return {"url": ""}

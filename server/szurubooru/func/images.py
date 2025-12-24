@@ -39,6 +39,18 @@ class Image:
     def frames(self) -> int:
         return self.info["streams"][0]["nb_read_frames"]
 
+    @property
+    def duration(self) -> float:
+        if "format" not in self.info:
+            return 0.0
+        duration = self.info["format"].get("duration")
+        if duration is None:
+            return 0.0
+        try:
+            return float(duration)
+        except (TypeError, ValueError):
+            return 0.0
+
     def resize_fill(self, width: int, height: int) -> None:
         width_greater = self.width > self.height
         width, height = (-1, height) if width_greater else (width, -1)

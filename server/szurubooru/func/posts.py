@@ -169,6 +169,7 @@ class PostSerializer(serialization.BaseSerializer):
             "fileSize": self.serialize_file_size,
             "canvasWidth": self.serialize_canvas_width,
             "canvasHeight": self.serialize_canvas_height,
+            "duration": self.serialize_duration,
             "contentUrl": self.serialize_content_url,
             "thumbnailUrl": self.serialize_thumbnail_url,
             "flags": self.serialize_flags,
@@ -232,6 +233,9 @@ class PostSerializer(serialization.BaseSerializer):
 
     def serialize_canvas_height(self) -> Any:
         return self.post.canvas_height
+
+    def serialize_duration(self) -> Any:
+        return self.post.duration
 
     def serialize_content_url(self) -> Any:
         return get_post_content_url(self.post)
@@ -799,6 +803,10 @@ def update_post_content(
         image = images.Image(content)
         post.canvas_width = image.width
         post.canvas_height = image.height
+        if post.type in (model.Post.TYPE_VIDEO, model.Post.TYPE_AUDIO):
+            post.duration = int(round(image.duration)) if image.duration > 0 else None
+        else:
+            post.duration = None
     except errors.ProcessingError as ex:
         logging.exception(ex)
         if not config.config["allow_broken_uploads"]:
@@ -806,6 +814,7 @@ def update_post_content(
         else:
             post.canvas_width = None
             post.canvas_height = None
+            post.duration = None
     if (post.canvas_width is not None and post.canvas_width <= 0) or (
         post.canvas_height is not None and post.canvas_height <= 0
     ):
