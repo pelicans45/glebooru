@@ -4,9 +4,19 @@ set -e
 # Deployment script for glebooru
 # Pushes to booru:/opt/booru and rebuilds docker containers
 
-REMOTE_HOST="booru"
-REMOTE_PATH="/opt/booru"
-GIT_REMOTE="server"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . "$ENV_FILE"
+    set +a
+fi
+
+REMOTE_HOST="${REMOTE_HOST:?Set REMOTE_HOST in .env}"
+REMOTE_PATH="${REMOTE_PATH:?Set REMOTE_PATH in .env}"
+GIT_REMOTE="${GIT_REMOTE:?Set GIT_REMOTE in .env}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
