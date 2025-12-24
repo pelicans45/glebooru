@@ -35,15 +35,21 @@ echo_error() {
     echo -e "${RED}Error:${NC} $1"
 }
 
-# Check for uncommitted local changes
+# Auto-commit any uncommitted local changes
 if ! git diff-index --quiet HEAD --; then
-    echo_error "You have uncommitted local changes. Please commit or stash them first."
+    echo_warn "Uncommitted changes detected. Auto-committing before deploy."
     git status --short
-    exit 1
+    git add -A
+    if ! git diff-index --cached --quiet HEAD --; then
+        git commit -m "Auto-commit before deploy $(date +%Y%m%d-%H%M%S)"
+    else
+        echo_warn "No staged changes to commit after git add -A."
+    fi
 fi
 
 # Show what will be deployed
 echo_step "Commits to deploy:"
+git fetch "${GIT_REMOTE}" 2>/dev/null || echo_warn "Unable to fetch ${GIT_REMOTE}"
 git log --oneline ${GIT_REMOTE}/master..HEAD 2>/dev/null || echo "  (unable to compare - remote may not have been fetched)"
 echo ""
 
