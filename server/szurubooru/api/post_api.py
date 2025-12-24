@@ -46,6 +46,24 @@ def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Respo
     )
 
 
+def _serialize_random_post(
+    ctx: rest.Context, post: Optional[model.Post]
+) -> rest.Response:
+    if not post:
+        return {"url": ""}
+
+    data = posts.serialize_post(
+        post,
+        ctx.user,
+        options=["id", "contentUrl", "thumbnailUrl", "mimeType", "type"],
+    )
+    if not data:
+        return {"url": ""}
+
+    data["url"] = data.get("contentUrl", "") or posts.get_post_content_url(post)
+    return data
+
+
 def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
     if not ctx.has_param("newTags"):
         return {}
@@ -122,10 +140,7 @@ def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Res
 
     if query_text.isdigit():
         post = posts.get_post_by_id(int(query_text))
-        return {
-            "url": posts.get_post_content_url(post),
-            "id": post.post_id,
-        }
+        return _serialize_random_post(ctx, post)
 
     types = "image,animation,video"
     query_text = f"sort:random type:{types} {query_text}"
@@ -139,10 +154,7 @@ def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Res
             if candidate.post_id != excluding_id:
                 selected_post = candidate
                 break
-    return {
-        "url": posts.get_post_content_url(selected_post),
-        "id": selected_post.post_id,
-    }
+    return _serialize_random_post(ctx, selected_post)
 
 from . import tag_api
 
