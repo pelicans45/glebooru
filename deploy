@@ -55,8 +55,7 @@ echo ""
 
 # Confirm deployment
 if [ "$1" != "-y" ] && [ "$1" != "--yes" ]; then
-    read -p "Deploy to production? [y/N] " -n 1 -r
-    echo
+    read -r -p "Deploy to production? [y/N] " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Aborted."
         exit 0
