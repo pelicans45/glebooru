@@ -304,7 +304,7 @@ const _onPopState = (router) => {
 const _onClick = (router) => {
     return (e) => {
         if (
-            _which(e) !== 1 ||
+            e.button !== 0 ||
             e.metaKey ||
             e.ctrlKey ||
             e.shiftKey ||
@@ -360,7 +360,7 @@ const _onClick = (router) => {
 const _onClickDisable = (router) => {
     return (e) => {
         if (
-            _which(e) !== 1 ||
+            e.button !== 0 ||
             e.metaKey ||
             e.ctrlKey ||
             e.shiftKey ||
@@ -400,11 +400,6 @@ const _onClickDisable = (router) => {
         }
     };
 };
-
-function _which(e) {
-    e = e || window.event;
-    return e.which === null ? e.button : e.which;
-}
 
 Router.prototype.Context = Context;
 Router.prototype.Route = Route;

@@ -3,6 +3,7 @@
 const api = require("../api.js");
 const vars = require("../vars.js");
 const tags = require("../tags.js");
+const misc = require("../util/misc.js");
 const uri = require("../util/uri.js");
 const lens = require("../lens.js");
 const AbstractList = require("./abstract_list.js");
@@ -94,21 +95,20 @@ class TagList extends AbstractList {
 
     static getRelevant(query, offset, limit) {
         return this.getAllRelevant().then((_tags) => {
-            let matchFunc;
-            if (query.length < tags.minLengthForPartialSearch) {
-                matchFunc = (name) => {
-                    return name.startsWith(query);
-                };
-            } else {
-                matchFunc = (name) => {
-                    return name.includes(query);
-                };
-            }
+            const term = query;
+            const pattern =
+                term.length < tags.minLengthForPartialSearch
+                    ? term + "*"
+                    : "*" + term + "*";
 
             return Promise.resolve(
                 _tags.results
                     .copy()
-                    .filter((tag) => matchFunc(tag.names[0]))
+                    .filter((tag) =>
+                        tag.names.some((name) =>
+                            misc.wildcardMatch(pattern, name, false)
+                        )
+                    )
                     .slice(offset, offset + limit)
             );
         });

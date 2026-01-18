@@ -684,6 +684,12 @@ document.addEventListener("input", (e) => {
     }
 });
 
+document.addEventListener("auxclick", (e) => {
+    if (e.target.getAttribute("href") === "" && e.button === 1) {
+        e.preventDefault();
+    }
+});
+
 /*
 // prevent opening buttons in new tabs
 document.addEventListener("click", (e) => {

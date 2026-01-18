@@ -66,10 +66,13 @@ def _verify_name_validity(name: str) -> None:
         raise InvalidTagNameError("Tag name is too long")
 
     name_regex = config.config["tag_name_regex"]
-    if not re.match(name_regex, name):
+    if not re.fullmatch(name_regex, name):
         raise InvalidTagNameError(
             "Tag name must satisfy regex %r" % name_regex
         )
+
+    if name in [".", ".."]:
+        raise InvalidTagNameError("Tag name cannot be '.' or '..'")
 
     if name in RESERVED_NAMES:
         raise InvalidTagNameError("Invalid tag name")
