@@ -30,7 +30,7 @@ class PostListTagAutoCompleteControl extends TagAutoCompleteControl {
         });
 
         this._sourceInputNode.addEventListener("keydown", (e) => {
-            if (e.keyCode !== 8) {
+            if (e.key !== "Backspace") {
                 return;
             }
             this._backspaced = true;

@@ -512,6 +512,21 @@ def test_update_tag_names_with_invalid_name(config_injector, tag_factory):
         tags.update_tag_names(tag, ["0"])
 
 
+@pytest.mark.parametrize("name", [".", ".."])
+def test_update_tag_names_with_dot_names(config_injector, tag_factory, name):
+    config_injector({"tag_name_regex": ".*"})
+    tag = tag_factory()
+    with pytest.raises(tags.InvalidTagNameError):
+        tags.update_tag_names(tag, [name])
+
+
+def test_update_tag_names_with_trailing_newline(config_injector, tag_factory):
+    config_injector({"tag_name_regex": r"^\S+$"})
+    tag = tag_factory()
+    with pytest.raises(tags.InvalidTagNameError):
+        tags.update_tag_names(tag, ["name\n"])
+
+
 def test_update_tag_names_with_too_long_string(config_injector, tag_factory):
     config_injector({"tag_name_regex": "^[a-z]*$"})
     tag = tag_factory()

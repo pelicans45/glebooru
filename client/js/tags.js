@@ -72,6 +72,7 @@ function tagListToMatches(tags, options) {
         })
         .map((tag) => {
             let cssName = misc.makeCssName(tag.category, "tag");
+            tag.matchingNames = tag.names;
             /*
             if (options.isTaggedWith(tag.names[0])) {
                 cssName += " disabled";
@@ -81,7 +82,9 @@ function tagListToMatches(tags, options) {
                 '<span class="' +
                 cssName +
                 '">' +
-                misc.escapeHtml(tag.names[0] + " (" + tag.postCount + ")") +
+                misc.escapeHtml(
+                    tag.matchingNames[0] + " (" + tag.postCount + ")"
+                ) +
                 "</span>";
             return {
                 caption: caption,

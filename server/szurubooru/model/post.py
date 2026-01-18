@@ -224,6 +224,7 @@ class Post(Base):
     canvas_width = sa.Column("image_width", sa.Integer)
     canvas_height = sa.Column("image_height", sa.Integer)
     mime_type = sa.Column("mime-type", sa.Unicode(32), nullable=False)
+    duration = sa.Column("duration", sa.Integer)
 
     # foreign tables
     user = sa.orm.relationship("User")

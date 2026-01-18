@@ -89,6 +89,14 @@ class Post extends events.EventTarget {
         return parts[parts.length - 1];
     }
 
+    get thumbnailExtension() {
+        if (!this._thumbnailUrl) {
+            return this.fileExtension;
+        }
+        const parts = this._thumbnailUrl.split("?")[0].split(".");
+        return parts[parts.length - 1];
+    }
+
     get source() {
         return this._source;
     }
@@ -581,6 +589,14 @@ class Post extends events.EventTarget {
         return `[${hostname}] ${this.id}.${this.fileExtension}`;
     }
 
+    getEnrichedThumbnailFilename() {
+        let hostname = location.hostname;
+        if (!hostname.includes("www.")) {
+            hostname = "www." + hostname;
+        }
+        return `[${hostname}] ${this.id}.${this.thumbnailExtension}`;
+    }
+
     replaceFilename(path, filename) {
         return path.split("/").slice(0, -1).join("/") + "/" + filename;
     }
@@ -600,7 +616,7 @@ class Post extends events.EventTarget {
     get enrichedThumbnailUrl() {
         return this.replaceFilename(
             this._thumbnailUrl,
-            this.getEnrichedFilename()
+            this.getEnrichedThumbnailFilename()
         );
     }
 
@@ -660,10 +676,11 @@ class Post extends events.EventTarget {
         }
 
         const filename = this.getEnrichedFilename();
+        const thumbnailFilename = this.getEnrichedThumbnailFilename();
 
         if (["image", "animation"].includes(this._type)) {
             this._thumbnailUrl = this._orig._thumbnailUrl =
-                this.replaceFilename(this._thumbnailUrl, filename);
+                this.replaceFilename(this._thumbnailUrl, thumbnailFilename);
         }
 
         this._contentUrl = this._orig._contentUrl = this.replaceFilename(

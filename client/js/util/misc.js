@@ -236,6 +236,30 @@ function hexToBase64(hexStr) {
     );
 }
 
+function wildcardMatch(pattern, text, sensitive = false) {
+    let escaped = pattern.replace(/[.+^${}()|[\]\\?]/g, "\\$&");
+    const regex = new RegExp(
+        `^${escaped.replace(/\(--wildcard--\)|\*/g, ".*")}$`,
+        sensitive ? "" : "i"
+    );
+    return regex.test(text);
+}
+
+function matchingNames(text, names) {
+    const minLengthForPartialSearch = 3;
+    let matches = names.filter((name) =>
+        wildcardMatch(text + "*", name, false)
+    );
+
+    if (!matches.length && text.length >= minLengthForPartialSearch) {
+        matches = names.filter((name) =>
+            wildcardMatch("*" + text + "*", name, false)
+        );
+    }
+
+    return matches.length ? matches : names;
+}
+
 function preloadPostImages(post) {
     if (!["image", "animation"].includes(post.type)) {
         return;
@@ -263,6 +287,8 @@ module.exports = {
     escapeSearchTerm: escapeSearchTerm,
     dataURItoBlob: dataURItoBlob,
     getPrettyName: getPrettyName,
+    wildcardMatch: wildcardMatch,
+    matchingNames: matchingNames,
     downloadURL: downloadURL,
     tagAddPending: tagAddPending,
     setTagAddInProgress: setTagAddInProgress,

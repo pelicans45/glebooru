@@ -4,9 +4,19 @@ set -e
 # Deployment script for glebooru
 # Pushes to booru:/opt/booru and rebuilds docker containers
 
-REMOTE_HOST="booru"
-REMOTE_PATH="/opt/booru"
-GIT_REMOTE="server"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . "$ENV_FILE"
+    set +a
+fi
+
+REMOTE_HOST="${REMOTE_HOST:?Set REMOTE_HOST in .env}"
+REMOTE_PATH="${REMOTE_PATH:?Set REMOTE_PATH in .env}"
+GIT_REMOTE="${GIT_REMOTE:?Set GIT_REMOTE in .env}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -25,22 +35,27 @@ echo_error() {
     echo -e "${RED}Error:${NC} $1"
 }
 
-# Check for uncommitted local changes
+# Auto-commit any uncommitted local changes
 if ! git diff-index --quiet HEAD --; then
-    echo_error "You have uncommitted local changes. Please commit or stash them first."
+    echo_warn "Uncommitted changes detected. Auto-committing before deploy."
     git status --short
-    exit 1
+    git add -A
+    if ! git diff-index --cached --quiet HEAD --; then
+        git commit -m "Auto-commit before deploy $(date +%Y%m%d-%H%M%S)"
+    else
+        echo_warn "No staged changes to commit after git add -A."
+    fi
 fi
 
 # Show what will be deployed
 echo_step "Commits to deploy:"
+git fetch "${GIT_REMOTE}" 2>/dev/null || echo_warn "Unable to fetch ${GIT_REMOTE}"
 git log --oneline ${GIT_REMOTE}/master..HEAD 2>/dev/null || echo "  (unable to compare - remote may not have been fetched)"
 echo ""
 
 # Confirm deployment
 if [ "$1" != "-y" ] && [ "$1" != "--yes" ]; then
-    read -p "Deploy to production? [y/N] " -n 1 -r
-    echo
+    read -r -p "Deploy to production? [y/N] " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Aborted."
         exit 0
