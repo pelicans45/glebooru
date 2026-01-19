@@ -15,6 +15,7 @@ from szurubooru.func import (
     mime,
     posts,
     tag_categories,
+    tags,
     scores,
     serialization,
     similar,
@@ -255,10 +256,30 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         )
     new_tags = []
     if ctx.has_param("tags"):
-        auth.verify_privilege(ctx.user, "posts:edit:tags")
+        new_tag_names = ctx.get_param_as_string_list("tags")
+        if not auth.has_privilege(ctx.user, "posts:edit:tags"):
+            existing_tags = tags.get_tags_by_names(new_tag_names)
+            existing_tag_ids = {tag.tag_id for tag in existing_tags}
+            old_tag_ids = {tag.tag_id for tag in post.tags}
+            removed_tag_ids = old_tag_ids - existing_tag_ids
+            added_tag_ids = existing_tag_ids - old_tag_ids
+            existing_tag_names = {
+                name.name.lower()
+                for tag in existing_tags
+                for name in tag.names
+            }
+            unresolved_names = [
+                name
+                for name in new_tag_names
+                if name.lower() not in existing_tag_names
+            ]
+            if removed_tag_ids:
+                auth.verify_privilege(ctx.user, "posts:edit:tags:remove")
+            if added_tag_ids or unresolved_names:
+                auth.verify_privilege(ctx.user, "posts:edit:tags:add")
         new_tags = posts.update_post_tags(
             post,
-            ctx.get_param_as_string_list("tags"),
+            new_tag_names,
             category_overrides=new_tag_categories,
         )
         if len(new_tags):
