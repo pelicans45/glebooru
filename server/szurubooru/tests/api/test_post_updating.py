@@ -13,6 +13,8 @@ def inject_config(config_injector):
         {
             "privileges": {
                 "posts:edit:tags": model.User.RANK_REGULAR,
+                "posts:edit:tags:add": model.User.RANK_REGULAR,
+                "posts:edit:tags:remove": model.User.RANK_REGULAR,
                 "posts:edit:content": model.User.RANK_REGULAR,
                 "posts:edit:safety": model.User.RANK_REGULAR,
                 "posts:edit:source": model.User.RANK_REGULAR,

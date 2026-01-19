@@ -108,6 +108,8 @@ privileges:
     'posts:edit:safety':            power
     'posts:edit:source':            regular
     'posts:edit:tags':              regular
+    'posts:edit:tags:add':          regular
+    'posts:edit:tags:remove':       regular
     'posts:edit:thumbnail':         power
     'posts:feature':                moderator
     'posts:delete':                 moderator
