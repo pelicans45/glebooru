@@ -108,7 +108,7 @@ privileges:
     'posts:edit:relations':         power
     'posts:edit:safety':            power
     'posts:edit:source':            power
-    'posts:edit:tags':              regular
+    'posts:edit:tags':              nobody
     'posts:edit:tags:add':          regular
     'posts:edit:tags:remove':       power
     'posts:edit:thumbnail':         power
