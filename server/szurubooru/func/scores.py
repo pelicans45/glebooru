@@ -50,6 +50,40 @@ def get_score(entity: model.Base, user: model.User) -> int:
     return row[0] if row else 0
 
 
+def get_post_scores_for_user(post_ids: list, user: model.User) -> dict:
+    """
+    Batch fetch user scores for multiple posts in a single query.
+    Returns a dict mapping post_id -> score (or 0 if not scored).
+    """
+    if not post_ids or not user or not user.user_id:
+        return {}
+
+    rows = (
+        db.session.query(model.PostScore.post_id, model.PostScore.score)
+        .filter(model.PostScore.post_id.in_(post_ids))
+        .filter(model.PostScore.user_id == user.user_id)
+        .all()
+    )
+    return {row[0]: row[1] for row in rows}
+
+
+def get_post_favorites_for_user(post_ids: list, user: model.User) -> set:
+    """
+    Batch fetch user favorites for multiple posts in a single query.
+    Returns a set of post_ids that the user has favorited.
+    """
+    if not post_ids or not user or not user.user_id:
+        return set()
+
+    rows = (
+        db.session.query(model.PostFavorite.post_id)
+        .filter(model.PostFavorite.post_id.in_(post_ids))
+        .filter(model.PostFavorite.user_id == user.user_id)
+        .all()
+    )
+    return {row[0] for row in rows}
+
+
 def set_score(entity: model.Base, user: model.User, score: int) -> None:
     from szurubooru.func import favorites
 

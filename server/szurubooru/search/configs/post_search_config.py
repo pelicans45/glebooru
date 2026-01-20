@@ -292,18 +292,19 @@ class PostSearchConfig(BaseSearchConfig):
         )
         return db.session.query(model.Post).options(
             sa.orm.lazyload("*"),
-            # use config optimized for official client
-            # sa.orm.defer(model.Post.score),
-            # sa.orm.defer(model.Post.favorite_count),
-            # sa.orm.defer(model.Post.comment_count),
+            # Defer expensive column_property subqueries for better listing performance
+            # These are only needed when explicitly requested via fields parameter
+            sa.orm.defer(model.Post.score),
+            sa.orm.defer(model.Post.favorite_count),
+            sa.orm.defer(model.Post.comment_count),
             sa.orm.defer(model.Post.last_favorite_time),
-            #sa.orm.defer(model.Post.feature_count),
-            #sa.orm.defer(model.Post.last_feature_time),
             sa.orm.defer(model.Post.last_comment_creation_time),
             sa.orm.defer(model.Post.last_comment_edit_time),
             sa.orm.defer(model.Post.note_count),
             sa.orm.defer(model.Post.tag_count),
+            sa.orm.defer(model.Post.relation_count),
             strategy(model.Post.tags).subqueryload(model.Tag.names),
+            strategy(model.Post.tags).joinedload(model.Tag.category),
             strategy(model.Post.tags).defer(model.Tag.post_count),
             strategy(model.Post.tags).lazyload(model.Tag.implications),
             strategy(model.Post.tags).lazyload(model.Tag.suggestions),

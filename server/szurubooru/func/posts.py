@@ -150,9 +150,18 @@ def serialize_note(note: model.PostNote) -> rest.Response:
 
 
 class PostSerializer(serialization.BaseSerializer):
-    def __init__(self, post: model.Post, auth_user: model.User) -> None:
+    def __init__(
+        self,
+        post: model.Post,
+        auth_user: model.User,
+        preloaded_scores: Optional[Dict[int, int]] = None,
+        preloaded_favorites: Optional[set] = None,
+    ) -> None:
         self.post = post
         self.auth_user = auth_user
+        # Pre-fetched data to avoid N+1 queries
+        self._preloaded_scores = preloaded_scores
+        self._preloaded_favorites = preloaded_favorites
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
@@ -271,16 +280,18 @@ class PostSerializer(serialization.BaseSerializer):
         ]
 
     def serialize_relations(self) -> Any:
+        # Batch load related posts instead of N+1 queries
+        relations = get_post_relations(self.post.post_id)
+        if not relations:
+            return []
+        child_ids = list({rel.child_id for rel in relations})
+        related_posts = get_posts_by_ids(child_ids)
         return sorted(
-            {
-                post["id"]: post
-                for post in [
-                    serialize_micro_post(
-                        try_get_post_by_id(rel.child_id), self.auth_user
-                    )
-                    for rel in get_post_relations(self.post.post_id)
-                ]
-            }.values(),
+            [
+                serialize_micro_post(post, self.auth_user)
+                for post in related_posts
+                if post is not None
+            ],
             key=lambda post: post["id"],
         )
 
@@ -291,9 +302,15 @@ class PostSerializer(serialization.BaseSerializer):
         return self.post.score
 
     def serialize_own_score(self) -> Any:
+        # Use pre-fetched score if available (batch optimization)
+        if self._preloaded_scores is not None:
+            return self._preloaded_scores.get(self.post.post_id, 0)
         return scores.get_score(self.post, self.auth_user)
 
     def serialize_own_favorite(self) -> Any:
+        # Use pre-fetched favorites if available (batch optimization)
+        if self._preloaded_favorites is not None:
+            return self.post.post_id in self._preloaded_favorites
         return (
             len(
                 [
@@ -374,17 +391,64 @@ class PostSerializer(serialization.BaseSerializer):
 
 
 def serialize_post(
-    post: Optional[model.Post], auth_user: model.User, options: List[str] = []
+    post: Optional[model.Post],
+    auth_user: model.User,
+    options: List[str] = [],
+    preloaded_scores: Optional[Dict[int, int]] = None,
+    preloaded_favorites: Optional[set] = None,
 ) -> Optional[rest.Response]:
     if not post:
         return None
-    return PostSerializer(post, auth_user).serialize(options)
+    return PostSerializer(
+        post, auth_user, preloaded_scores, preloaded_favorites
+    ).serialize(options)
 
 
 def serialize_micro_post(
     post: model.Post, auth_user: model.User
 ) -> Optional[rest.Response]:
     return serialize_post(post, auth_user=auth_user, options=["id", "thumbnailUrl"])
+
+
+def serialize_posts_batch(
+    post_list: List[model.Post],
+    auth_user: model.User,
+    options: List[str] = [],
+) -> List[rest.Response]:
+    """
+    Batch serialize multiple posts with optimized data fetching.
+    Pre-fetches user scores and favorites to avoid N+1 queries,
+    but only when those fields are actually requested.
+    """
+    if not post_list:
+        return []
+
+    post_ids = [post.post_id for post in post_list]
+
+    # Only pre-fetch data that will actually be used
+    # If options is empty, all fields are serialized
+    needs_score = not options or "ownScore" in options
+    needs_favorite = not options or "ownFavorite" in options
+
+    preloaded_scores = None
+    preloaded_favorites = None
+
+    if needs_score:
+        preloaded_scores = scores.get_post_scores_for_user(post_ids, auth_user)
+    if needs_favorite:
+        preloaded_favorites = scores.get_post_favorites_for_user(post_ids, auth_user)
+
+    # Serialize all posts with pre-fetched data
+    return [
+        serialize_post(
+            post,
+            auth_user,
+            options,
+            preloaded_scores,
+            preloaded_favorites,
+        )
+        for post in post_list
+    ]
 
 
 def get_post_relations(post_id: int) -> List[model.Post]:

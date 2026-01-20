@@ -7,6 +7,7 @@ for the PostgreSQL database connection.
 from typing import Any
 
 import sqlalchemy as sa
+from sqlalchemy import orm
 from sqlalchemy.pool import QueuePool
 
 from szurubooru import config
@@ -47,8 +48,8 @@ def _create_engine() -> sa.Engine:
 
 
 _engine: sa.Engine = _create_engine()
-_sessionmaker = sa.orm.sessionmaker(bind=_engine, autoflush=False)
-session = sa.orm.scoped_session(_sessionmaker)
+_sessionmaker = orm.sessionmaker(bind=_engine, autoflush=False)
+session = orm.scoped_session(_sessionmaker)
 
 
 def get_session() -> Any:

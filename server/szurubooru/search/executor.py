@@ -133,6 +133,27 @@ class Executor:
             "results": [serializer(entity) for entity in entities],
         }
 
+    def execute_and_serialize_batch(
+        self,
+        ctx: rest.Context,
+        batch_serializer: Callable[[list], list],
+    ) -> rest.Response:
+        """
+        Execute search and serialize results using batch serialization.
+        This avoids N+1 queries by allowing the serializer to pre-fetch data.
+        """
+        query = ctx.get_param_as_string("q", default="")
+        offset = ctx.get_param_as_int("offset", default=0, min=0)
+        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
+        count, entities = self.execute(query, offset, limit)
+        return {
+            "q": query,
+            "offset": offset,
+            "limit": limit,
+            "total": count,
+            "results": batch_serializer(entities),
+        }
+
     def count(self, query_text: str) -> int:
         search_query = self.parser.parse(query_text)
         self.config.on_search_query_parsed(search_query)

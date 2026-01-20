@@ -106,8 +106,11 @@ def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
-    return _search_executor.execute_and_serialize(
-        ctx, lambda post: _serialize_post(ctx, post)
+    # Use batch serialization for optimized N+1 query handling
+    options = serialization.get_serialization_options(ctx)
+    return _search_executor.execute_and_serialize_batch(
+        ctx,
+        lambda post_list: posts.serialize_posts_batch(post_list, ctx.user, options),
     )
 
 
