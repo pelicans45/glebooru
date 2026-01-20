@@ -89,10 +89,38 @@ function minifyHtml(html) {
 }
 
 function bundleHtml(domain, data) {
+    const siteUrl = `https://${domain}`;
+    const metaDescription = data.meta_description || "";
+    const metaKeywords = Array.isArray(data.meta_keywords) ? data.meta_keywords.join(", ") : (data.meta_keywords || "");
+
     let baseHtml = readTextFile("./html/index.html").replace(
         "<!-- Base HTML Placeholder -->",
-        `<title>${data.name}</title><base id="base" href="${baseUrl()}"/><meta name="description" content="${data.meta_description || ""}"/>`
+        `<title>${data.name}</title><base id="base" href="${baseUrl()}"/><meta name="description" content="${metaDescription}"/>`
     );
+
+    // Build SEO meta tags
+    let seoTags = [];
+
+    // Meta keywords (if provided)
+    if (metaKeywords) {
+        seoTags.push(`<meta name="keywords" content="${metaKeywords}"/>`);
+    }
+
+    // Open Graph tags for social sharing
+    seoTags.push(`<meta property="og:title" content="${data.name}"/>`);
+    seoTags.push(`<meta property="og:description" content="${metaDescription}"/>`);
+    seoTags.push(`<meta property="og:type" content="website"/>`);
+    seoTags.push(`<meta property="og:url" content="${siteUrl}/"/>`);
+    seoTags.push(`<meta property="og:site_name" content="${data.name}"/>`);
+    seoTags.push(`<meta property="og:image" content="${siteUrl}/img/android-chrome-192x192.png"/>`);
+
+    // Twitter Card tags
+    seoTags.push(`<meta name="twitter:card" content="summary"/>`);
+    seoTags.push(`<meta name="twitter:title" content="${data.name}"/>`);
+    seoTags.push(`<meta name="twitter:description" content="${metaDescription}"/>`);
+    seoTags.push(`<meta name="twitter:image" content="${siteUrl}/img/android-chrome-192x192.png"/>`);
+
+    baseHtml = baseHtml.replace("<!-- SEO Placeholder -->", seoTags.join(""));
 
     baseHtml = baseHtml.replaceAll(
         "$RAND$",
@@ -269,6 +297,36 @@ function bundleBinaryAssets(domain) {
     }
 }
 
+function bundleRobotsTxt(domain) {
+    const outputDir = `${outputPath}/${domain}`;
+    const siteUrl = `https://${domain}`;
+
+    const robotsTxt = `User-agent: *
+Allow: /
+
+# Block AI crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# Sitemap location
+Sitemap: ${siteUrl}/sitemap.xml
+`;
+
+    writeFileSync(`${outputDir}/robots.txt`, robotsTxt);
+}
+
 async function bundleWebAppFiles(domain, data) {
     const outputDir = `${outputPath}/${domain}`;
     const imgDir = `./sites/${domain}/img`;
@@ -333,6 +391,7 @@ async function buildDomain(domain, data) {
     }
     if (!process.argv.includes("--no-html")) {
         tasks.push(Promise.resolve(bundleHtml(domain, data)));
+        tasks.push(Promise.resolve(bundleRobotsTxt(domain)));
     }
     if (!process.argv.includes("--no-web-app-files")) {
         tasks.push(bundleWebAppFiles(domain, data));

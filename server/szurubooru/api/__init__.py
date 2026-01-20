@@ -9,6 +9,7 @@ import szurubooru.api.embed_api
 import szurubooru.api.info_api
 import szurubooru.api.metric_api
 import szurubooru.api.password_reset_api
+import szurubooru.api.sitemap_api
 import szurubooru.api.snapshot_api
 import szurubooru.api.user_api
 import szurubooru.api.user_token_api

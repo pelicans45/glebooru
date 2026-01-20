@@ -133,7 +133,8 @@ def application(
                 db.session.remove()
 
             if response.get("return_type") == "custom":
-                start_response(response.get("status_code", "200"), [("content-type", "text/html")])
+                content_type = response.get("content_type", "text/html")
+                start_response(response.get("status_code", "200"), [("content-type", content_type)])
                 return (response.get("content", "").encode("utf-8"),)
 
             start_response("200", [("content-type", "application/json")])
