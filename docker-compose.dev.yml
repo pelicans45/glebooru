@@ -27,6 +27,7 @@ services:
     client:
         build:
             context: client
+            target: development
             args:
                 DEV: 1
         #platform: linux/arm64
