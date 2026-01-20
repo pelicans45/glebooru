@@ -108,7 +108,7 @@ class Executor:
         count_query = count_query.options(sa.orm.lazyload("*"))
         count_query = self._prepare_db_query(count_query, search_query, False)
         count_statement = count_query.statement.select_from(model).with_only_columns(
-            [sa.func.count()]
+            sa.func.count()
         ).order_by(None)
         count = db.session.execute(count_statement).scalar()
 
@@ -140,7 +140,7 @@ class Executor:
         count_query = count_query.options(sa.orm.lazyload("*"))
         count_query = self._prepare_db_query(count_query, search_query, False)
         count_statement = count_query.statement.select_from(model).with_only_columns(
-            [sa.func.count()]
+            sa.func.count()
         ).order_by(None)
         count = db.session.execute(count_statement).scalar()
         return count

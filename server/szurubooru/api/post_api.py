@@ -114,21 +114,9 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")
 def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     # auth.verify_privilege(ctx.user, "posts:view")
-    # post = _get_post(params)
-    """
-    post_id = int(params["post_id"])
-    post = get_post_query.params(id=post_id).first()
-    if not post:
-        raise posts.PostNotFoundError("Post %d not found" % post_id)
-    """
-    post = (
-        db.session.query(model.Post)
-        .from_statement(posts.post_select_statement)
-        .params(id=int(params["post_id"]))
-        .first()
-    )
-    if not post:
-        raise posts.PostNotFoundError("Post not found")
+    # Benchmark showed simple ORM filter is fastest for posts with few relationships
+    # Use get_post_by_id (simple filter) rather than eager loading which adds overhead
+    post = _get_post(params)
     return _serialize_post(ctx, post)
 
 

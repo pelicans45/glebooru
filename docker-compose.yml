@@ -16,6 +16,9 @@ services:
             #POSTGRES_PORT: 5432
             #LOG_SQL: 0 (1 for verbose SQL logs)
             THREADS:
+            WORKERS:
+            ## HTTP Server: granian (default, faster, Rust-based) or waitress
+            SERVER: ${SERVER:-granian}
             SECRET:
         volumes:
             - "${MOUNT_DATA}:/data"
@@ -37,11 +40,15 @@ services:
             - "${PORT}:80"
 
     sql:
-        image: postgres:16
+        image: postgres:18.1
         restart: unless-stopped
         environment:
             POSTGRES_USER:
             POSTGRES_PASSWORD:
         volumes:
-            - "${MOUNT_SQL}:/var/lib/postgresql/data"
+            # PostgreSQL 18 changed PGDATA to /var/lib/postgresql/18/docker
+            # Mount at /var/lib/postgresql for pg_upgrade compatibility
+            - "${MOUNT_SQL}:/var/lib/postgresql"
+            - ./server/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
             - /opt/backup:/opt/backup
+        command: postgres -c config_file=/etc/postgresql/postgresql.conf

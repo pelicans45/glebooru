@@ -276,7 +276,7 @@ class Post(Base):
 
     # dynamic columns
     tag_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(PostTag.tag_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(PostTag.tag_id))
         .where(PostTag.post_id == post_id)
         .correlate_except(PostTag)
         .scalar_subquery()
@@ -308,11 +308,9 @@ class Post(Base):
 
     score = sa.orm.column_property(
         sa.sql.expression.select(
-            [
-                sa.sql.expression.func.coalesce(
-                    sa.sql.expression.func.sum(PostScore.score), 0
-                )
-            ]
+            sa.sql.expression.func.coalesce(
+                sa.sql.expression.func.sum(PostScore.score), 0
+            )
         )
         .where(PostScore.post_id == post_id)
         .correlate_except(PostScore)
@@ -320,14 +318,14 @@ class Post(Base):
     )
 
     favorite_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(PostFavorite.post_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(PostFavorite.post_id))
         .where(PostFavorite.post_id == post_id)
         .correlate_except(PostFavorite)
         .scalar_subquery()
     )
 
     last_favorite_time = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.max(PostFavorite.time)])
+        sa.sql.expression.select(sa.sql.expression.func.max(PostFavorite.time))
         .where(PostFavorite.post_id == post_id)
         .correlate_except(PostFavorite)
         .scalar_subquery()
@@ -350,35 +348,35 @@ class Post(Base):
     """
 
     comment_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(Comment.post_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(Comment.post_id))
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
         .scalar_subquery()
     )
 
     last_comment_creation_time = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.max(Comment.creation_time)])
+        sa.sql.expression.select(sa.sql.expression.func.max(Comment.creation_time))
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
         .scalar_subquery()
     )
 
     last_comment_edit_time = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.max(Comment.last_edit_time)])
+        sa.sql.expression.select(sa.sql.expression.func.max(Comment.last_edit_time))
         .where(Comment.post_id == post_id)
         .correlate_except(Comment)
         .scalar_subquery()
     )
 
     note_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(PostNote.post_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(PostNote.post_id))
         .where(PostNote.post_id == post_id)
         .correlate_except(PostNote)
         .scalar_subquery()
     )
 
     relation_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(PostRelation.child_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(PostRelation.child_id))
         .where((PostRelation.parent_id == post_id) | (PostRelation.child_id == post_id))
         .correlate_except(PostRelation)
         .scalar_subquery()

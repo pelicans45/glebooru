@@ -1,4 +1,4 @@
-FROM python:3.12.4-slim-bookworm
+FROM python:3.14-slim-bookworm
 WORKDIR /opt/app
 
 ARG PUID=1000

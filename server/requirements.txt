@@ -1,19 +1,26 @@
-alembic>=0.8.5
+alembic>=1.9.0
+# Multipart form parsing (cgi module removed in Python 3.13)
+python-multipart>=0.0.6
 certifi>=2017.11.5
 coloredlogs==5.0
-heif-image-plugin>=0.3.2
 numpy>=1.8.2
-pillow-avif-plugin~=1.1.0
 pillow>=4.3.0
+# pillow-heif provides both HEIF and AVIF support (Python 3.14 compatible)
+pillow-heif>=0.18.0
+# psycopg3 (psycopg) is recommended for SQLAlchemy 2.0
+# psycopg2-binary still works but psycopg3 has better async support
+psycopg[binary]>=3.1.0
 psycopg2-binary>=2.6.1
-pyheif==0.6.1
 pynacl>=1.2.1
 pyRFC3339>=1.0
 pytz>=2018.3
 pyyaml>=3.11
-SQLAlchemy==1.4.46
-#SQLAlchemy>=1.0.12, <1.4
+# SQLAlchemy 2.0 - supports async, better performance with Cython extensions
+# Note: Legacy query() still works but is deprecated. See SQLALCHEMY_MIGRATION.md
+SQLAlchemy>=2.0.0
 youtube_dl
 setuptools
+# HTTP Server options (uncomment preferred):
 waitress
+granian[uvloop]>=1.4.0
 orjson

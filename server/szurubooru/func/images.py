@@ -7,8 +7,9 @@ import subprocess
 from io import BytesIO
 from typing import List
 
-import HeifImagePlugin
-import pillow_avif
+# pillow-heif provides both HEIF and AVIF support
+import pillow_heif
+pillow_heif.register_heif_opener()  # Also registers AVIF opener
 from PIL import Image as PILImage
 
 from szurubooru import errors

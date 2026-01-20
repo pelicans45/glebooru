@@ -110,17 +110,17 @@ class Metric(Base):
 
     tag_name = sa.orm.column_property(
         (
-            sa.sql.expression.select([TagName.name])
+            sa.sql.expression.select(TagName.name)
                 .where(TagName.tag_id == tag_id)
                 .order_by(TagName.order)
                 .limit(1)
-                .as_scalar()
+                .scalar_subquery()
         ))
 
     post_metric_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
-                [sa.sql.expression.func.count(PostMetric.post_id)])
+                sa.sql.expression.func.count(PostMetric.post_id))
                 .where(PostMetric.tag_id == tag_id)
                 .correlate_except(PostMetric)
                 .scalar_subquery()
@@ -130,7 +130,7 @@ class Metric(Base):
     post_metric_range_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
-                [sa.sql.expression.func.count(PostMetricRange.post_id)])
+                sa.sql.expression.func.count(PostMetricRange.post_id))
                 .where(PostMetricRange.tag_id == tag_id)
                 .correlate_except(PostMetricRange)
                 .scalar_subquery()

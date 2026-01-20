@@ -7,7 +7,6 @@ Created at: 2018-02-24 23:00:32.848575
 """
 
 import sqlalchemy as sa
-import sqlalchemy.ext.declarative
 import sqlalchemy.orm.session
 from alembic import op
 
@@ -16,7 +15,7 @@ down_revision = "02ef5f73f4ab"
 branch_labels = None
 depends_on = None
 
-Base = sa.ext.declarative.declarative_base()
+Base = sa.orm.declarative_base()
 
 
 class User(Base):

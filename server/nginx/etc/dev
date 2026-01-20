@@ -1,7 +1,3 @@
-upstream client {
-    server client:80;
-}
-
 map $http_user_agent $embed_prefix {
     ~*(discordbot|twitterbot|facebookexternalhit)/  /api/embed;
 }
@@ -12,13 +8,17 @@ server {
     client_max_body_size 40M;
     client_body_timeout 30s;
 
+    # Use Docker's internal DNS resolver for dynamic resolution
+    resolver 127.0.0.11 valid=10s;
+    set $client_upstream client:80;
+
     location / {
-        proxy_pass http://client;
+        proxy_pass http://$client_upstream;
         include /etc/nginx/include/proxy;
     }
 
     location ~ ^/[0-9]+ {
-        proxy_pass http://client$embed_prefix$request_uri;
+        proxy_pass http://$client_upstream$embed_prefix$request_uri;
         include /etc/nginx/include/proxy;
     }
 
@@ -27,7 +27,7 @@ server {
         #alias /mnt/volume_nyc3_04/szurubooru/data/posts/;
         #try_files /mnt/volume_nyc3_04/szurubooru/data/posts/$1 =404;
 
-        proxy_pass http://client/posts/$1;
+        proxy_pass http://$client_upstream/posts/$1;
 
         #error_page 403 @unauthorized;
         #error_page 404 @notfound;
@@ -39,14 +39,14 @@ server {
         #try_files /mnt/volume_nyc3_04/szurubooru/data/generated-thumbnails/$1 =404;
 
 
-        proxy_pass http://client/thumbnails/$1;
+        proxy_pass http://$client_upstream/thumbnails/$1;
 
         #error_page 403 @unauthorized;
         #error_page 404 @notfound;
     }
 
     #location /api/tag-siblings {
-    #    proxy_pass http://client/api/tag-siblings;
+    #    proxy_pass http://$client_upstream/api/tag-siblings;
     #    include /opt/booru/server/nginx/proxy;
     #
     #    proxy_cache main_cache;

@@ -14,7 +14,7 @@ branch_labels = None
 depends_on = None
 
 
-Base = sa.ext.declarative.declarative_base()
+Base = sa.orm.declarative_base()
 
 
 class PoolCategory(Base):

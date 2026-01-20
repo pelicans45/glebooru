@@ -120,7 +120,7 @@ class Tag(Base):
 
     post_count = sa.orm.column_property(
         sa.sql.expression.select(
-            [sa.sql.expression.func.count(PostTag.post_id)]
+            sa.sql.expression.func.count(PostTag.post_id)
         )
         .where(PostTag.tag_id == tag_id)
         .correlate_except(PostTag)
@@ -129,11 +129,11 @@ class Tag(Base):
 
     first_name = sa.orm.column_property(
         (
-            sa.sql.expression.select([TagName.name])
+            sa.sql.expression.select(TagName.name)
             .where(TagName.tag_id == tag_id)
             .order_by(TagName.order)
             .limit(1)
-            .as_scalar()
+            .scalar_subquery()
         ),
         deferred=True,
     )
@@ -141,10 +141,10 @@ class Tag(Base):
     suggestion_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
-                [sa.sql.expression.func.count(TagSuggestion.child_id)]
+                sa.sql.expression.func.count(TagSuggestion.child_id)
             )
             .where(TagSuggestion.parent_id == tag_id)
-            .as_scalar()
+            .scalar_subquery()
         ),
         deferred=True,
     )
@@ -152,10 +152,10 @@ class Tag(Base):
     implication_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
-                [sa.sql.expression.func.count(TagImplication.child_id)]
+                sa.sql.expression.func.count(TagImplication.child_id)
             )
             .where(TagImplication.parent_id == tag_id)
-            .as_scalar()
+            .scalar_subquery()
         ),
         deferred=True,
     )

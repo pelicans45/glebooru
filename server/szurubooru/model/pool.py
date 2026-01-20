@@ -88,21 +88,21 @@ class Pool(Base):
     post_count = sa.orm.column_property(
         (
             sa.sql.expression.select(
-                [sa.sql.expression.func.count(PoolPost.post_id)]
+                sa.sql.expression.func.count(PoolPost.post_id)
             )
             .where(PoolPost.pool_id == pool_id)
-            .as_scalar()
+            .scalar_subquery()
         ),
         deferred=True,
     )
 
     first_name = sa.orm.column_property(
         (
-            sa.sql.expression.select([PoolName.name])
+            sa.sql.expression.select(PoolName.name)
             .where(PoolName.pool_id == pool_id)
             .order_by(PoolName.order)
             .limit(1)
-            .as_scalar()
+            .scalar_subquery()
         ),
         deferred=True,
     )

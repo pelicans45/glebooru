@@ -411,13 +411,7 @@ def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
         .params(id=post_id)
         .first()
     )
-    # return get_post_query.params(id=post_id).first()
 
-    # return (
-    #    db.session.query(model.Post)
-    #    .filter(model.Post.post_id == post_id)
-    #    .one_or_none()
-    # )
 
 
 def get_post_by_id(post_id: int) -> model.Post:

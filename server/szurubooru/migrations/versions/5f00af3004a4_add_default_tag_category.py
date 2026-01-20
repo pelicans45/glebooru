@@ -6,7 +6,6 @@ Created at: 2017-02-02 20:06:13.336380
 """
 
 import sqlalchemy as sa
-import sqlalchemy.ext.declarative
 import sqlalchemy.orm.session
 from alembic import op
 
@@ -16,7 +15,7 @@ branch_labels = None
 depends_on = None
 
 
-Base = sa.ext.declarative.declarative_base()
+Base = sa.orm.declarative_base()
 
 
 class TagCategory(Base):

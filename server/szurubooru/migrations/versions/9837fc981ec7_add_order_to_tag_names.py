@@ -6,7 +6,6 @@ Created at: 2016-08-28 19:03:59.831527
 """
 
 import sqlalchemy as sa
-import sqlalchemy.ext.declarative
 from alembic import op
 
 revision = "9837fc981ec7"
@@ -15,7 +14,7 @@ branch_labels = None
 depends_on = None
 
 
-Base = sa.ext.declarative.declarative_base()
+Base = sa.orm.declarative_base()
 
 
 class TagName(Base):

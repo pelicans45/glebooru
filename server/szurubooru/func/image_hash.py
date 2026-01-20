@@ -4,9 +4,10 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Callable, List, Optional, Set, Tuple
 
-import HeifImagePlugin
 import numpy as np
-import pillow_avif
+# pillow-heif provides both HEIF and AVIF support
+import pillow_heif
+pillow_heif.register_heif_opener()  # Also registers AVIF opener
 from PIL import Image
 
 from szurubooru import config, errors
