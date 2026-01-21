@@ -238,8 +238,12 @@ class Post extends events.EventTarget {
 
     static get(id, options = {}) {
         const requestOptions = Object.assign({ noProgress: true }, options);
+        const params = {};
+        if (options.fields && options.fields.length) {
+            params.fields = options.fields.join(",");
+        }
         return api
-            .get(uri.formatApiLink("post", id), requestOptions)
+            .get(uri.formatApiLink("post", id, params), requestOptions)
             .then((response) => {
                 return Promise.resolve(Post.fromResponse(response));
             });
@@ -657,8 +661,9 @@ class Post extends events.EventTarget {
             _hasCustomThumbnail: response.hasCustomThumbnail,
         };
 
+        const tagsResponse = response.tags || response.tagsBasic || [];
         for (const obj of [this, this._orig]) {
-            obj._tags.sync(response.tags);
+            obj._tags.sync(tagsResponse);
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
             obj._pools.sync(response.pools);

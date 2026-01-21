@@ -22,8 +22,41 @@ class PostMainController extends BasePostController {
 
         let parameters = ctx.parameters;
         let query = uri.getPostsQuery(parameters);
+        const baseFields = [
+            "id",
+            "version",
+            "creationTime",
+            "lastEditTime",
+            "safety",
+            "source",
+            "type",
+            "mimeType",
+            "checksum",
+            "checksumMD5",
+            "fileSize",
+            "canvasWidth",
+            "canvasHeight",
+            "duration",
+            "contentUrl",
+            "thumbnailUrl",
+            "flags",
+            "tags",
+            "relations",
+            "user",
+            "score",
+            "ownScore",
+            "ownFavorite",
+            "favoriteCount",
+            "commentCount",
+            "notes",
+            "comments",
+        ];
+        const postFields = editMode
+            ? baseFields.concat(["pools"])
+            : baseFields;
+
         Promise.all([
-            Post.get(ctx.parameters.id),
+            Post.get(ctx.parameters.id, { fields: postFields }),
             PostList.getAround(ctx.parameters.id, query, ctx.parameters.r),
         ]).then(
             (responses) => {
@@ -63,7 +96,10 @@ class PostMainController extends BasePostController {
 
                 // Preload nearby posts
                 if (prevPostId) {
-                    Post.get(prevPostId, { noProgress: true }).then(
+                    Post.get(prevPostId, {
+                        noProgress: true,
+                        fields: ["id", "type", "contentUrl"],
+                    }).then(
                         misc.preloadPostImages
                     );
                     PostList.getAround(
@@ -73,7 +109,10 @@ class PostMainController extends BasePostController {
                     );
                 }
                 if (nextPostId) {
-                    Post.get(nextPostId, { noProgress: true }).then(
+                    Post.get(nextPostId, {
+                        noProgress: true,
+                        fields: ["id", "type", "contentUrl"],
+                    }).then(
                         misc.preloadPostImages
                     );
                     PostList.getAround(

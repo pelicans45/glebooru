@@ -156,12 +156,18 @@ class PostSerializer(serialization.BaseSerializer):
         auth_user: model.User,
         preloaded_scores: Optional[Dict[int, int]] = None,
         preloaded_favorites: Optional[set] = None,
+        preloaded_score_sums: Optional[Dict[int, int]] = None,
+        preloaded_favorite_counts: Optional[Dict[int, int]] = None,
+        preloaded_comment_counts: Optional[Dict[int, int]] = None,
     ) -> None:
         self.post = post
         self.auth_user = auth_user
         # Pre-fetched data to avoid N+1 queries
         self._preloaded_scores = preloaded_scores
         self._preloaded_favorites = preloaded_favorites
+        self._preloaded_score_sums = preloaded_score_sums
+        self._preloaded_favorite_counts = preloaded_favorite_counts
+        self._preloaded_comment_counts = preloaded_comment_counts
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
@@ -183,6 +189,7 @@ class PostSerializer(serialization.BaseSerializer):
             "thumbnailUrl": self.serialize_thumbnail_url,
             "flags": self.serialize_flags,
             "tags": self.serialize_tags,
+            "tagsBasic": self.serialize_tags_basic,
             "relations": self.serialize_relations,
             "user": self.serialize_user,
             "score": self.serialize_score,
@@ -250,12 +257,9 @@ class PostSerializer(serialization.BaseSerializer):
         return get_post_content_url(self.post)
 
     def serialize_thumbnail_url(self) -> Any:
-        has_custom_thumbnail = files.has(
-            get_post_thumbnail_backup_path(self.post)
-        )
+        # Assume custom thumbnails are not used; avoid filesystem checks.
         if (
-            not has_custom_thumbnail
-            and (self.post.type == "image" or self.post.type == "animation")
+            (self.post.type == "image" or self.post.type == "animation")
             and self.post.file_size is not None
             and self.post.file_size
             < config.config["thumbnails"]["min_file_size"]
@@ -275,6 +279,15 @@ class PostSerializer(serialization.BaseSerializer):
                 # "metric": {"min": tag.metric.min, "max": tag.metric.max}
                 # if tag.metric
                 # else None,
+            }
+            for tag in tags.sort_tags(self.post.tags)
+        ]
+
+    def serialize_tags_basic(self) -> Any:
+        return [
+            {
+                "names": [name.name for name in tag.names],
+                "category": tag.category.name,
             }
             for tag in tags.sort_tags(self.post.tags)
         ]
@@ -299,6 +312,8 @@ class PostSerializer(serialization.BaseSerializer):
         return users.serialize_micro_user(self.post.user, self.auth_user)
 
     def serialize_score(self) -> Any:
+        if self._preloaded_score_sums is not None:
+            return self._preloaded_score_sums.get(self.post.post_id, 0)
         return self.post.score
 
     def serialize_own_score(self) -> Any:
@@ -326,9 +341,13 @@ class PostSerializer(serialization.BaseSerializer):
         return self.post.tag_count
 
     def serialize_favorite_count(self) -> Any:
+        if self._preloaded_favorite_counts is not None:
+            return self._preloaded_favorite_counts.get(self.post.post_id, 0)
         return self.post.favorite_count
 
     def serialize_comment_count(self) -> Any:
+        if self._preloaded_comment_counts is not None:
+            return self._preloaded_comment_counts.get(self.post.post_id, 0)
         return self.post.comment_count
 
     def serialize_note_count(self) -> Any:
@@ -350,7 +369,8 @@ class PostSerializer(serialization.BaseSerializer):
         ]
 
     def serialize_has_custom_thumbnail(self) -> Any:
-        return files.has(get_post_thumbnail_backup_path(self.post))
+        # Assume custom thumbnails are not used.
+        return False
 
     def serialize_notes(self) -> Any:
         return sorted(
@@ -396,11 +416,20 @@ def serialize_post(
     options: List[str] = [],
     preloaded_scores: Optional[Dict[int, int]] = None,
     preloaded_favorites: Optional[set] = None,
+    preloaded_score_sums: Optional[Dict[int, int]] = None,
+    preloaded_favorite_counts: Optional[Dict[int, int]] = None,
+    preloaded_comment_counts: Optional[Dict[int, int]] = None,
 ) -> Optional[rest.Response]:
     if not post:
         return None
     return PostSerializer(
-        post, auth_user, preloaded_scores, preloaded_favorites
+        post,
+        auth_user,
+        preloaded_scores,
+        preloaded_favorites,
+        preloaded_score_sums,
+        preloaded_favorite_counts,
+        preloaded_comment_counts,
     ).serialize(options)
 
 
@@ -429,9 +458,11 @@ def serialize_posts_batch(
     # If options is empty, all fields are serialized
     needs_score = not options or "ownScore" in options
     needs_favorite = not options or "ownFavorite" in options
-
     preloaded_scores = None
     preloaded_favorites = None
+    preloaded_score_sums = None
+    preloaded_favorite_counts = None
+    preloaded_comment_counts = None
 
     if needs_score:
         preloaded_scores = scores.get_post_scores_for_user(post_ids, auth_user)
@@ -446,6 +477,9 @@ def serialize_posts_batch(
             options,
             preloaded_scores,
             preloaded_favorites,
+            preloaded_score_sums,
+            preloaded_favorite_counts,
+            preloaded_comment_counts,
         )
         for post in post_list
     ]
@@ -490,7 +524,7 @@ def get_posts_by_ids(ids: List[int]) -> List[model.Post]:
         return []
     posts = (
         db.session.query(model.Post)
-        .filter(sa.sql.or_(model.Post.post_id == post_id for post_id in ids))
+        .filter(model.Post.post_id.in_(ids))
         .all()
     )
     id_order = {v: k for k, v in enumerate(ids)}

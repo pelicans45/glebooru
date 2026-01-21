@@ -193,14 +193,12 @@ def get_pools_by_names(names: List[str]) -> List[model.Pool]:
     names = util.icase_unique(names)
     if len(names) == 0:
         return []
+    lowered_names = [name.lower() for name in names]
     return (
         db.session.query(model.Pool)
         .join(model.PoolName)
         .filter(
-            sa.sql.or_(
-                sa.func.lower(model.PoolName.name) == name.lower()
-                for name in names
-            )
+            sa.func.lower(model.PoolName.name).in_(lowered_names)
         )
         .all()
     )

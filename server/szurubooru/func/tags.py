@@ -222,14 +222,12 @@ def get_tags_by_names(names: List[str]) -> List[model.Tag]:
     names = util.icase_unique(names)
     if len(names) == 0:
         return []
+    lowered_names = [name.lower() for name in names]
     return (
         db.session.query(model.Tag)
         .join(model.TagName)
         .filter(
-            sa.sql.or_(
-                sa.func.lower(model.TagName.name) == name.lower()
-                for name in names
-            )
+            sa.func.lower(model.TagName.name).in_(lowered_names)
         )
         .all()
     )

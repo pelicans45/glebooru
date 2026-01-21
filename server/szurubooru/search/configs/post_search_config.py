@@ -292,11 +292,8 @@ class PostSearchConfig(BaseSearchConfig):
         )
         return db.session.query(model.Post).options(
             sa.orm.lazyload("*"),
-            # Defer expensive column_property subqueries for better listing performance
+            # Defer heavier column_property subqueries for better listing performance
             # These are only needed when explicitly requested via fields parameter
-            sa.orm.defer(model.Post.score),
-            sa.orm.defer(model.Post.favorite_count),
-            sa.orm.defer(model.Post.comment_count),
             sa.orm.defer(model.Post.last_favorite_time),
             sa.orm.defer(model.Post.last_comment_creation_time),
             sa.orm.defer(model.Post.last_comment_edit_time),

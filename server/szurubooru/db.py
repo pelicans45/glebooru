@@ -27,11 +27,14 @@ def _create_engine() -> sa.Engine:
         database_url,
         # Connection pooling configuration
         poolclass=QueuePool,
-        pool_size=10,           # Base connections to keep open
-        max_overflow=20,        # Additional connections under load
-        pool_timeout=30,        # Seconds to wait for connection
+        # Keep conservative to avoid exhausting max_connections when using
+        # multiple WSGI worker processes.
+        pool_size=4,            # Base connections per process
+        max_overflow=4,         # Additional connections under load
+        pool_timeout=15,        # Seconds to wait for connection
         pool_recycle=1800,      # Recycle connections after 30 minutes
         pool_pre_ping=True,     # Verify connection validity before use
+        pool_use_lifo=True,     # Better cache locality under bursty load
 
         # Performance settings
         echo=config.config.get("show_sql", False),

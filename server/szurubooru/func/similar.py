@@ -19,8 +19,8 @@ def find_similar_posts(
         db.session.query(post_alias)
         .join(pt_alias, pt_alias.post_id == post_alias.post_id)
         .filter(
-            sa.sql.or_(
-                pt_alias.tag_id == tag.tag_id for tag in source_post.tags
+            pt_alias.tag_id.in_(
+                [tag.tag_id for tag in source_post.tags]
             )
         )
         .filter(pt_alias.post_id != source_post.post_id)

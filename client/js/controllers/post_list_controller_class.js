@@ -25,7 +25,7 @@ const fields = [
     "score",
     "favoriteCount",
     "commentCount",
-    "tags",
+    "tagsBasic",
     "version",
 ];
 

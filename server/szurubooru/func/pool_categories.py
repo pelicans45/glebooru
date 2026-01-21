@@ -92,9 +92,7 @@ def update_category_name(category: model.PoolCategory, name: str) -> None:
         expr = expr & (
             model.PoolCategory.pool_category_id != category.pool_category_id
         )
-    already_exists = (
-        db.session.query(model.PoolCategory).filter(expr).count() > 0
-    )
+    already_exists = db.session.query(sa.exists().where(expr)).scalar()
     if already_exists:
         raise PoolCategoryAlreadyExistsError(
             "A category with this name already exists"
