@@ -63,9 +63,8 @@ class PostReadonlySidebarControl extends events.EventTarget {
             );
         }
 			*/
-        // Load lookalikes (reverse image search) and similar posts in parallel
-        this._loadLookalikePosts();
-        this._loadSimilarPosts();
+        // Load lookalikes and similar posts in parallel, render when both complete
+        this._loadAndRenderSimilarPosts();
     }
 
     get _scoreContainerNode() {
@@ -269,53 +268,44 @@ class PostReadonlySidebarControl extends events.EventTarget {
         this._installScore();
     }
 
-    _loadSimilarPosts() {
-        if (this._post.tags.length < 3) {
-            return Promise.resolve();
-        }
-
-        return PostList.search(
-            "similar:" + this._post.id + " -id:" + this._post.id,
-            0,
-            similarPostCount,
-            ["id", "thumbnailUrl"],
-            undefined,
-            true
-        ).then((response) => {
-            if (response.results.length === 0) {
-                return;
-            }
-
-            const existingIds = Array.from(this._similarListNode.children).map(
-                (node) =>
-                    node
-                        .querySelector("a")
-                        .getAttribute("href")
-                        .split("/")
-                        .pop()
-            );
-
+    _loadAndRenderSimilarPosts() {
+        // Fetch both in parallel, render together when both complete
+        Promise.all([
+            this._fetchLookalikes(),
+            this._fetchSimilarPosts(),
+        ]).then(([lookalikes, similarPosts]) => {
             const listNode = this._similarListNode;
+            const renderedIds = new Set();
 
-            for (let post of response.results) {
-                // prevent duplicates
-                if (existingIds.includes(post.id.toString())) {
-                    continue;
-                }
+            // Render lookalikes first
+            for (let post of lookalikes) {
+                if (renderedIds.has(post.id)) continue;
+                renderedIds.add(post.id);
 
                 let postNode = similarItemTemplate({
                     id: post.id,
                     thumbnailUrl: post.thumbnailUrl,
                 });
+                postNode.classList.add("lookalike-item");
+                listNode.appendChild(postNode);
+            }
 
+            // Render similar posts, skipping duplicates
+            for (let post of similarPosts) {
+                if (renderedIds.has(post.id)) continue;
+                renderedIds.add(post.id);
+
+                let postNode = similarItemTemplate({
+                    id: post.id,
+                    thumbnailUrl: post.thumbnailUrl,
+                });
                 postNode.classList.add("similar-item");
-
                 listNode.appendChild(postNode);
             }
         });
     }
 
-    _loadLookalikePosts() {
+    _fetchLookalikes() {
         const limit = similarPostCount;
         const fields = ["id", "thumbnailUrl"];
         const threshold = 0.6;
@@ -325,24 +315,24 @@ class PostReadonlySidebarControl extends events.EventTarget {
             threshold,
             fields,
             lens.hostnameFilter
-        ).then((response) => {
-            if (response.results.length === 0) {
-                return;
-            }
+        ).then((response) => response.results || [])
+         .catch(() => []);
+    }
 
-            const listNode = this._lookalikesListNode;
+    _fetchSimilarPosts() {
+        if (this._post.tags.length < 3) {
+            return Promise.resolve([]);
+        }
 
-            for (let post of response.results) {
-                let postNode = similarItemTemplate({
-                    id: post.id,
-                    thumbnailUrl: post.thumbnailUrl,
-                });
-
-                postNode.classList.add("lookalike-item");
-
-                listNode.appendChild(postNode);
-            }
-        });
+        return PostList.search(
+            "similar:" + this._post.id + " -id:" + this._post.id,
+            0,
+            similarPostCount,
+            ["id", "thumbnailUrl"],
+            undefined,
+            true
+        ).then((response) => response.results || [])
+         .catch(() => []);
     }
 }
 

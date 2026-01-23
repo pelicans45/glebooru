@@ -12,5 +12,5 @@ if [ "$GLEBOORU_WATCH" == "1" ]; then
     bun build.js --watch --skip-init &
 fi
 
-# Start server
-exec nginx
+# Start server in foreground (daemon off required for Docker)
+exec nginx -g 'daemon off;'
