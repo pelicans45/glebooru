@@ -111,18 +111,27 @@ tag.names[0].name,
 """
 
 
-def sort_tags(tags: List[model.Tag]) -> List[model.Tag]:
+def sort_tags(
+    tags: List[model.Tag],
+    preloaded_counts: dict = None,
+) -> List[model.Tag]:
     default_category_name = tag_categories.get_default_category_name()
-    return sorted(
-        tags,
-        key=lambda tag: (
+
+    def get_sort_key(tag):
+        # Use preloaded counts if available to avoid N+1 queries
+        if preloaded_counts is not None:
+            post_count = preloaded_counts.get(tag.tag_id, 0)
+        else:
+            post_count = tag.post_count
+        return (
             tag.category.order,
             default_category_name == tag.category.name,
             tag.category.name,
-            -tag.post_count,
+            -post_count,
             tag.names[0].name,
-        ),
-    )
+        )
+
+    return sorted(tags, key=get_sort_key)
 
 
 def serialize_relation(tag):

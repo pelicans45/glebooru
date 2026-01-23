@@ -316,11 +316,20 @@ class PostSearchConfig(BaseSearchConfig):
             sa.orm.defer(model.Post.note_count),
             sa.orm.defer(model.Post.tag_count),
             sa.orm.defer(model.Post.relation_count),
+            # Tags with names and categories
             strategy(model.Post.tags).subqueryload(model.Tag.names),
             strategy(model.Post.tags).joinedload(model.Tag.category),
             strategy(model.Post.tags).defer(model.Tag.post_count),
             strategy(model.Post.tags).lazyload(model.Tag.implications),
             strategy(model.Post.tags).lazyload(model.Tag.suggestions),
+            # Eagerly load relationships accessed during serialization to avoid N+1
+            strategy(model.Post.favorited_by),  # User is eager via model
+            strategy(model.Post.comments),  # User is eager via model
+            strategy(model.Post.notes),
+            strategy(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.names),
+            strategy(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.category),
+            strategy(model.Post.metrics).joinedload(model.PostMetric.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
+            strategy(model.Post.metric_ranges).joinedload(model.PostMetricRange.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:

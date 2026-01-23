@@ -108,7 +108,8 @@ class Executor:
             return cache.get(key)
 
         filter_query = self.config.create_filter_query(disable_eager_loads)
-        filter_query = filter_query.options(sa.orm.lazyload("*"))
+        # Note: lazyload("*") is already applied in create_filter_query
+        # Don't add another one here as it would override specific eager loads
         filter_query = self._prepare_db_query(filter_query, search_query, True)
         entities = filter_query.offset(offset).limit(limit).all()
 

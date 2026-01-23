@@ -160,16 +160,6 @@ class PostEditSidebarControl extends events.EventTarget {
             });
         }
 
-        if (this._thumbnailRemovalLinkNode) {
-            this._thumbnailRemovalLinkNode.addEventListener("click", (e) =>
-                this._evtRemoveThumbnailClick(e)
-            );
-            this._thumbnailRemovalLinkNode.style.display = this._post
-                .hasCustomThumbnail
-                ? "block"
-                : "none";
-        }
-
         if (this._addNoteLinkNode) {
             this._addNoteLinkNode.addEventListener("click", (e) =>
                 this._evtAddNoteClick(e)

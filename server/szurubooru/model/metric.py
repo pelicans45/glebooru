@@ -115,7 +115,9 @@ class Metric(Base):
                 .order_by(TagName.order)
                 .limit(1)
                 .scalar_subquery()
-        ))
+        ),
+        deferred=True,  # Avoid N+1 when loading metrics
+    )
 
     post_metric_count = sa.orm.column_property(
         (

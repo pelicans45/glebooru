@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists
 
-COPY requirements.txt /tmp/
+COPY requirements.txt dev-requirements.txt /tmp/
 
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt -r /tmp/dev-requirements.txt \
+    && rm /tmp/requirements.txt /tmp/dev-requirements.txt
 
 RUN mkdir -p /opt/app /data \
     && addgroup --gid ${PGID} app \
@@ -25,7 +25,8 @@ RUN mkdir -p /opt/app /data \
     && chown -R app:app /opt/app /data
 
 COPY . ./
-RUN rm -rf /opt/app/szurubooru/tests
+# Keep tests for development - use multi-stage build for production if needed
+# RUN rm -rf /opt/app/szurubooru/tests
 
 RUN chown -R app /opt/app && chmod +x /opt/app/docker-start.sh
 

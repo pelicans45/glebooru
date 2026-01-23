@@ -38,6 +38,7 @@ class PostFeature(Base):
 
 class PostScore(Base):
     __tablename__ = "post_score"
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     post_id = sa.Column(
         "post_id",
@@ -67,6 +68,7 @@ class PostScore(Base):
 
 class PostFavorite(Base):
     __tablename__ = "post_favorite"
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     post_id = sa.Column(
         "post_id",
@@ -89,6 +91,7 @@ class PostFavorite(Base):
     post = sa.orm.relationship("Post")
     user = sa.orm.relationship(
         "User",
+        lazy="joined",
         backref=sa.orm.backref("post_favorites", cascade="all, delete-orphan"),
     )
 
@@ -162,6 +165,7 @@ class PostTag(Base):
 
 class PostSignature(Base):
     __tablename__ = "post_signature"
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     post_id = sa.Column(
         "post_id",

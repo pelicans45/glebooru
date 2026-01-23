@@ -263,7 +263,6 @@ def test_serialize_post(
             "relationCount": 0,
             "lastFeatureTime": datetime(1999, 1, 1),
             "favoritedBy": ["fav1"],
-            "hasCustomThumbnail": True,
             "mimeType": "image/jpeg",
             "comments": ["commenter1", "commenter2"],
             "metrics": [

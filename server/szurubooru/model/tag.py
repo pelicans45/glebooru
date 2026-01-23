@@ -123,7 +123,8 @@ class Tag(Base):
         )
         .where(PostTag.tag_id == tag_id)
         .correlate_except(PostTag)
-        .scalar_subquery()
+        .scalar_subquery(),
+        deferred=True,  # Avoid N+1 queries - use batch pre-fetch instead
     )
 
     first_name = sa.orm.column_property(

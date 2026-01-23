@@ -75,7 +75,7 @@ def test_get_post_snapshot(post_factory, user_factory, tag_factory):
     note.post = post
     note.polygon = [(1, 1), (200, 1), (200, 200), (1, 200)]
     note.text = "some text"
-    db.session.add_all([score])
+    db.session.add_all([score, favorite, feature, note])
     db.session.flush()
 
     post.user = user
@@ -85,10 +85,14 @@ def test_get_post_snapshot(post_factory, user_factory, tag_factory):
     post.tags.append(tag2)
     post.relations.append(related_post1)
     post.relations.append(related_post2)
-    post.scores.append(score)
-    post.favorited_by.append(favorite)
-    post.features.append(feature)
-    post.notes.append(note)
+    if score not in post.scores:
+        post.scores.append(score)
+    if favorite not in post.favorited_by:
+        post.favorited_by.append(favorite)
+    if feature not in post.features:
+        post.features.append(feature)
+    if note not in post.notes:
+        post.notes.append(note)
 
     assert snapshots.get_post_snapshot(post) == {
         "checksum": "deadbeef",

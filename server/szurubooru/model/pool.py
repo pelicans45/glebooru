@@ -46,7 +46,7 @@ class PoolPost(Base):
     order = sa.Column("ord", sa.Integer, nullable=False, index=True)
 
     pool = sa.orm.relationship("Pool", back_populates="_posts")
-    post = sa.orm.relationship("Post", back_populates="_pools")
+    post = sa.orm.relationship("Post", lazy="joined", back_populates="_pools")
 
     def __init__(self, post) -> None:
         self.post_id = post.post_id

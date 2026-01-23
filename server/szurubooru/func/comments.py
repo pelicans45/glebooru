@@ -42,7 +42,8 @@ class CommentSerializer(serialization.BaseSerializer):
         return users.serialize_micro_user(self.comment.user, self.auth_user)
 
     def serialize_post_id(self) -> Any:
-        return self.comment.post.post_id
+        # Use the column directly instead of loading the relationship
+        return self.comment.post_id
 
     def serialize_version(self) -> Any:
         return self.comment.version
@@ -60,7 +61,13 @@ class CommentSerializer(serialization.BaseSerializer):
         return self.comment.score
 
     def serialize_own_score(self) -> Any:
-        return scores.get_score(self.comment, self.auth_user)
+        # Use eager-loaded scores instead of running a query
+        if not self.auth_user or not self.auth_user.user_id:
+            return 0
+        for score in self.comment.scores:
+            if score.user_id == self.auth_user.user_id:
+                return score.score
+        return 0
 
 
 def serialize_comment(

@@ -183,10 +183,6 @@ class Post extends events.EventTarget {
         return this._ownScore;
     }
 
-    get hasCustomThumbnail() {
-        return this._hasCustomThumbnail;
-    }
-
     set flags(value) {
         this._flags = value;
     }
@@ -658,7 +654,6 @@ class Post extends events.EventTarget {
             _favoriteCount: response.favoriteCount,
             _ownScore: response.ownScore,
             _ownFavorite: response.ownFavorite,
-            _hasCustomThumbnail: response.hasCustomThumbnail,
         };
 
         const tagsResponse = response.tags || response.tagsBasic || [];

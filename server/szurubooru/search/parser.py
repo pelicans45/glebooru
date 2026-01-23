@@ -15,7 +15,9 @@ def _create_criterion(
             raise errors.SearchError("Empty compound value")
         return criteria.ArrayCriterion(original_value, values)
     if re.search(r"(?<!\\)\.(?<!\\)\.", value):
-        low, high = re.split(r"(?<!\\)\.(?<!\\)\.", value, 1)
+        low, high = re.split(
+            r"(?<!\\)\.(?<!\\)\.", value, maxsplit=1
+        )
         if not low and not high:
             raise errors.SearchError("Empty ranged value")
         return criteria.RangedCriterion(original_value, low, high)

@@ -190,6 +190,8 @@ class PostSerializer(serialization.BaseSerializer):
         preloaded_score_sums: Optional[Dict[int, int]] = None,
         preloaded_favorite_counts: Optional[Dict[int, int]] = None,
         preloaded_comment_counts: Optional[Dict[int, int]] = None,
+        preloaded_tag_counts: Optional[Dict[int, int]] = None,
+        preloaded_relations: Optional[Dict[int, List]] = None,
     ) -> None:
         self.post = post
         self.auth_user = auth_user
@@ -199,6 +201,8 @@ class PostSerializer(serialization.BaseSerializer):
         self._preloaded_score_sums = preloaded_score_sums
         self._preloaded_favorite_counts = preloaded_favorite_counts
         self._preloaded_comment_counts = preloaded_comment_counts
+        self._preloaded_tag_counts = preloaded_tag_counts
+        self._preloaded_relations = preloaded_relations
 
     def _serializers(self) -> Dict[str, Callable[[], Any]]:
         return {
@@ -232,7 +236,6 @@ class PostSerializer(serialization.BaseSerializer):
             "featureCount": self.serialize_feature_count,
             "lastFeatureTime": self.serialize_last_feature_time,
             "favoritedBy": self.serialize_favorited_by,
-            "hasCustomThumbnail": self.serialize_has_custom_thumbnail,
             "notes": self.serialize_notes,
             "comments": self.serialize_comments,
             "metrics": self.serialize_metrics,
@@ -300,17 +303,23 @@ class PostSerializer(serialization.BaseSerializer):
         return self.post.flags
 
     def serialize_tags(self) -> Any:
-        return [
-            {
+        result = []
+        # Pass preloaded counts to sort_tags to avoid N+1 on tag.post_count
+        for tag in tags.sort_tags(self.post.tags, self._preloaded_tag_counts):
+            # Use preloaded tag counts if available to avoid N+1 queries
+            if self._preloaded_tag_counts is not None:
+                usages = self._preloaded_tag_counts.get(tag.tag_id, 0)
+            else:
+                usages = tag.post_count
+            result.append({
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
-                "usages": tag.post_count,
+                "usages": usages,
                 "metric": {"min": tag.metric.min, "max": tag.metric.max}
                 if tag.metric
                 else None,
-            }
-            for tag in tags.sort_tags(self.post.tags)
-        ]
+            })
+        return result
 
     def serialize_tags_basic(self) -> Any:
         return [
@@ -322,12 +331,16 @@ class PostSerializer(serialization.BaseSerializer):
         ]
 
     def serialize_relations(self) -> Any:
-        # Batch load related posts instead of N+1 queries
-        relations = get_post_relations(self.post.post_id)
-        if not relations:
-            return []
-        child_ids = list({rel.child_id for rel in relations})
-        related_posts = get_posts_by_ids(child_ids)
+        # Use preloaded relations if available to avoid N+1 queries
+        if self._preloaded_relations is not None:
+            related_posts = self._preloaded_relations.get(self.post.post_id, [])
+        else:
+            # Fallback to per-post query
+            relations = get_post_relations(self.post.post_id)
+            if not relations:
+                return []
+            child_ids = list({rel.child_id for rel in relations})
+            related_posts = get_posts_by_ids(child_ids)
         return sorted(
             [
                 serialize_micro_post(post, self.auth_user)
@@ -397,9 +410,6 @@ class PostSerializer(serialization.BaseSerializer):
             for rel in self.post.favorited_by
         ]
 
-    def serialize_has_custom_thumbnail(self) -> Any:
-        return files.has(get_post_thumbnail_backup_path(self.post))
-
     def serialize_notes(self) -> Any:
         return sorted(
             [serialize_note(note) for note in self.post.notes],
@@ -421,20 +431,25 @@ class PostSerializer(serialization.BaseSerializer):
         ]
 
     def serialize_metrics(self) -> Any:
+        # Use eager-loaded tag.names instead of tag_name column_property to avoid N+1
+        def get_tag_name(metric):
+            if metric.metric and metric.metric.tag and metric.metric.tag.names:
+                return metric.metric.tag.names[0].name
+            return ""
         return [
             metrics.serialize_post_metric(metric)
-            for metric in sorted(
-                self.post.metrics, key=lambda metric: metric.metric.tag_name
-            )
+            for metric in sorted(self.post.metrics, key=get_tag_name)
         ]
 
     def serialize_metric_ranges(self) -> Any:
+        # Use eager-loaded tag.names instead of tag_name column_property to avoid N+1
+        def get_tag_name(metric_range):
+            if metric_range.metric and metric_range.metric.tag and metric_range.metric.tag.names:
+                return metric_range.metric.tag.names[0].name
+            return ""
         return [
             metrics.serialize_post_metric_range(metric_range)
-            for metric_range in sorted(
-                self.post.metric_ranges,
-                key=lambda metric_range: metric_range.metric.tag_name,
-            )
+            for metric_range in sorted(self.post.metric_ranges, key=get_tag_name)
         ]
 
 
@@ -447,9 +462,43 @@ def serialize_post(
     preloaded_score_sums: Optional[Dict[int, int]] = None,
     preloaded_favorite_counts: Optional[Dict[int, int]] = None,
     preloaded_comment_counts: Optional[Dict[int, int]] = None,
+    preloaded_tag_counts: Optional[Dict[int, int]] = None,
+    preloaded_relations: Optional[Dict[int, List]] = None,
 ) -> Optional[rest.Response]:
     if not post:
         return None
+
+    # Pre-fetch data for single post if not provided (avoids N+1 queries)
+    needs_tags = not options or "tags" in options
+    needs_relations = not options or "relations" in options
+
+    if needs_tags and preloaded_tag_counts is None:
+        # Check if tags are already loaded to avoid triggering lazy load
+        state = sa.orm.attributes.instance_state(post)
+        if 'tags' not in state.dict:
+            # Tags not loaded yet - load them efficiently with a single query
+            loaded_tags = (
+                db.session.query(model.Tag)
+                .join(model.PostTag)
+                .filter(model.PostTag.post_id == post.post_id)
+                .options(
+                    sa.orm.joinedload(model.Tag.names),
+                    sa.orm.joinedload(model.Tag.category),
+                    sa.orm.joinedload(model.Tag.metric),  # Avoid N+1 for tag.metric
+                )
+                .all()
+            )
+            # Set the tags without triggering relationship machinery
+            sa.orm.attributes.set_committed_value(post, 'tags', loaded_tags)
+
+        # Now get tag counts
+        if post.tags:
+            tag_ids = [tag.tag_id for tag in post.tags]
+            preloaded_tag_counts = get_tag_post_counts(tag_ids)
+
+    if preloaded_relations is None and needs_relations:
+        preloaded_relations = get_relations_for_posts([post.post_id])
+
     return PostSerializer(
         post,
         auth_user,
@@ -458,6 +507,8 @@ def serialize_post(
         preloaded_score_sums,
         preloaded_favorite_counts,
         preloaded_comment_counts,
+        preloaded_tag_counts,
+        preloaded_relations,
     ).serialize(options)
 
 
@@ -474,8 +525,8 @@ def serialize_posts_batch(
 ) -> List[rest.Response]:
     """
     Batch serialize multiple posts with optimized data fetching.
-    Pre-fetches user scores and favorites to avoid N+1 queries,
-    but only when those fields are actually requested.
+    Pre-fetches user scores, favorites, tag counts, and relations
+    to avoid N+1 queries.
     """
     if not post_list:
         return []
@@ -486,16 +537,46 @@ def serialize_posts_batch(
     # If options is empty, all fields are serialized
     needs_score = not options or "ownScore" in options
     needs_favorite = not options or "ownFavorite" in options
+    needs_tags = not options or "tags" in options
+    needs_relations = not options or "relations" in options
+
     preloaded_scores = None
     preloaded_favorites = None
     preloaded_score_sums = None
     preloaded_favorite_counts = None
     preloaded_comment_counts = None
+    preloaded_tag_counts = None
+    preloaded_relations = None
 
     if needs_score:
         preloaded_scores = scores.get_post_scores_for_user(post_ids, auth_user)
     if needs_favorite:
         preloaded_favorites = scores.get_post_favorites_for_user(post_ids, auth_user)
+
+    # Batch fetch tags and tag post counts
+    if needs_tags:
+        # Check if tags are already loaded on the first post
+        first_post_state = sa.orm.attributes.instance_state(post_list[0])
+        tags_already_loaded = 'tags' in first_post_state.dict
+
+        if not tags_already_loaded:
+            # Batch load tags for all posts with a single efficient query
+            tags_by_post = _batch_load_tags_for_posts(post_ids)
+            for post in post_list:
+                post_tags = tags_by_post.get(post.post_id, [])
+                sa.orm.attributes.set_committed_value(post, 'tags', post_tags)
+
+        # Now collect tag IDs and batch fetch counts
+        all_tag_ids = set()
+        for post in post_list:
+            for tag in post.tags:
+                all_tag_ids.add(tag.tag_id)
+        if all_tag_ids:
+            preloaded_tag_counts = get_tag_post_counts(list(all_tag_ids))
+
+    # Batch fetch relations
+    if needs_relations:
+        preloaded_relations = get_relations_for_posts(post_ids)
 
     # Serialize all posts with pre-fetched data
     return [
@@ -508,9 +589,37 @@ def serialize_posts_batch(
             preloaded_score_sums,
             preloaded_favorite_counts,
             preloaded_comment_counts,
+            preloaded_tag_counts,
+            preloaded_relations,
         )
         for post in post_list
     ]
+
+
+def _batch_load_tags_for_posts(post_ids: List[int]) -> Dict[int, List[model.Tag]]:
+    """Load tags for multiple posts in a single query, returning dict of post_id -> tags."""
+    if not post_ids:
+        return {}
+
+    # Query all tags for the given posts with eager loading
+    post_tags = (
+        db.session.query(model.PostTag.post_id, model.Tag)
+        .join(model.Tag, model.PostTag.tag_id == model.Tag.tag_id)
+        .filter(model.PostTag.post_id.in_(post_ids))
+        .options(
+            sa.orm.joinedload(model.Tag.names),
+            sa.orm.joinedload(model.Tag.category),
+            sa.orm.joinedload(model.Tag.metric),
+        )
+        .all()
+    )
+
+    # Group by post_id
+    result = {pid: [] for pid in post_ids}
+    for post_id, tag in post_tags:
+        result[post_id].append(tag)
+
+    return result
 
 
 def get_post_relations(post_id: int) -> List[model.Post]:
@@ -523,6 +632,59 @@ def get_post_relations(post_id: int) -> List[model.Post]:
     )
 
 
+def get_tag_post_counts(tag_ids: List[int]) -> Dict[int, int]:
+    """Batch fetch post counts for multiple tags."""
+    if not tag_ids:
+        return {}
+    result = (
+        db.session.query(
+            model.PostTag.tag_id,
+            sa.func.count(model.PostTag.post_id)
+        )
+        .filter(model.PostTag.tag_id.in_(tag_ids))
+        .group_by(model.PostTag.tag_id)
+        .all()
+    )
+    return {tag_id: count for tag_id, count in result}
+
+
+def get_relations_for_posts(post_ids: List[int]) -> Dict[int, List[model.Post]]:
+    """Batch fetch relations for multiple posts."""
+    if not post_ids:
+        return {}
+    # Get all relations for these posts
+    relations = (
+        db.session.query(model.PostRelation)
+        .filter(model.PostRelation.parent_id.in_(post_ids))
+        .all()
+    )
+    if not relations:
+        return {}
+
+    # Group child_ids by parent
+    parent_to_children: Dict[int, List[int]] = {}
+    all_child_ids = set()
+    for rel in relations:
+        if rel.parent_id not in parent_to_children:
+            parent_to_children[rel.parent_id] = []
+        parent_to_children[rel.parent_id].append(rel.child_id)
+        all_child_ids.add(rel.child_id)
+
+    # Fetch all related posts in one query
+    if all_child_ids:
+        related_posts = get_posts_by_ids(list(all_child_ids))
+        posts_by_id = {p.post_id: p for p in related_posts}
+    else:
+        posts_by_id = {}
+
+    # Build result dict
+    result: Dict[int, List[model.Post]] = {}
+    for parent_id, child_ids in parent_to_children.items():
+        result[parent_id] = [posts_by_id[cid] for cid in child_ids if cid in posts_by_id]
+
+    return result
+
+
 def get_post_count() -> int:
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
 
@@ -531,6 +693,7 @@ post_select_statement = sa.text("select * from post where id = :id")
 
 
 def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
+    """Fetch post using raw SQL - fast but without eager loading."""
     return (
         db.session.query(model.Post)
         .from_statement(post_select_statement)
@@ -538,6 +701,29 @@ def try_get_post_by_id(post_id: int) -> Optional[model.Post]:
         .first()
     )
 
+
+def try_get_post_by_id_for_serialization(post_id: int) -> Optional[model.Post]:
+    """Fetch post with eager loading for serialization (avoids N+1)."""
+    return (
+        db.session.query(model.Post)
+        .filter(model.Post.post_id == post_id)
+        .options(
+            # Tags with names and categories (but not post_count - we batch that)
+            sa.orm.subqueryload(model.Post.tags).subqueryload(model.Tag.names),
+            sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.category),
+            sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.implications),
+            sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.suggestions),
+            # Other relationships
+            sa.orm.subqueryload(model.Post.favorited_by),
+            sa.orm.subqueryload(model.Post.comments),
+            sa.orm.subqueryload(model.Post.notes),
+            sa.orm.subqueryload(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.names),
+            sa.orm.subqueryload(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.category),
+            sa.orm.subqueryload(model.Post.metrics).joinedload(model.PostMetric.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
+            sa.orm.subqueryload(model.Post.metric_ranges).joinedload(model.PostMetricRange.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
+        )
+        .first()
+    )
 
 
 def get_post_by_id(post_id: int) -> model.Post:
@@ -547,14 +733,30 @@ def get_post_by_id(post_id: int) -> model.Post:
     return post
 
 
-def get_posts_by_ids(ids: List[int]) -> List[model.Post]:
+def get_post_by_id_for_serialization(post_id: int) -> model.Post:
+    """Fetch post with eager loading - use for API responses."""
+    post = try_get_post_by_id_for_serialization(post_id)
+    if not post:
+        raise PostNotFoundError("Post %r not found" % post_id)
+    return post
+
+
+def get_posts_by_ids(ids: List[int], eager_load_tags: bool = False) -> List[model.Post]:
     if len(ids) == 0:
         return []
-    posts = (
-        db.session.query(model.Post)
-        .filter(model.Post.post_id.in_(ids))
-        .all()
-    )
+    query = db.session.query(model.Post).filter(model.Post.post_id.in_(ids))
+
+    if eager_load_tags:
+        query = query.options(
+            # Tags with names, categories, and metrics for efficient batch serialization
+            sa.orm.subqueryload(model.Post.tags).subqueryload(model.Tag.names),
+            sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.category),
+            sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.metric),
+            sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.implications),
+            sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.suggestions),
+        )
+
+    posts = query.all()
     id_order = {v: k for k, v in enumerate(ids)}
     return sorted(posts, key=lambda post: id_order.get(post.post_id))
 
@@ -1339,13 +1541,26 @@ def search_by_signature(
             ]
         )
     )
-    if data:
-        candidate_post_ids, sigarray = data
-        distances = image_hash.normalized_distance(sigarray, signature)
-        return [
-            (distance, try_get_post_by_id(candidate_post_id))
-            for candidate_post_id, distance in zip(candidate_post_ids, distances)
-            if distance < distance_cutoff
-        ]
-    else:
+    if not data:
         return []
+
+    candidate_post_ids, sigarray = data
+    distances = image_hash.normalized_distance(sigarray, signature)
+
+    # Filter by distance threshold first, then batch fetch posts (avoids N+1)
+    matching = [
+        (pid, dist)
+        for pid, dist in zip(candidate_post_ids, distances)
+        if dist < distance_cutoff
+    ]
+    if not matching:
+        return []
+
+    post_ids = [pid for pid, _ in matching]
+    posts_map = {p.post_id: p for p in get_posts_by_ids(post_ids)}
+
+    return [
+        (dist, posts_map.get(pid))
+        for pid, dist in matching
+        if posts_map.get(pid) is not None
+    ]
