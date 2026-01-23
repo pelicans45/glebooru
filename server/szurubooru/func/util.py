@@ -3,7 +3,7 @@ import os
 import re
 import tempfile
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, Generator, List, Optional, Tuple, TypeVar, Union
 
 from szurubooru import errors
@@ -112,14 +112,14 @@ def parse_time_range(value: str) -> Tuple[datetime, datetime]:
         raise errors.ValidationError("Empty date format")
 
     if value == "today":
-        now = datetime.utcnow()
+        now = datetime.now(UTC).replace(tzinfo=None)
         return (
             datetime(now.year, now.month, now.day, 0, 0, 0),
             datetime(now.year, now.month, now.day, 0, 0, 0) + almost_one_day,
         )
 
     if value == "yesterday":
-        now = datetime.utcnow()
+        now = datetime.now(UTC).replace(tzinfo=None)
         return (
             datetime(now.year, now.month, now.day, 0, 0, 0) - one_day,
             datetime(now.year, now.month, now.day, 0, 0, 0) - one_second,

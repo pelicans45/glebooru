@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, List, Optional
 
 from szurubooru import db, errors, model, rest
@@ -94,7 +94,7 @@ def create_comment(
     comment.user = user
     comment.post = post
     update_comment_text(comment, text)
-    comment.creation_time = datetime.utcnow()
+    comment.creation_time = datetime.now(UTC).replace(tzinfo=None)
     return comment
 
 

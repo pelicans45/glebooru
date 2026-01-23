@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 
 from szurubooru import db, model, rest, search
@@ -24,7 +24,7 @@ def get_cached_tag_list(tag):
         return None
 
     if (
-        datetime.utcnow() - result["time"]
+        datetime.now(UTC).replace(tzinfo=None) - result["time"]
     ).total_seconds() > TAG_LIST_CACHE_EXPIRATION_SECONDS:
         return None
 
@@ -32,7 +32,10 @@ def get_cached_tag_list(tag):
 
 
 def set_cached_tag_list(tag, resp):
-    TAG_LIST_CACHE[tag] = {"response": resp, "time": datetime.utcnow()}
+    TAG_LIST_CACHE[tag] = {
+        "response": resp,
+        "time": datetime.now(UTC).replace(tzinfo=None),
+    }
 
 
 def clear_cached_tag_list(tag):
@@ -189,7 +192,7 @@ def update_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
             db.session.flush()
             # snapshots.create(new_metric, ctx.user)
 
-    tag.last_edit_time = datetime.utcnow()
+    tag.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(tag, ctx.user)
     ctx.session.commit()

@@ -209,8 +209,7 @@ def update_or_create_post_metrics(post: model.Post, metrics_data: Any) -> None:
         tag = tags.get_tag_by_name(tag_name)
         if not tag.metric:
             raise MetricDoesNotExistsError("Tag %r has no metric" % tag_name)
-        post_metric = update_or_create_post_metric(post, tag.metric, value)
-        post.metrics.append(post_metric)
+        update_or_create_post_metric(post, tag.metric, value)
 
 
 def update_or_create_post_metric_range(
@@ -262,10 +261,7 @@ def update_or_create_post_metric_ranges(
         tag = tags.get_tag_by_name(tag_name)
         if not tag.metric:
             raise MetricDoesNotExistsError("Tag %r has no metric" % tag_name)
-        post_metric_range = update_or_create_post_metric_range(
-            post, tag.metric, low, high
-        )
-        post.metric_ranges.append(post_metric_range)
+        update_or_create_post_metric_range(post, tag.metric, low, high)
 
 
 def delete_metric(metric: model.Metric) -> None:

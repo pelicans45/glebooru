@@ -21,6 +21,9 @@ def get_mime_type(content: bytes) -> str:
     if content[0:2] == b"BM":
         return "image/bmp"
 
+    if is_webp_content(content):
+        return "image/webp"
+
     if content[4:12] in (b"ftypavif", b"ftypavis"):
         return "image/avif"
 

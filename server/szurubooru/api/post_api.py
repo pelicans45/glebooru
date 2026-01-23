@@ -1,6 +1,6 @@
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from math import ceil
 from typing import Dict, List, Optional
 
@@ -14,6 +14,7 @@ from szurubooru.func import (
     metrics,
     mime,
     posts,
+    random_post,
     tag_categories,
     tags,
     scores,
@@ -104,7 +105,7 @@ def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
 
 @rest.routes.get("/posts/?")
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    # auth.verify_privilege(ctx.user, "posts:list")
+    auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
     # Use batch serialization for optimized N+1 query handling
     options = serialization.get_serialization_options(ctx)
@@ -116,7 +117,7 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")
 def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
-    # auth.verify_privilege(ctx.user, "posts:view")
+    auth.verify_privilege(ctx.user, "posts:view")
     # Benchmark showed simple ORM filter is fastest for posts with few relationships
     # Use get_post_by_id (simple filter) rather than eager loading which adds overhead
     post = _get_post(params)
@@ -126,9 +127,11 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 @rest.routes.get("/random-post/?")
 @rest.routes.get("/random-image/?")
 def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    # auth.verify_privilege(ctx.user, "posts:list")
-    _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("q", default="").strip()
+    auth.verify_privilege(ctx.user, "posts:list")
+    if ctx.has_param("query"):
+        query_text = ctx.get_param_as_string("query", default="").strip()
+    else:
+        query_text = ctx.get_param_as_string("q", default="").strip()
     excluding_param = ctx.get_param_as_string("excluding", default="").strip()
     excluding_id = None
     if excluding_param:
@@ -139,14 +142,71 @@ def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Res
     if not query_text:
         return {"url": ""}
 
+    # Fast path for post ID lookup
     if query_text.isdigit():
         post = posts.get_post_by_id(int(query_text))
         return _serialize_random_post(ctx, post)
 
+    # Fast path for simple tag queries (99% of calls)
+    if random_post.is_simple_tag_query(query_text):
+        included_tags, excluded_tags = random_post.parse_tag_tokens(query_text)
+
+        # Ultra-fast path for single tag without exclusions (most common case)
+        if len(included_tags) == 1 and not excluded_tags and '*' not in included_tags[0]:
+            tag_id = random_post.resolve_tag_id_single(included_tags[0])
+            if tag_id is None:
+                return {"url": ""}
+
+            limit = 2 if excluding_id is not None else 1
+            result_posts = random_post.get_random_post_single_tag(
+                tag_id, set(), excluding_id, limit
+            )
+
+            if not result_posts:
+                return {"url": ""}
+
+            selected_post = result_posts[0]
+            if excluding_id is not None and len(result_posts) > 1:
+                for candidate in result_posts:
+                    if candidate.post_id != excluding_id:
+                        selected_post = candidate
+                        break
+            return _serialize_random_post(ctx, selected_post)
+
+        # General fast path for multiple tags or exclusions
+        included_tag_ids = (
+            random_post.resolve_tag_ids(included_tags) if included_tags else set()
+        )
+        excluded_tag_ids = (
+            random_post.resolve_tag_ids(excluded_tags) if excluded_tags else set()
+        )
+
+        # If we have included tags but none resolved, no results
+        if included_tags and not included_tag_ids:
+            return {"url": ""}
+
+        limit = 2 if excluding_id is not None else 1
+        result_posts = random_post.get_random_post_fast(
+            included_tag_ids, excluded_tag_ids, excluding_id, limit
+        )
+
+        if not result_posts:
+            return {"url": ""}
+
+        selected_post = result_posts[0]
+        if excluding_id is not None and len(result_posts) > 1:
+            for candidate in result_posts:
+                if candidate.post_id != excluding_id:
+                    selected_post = candidate
+                    break
+        return _serialize_random_post(ctx, selected_post)
+
+    # Fallback to generic search executor for complex queries
+    _search_executor_config.user = ctx.user
     types = "image,animation,video"
-    query_text = f"sort:random type:{types} {query_text}"
+    full_query = f"sort:random type:{types} {query_text}"
     limit = 2 if excluding_id is not None else 1
-    count, _posts = _search_executor.execute(query_text, 0, limit)
+    count, _posts = _search_executor.execute(full_query, 0, limit)
     if count == 0:
         return {"url": ""}
     selected_post = _posts[0]
@@ -183,12 +243,16 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
     new_tag_categories = _get_new_tag_categories(ctx)
 
     host = ctx.get_header("X-Original-Host")
+    create_kwargs = {}
+    if host:
+        create_kwargs["host"] = host
+    if new_tag_categories:
+        create_kwargs["category_overrides"] = new_tag_categories
     post, new_tags = posts.create_post(
         content,
         tag_names,
         None if anonymous else ctx.user,
-        host=host,
-        category_overrides=new_tag_categories,
+        **create_kwargs,
     )
     if len(new_tags):
         auth.verify_privilege(ctx.user, "tags:create")
@@ -243,7 +307,6 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         posts.update_post_content(
             post,
             content,
-            content_changed=True,
         )
     new_tags = []
     if ctx.has_param("tags"):
@@ -295,10 +358,9 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if ctx.has_param("flags"):
         auth.verify_privilege(ctx.user, "posts:edit:flags")
         posts.update_post_flags(post, ctx.get_param_as_string_list("flags"))
-    # Thumbnail editing disabled
-    # if ctx.has_file("thumbnail"):
-    #     auth.verify_privilege(ctx.user, "posts:edit:thumbnail")
-    #     posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
+    if ctx.has_file("thumbnail"):
+        auth.verify_privilege(ctx.user, "posts:edit:thumbnail")
+        posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
     if ctx.has_param("metrics"):
         auth.verify_privilege(ctx.user, "metrics:edit:posts")
         metrics.update_or_create_post_metrics(post, ctx.get_param_as_list("metrics"))
@@ -307,7 +369,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         metrics.update_or_create_post_metric_ranges(
             post, ctx.get_param_as_list("metricRanges")
         )
-    post.last_edit_time = datetime.utcnow()
+    post.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
@@ -341,7 +403,10 @@ def merge_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
     versions.verify_version(target_post, ctx, "mergeToVersion")
     versions.bump_version(target_post)
     auth.verify_privilege(ctx.user, "posts:merge")
-    posts.merge_posts(source_post, target_post, replace_content)
+    if replace_content:
+        posts.merge_posts(source_post, target_post, True)
+    else:
+        posts.merge_posts(source_post, target_post)
     snapshots.merge(source_post, target_post, ctx.user)
     ctx.session.commit()
     return _serialize_post(ctx, target_post)
@@ -448,7 +513,10 @@ def get_posts_lookalikes(
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
     threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
-    query = ctx.get_param_as_string("q", default=None)
+    if ctx.has_param("query"):
+        query = ctx.get_param_as_string("query", default=None)
+    else:
+        query = ctx.get_param_as_string("q", default=None)
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     if post.signature is None:
@@ -475,12 +543,15 @@ def get_posts_lookalikes(
 def get_posts_median(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("q", default="")
+    if ctx.has_param("query"):
+        query_text = ctx.get_param_as_string("query", default="")
+    else:
+        query_text = ctx.get_param_as_string("q", default="")
     total_count = _search_executor.count(query_text)
     offset = ceil(total_count / 2) - 1
     _, results = _search_executor.execute(query_text, offset, 1)
     return {
-        "q": query_text,
+        "query": query_text,
         "offset": offset,
         "limit": 1,
         "total": len(results),
@@ -494,13 +565,16 @@ def get_posts_similar_by_tags(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:similar")
     _search_executor_config.user = ctx.user
-    query_text = ctx.get_param_as_string("q", default="")
+    if ctx.has_param("query"):
+        query_text = ctx.get_param_as_string("query", default="")
+    else:
+        query_text = ctx.get_param_as_string("q", default="")
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
     results = similar.find_similar_posts(post, limit, query_text)
     return {
-        "q": query_text,
+        "query": query_text,
         "limit": limit,
         "results": list(
             [posts.serialize_micro_post(result, ctx.user) for result in results]

@@ -28,6 +28,7 @@ class AutoCompleteControl {
             {
                 verticalShift: 2,
                 maxResults: vars.maxSuggestedResults,
+                debounceMs: 0,
                 getTextToFind: () => {
                     const value = sourceInputNode.value;
                     const start = _getSelectionStart(sourceInputNode);
@@ -44,6 +45,7 @@ class AutoCompleteControl {
         this._results = [];
         this._activeResult = -1;
         this._backspaced = false;
+        this._requestId = 0;
 
         this._install();
     }
@@ -112,7 +114,15 @@ class AutoCompleteControl {
         if (!textToFind) {
             this.hide();
         } else {
-            this._updateResults(textToFind);
+            window.clearTimeout(this._showTimeout);
+            const debounceMs = this._options.debounceMs || 0;
+            if (debounceMs > 0) {
+                this._showTimeout = window.setTimeout(() => {
+                    this._updateResults(this._options.getTextToFind());
+                }, debounceMs);
+            } else {
+                this._updateResults(textToFind);
+            }
         }
     }
 
@@ -267,7 +277,11 @@ class AutoCompleteControl {
             return;
         }
 
+        const requestId = ++this._requestId;
         this._options.getMatches(textToFind).then((matches) => {
+            if (requestId !== this._requestId) {
+                return;
+            }
             const oldResults = this._results.slice();
             this._results = matches.slice(0, this._options.maxResults);
             const oldResultsHash = JSON.stringify(oldResults);

@@ -1,11 +1,9 @@
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import patch
 
 import pytest
-import pytz
-
 from szurubooru import db, model
 from szurubooru.func import auth, user_tokens, users, util
 
@@ -108,9 +106,7 @@ def test_update_user_token_note_input_too_long(user_token_factory):
 def test_update_user_token_expiration_time(user_token_factory):
     user_token = user_token_factory()
     assert user_token.expiration_time is None
-    expiration_time_str = (
-        (datetime.utcnow() + timedelta(days=1)).replace(tzinfo=pytz.utc)
-    ).isoformat()
+    expiration_time_str = (datetime.now(UTC) + timedelta(days=1)).isoformat()
     user_tokens.update_user_token_expiration_time(
         user_token, expiration_time_str
     )
@@ -121,9 +117,7 @@ def test_update_user_token_expiration_time(user_token_factory):
 def test_update_user_token_expiration_time_in_past(user_token_factory):
     user_token = user_token_factory()
     assert user_token.expiration_time is None
-    expiration_time_str = (
-        (datetime.utcnow() - timedelta(days=1)).replace(tzinfo=pytz.utc)
-    ).isoformat()
+    expiration_time_str = (datetime.now(UTC) - timedelta(days=1)).isoformat()
     with pytest.raises(
         user_tokens.InvalidExpirationError,
         match="Expiration cannot happen in the past",
@@ -136,8 +130,8 @@ def test_update_user_token_expiration_time_in_past(user_token_factory):
 @pytest.mark.parametrize(
     "expiration_time_str",
     [
-        datetime.utcnow().isoformat(),
-        (datetime.utcnow() - timedelta(days=1)).ctime(),
+        datetime.now(UTC).replace(tzinfo=None).isoformat(),
+        (datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1)).ctime(),
         "1970/01/01 00:00:01.0000Z",
         "70/01/01 00:00:01.0000Z",
         "".join(random.choice(string.ascii_letters) for _ in range(15)),

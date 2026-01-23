@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Optional
 
 from szurubooru.func import auth, posts, users, util
@@ -11,11 +11,9 @@ _cache_result = None  # type: Optional[int]
 
 
 def _get_disk_usage() -> int:
-    return 0
-    """
     global _cache_time, _cache_result
     threshold = timedelta(hours=48)
-    now = datetime.utcnow()
+    now = datetime.now(UTC).replace(tzinfo=None)
     if _cache_time and _cache_time > now - threshold:
         #assert _cache_result is not None
         return _cache_result
@@ -30,7 +28,6 @@ def _get_disk_usage() -> int:
     _cache_time = now
     _cache_result = total_size
     return total_size
-    """
 
 
 @rest.routes.get("/names")
@@ -39,11 +36,11 @@ def get_name_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respo
 
 @rest.routes.get("/info/?")
 def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
-    #post_feature = posts.try_get_current_post_feature()
+    post_feature = posts.try_get_current_post_feature()
     ret = {
         "postCount": posts.get_post_count(),
         "diskUsage": _get_disk_usage(),
-        "serverTime": datetime.utcnow(),
+        "serverTime": datetime.now(UTC).replace(tzinfo=None),
         "config": {
             "name": config.config["name"],
             "userNameRegex": config.config["user_name_regex"],
@@ -59,7 +56,6 @@ def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             ),
         },
     }
-    """
     if auth.has_privilege(ctx.user, "posts:view:featured"):
         ret["featuredPost"] = (
             posts.serialize_post(post_feature.post, ctx.user)
@@ -72,5 +68,4 @@ def get_info(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             else None
         )
         ret["featuringTime"] = post_feature.time if post_feature else None
-    """
     return ret

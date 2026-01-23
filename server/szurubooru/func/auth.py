@@ -2,7 +2,7 @@ import hashlib
 import random
 import uuid
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Tuple
 
 from nacl import pwhash
@@ -106,13 +106,13 @@ def is_valid_token(user_token: Optional[model.UserToken]) -> bool:
         return False
     if not user_token.enabled:
         return False
-    """
-    if (
-        user_token.expiration_time is not None
-        and user_token.expiration_time < datetime.utcnow()
-    ):
-        return False
-    """
+    if user_token.expiration_time is not None:
+        if user_token.expiration_time.tzinfo is not None:
+            now = datetime.now(user_token.expiration_time.tzinfo)
+        else:
+            now = datetime.now(UTC).replace(tzinfo=None)
+        if user_token.expiration_time < now:
+            return False
     return True
 
 

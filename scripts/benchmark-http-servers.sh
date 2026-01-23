@@ -1,7 +1,7 @@
 #!/bin/bash
 # HTTP Server Benchmark Script
 # ============================
-# Compares performance between waitress and granian HTTP servers.
+# Benchmarks the Granian HTTP server.
 #
 # Requirements:
 # - wrk or ab (Apache Benchmark) installed
@@ -178,13 +178,13 @@ benchmark_endpoints() {
     run_benchmark "${server_name}_search" "${base_url}/api/posts?query=*&limit=20"
 }
 
-# Generate comparison report
+# Generate report
 generate_report() {
-    local report_file="${RESULTS_DIR}/http_server_comparison_${TIMESTAMP}.txt"
+    local report_file="${RESULTS_DIR}/http_server_benchmark_${TIMESTAMP}.txt"
 
-    header "Generating Comparison Report"
+    header "Generating Benchmark Report"
 
-    echo "=== HTTP Server Benchmark Comparison ===" > "$report_file"
+    echo "=== HTTP Server Benchmark Report ===" > "$report_file"
     echo "Generated: $(date)" >> "$report_file"
     echo "Host: ${HOST}:${PORT}" >> "$report_file"
     echo "Benchmark tool: ${BENCH_TOOL}" >> "$report_file"
@@ -193,7 +193,7 @@ generate_report() {
     # Extract key metrics from each test
     echo "=== Results Summary ===" >> "$report_file"
 
-    for server in waitress granian; do
+    for server in granian current; do
         echo "" >> "$report_file"
         echo "--- ${server} ---" >> "$report_file"
 
@@ -223,41 +223,9 @@ generate_report() {
     echo "=== Recommendations ===" >> "$report_file"
     echo "Compare Requests/sec values. Higher is better." >> "$report_file"
     echo "Compare Latency values. Lower is better." >> "$report_file"
-    echo "" >> "$report_file"
-    echo "For CPU-bound workloads: Both servers similar" >> "$report_file"
-    echo "For I/O-bound workloads: Granian typically wins" >> "$report_file"
-    echo "For memory efficiency: Granian uses less memory per worker" >> "$report_file"
 
     cat "$report_file"
     log "Report saved to: $report_file"
-}
-
-# Switch server implementation
-switch_server() {
-    local server=$1
-
-    log "Switching to ${server}..."
-
-    # This assumes docker-compose setup
-    if [ "$server" == "waitress" ]; then
-        # Use default docker-start.sh
-        docker compose -f docker-compose.dev.yml exec server bash -c "
-            pkill -f 'granian|waitress' || true
-            /opt/app/docker-start.sh &
-        " 2>/dev/null || {
-            log "Note: Run this with server already running the specified server type"
-        }
-    elif [ "$server" == "granian" ]; then
-        # Use granian startup script
-        docker compose -f docker-compose.dev.yml exec server bash -c "
-            pkill -f 'granian|waitress' || true
-            /opt/app/docker-start-granian.sh &
-        " 2>/dev/null || {
-            log "Note: Run this with server already running the specified server type"
-        }
-    fi
-
-    sleep 5
 }
 
 # Main execution
@@ -272,20 +240,15 @@ main() {
             benchmark_endpoints "current"
             ;;
         --full)
-            # Full comparison (requires manual server restarts)
+            # Full benchmark (longer run)
             check_tools
-
-            echo "This benchmark requires manually switching between server implementations."
-            echo ""
-            echo "Step 1: Start the server with waitress (default docker-start.sh)"
-            echo "Step 2: Run: $0 --benchmark waitress"
-            echo "Step 3: Restart server with granian (docker-start-granian.sh)"
-            echo "Step 4: Run: $0 --benchmark granian"
-            echo "Step 5: Run: $0 --report"
+            wait_for_server
+            DURATION=60
+            benchmark_endpoints "granian"
             ;;
         --benchmark)
             if [ -z "${2:-}" ]; then
-                echo "Usage: $0 --benchmark [waitress|granian]"
+                echo "Usage: $0 --benchmark LABEL"
                 exit 1
             fi
             check_tools
@@ -302,9 +265,9 @@ main() {
             echo ""
             echo "Options:"
             echo "  --quick              Benchmark current running server"
-            echo "  --full               Show full comparison instructions"
-            echo "  --benchmark SERVER   Benchmark specific server (waitress|granian)"
-            echo "  --report             Generate comparison report from existing results"
+            echo "  --full               Run a longer benchmark against Granian"
+            echo "  --benchmark LABEL    Benchmark current server with a label"
+            echo "  --report             Generate report from existing results"
             echo ""
             echo "Environment variables:"
             echo "  HOST           Server host (default: localhost)"
@@ -314,11 +277,9 @@ main() {
             echo "  CONNECTIONS    Concurrent connections (default: 100)"
             echo ""
             echo "Example workflow:"
-            echo "  1. Start server with waitress: ./d"
-            echo "  2. Run: $0 --benchmark waitress"
-            echo "  3. Restart server with granian"
-            echo "  4. Run: $0 --benchmark granian"
-            echo "  5. Run: $0 --report"
+            echo "  1. Start server: ./d"
+            echo "  2. Run: $0 --quick"
+            echo "  3. Run: $0 --report"
             ;;
     esac
 }

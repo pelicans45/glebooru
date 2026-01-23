@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import sqlalchemy as sa
@@ -43,17 +43,18 @@ def get_avatar_path(user_name: str) -> str:
 
 def get_avatar_url(user: model.User) -> str:
     # assert user
-    if not user.name:
-        return ""
-
     if user.avatar_style == user.AVATAR_GRAVATAR:
         # assert user.email or user.name
         if not user.email and not user.name:
             return ""
+        identifier = (user.email or user.name).strip().lower()
         return "https://gravatar.com/avatar/%s?d=retro&s=%d" % (
-            util.get_md5(user.name + "ABC1234xyz").lower(),
+            util.get_md5(identifier).lower(),
             config.config["thumbnails"]["avatar_width"],
         )
+
+    if not user.name:
+        return ""
 
     return "%s/avatars/%s.png" % (
         config.config["data_url"].rstrip("/"),
@@ -229,7 +230,7 @@ def create_user(name: str, password: str, email: str) -> model.User:
     else:
         user.rank = model.User.RANK_ADMINISTRATOR
 
-    user.creation_time = datetime.utcnow()
+    user.creation_time = datetime.now(UTC).replace(tzinfo=None)
     user.avatar_style = model.User.AVATAR_GRAVATAR
     return user
 
@@ -282,7 +283,7 @@ def update_user_email(user: model.User, email: str) -> None:
 
 
 def update_user_rank(
-    user: model.User, rank: str, auth_user: model.User
+    user: model.User, rank: str, auth_user: Optional[model.User] = None
 ) -> None:
     # assert user
     if not rank:
@@ -293,11 +294,12 @@ def update_user_rank(
         raise InvalidRankError("Rank can be either of %r" % all_ranks)
     if rank in (model.User.RANK_ANONYMOUS, model.User.RANK_NOBODY):
         raise InvalidRankError("Rank %r cannot be used" % auth.RANK_MAP[rank])
-    if (
-        all_ranks.index(auth_user.rank) < all_ranks.index(rank)
-        and get_user_count() > 0
-    ):
-        raise errors.AuthError("Trying to set higher rank than your own")
+    if auth_user is not None:
+        if (
+            all_ranks.index(auth_user.rank) < all_ranks.index(rank)
+            and get_user_count() > 0
+        ):
+            raise errors.AuthError("Trying to set higher rank than your own")
     user.rank = rank
 
 
@@ -329,7 +331,7 @@ def update_user_avatar(
 
 def bump_user_login_time(user: model.User) -> None:
     # assert user
-    user.last_login_time = datetime.utcnow()
+    user.last_login_time = datetime.now(UTC).replace(tzinfo=None)
 
 
 def reset_user_password(user: model.User) -> str:

@@ -8,9 +8,7 @@ pillow>=4.3.0
 # pillow-heif provides both HEIF and AVIF support (Python 3.14 compatible)
 pillow-heif>=0.18.0
 # psycopg3 (psycopg) is recommended for SQLAlchemy 2.0
-# psycopg2-binary still works but psycopg3 has better async support
 psycopg[binary]>=3.1.0
-psycopg2-binary>=2.6.1
 pynacl>=1.2.1
 pyRFC3339>=1.0
 pytz>=2018.3
@@ -20,7 +18,6 @@ pyyaml>=3.11
 SQLAlchemy>=2.0.0
 youtube_dl
 setuptools
-# HTTP Server options (uncomment preferred):
-waitress
+# HTTP server
 granian[uvloop]>=1.4.0
 orjson

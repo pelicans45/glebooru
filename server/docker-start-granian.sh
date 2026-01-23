@@ -1,8 +1,8 @@
 #!/bin/bash
 # Granian HTTP Server Startup Script
 # ===================================
-# Alternative to waitress using Granian (Rust-based HTTP server)
-# Typically 2-3x faster than waitress for I/O-bound workloads.
+# Granian startup helper (Rust-based HTTP server).
+# Note: docker-start.sh already launches Granian in normal usage.
 
 set -e
 cd /opt/app
@@ -13,7 +13,7 @@ alembic upgrade head
 # Granian configuration
 # - interface: wsgi (for our current WSGI app)
 # - workers: number of worker processes (usually 1-2 per CPU core)
-# - threads: threads per worker (for WSGI mode)
+# - blocking-threads: threads per worker (for WSGI mode)
 # - backpressure: prevents overloading the Python interpreter
 #
 # Note: For even better performance, convert to ASGI and use interface=asgi
@@ -29,7 +29,7 @@ exec granian \
     --host 0.0.0.0 \
     --port ${PORT} \
     --workers ${WORKERS} \
-    --threads ${THREADS} \
+    --blocking-threads ${THREADS} \
     --backpressure 64 \
     --log-level info \
     szurubooru.facade:app

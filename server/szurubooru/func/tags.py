@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
@@ -112,13 +112,14 @@ tag.names[0].name,
 
 
 def sort_tags(tags: List[model.Tag]) -> List[model.Tag]:
-    # default_category_name = tag_categories.get_default_category_name()
+    default_category_name = tag_categories.get_default_category_name()
     return sorted(
         tags,
         key=lambda tag: (
             tag.category.order,
+            default_category_name == tag.category.name,
             tag.category.name,
-            #-tag.post_count,
+            -tag.post_count,
             tag.names[0].name,
         ),
     )
@@ -147,7 +148,7 @@ class TagSerializer(serialization.BaseSerializer):
             "usages": self.serialize_usages,
             "suggestions": self.serialize_suggestions,
             "implications": self.serialize_implications,
-            #"metric": self.serialize_metric,
+            "metric": self.serialize_metric,
         }
 
     def serialize_names(self) -> Any:
@@ -268,7 +269,7 @@ def get_or_create_tags_by_names(
     return existing_tags, new_tags
 
 
-def get_tag_siblings(tag: model.Tag, limit) -> List[model.Tag]:
+def get_tag_siblings(tag: model.Tag, limit: int = 50) -> List[model.Tag]:
     # assert tag
     tag_alias = sa.orm.aliased(model.Tag)
     pt_alias1 = sa.orm.aliased(model.PostTag)
@@ -307,12 +308,12 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
     # assert target_tag
     if source_tag.tag_id == target_tag.tag_id:
         raise InvalidTagRelationError("Cannot merge tag with itself")
-    #if source_tag.metric or target_tag.metric:
-    #    raise InvalidTagRelationError("Cannot merge tags with metrics")
+    if source_tag.metric or target_tag.metric:
+        raise InvalidTagRelationError("Cannot merge tags with metrics")
 
     def merge_posts(source_tag_id: int, target_tag_id: int) -> None:
         alias1 = model.PostTag
-        alias2 = sa.orm.util.aliased(model.PostTag)
+        alias2 = sa.orm.aliased(model.PostTag)
         update_stmt = sa.sql.expression.update(alias1).where(
             alias1.tag_id == source_tag_id
         )
@@ -330,7 +331,7 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
         table: model.Base, source_tag_id: int, target_tag_id: int
     ) -> None:
         alias1 = table
-        alias2 = sa.orm.util.aliased(table)
+        alias2 = sa.orm.aliased(table)
         update_stmt = (
             sa.sql.expression.update(alias1)
             .where(alias1.parent_id == source_tag_id)
@@ -380,7 +381,7 @@ def create_tag(
     implications: List[str],
 ) -> model.Tag:
     tag = model.Tag()
-    tag.creation_time = datetime.utcnow()
+    tag.creation_time = datetime.now(UTC).replace(tzinfo=None)
     update_tag_names(tag, names)
     update_tag_category_name(tag, category_name)
     update_tag_suggestions(tag, suggestions)

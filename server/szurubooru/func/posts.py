@@ -1,7 +1,7 @@
 import hmac
 import io
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import sqlalchemy as sa
@@ -105,12 +105,17 @@ def get_post_security_hash(id: int) -> str:
         config.config["secret"].encode("utf8"),
         msg=str(id).encode("utf-8"),
         digestmod="md5",
-    ).hexdigest()[0:8]
+    ).hexdigest()[0:16]
 
 
 def get_post_content_url(post: model.Post) -> str:
     # assert post
-    return f"/posts/{post.post_id}.{mime.get_extension(post.mime_type) or 'dat'}"
+    base_url = config.config.get("data_url") or ""
+    if base_url and not base_url.endswith("/"):
+        base_url += "/"
+    extension = mime.get_extension(post.mime_type) or "dat"
+    security_hash = get_post_security_hash(post.post_id)
+    return f"{base_url}posts/{post.post_id}_{security_hash}.{extension}"
 
 
 
@@ -122,23 +127,49 @@ def get_post_thumbnail_extension(post: model.Post) -> str:
 
 def get_post_thumbnail_url(post: model.Post) -> str:
     # assert post
-    return f"/thumbnails/{post.post_id}.{get_post_thumbnail_extension(post)}"
+    base_url = config.config.get("data_url") or ""
+    if base_url and not base_url.endswith("/"):
+        base_url += "/"
+    security_hash = get_post_security_hash(post.post_id)
+    return (
+        f"{base_url}generated-thumbnails/"
+        f"{post.post_id}_{security_hash}.{get_post_thumbnail_extension(post)}"
+    )
 
 
 def get_post_content_path(post: model.Post) -> str:
     # assert post
     # assert post.post_id
-    return f"posts/{post.post_id}.{mime.get_extension(post.mime_type) or 'dat'}"
+    extension = mime.get_extension(post.mime_type) or "dat"
+    security_hash = get_post_security_hash(post.post_id)
+    return f"posts/{post.post_id}_{security_hash}.{extension}"
 
 
 def get_post_thumbnail_path(post: model.Post) -> str:
     # assert post
-    return f"generated-thumbnails/{post.post_id}.{get_post_thumbnail_extension(post)}"
+    security_hash = get_post_security_hash(post.post_id)
+    return (
+        f"generated-thumbnails/{post.post_id}_{security_hash}."
+        f"{get_post_thumbnail_extension(post)}"
+    )
 
 
 def get_post_thumbnail_backup_path(post: model.Post) -> str:
     # assert post
-    return f"posts/custom-thumbnails/{post.post_id}.dat"
+    security_hash = get_post_security_hash(post.post_id)
+    return f"posts/custom-thumbnails/{post.post_id}_{security_hash}.dat"
+
+
+def _get_thumbnail_min_file_size() -> int:
+    return int(config.config.get("thumbnails", {}).get("min_file_size", 0))
+
+
+def _get_thumbnail_dimensions() -> Tuple[int, int]:
+    thumbnails = config.config.get("thumbnails", {})
+    return (
+        int(thumbnails.get("post_width", 300)),
+        int(thumbnails.get("post_height", 300)),
+    )
 
 
 def serialize_note(note: model.PostNote) -> rest.Response:
@@ -184,12 +215,10 @@ class PostSerializer(serialization.BaseSerializer):
             "fileSize": self.serialize_file_size,
             "canvasWidth": self.serialize_canvas_width,
             "canvasHeight": self.serialize_canvas_height,
-            "duration": self.serialize_duration,
             "contentUrl": self.serialize_content_url,
             "thumbnailUrl": self.serialize_thumbnail_url,
             "flags": self.serialize_flags,
             "tags": self.serialize_tags,
-            "tagsBasic": self.serialize_tags_basic,
             "relations": self.serialize_relations,
             "user": self.serialize_user,
             "score": self.serialize_score,
@@ -200,14 +229,14 @@ class PostSerializer(serialization.BaseSerializer):
             "commentCount": self.serialize_comment_count,
             "noteCount": self.serialize_note_count,
             "relationCount": self.serialize_relation_count,
-            # "featureCount": self.serialize_feature_count,
-            # "lastFeatureTime": self.serialize_last_feature_time,
+            "featureCount": self.serialize_feature_count,
+            "lastFeatureTime": self.serialize_last_feature_time,
             "favoritedBy": self.serialize_favorited_by,
             "hasCustomThumbnail": self.serialize_has_custom_thumbnail,
             "notes": self.serialize_notes,
             "comments": self.serialize_comments,
-            # "metrics": self.serialize_metrics,
-            # "metricRanges": self.serialize_metric_ranges,
+            "metrics": self.serialize_metrics,
+            "metricRanges": self.serialize_metric_ranges,
             "pools": self.serialize_pools,
         }
 
@@ -262,7 +291,7 @@ class PostSerializer(serialization.BaseSerializer):
             (self.post.type == "image" or self.post.type == "animation")
             and self.post.file_size is not None
             and self.post.file_size
-            < config.config["thumbnails"]["min_file_size"]
+            < _get_thumbnail_min_file_size()
         ):
             return get_post_content_url(self.post)
         return get_post_thumbnail_url(self.post)
@@ -276,9 +305,9 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
                 "usages": tag.post_count,
-                # "metric": {"min": tag.metric.min, "max": tag.metric.max}
-                # if tag.metric
-                # else None,
+                "metric": {"min": tag.metric.min, "max": tag.metric.max}
+                if tag.metric
+                else None,
             }
             for tag in tags.sort_tags(self.post.tags)
         ]
@@ -369,8 +398,7 @@ class PostSerializer(serialization.BaseSerializer):
         ]
 
     def serialize_has_custom_thumbnail(self) -> Any:
-        # Assume custom thumbnails are not used.
-        return False
+        return files.has(get_post_thumbnail_backup_path(self.post))
 
     def serialize_notes(self) -> Any:
         return sorted(
@@ -592,7 +620,7 @@ def create_post(
     post = model.Post()
     post.safety = model.Post.SAFETY_SAFE
     post.user = user
-    post.creation_time = datetime.utcnow()
+    post.creation_time = datetime.now(UTC).replace(tzinfo=None)
     post.flags = []
     tag_names = tag_names or []
 
@@ -740,22 +768,41 @@ def purge_post_signature(post: model.Post) -> None:
     )
     """
     db.session.execute(
-        "delete from post_signature where post_id=:id", {"id": post.post_id}
+        sa.text("delete from post_signature where post_id=:id"),
+        {"id": post.post_id},
     )
 
 
-def generate_post_signature(post: model.Post, content: bytes) -> None:
+def generate_post_signature(
+    post: model.Post, content: bytes
+) -> Optional[model.PostSignature]:
+    ext = mime.get_extension(post.mime_type) if post.mime_type else None
     try:
         unpacked_signature = image_hash.generate_signature(content)
         packed_signature = image_hash.pack_signature(unpacked_signature)
         words = image_hash.generate_words(unpacked_signature)
 
-        db.session.add(
-            model.PostSignature(post=post, signature=packed_signature, words=words)
+        signature = model.PostSignature(
+            post=post, signature=packed_signature, words=words
         )
+        db.session.add(signature)
+        return signature
     except errors.ProcessingError:
+        if ext in {"avif", "heic", "heif"}:
+            logger.warning(
+                "Falling back to placeholder image hash for %s", ext
+            )
+            unpacked_signature = image_hash.np.zeros(image_hash.SIG_NUMS)
+            packed_signature = image_hash.pack_signature(unpacked_signature)
+            words = image_hash.generate_words(unpacked_signature)
+            signature = model.PostSignature(
+                post=post, signature=packed_signature, words=words
+            )
+            db.session.add(signature)
+            return signature
         if not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError("Unable to generate image hash data")
+        return None
 
 
 def update_all_post_signatures() -> None:
@@ -771,7 +818,14 @@ def update_all_post_signatures() -> None:
     )
     for post in posts_to_hash:
         try:
-            generate_post_signature(post, files.get(get_post_content_path(post)))
+            content = files.get(get_post_content_path(post))
+            if not content:
+                logging.warning(
+                    "Skipping signature for post %d: content missing",
+                    post.post_id,
+                )
+                continue
+            generate_post_signature(post, content)
             db.session.commit()
             # logging.info("Created Signature - Post %d", post.post_id)
         except Exception as ex:
@@ -787,7 +841,14 @@ def update_all_md5_checksums() -> None:
     )
     for post in posts_to_hash:
         try:
-            post.checksum_md5 = util.get_md5(files.get(get_post_content_path(post)))
+            content = files.get(get_post_content_path(post))
+            if not content:
+                logging.warning(
+                    "Skipping md5 for post %d: content missing",
+                    post.post_id,
+                )
+                continue
+            post.checksum_md5 = util.get_md5(content)
             db.session.commit()
             # logging.info("Created MD5 - Post %d", post.post_id)
         except Exception as ex:
@@ -847,8 +908,7 @@ def update_post_content(
     update_signature = False
     post.mime_type = mime.get_mime_type(content)
     if mime.is_flash(post.mime_type):
-        # post.type = model.Post.TYPE_FLASH
-        raise InvalidPostContentError("Unhandled file type: %r" % post.mime_type)
+        post.type = model.Post.TYPE_FLASH
     elif mime.is_image(post.mime_type):
         update_signature = True
         if mime.is_animated_gif(content):
@@ -877,13 +937,14 @@ def update_post_content(
     post_id = post.post_id
     if post_id is None:
         post_id = 0
-    other_post = db.session.execute(
-        "select id from post where checksum=:checksum and id != :id",
-        {"checksum": post.checksum, "id": post_id},
-    ).first()
+    other_post_id = db.session.execute(
+        sa.select(model.Post.post_id)
+        .where(model.Post.checksum == post.checksum)
+        .where(model.Post.post_id != post_id)
+    ).scalar_one_or_none()
 
-    if other_post and other_post["id"] and other_post["id"] != post.post_id:
-        raise PostAlreadyUploadedError(other_post["id"])
+    if other_post_id and other_post_id != post.post_id:
+        raise PostAlreadyUploadedError(other_post_id)
 
     if update_signature:
         if content_changed:
@@ -901,12 +962,24 @@ def update_post_content(
             post.duration = None
     except errors.ProcessingError as ex:
         logging.exception(ex)
-        if not config.config["allow_broken_uploads"]:
+        if mime.is_heif(post.mime_type):
+            post.canvas_width = None
+            post.canvas_height = None
+            post.duration = None
+        elif not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError("Unable to process image metadata")
         else:
             post.canvas_width = None
             post.canvas_height = None
             post.duration = None
+    except Exception as ex:
+        if mime.is_heif(post.mime_type):
+            logging.exception(ex)
+            post.canvas_width = None
+            post.canvas_height = None
+            post.duration = None
+        else:
+            raise
     if (post.canvas_width is not None and post.canvas_width <= 0) or (
         post.canvas_height is not None and post.canvas_height <= 0
     ):
@@ -936,7 +1009,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
             (post.type == "image" or post.type == "animation")
             and post.file_size is not None
             and post.file_size
-            < config.config["thumbnails"]["min_file_size"]
+            < _get_thumbnail_min_file_size()
         ):
             return
 
@@ -950,8 +1023,7 @@ def generate_post_thumbnail(post: model.Post) -> None:
     try:
         # assert content
         image = images.Image(content)
-        thumb_width = int(config.config["thumbnails"]["post_width"])
-        thumb_height = int(config.config["thumbnails"]["post_height"])
+        thumb_width, thumb_height = _get_thumbnail_dimensions()
         if get_post_thumbnail_extension(post) == "gif":
             thumbnail_content = image.to_gif_thumbnail(thumb_width, thumb_height)
         else:
@@ -1066,7 +1138,7 @@ def feature_post(post: model.Post, user: Optional[model.User]) -> None:
     if user and not user.name:
         user = None
     post_feature = model.PostFeature()
-    post_feature.time = datetime.utcnow()
+    post_feature.time = datetime.now(UTC).replace(tzinfo=None)
     post_feature.post = post
     post_feature.user = user
     db.session.add(post_feature)
@@ -1078,7 +1150,9 @@ def delete(post: model.Post) -> None:
 
 
 def merge_posts(
-    source_post: model.Post, target_post: model.Post, replace_content: bool
+    source_post: model.Post,
+    target_post: model.Post,
+    replace_content: bool = False,
 ) -> None:
     # assert source_post
     # assert target_post
@@ -1092,7 +1166,7 @@ def merge_posts(
         target_post_id: int,
     ) -> None:
         alias1 = table
-        alias2 = sa.orm.util.aliased(table)
+        alias2 = sa.orm.aliased(table)
         update_stmt = sa.sql.expression.update(alias1).where(
             alias1.post_id == source_post_id
         )
@@ -1138,7 +1212,7 @@ def merge_posts(
 
     def merge_relations(source_post_id: int, target_post_id: int) -> None:
         alias1 = model.PostRelation
-        alias2 = sa.orm.util.aliased(model.PostRelation)
+        alias2 = sa.orm.aliased(model.PostRelation)
         update_stmt = (
             sa.sql.expression.update(alias1)
             .where(alias1.parent_id == source_post_id)
@@ -1222,7 +1296,6 @@ def search_by_signature(
     distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
     query: str = None,
 ) -> List[Tuple[float, model.Post]]:
-    return []
     query_words = image_hash.generate_words(signature)
     """
     The unnest function is used here to expand one row containing the 'words'
@@ -1257,7 +1330,7 @@ def search_by_signature(
 
     dbquery = dbquery.format(join_clause=join_clause, where_clause=where_clause)
 
-    candidates = db.session.execute(dbquery, params)
+    candidates = db.session.execute(sa.text(dbquery), params)
     data = tuple(
         zip(
             *[

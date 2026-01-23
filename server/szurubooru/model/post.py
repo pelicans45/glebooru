@@ -29,7 +29,7 @@ class PostFeature(Base):
     )
     time = sa.Column("time", sa.DateTime, nullable=False)
 
-    post = sa.orm.relationship("Post")  # type: Post
+    post = sa.orm.relationship("Post", back_populates="features")  # type: Post
     user = sa.orm.relationship(
         "User",
         backref=sa.orm.backref("post_features", cascade="all, delete-orphan"),
@@ -244,9 +244,12 @@ class Post(Base):
         lazy="joined",
         backref="related_by",
     )
-    #features = sa.orm.relationship(
-    #    "PostFeature", cascade="all, delete-orphan", lazy="joined", overlaps="post"
-    #)
+    features = sa.orm.relationship(
+        "PostFeature",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
     scores = sa.orm.relationship(
         "PostScore", cascade="all, delete-orphan", lazy="joined", overlaps="post"
     )
@@ -259,12 +262,18 @@ class Post(Base):
     comments = sa.orm.relationship(
         "Comment", cascade="all, delete-orphan", overlaps="post"
     )
-    #metrics = sa.orm.relationship(
-    #    "PostMetric", cascade="all, delete-orphan", lazy="joined"
-    #)
-    #metric_ranges = sa.orm.relationship(
-    #    "PostMetricRange", cascade="all, delete-orphan", lazy="joined"
-    #)
+    metrics = sa.orm.relationship(
+        "PostMetric",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+    metric_ranges = sa.orm.relationship(
+        "PostMetricRange",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
     _pools = sa.orm.relationship(
         "PoolPost",
         cascade="all,delete-orphan",
@@ -331,21 +340,19 @@ class Post(Base):
         .scalar_subquery()
     )
 
-    """
     feature_count = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.count(PostFeature.post_id)])
+        sa.sql.expression.select(sa.sql.expression.func.count(PostFeature.post_id))
         .where(PostFeature.post_id == post_id)
         .correlate_except(PostFeature)
         .scalar_subquery()
     )
 
     last_feature_time = sa.orm.column_property(
-        sa.sql.expression.select([sa.sql.expression.func.max(PostFeature.time)])
+        sa.sql.expression.select(sa.sql.expression.func.max(PostFeature.time))
         .where(PostFeature.post_id == post_id)
         .correlate_except(PostFeature)
         .scalar_subquery()
     )
-    """
 
     comment_count = sa.orm.column_property(
         sa.sql.expression.select(sa.sql.expression.func.count(Comment.post_id))

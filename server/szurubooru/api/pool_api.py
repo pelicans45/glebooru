@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 
 from szurubooru import db, model, rest, search
@@ -39,7 +39,7 @@ def create_pool(
     posts = ctx.get_param_as_int_list("posts", default=[])
 
     pool = pools.create_pool(names, category, posts)
-    pool.last_edit_time = datetime.utcnow()
+    pool.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     pools.update_pool_description(pool, description)
     ctx.session.add(pool)
     ctx.session.flush()
@@ -77,7 +77,7 @@ def update_pool(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         auth.verify_privilege(ctx.user, "pools:edit:posts")
         posts = ctx.get_param_as_int_list("posts")
         pools.update_pool_posts(pool, posts)
-    pool.last_edit_time = datetime.utcnow()
+    pool.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(pool, ctx.user)
     ctx.session.commit()
@@ -99,8 +99,8 @@ def delete_pool(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
 def merge_pools(
     ctx: rest.Context, _params: Dict[str, str] = {}
 ) -> rest.Response:
-    source_pool_id = ctx.get_param_as_string("remove")
-    target_pool_id = ctx.get_param_as_string("mergeTo")
+    source_pool_id = ctx.get_param_as_int("remove")
+    target_pool_id = ctx.get_param_as_int("mergeTo")
     source_pool = pools.get_pool_by_id(source_pool_id)
     target_pool = pools.get_pool_by_id(target_pool_id)
     versions.verify_version(source_pool, ctx, "removeVersion")

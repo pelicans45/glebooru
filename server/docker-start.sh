@@ -7,7 +7,6 @@
 #   PORT     - Server port (default: 6666)
 #   THREADS  - Number of threads (default: 4)
 #   WORKERS  - Number of workers for granian (default: 2)
-#   SERVER   - HTTP server: waitress or granian (default: waitress)
 
 set -e
 cd /opt/app
@@ -19,25 +18,15 @@ alembic upgrade head
 PORT=${PORT:-6666}
 THREADS=${THREADS:-4}
 WORKERS=${WORKERS:-2}
-SERVER=${SERVER:-waitress}
 
 echo "Starting szurubooru API on port ${PORT}"
-echo "Server: ${SERVER}, Threads: ${THREADS}"
-
-case "$SERVER" in
-    granian)
-        echo "Using Granian HTTP server (Rust-based, high performance)"
-        exec granian \
-            --interface wsgi \
-            --host 0.0.0.0 \
-            --port ${PORT} \
-            --workers ${WORKERS} \
-            --blocking-threads ${THREADS} \
-            --backpressure 64 \
-            szurubooru.facade:app
-        ;;
-    waitress|*)
-        echo "Using Waitress HTTP server"
-        exec waitress-serve --port ${PORT} --threads ${THREADS} szurubooru.facade:app
-        ;;
-esac
+echo "Server: granian, Threads: ${THREADS}, Workers: ${WORKERS}"
+echo "Using Granian HTTP server (Rust-based, high performance)"
+exec granian \
+    --interface wsgi \
+    --host 0.0.0.0 \
+    --port ${PORT} \
+    --workers ${WORKERS} \
+    --blocking-threads ${THREADS} \
+    --backpressure 64 \
+    szurubooru.facade:app

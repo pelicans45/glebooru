@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import pytest
 
@@ -53,7 +53,9 @@ def test_is_valid_token(user_token_factory):
 
 
 def test_expired_token_is_invalid(user_token_factory):
-    past_expiration = datetime.utcnow() - timedelta(minutes=30)
+    past_expiration = datetime.now(UTC).replace(tzinfo=None) - timedelta(
+        minutes=30
+    )
     user_token = user_token_factory(expiration_time=past_expiration)
     assert not auth.is_valid_token(user_token)
 

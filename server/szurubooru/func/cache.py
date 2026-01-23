@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List
 
 
@@ -6,7 +6,7 @@ class LruCacheItem:
     def __init__(self, key: object, value: Any) -> None:
         self.key = key
         self.value = value
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC).replace(tzinfo=None)
 
 
 class LruCache:

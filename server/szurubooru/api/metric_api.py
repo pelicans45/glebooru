@@ -79,14 +79,19 @@ def get_post_metrics_median(
     auth.verify_privilege(ctx.user, "metrics:list")
     metric = _get_metric(params)
     tag_name = params["tag_name"]
-    query_text = ctx.get_param_as_string(
-        "q",
-        default="%s:%f..%f" % (tag_name, metric.min, metric.max))
+    if ctx.has_param("query"):
+        query_text = ctx.get_param_as_string(
+            "query",
+            default="%s:%f..%f" % (tag_name, metric.min, metric.max))
+    else:
+        query_text = ctx.get_param_as_string(
+            "q",
+            default="%s:%f..%f" % (tag_name, metric.min, metric.max))
     total_count = _search_executor.count(query_text)
     offset = ceil(total_count/2) - 1
     _, results = _search_executor.execute(query_text, offset, 1)
     return {
-        "q": query_text,
+        "query": query_text,
         "offset": offset,
         "limit": 1,
         "total": len(results),

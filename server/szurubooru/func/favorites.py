@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Optional, Tuple
 
 from szurubooru import db, errors, model
@@ -53,5 +53,5 @@ def set_favorite(entity: model.Base, user: Optional[model.User]) -> None:
         fav_entity = table()
         setattr(fav_entity, get_column(table).name, get_column(entity))
         fav_entity.user = user
-        fav_entity.time = datetime.utcnow()
+        fav_entity.time = datetime.now(UTC).replace(tzinfo=None)
         db.session.add(fav_entity)

@@ -113,8 +113,8 @@ def test_filter_anonymous(
         (None, "\\*", ["*"]),
         (None, "\\", None),
         (None, "\\asd", None),
-        ("psycopg2", "\\\\", ["\\"]),
-        ("psycopg2", "\\\\asd", ["\\asd"]),
+        ("psycopg", "\\\\", ["\\"]),
+        ("psycopg", "\\\\asd", ["\\asd"]),
     ],
 )
 def test_escaping(executor, tag_factory, input, expected_tag_names, db_driver):

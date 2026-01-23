@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Tuple, Union
 import sqlalchemy as sa
 from szurubooru.func import cache
 from szurubooru.search import parser, tokens
+from szurubooru.search.configs import util as search_util
 from szurubooru.search.configs.base_search_config import BaseSearchConfig
 from szurubooru.search.query import SearchQuery
 from szurubooru.search.typing import SaQuery
@@ -40,6 +41,11 @@ class Executor:
         self.config = search_config
         self.parser = parser.Parser()
 
+    def _unwrap_sort_column(self, column):
+        if isinstance(column, search_util.SortColumn):
+            return column.column, column.nulls_last
+        return column, False
+
     def get_around(
         self, query_text: str, entity_id: int
     ) -> Tuple[model.Base, model.Base, model.Base]:
@@ -70,9 +76,11 @@ class Executor:
         entity_id: int,
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
-        entities = self.get_around(
-            ctx.get_param_as_string("q", default=""), entity_id
-        )
+        if ctx.has_param("query"):
+            query_text = ctx.get_param_as_string("query", default="")
+        else:
+            query_text = ctx.get_param_as_string("q", default="")
+        entities = self.get_around(query_text, entity_id)
         return {
             "prev": serializer(entities[0]),
             "next": serializer(entities[1]),
@@ -121,12 +129,15 @@ class Executor:
         ctx: rest.Context,
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
-        query = ctx.get_param_as_string("q", default="")
+        if ctx.has_param("query"):
+            query = ctx.get_param_as_string("query", default="")
+        else:
+            query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)#max=100)
         count, entities = self.execute(query, offset, limit)
         return {
-            "q": query,
+            "query": query,
             "offset": offset,
             "limit": limit,
             "total": count,
@@ -142,12 +153,15 @@ class Executor:
         Execute search and serialize results using batch serialization.
         This avoids N+1 queries by allowing the serializer to pre-fetch data.
         """
-        query = ctx.get_param_as_string("q", default="")
+        if ctx.has_param("query"):
+            query = ctx.get_param_as_string("query", default="")
+        else:
+            query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
         count, entities = self.execute(query, offset, limit)
         return {
-            "q": query,
+            "query": query,
             "offset": offset,
             "limit": limit,
             "total": count,
@@ -225,11 +239,17 @@ class Executor:
                 column, default_order = self.config.sort_columns[
                     sort_token.name
                 ]
+                column, nulls_last = self._unwrap_sort_column(column)
                 order = _get_order(sort_token.order, default_order)
                 if order == sort_token.SORT_ASC:
-                    db_query = db_query.order_by(column.asc())
+                    order_expr = column.asc()
                 elif order == sort_token.SORT_DESC:
-                    db_query = db_query.order_by(column.desc())
+                    order_expr = column.desc()
+                else:
+                    continue
+                if nulls_last:
+                    order_expr = order_expr.nulls_last()
+                db_query = db_query.order_by(order_expr)
 
         db_query = self.config.finalize_query(db_query)
         return db_query
@@ -258,6 +278,7 @@ class Executor:
                     )
                 )
             column, default_order = self.config.sort_columns[sort_token.name]
+            column, nulls_last = self._unwrap_sort_column(column)
             order = _get_order(sort_token.order, default_order)
 
             # the order column may be joined, so we need to query its value:
@@ -278,20 +299,32 @@ class Executor:
 
             if order == sort_token.SORT_ASC:
                 if direction == self.AROUND_NEXT:
-                    db_query = db_query.order_by(column.asc()).filter(
+                    order_expr = column.asc()
+                    if nulls_last:
+                        order_expr = order_expr.nulls_last()
+                    db_query = db_query.order_by(order_expr).filter(
                         column > column_value
                     )
                 elif direction == self.AROUND_PREV:
-                    db_query = db_query.order_by(column.desc()).filter(
+                    order_expr = column.desc()
+                    if nulls_last:
+                        order_expr = order_expr.nulls_last()
+                    db_query = db_query.order_by(order_expr).filter(
                         column < column_value
                     )
             elif order == sort_token.SORT_DESC:
                 if direction == self.AROUND_NEXT:
-                    db_query = db_query.order_by(column.desc()).filter(
+                    order_expr = column.desc()
+                    if nulls_last:
+                        order_expr = order_expr.nulls_last()
+                    db_query = db_query.order_by(order_expr).filter(
                         column < column_value
                     )
                 elif direction == self.AROUND_PREV:
-                    db_query = db_query.order_by(column.asc()).filter(
+                    order_expr = column.asc()
+                    if nulls_last:
+                        order_expr = order_expr.nulls_last()
+                    db_query = db_query.order_by(order_expr).filter(
                         column > column_value
                     )
 

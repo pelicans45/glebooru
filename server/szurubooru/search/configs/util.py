@@ -12,6 +12,12 @@ Number = Union[int, float]
 WILDCARD = "(--wildcard--)"  # something unlikely to be used by the users
 
 
+class SortColumn:
+    def __init__(self, column: Any, nulls_last: bool = False) -> None:
+        self.column = column
+        self.nulls_last = nulls_last
+
+
 def unescape(text: str, make_wildcards_special: bool = False) -> str:
     output = ""
     i = 0

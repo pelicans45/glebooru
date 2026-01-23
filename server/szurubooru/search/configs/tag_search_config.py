@@ -24,7 +24,6 @@ class TagSearchConfig(BaseSearchConfig):
                 sa.orm.defer(model.Tag.first_name),
                 sa.orm.defer(model.Tag.suggestion_count),
                 sa.orm.defer(model.Tag.implication_count),
-                sa.orm.defer(model.Tag.post_count),
                 strategy(model.Tag.names),
                 strategy(model.Tag.suggestions).joinedload(model.Tag.names),
                 strategy(model.Tag.implications).joinedload(model.Tag.names),

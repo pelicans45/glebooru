@@ -7,16 +7,11 @@ from szurubooru.func import snapshots
 
 
 @pytest.fixture(autouse=True)
-def session(query_logger, postgresql_db):
+def session(nontransacted_session):
     """
     Override db session for this specific test section only
     """
-    db.session = postgresql_db.session
-    postgresql_db.create_table(*model.Base.metadata.sorted_tables)
-    try:
-        yield postgresql_db.session
-    finally:
-        postgresql_db.reset_db()
+    yield nontransacted_session
 
 
 def test_modify_saves_non_empty_diffs(post_factory, user_factory):

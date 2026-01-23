@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from unittest.mock import patch
 
 import pytest
@@ -48,7 +48,10 @@ def test_using_special_tokens(user_factory, post_factory, context_factory):
     post1 = post_factory(id=1)
     post2 = post_factory(id=2)
     post1.favorited_by = [
-        model.PostFavorite(user=auth_user, time=datetime.utcnow())
+        model.PostFavorite(
+            user=auth_user,
+            time=datetime.now(UTC).replace(tzinfo=None),
+        )
     ]
     db.session.add_all([post1, post2, auth_user])
     db.session.flush()

@@ -44,12 +44,14 @@ class TagAutoCompleteControl extends AutoCompleteControl {
             {
                 isTaggedWith: (tag) => input.value.split(" ").includes(tag),
                 isNegationAllowed: false,
+                useRemoteSearch: lens.isUniversal,
+                debounceMs: lens.isUniversal ? 150 : 0,
             },
             options
         );
 
-        //if (lens.isUniversal) {
-        if (false) {
+        const useRemoteSearch = options.useRemoteSearch;
+        if (useRemoteSearch) {
             options.getMatches = (text) => {
                 const negated =
                     options.isNegationAllowed && text[0] === "-";

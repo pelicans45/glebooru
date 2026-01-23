@@ -32,7 +32,7 @@ def test_merging(user_factory, context_factory, post_factory):
                 user=auth_user,
             )
         )
-        posts.merge_posts.called_once_with(source_post, target_post)
+        posts.merge_posts.assert_called_once_with(source_post, target_post)
         snapshots.merge.assert_called_once_with(
             source_post, target_post, auth_user
         )

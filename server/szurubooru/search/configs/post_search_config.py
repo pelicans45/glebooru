@@ -134,29 +134,45 @@ def _similar_filter(
     # subquery for tags of the given post (post id in criterion)
     tag_query = db.session.query(model.PostTag.tag_id)
     tag_query = filter_func_tag(tag_query, criterion, False)
-    tag_query = sa.select(tag_query.subquery("source_tags"))
+    tag_subquery = tag_query.subquery("source_tags")
+    tag_select = sa.select(tag_subquery.c.tag_id)
 
     if negated:
-        # negated query runs normally, doesn't apply sort
-        subquery = (
-            db.session.query(pt_alias.post_id)
-            .filter(pt_alias.tag_id.in_(tag_query))
+        similarity_subquery = (
+            db.session.query(
+                pt_alias.post_id.label("post_id"),
+                sa.func.count(pt_alias.tag_id).label("similarity"),
+            )
+            .filter(pt_alias.tag_id.in_(tag_select))
             .group_by(pt_alias.post_id)
+            .having(sa.func.count(pt_alias.tag_id) > 0)
             .subquery("similar_posts")
         )
-        expr = model.Post.post_id.in_(subquery)
+        expr = model.Post.post_id.in_(
+            sa.select(similarity_subquery.c.post_id)
+        )
         return query.filter(~expr)
     else:
         # direct query applies sort
+        similarity_subquery = (
+            db.session.query(
+                pt_alias.post_id.label("post_id"),
+                sa.func.count(pt_alias.tag_id).label("similarity"),
+            )
+            .filter(pt_alias.tag_id.in_(tag_select))
+            .group_by(pt_alias.post_id)
+            .having(sa.func.count(pt_alias.tag_id) > 0)
+            .subquery("similar_posts")
+        )
         subquery = query.subquery("main_query")
         return (
             db.session.query(model.Post)
-            .join(pt_alias, pt_alias.post_id == model.Post.post_id)
-            .filter(pt_alias.tag_id.in_(tag_query))
-            .group_by(model.Post.post_id)
-            .having(sa.func.count(pt_alias.tag_id) > 4)
-            .join(subquery, pt_alias.post_id == subquery.c.id)
-            .order_by(sa.func.count(pt_alias.tag_id).desc())
+            .join(
+                similarity_subquery,
+                similarity_subquery.c.post_id == model.Post.post_id,
+            )
+            .join(subquery, similarity_subquery.c.post_id == subquery.c.id)
+            .order_by(similarity_subquery.c.similarity.desc())
         )
 
 
@@ -202,7 +218,7 @@ def _metric_presence_filter(
         .filter(tag_name_filter)
         .subquery()
     )
-    post_filter = model.Post.post_id.in_(subquery)
+    post_filter = model.Post.post_id.in_(sa.select(subquery.c.post_id))
     if negated:
         post_filter = ~post_filter
     return query.filter(post_filter)
@@ -216,7 +232,7 @@ def _create_metric_sort_column(metric_name: str):
         .filter(pm.post_id == model.Post.post_id)
         .join(t, t.tag_id == pm.tag_id)
         .filter(t.name == metric_name)
-        .as_scalar()
+        .scalar_subquery()
     )
     return ret
 
@@ -329,13 +345,10 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
-        """
         filters = {
             "metric-" + name: _create_metric_num_filter(name)
             for name in self.all_metric_names
         }
-        """
-        filters = {}
         filters.update(
             util.unalias_dict(
                 [
@@ -355,7 +368,7 @@ class PostSearchConfig(BaseSearchConfig):
                             ),
                         ),
                     ),
-                    #(["metric"], _metric_presence_filter),
+                    (["metric"], _metric_presence_filter),
                     (
                         ["score"],
                         search_util.create_num_filter(model.Post.score),
@@ -415,12 +428,12 @@ class PostSearchConfig(BaseSearchConfig):
                             model.Post.relation_count
                         ),
                     ),
-                    #(
-                    #    ["feature-count"],
-                    #    search_util.create_num_filter(
-                    #        model.Post.feature_count
-                    #    ),
-                    #),
+                    (
+                        ["feature-count"],
+                        search_util.create_num_filter(
+                            model.Post.feature_count
+                        ),
+                    ),
                     (
                         ["type"],
                         search_util.create_str_filter(
@@ -494,12 +507,12 @@ class PostSearchConfig(BaseSearchConfig):
                             model.Post.last_favorite_time
                         ),
                     ),
-                    #(
-                    #    ["feature-date", "feature-time"],
-                    #    search_util.create_date_filter(
-                    #        model.Post.last_feature_time
-                    #    ),
-                    #),
+                    (
+                        ["feature-date", "feature-time"],
+                        search_util.create_date_filter(
+                            model.Post.last_feature_time
+                        ),
+                    ),
                     (
                         ["safety", "rating"],
                         search_util.create_str_filter(
@@ -523,13 +536,15 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def sort_columns(self) -> Dict[str, Tuple[SaColumn, str]]:
-        """
         filters = {
-            "metric-" + name: (_create_metric_sort_column(name), self.SORT_ASC)
+            "metric-" + name: (
+                search_util.SortColumn(
+                    _create_metric_sort_column(name), nulls_last=True
+                ),
+                self.SORT_ASC,
+            )
             for name in self.all_metric_names
         }
-        """
-        filters = {}
         filters.update(
             util.unalias_dict(
                 [
@@ -553,10 +568,10 @@ class PostSearchConfig(BaseSearchConfig):
                         ["relation-count"],
                         (model.Post.relation_count, self.SORT_DESC),
                     ),
-                    #(
-                    #    ["feature-count"],
-                    #    (model.Post.feature_count, self.SORT_DESC),
-                    #),
+                    (
+                        ["feature-count"],
+                        (model.Post.feature_count, self.SORT_DESC),
+                    ),
                     (["file-size"], (model.Post.file_size, self.SORT_DESC)),
                     (
                         ["image-width", "width"],
@@ -594,10 +609,10 @@ class PostSearchConfig(BaseSearchConfig):
                         ["fav-date", "fav-time"],
                         (model.Post.last_favorite_time, self.SORT_DESC),
                     ),
-                    #(
-                    #    ["feature-date", "feature-time"],
-                    #    (model.Post.last_feature_time, self.SORT_DESC),
-                    #),
+                    (
+                        ["feature-date", "feature-time"],
+                        (model.Post.last_feature_time, self.SORT_DESC),
+                    ),
                 ]
             )
         )

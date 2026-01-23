@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, Optional
 
 import sqlalchemy as sa
@@ -51,7 +51,7 @@ def get_post_snapshot(post: model.Post) -> Dict[str, Any]:
         "safety": post.safety,
         "checksum": post.checksum,
         "flags": post.flags,
-        #"featured": post.is_featured,
+        "featured": bool(post.features),
         "tags": sorted([tag.first_name for tag in post.tags]),
         "relations": sorted([rel.post_id for rel in post.relations]),
         "notes": sorted(
@@ -111,7 +111,7 @@ def _create(
         auth_user = None
 
     snapshot = model.Snapshot()
-    snapshot.creation_time = datetime.utcnow()
+    snapshot.creation_time = datetime.now(UTC).replace(tzinfo=None)
     snapshot.operation = operation
     snapshot.resource_type = resource_type
     snapshot.resource_pkey = resource_pkey
@@ -147,7 +147,7 @@ def modify(entity: model.Base, auth_user: Optional[model.User]) -> None:
     snapshot_factory = _snapshot_factories[snapshot.resource_type]
 
     detached_session = sa.orm.sessionmaker(bind=db.session.get_bind())()
-    detached_entity = detached_session.query(table).get(snapshot.resource_pkey)
+    detached_entity = detached_session.get(table, snapshot.resource_pkey)
     # assert detached_entity, "Entity not found in DB, have you committed it?"
     detached_snapshot = snapshot_factory(detached_entity)
     detached_session.close()

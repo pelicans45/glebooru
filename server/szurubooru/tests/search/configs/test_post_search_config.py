@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 
 import pytest
 
@@ -9,7 +9,9 @@ from szurubooru import db, errors, model, search
 def fav_factory(user_factory):
     def factory(post, user=None):
         return model.PostFavorite(
-            post=post, user=user or user_factory(), time=datetime.utcnow()
+            post=post,
+            user=user or user_factory(),
+            time=datetime.now(UTC).replace(tzinfo=None),
         )
 
     return factory
@@ -21,7 +23,7 @@ def score_factory(user_factory):
         return model.PostScore(
             post=post,
             user=user or user_factory(),
-            time=datetime.utcnow(),
+            time=datetime.now(UTC).replace(tzinfo=None),
             score=score,
         )
 
@@ -41,9 +43,13 @@ def feature_factory(user_factory):
     def factory(post=None):
         if post:
             return model.PostFeature(
-                time=datetime.utcnow(), user=user_factory(), post=post
+                time=datetime.now(UTC).replace(tzinfo=None),
+                user=user_factory(),
+                post=post,
             )
-        return model.PostFeature(time=datetime.utcnow(), user=user_factory())
+        return model.PostFeature(
+            time=datetime.now(UTC).replace(tzinfo=None), user=user_factory()
+        )
 
     return factory
 
@@ -150,7 +156,7 @@ def test_filter_by_score(
         db.session.add(
             model.PostScore(
                 score=post.post_id,
-                time=datetime.utcnow(),
+                time=datetime.now(UTC).replace(tzinfo=None),
                 post=post,
                 user=user_factory(),
             )

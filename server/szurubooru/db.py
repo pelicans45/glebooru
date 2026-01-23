@@ -39,8 +39,7 @@ def _create_engine() -> sa.Engine:
         # Performance settings
         echo=config.config.get("show_sql", False),
 
-        # Use psycopg3 driver features if available
-        # These options work with both psycopg2 and psycopg3
+        # psycopg3 driver options
         connect_args={
             # Application name for easier debugging in pg_stat_activity
             "application_name": "szurubooru",

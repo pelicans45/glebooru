@@ -2,12 +2,18 @@ import contextlib
 import os
 import random
 import string
+import uuid
 from datetime import datetime
 from unittest.mock import patch
 
 import freezegun
 import pytest
+import psycopg
 import sqlalchemy as sa
+from pytest_postgresql import factories
+from pytest_postgresql.janitor import DatabaseJanitor
+from sqlalchemy import orm
+from sqlalchemy.pool import NullPool
 
 from szurubooru import config, db, model, rest
 
@@ -43,25 +49,144 @@ def query_logger(pytestconfig):
         logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 
-@pytest.fixture(scope="function", autouse=True)
-def session(query_logger, transacted_postgresql_db):
-    db.session = transacted_postgresql_db.session
-    transacted_postgresql_db.create_table(*model.Base.metadata.sorted_tables)
-    try:
-        yield transacted_postgresql_db.session
-    finally:
-        transacted_postgresql_db.reset_db()
+def _get_env_setting(name, default):
+    value = os.getenv(name)
+    if value:
+        return value
+    return default
+
+
+def _postgres_settings():
+    return {
+        "host": _get_env_setting("POSTGRES_HOST", "localhost"),
+        "port": int(_get_env_setting("POSTGRES_PORT", "5432")),
+        "user": _get_env_setting("POSTGRES_USER", "postgres"),
+        "password": _get_env_setting("POSTGRES_PASSWORD", ""),
+        "admin_db": _get_env_setting("POSTGRES_DB", "postgres"),
+    }
+
+
+def _sqlalchemy_url(**kwargs):
+    return sa.engine.URL.create(
+        "postgresql+psycopg",
+        username=kwargs["user"],
+        password=kwargs["password"] or None,
+        host=kwargs["host"],
+        port=kwargs["port"],
+        database=kwargs["dbname"],
+    )
+
+
+def _load_database(**kwargs):
+    engine = sa.create_engine(_sqlalchemy_url(**kwargs), poolclass=NullPool)
+    with engine.begin() as connection:
+        model.Base.metadata.create_all(connection)
+    engine.dispose()
+
+
+_PG_SETTINGS = _postgres_settings()
+postgresql_noproc = factories.postgresql_noproc(
+    host=_PG_SETTINGS["host"],
+    port=_PG_SETTINGS["port"],
+    user=_PG_SETTINGS["user"],
+    password=_PG_SETTINGS["password"],
+    dbname=_PG_SETTINGS["admin_db"],
+)
+_CREATED_DATABASES = set()
 
 
 @pytest.fixture(scope="function")
-def nontransacted_session(query_logger, postgresql_db):
-    old_db_session = db.session
-    db.session = postgresql_db.session
-    postgresql_db.create_table(*model.Base.metadata.sorted_tables)
+def postgresql(postgresql_noproc):
+    dbname = f"pytest_{uuid.uuid4().hex}"
+    janitor = DatabaseJanitor(
+        user=postgresql_noproc.user,
+        host=postgresql_noproc.host,
+        port=postgresql_noproc.port,
+        dbname=dbname,
+        template_dbname=postgresql_noproc.template_dbname,
+        version=postgresql_noproc.version,
+        password=postgresql_noproc.password,
+    )
+    with janitor:
+        db_connection = psycopg.connect(
+            dbname=dbname,
+            user=postgresql_noproc.user,
+            password=postgresql_noproc.password,
+            host=postgresql_noproc.host,
+            port=postgresql_noproc.port,
+            options=postgresql_noproc.options,
+        )
+        yield db_connection
+        db_connection.close()
+
+
+def _create_session(postgresql_connection):
+    info = postgresql_connection.info
+    db_key = (info.host, info.port, info.user, info.dbname)
+    if db_key not in _CREATED_DATABASES:
+        _load_database(
+            host=info.host or _PG_SETTINGS["host"],
+            port=info.port or _PG_SETTINGS["port"],
+            user=info.user or _PG_SETTINGS["user"],
+            password=_PG_SETTINGS["password"],
+            dbname=info.dbname,
+        )
+        _CREATED_DATABASES.add(db_key)
+    engine = sa.create_engine(
+        _sqlalchemy_url(
+            user=info.user or _PG_SETTINGS["user"],
+            password=_PG_SETTINGS["password"],
+            host=info.host or _PG_SETTINGS["host"],
+            port=info.port or _PG_SETTINGS["port"],
+            dbname=info.dbname,
+        ),
+        poolclass=NullPool,
+    )
+    session_factory = orm.sessionmaker(bind=engine, autoflush=False)
+    return session_factory(), engine
+
+
+@pytest.fixture(scope="function")
+def postgres_session(postgresql):
+    session, engine = _create_session(postgresql)
     try:
-        yield postgresql_db.session
+        yield session
     finally:
-        postgresql_db.reset_db()
+        session.rollback()
+        session.close()
+        engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def postgres_session_nontransacted(postgresql):
+    session, engine = _create_session(postgresql)
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+        engine.dispose()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def session(query_logger, postgres_session):
+    db.session = postgres_session
+    try:
+        yield postgres_session
+    finally:
+        postgres_session.rollback()
+        postgres_session.close()
+
+
+@pytest.fixture(scope="function")
+def nontransacted_session(query_logger, postgres_session_nontransacted):
+    old_db_session = db.session
+    db.session = postgres_session_nontransacted
+    try:
+        yield postgres_session_nontransacted
+    finally:
+        postgres_session_nontransacted.rollback()
+        postgres_session_nontransacted.close()
         db.session = old_db_session
 
 
@@ -174,18 +299,18 @@ def post_factory():
         id=None,
         safety=model.Post.SAFETY_SAFE,
         type=model.Post.TYPE_IMAGE,
-        checksum="...",
-        tags=[],
+        checksum=None,
+        tags=None,
     ):
         post = model.Post()
         post.post_id = id
         post.safety = safety
         post.type = type
-        post.checksum = checksum
+        post.checksum = checksum or get_unique_name()
         post.flags = []
         post.mime_type = "application/octet-stream"
         post.creation_time = datetime(1996, 1, 1)
-        post.tags = tags
+        post.tags = list(tags) if tags else []
         return post
 
     return factory

@@ -110,13 +110,12 @@ class Tag(Base):
         secondaryjoin=tag_id == TagImplication.child_id,
         lazy="joined",
     )
-    """
     metric = sa.orm.relationship(
         "Metric",
         uselist=False,
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        back_populates="tag",
     )
-    """
 
     post_count = sa.orm.column_property(
         sa.sql.expression.select(

@@ -33,7 +33,13 @@ def test_get_post_url(input_mime_type, expected_url, config_injector):
     assert posts.get_post_content_url(post) == expected_url
 
 
-@pytest.mark.parametrize("input_mime_type", ["image/jpeg", "image/gif"])
+@pytest.mark.parametrize(
+    "input_mime_type,expected_path",
+    [
+        ("image/jpeg", "posts/1_244c8840887984c4.jpg"),
+        ("image/gif", "posts/1_244c8840887984c4.gif"),
+    ],
+)
 def test_get_post_content_path(input_mime_type, expected_path):
     post = model.Post()
     post.post_id = 1

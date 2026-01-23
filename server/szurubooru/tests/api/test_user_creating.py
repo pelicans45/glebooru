@@ -48,8 +48,8 @@ def test_creating_user(user_factory, context_factory, fake_datetime):
         assert not users.update_user_name.called
         assert not users.update_user_password.called
         assert not users.update_user_email.called
-        users.update_user_rank.called_once_with(user, "moderator")
-        users.update_user_avatar.called_once_with(user, "manual", b"...")
+        users.update_user_rank.assert_called_once_with(user, "moderator")
+        users.update_user_avatar.assert_called_once_with(user, "manual", b"...")
 
 
 @pytest.mark.parametrize("field", ["name", "password"])

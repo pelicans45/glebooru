@@ -11,6 +11,8 @@ const Tag = require("./tag.js");
 
 let allRelevantTags = null;
 let topRelevantMatches = null;
+let allRelevantTagsPromise = null;
+let topRelevantMatchesPromise = null;
 
 const fields = [
     "names",
@@ -57,40 +59,47 @@ class TagList extends AbstractList {
         if (allRelevantTags && !refresh) {
             return Promise.resolve(allRelevantTags);
         }
-
-        if (lens.isUniversal) {
-            return this.search("sort:usages", 0, 5000, fields, true).then(
-                (response) => {
-                    allRelevantTags = response;
-                    /*
-                allRelevantTags = Object.assign({}, response, {
-                    results: this.fromResponse(response.results),
-                });
-				*/
-                    return Promise.resolve(allRelevantTags);
-                }
-            );
+        if (allRelevantTagsPromise && !refresh) {
+            return allRelevantTagsPromise;
+        }
+        if (allRelevantTagsPromise && refresh) {
+            return allRelevantTagsPromise;
         }
 
-        return api
-            .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
-                noProgress: true,
-            })
-            .then((response) => {
-                for (const result of response.results) {
-                    result.tag.usages = result.occurrences;
-                }
+        if (refresh) {
+            allRelevantTags = null;
+        }
 
-                const results = lens.excludeRedundantTags(
-                    response.results.map((result) => result.tag)
-                );
+        const loader = lens.isUniversal
+            ? this.search("sort:usages", 0, 5000, fields, true)
+            : api
+                .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
+                    noProgress: true,
+                })
+                .then((response) => {
+                    for (const result of response.results) {
+                        result.tag.usages = result.occurrences;
+                    }
 
-                allRelevantTags = Object.assign({}, response, {
-                    results: this.fromResponse(results),
+                    const results = lens.excludeRedundantTags(
+                        response.results.map((result) => result.tag)
+                    );
+
+                    return Object.assign({}, response, {
+                        results: this.fromResponse(results),
+                    });
                 });
 
-                return Promise.resolve(allRelevantTags);
+        allRelevantTagsPromise = loader
+            .then((response) => {
+                allRelevantTags = response;
+                return allRelevantTags;
+            })
+            .finally(() => {
+                allRelevantTagsPromise = null;
             });
+
+        return allRelevantTagsPromise;
     }
 
     static getRelevant(query, offset, limit) {
@@ -118,21 +127,38 @@ class TagList extends AbstractList {
         if (topRelevantMatches && !refresh) {
             return Promise.resolve(topRelevantMatches);
         }
+        if (topRelevantMatchesPromise && !refresh) {
+            return topRelevantMatchesPromise;
+        }
+        if (topRelevantMatchesPromise && refresh) {
+            return topRelevantMatchesPromise;
+        }
 
-        return this.getAllRelevant(refresh).then((response) => {
-            topRelevantMatches = tags.tagListToMatches(
-                response.results.copy().slice(0, vars.maxSuggestedResults),
-                {
-                    isTaggedWith: () => false,
-                }
-            );
-            return Promise.resolve(topRelevantMatches);
-        });
+        topRelevantMatchesPromise = this.getAllRelevant(refresh)
+            .then((response) => {
+                topRelevantMatches = tags.tagListToMatches(
+                    response.results.copy().slice(0, vars.maxSuggestedResults),
+                    {
+                        isTaggedWith: () => false,
+                    }
+                );
+                return topRelevantMatches;
+            })
+            .finally(() => {
+                topRelevantMatchesPromise = null;
+            });
+
+        return topRelevantMatchesPromise;
     }
 
-    static refreshRelevant() {
+    static refreshRelevant(preload = false) {
         allRelevantTags = null;
         topRelevantMatches = null;
+        allRelevantTagsPromise = null;
+        topRelevantMatchesPromise = null;
+        if (!preload) {
+            return Promise.resolve();
+        }
         return this.getTopRelevantMatches(true);
     }
 

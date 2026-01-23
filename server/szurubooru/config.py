@@ -17,6 +17,18 @@ def _merge(left: Dict, right: Dict) -> Dict:
     return left
 
 
+def _normalize_database_url(url: str) -> str:
+    if not url:
+        return url
+    if url.startswith("postgresql+psycopg://"):
+        return url
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    return url
+
+
 def _docker_config() -> Dict:
     if "TEST_ENVIRONMENT" not in os.environ:
         for key in ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST"]:
@@ -29,7 +41,7 @@ def _docker_config() -> Dict:
         "show_sql": int(os.getenv("LOG_SQL", 0)),
         "data_url": os.getenv("DATA_URL", "data/"),
         "data_dir": "/data/",
-        "database": "postgresql://%(user)s:%(pass)s@%(host)s:%(port)d/%(db)s"
+        "database": "postgresql+psycopg://%(user)s:%(pass)s@%(host)s:%(port)d/%(db)s"
         % {
             "user": os.getenv("POSTGRES_USER"),
             "pass": os.getenv("POSTGRES_PASSWORD"),
@@ -62,6 +74,7 @@ def _read_config() -> Dict:
     if not secret:
         raise KeyError("Missing SECRET")
     ret["secret"] = secret
+    ret["database"] = _normalize_database_url(ret.get("database"))
     return ret
 
 

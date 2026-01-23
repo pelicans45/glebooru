@@ -10,14 +10,17 @@ from typing import List
 # pillow-heif provides both HEIF and AVIF support
 import pillow_heif
 pillow_heif.register_heif_opener()  # Also registers AVIF opener
-from PIL import Image as PILImage
+from PIL import Image as PILImage, UnidentifiedImageError
 
 from szurubooru import errors
 from szurubooru.func import mime, util
 
 
 def convert_heif_to_png(content: bytes) -> bytes:
-    img = PILImage.open(BytesIO(content))
+    try:
+        img = PILImage.open(BytesIO(content))
+    except (UnidentifiedImageError, OSError, ValueError) as ex:
+        raise errors.ProcessingError("Unable to decode HEIF/AVIF image") from ex
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format="PNG")
     return img_byte_arr.getvalue()

@@ -50,27 +50,23 @@ stmt = select(model.Post).where(...)
 posts = db.session.execute(stmt).scalars().all()
 ```
 
-### 3. HTTP Server Options (Waitress vs Granian)
+### 3. HTTP Server (Granian)
 
-Added support for Granian, a Rust-based HTTP server that's **2-3x faster** than Waitress.
+Granian, a Rust-based HTTP server, is now the **only** supported HTTP server.
+Waitress support has been removed to simplify deployment and improve throughput.
 
 **Files Changed:**
-- `server/requirements.txt` - Added granian
-- `server/docker-start.sh` - Made configurable via SERVER env var
-- `server/docker-start-granian.sh` - Dedicated granian startup script
+- `server/requirements.txt` - Added granian, removed waitress
+- `server/docker-start.sh` - Granian-only startup
 
 **Usage:**
 ```bash
-# Use Waitress (default)
-SERVER=waitress ./d
-
-# Use Granian (faster)
-SERVER=granian ./d
+./d
 ```
 
 **Granian Advantages:**
-- 50,000 req/s vs Waitress ~10,000 req/s (benchmarks vary)
-- ~15MB memory per worker vs ~30MB for traditional servers
+- High throughput for I/O-bound workloads
+- Lower memory usage per worker
 - Built on Rust's Tokio and Hyper for maximum efficiency
 
 ## Migration Procedure
@@ -132,13 +128,13 @@ Benchmark different AIO modes to find the best for your storage:
 - **Network-attached storage (DigitalOcean, AWS EBS):** Use `io_method = worker`
 - **Local NVMe/SSD:** Use `io_method = io_uring`
 
-### HTTP Server Comparison
+### HTTP Server Benchmarking
 
 ```bash
 # Benchmark current server
 ./scripts/benchmark-http-servers.sh --quick
 
-# Full comparison workflow
+# Full benchmarking workflow
 ./scripts/benchmark-http-servers.sh --full
 ```
 
@@ -169,9 +165,8 @@ Benchmark different AIO modes to find the best for your storage:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SERVER` | waitress | HTTP server (waitress/granian) |
 | `PORT` | 6666 | Server port |
-| `THREADS` | 4 | Threads per worker |
+| `THREADS` | 4 | Blocking threads per worker |
 | `WORKERS` | 2 | Worker processes (granian) |
 
 ## Rollback Procedure
@@ -192,7 +187,7 @@ Benchmark different AIO modes to find the best for your storage:
 
 ### HTTP Server Rollback
 
-Set `SERVER=waitress` or remove the SERVER environment variable.
+No rollback path for the HTTP server is documented; Granian is the only supported server.
 
 ## Performance Expectations
 
@@ -203,8 +198,8 @@ Based on benchmarks and documentation:
 | Sequential scans | Baseline | 2-3x faster | PostgreSQL 18 AIO |
 | Cold cache reads | Baseline | 2-3x faster | PostgreSQL 18 AIO |
 | ORM inserts | Baseline | 5x faster | SQLAlchemy 2.0 |
-| HTTP requests | ~10k/s | ~50k/s | Granian |
-| Memory usage | Baseline | ~50% less | Granian workers |
+| HTTP requests | Baseline | Higher | Granian |
+| Memory usage | Baseline | Lower | Granian workers |
 
 **Note:** Actual improvements depend on workload and hardware. Always benchmark in your environment.
 

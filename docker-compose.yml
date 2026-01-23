@@ -17,8 +17,7 @@ services:
             #LOG_SQL: 0 (1 for verbose SQL logs)
             THREADS:
             WORKERS:
-            ## HTTP Server: granian (default, faster, Rust-based) or waitress
-            SERVER: ${SERVER:-granian}
+            ## HTTP Server: granian (Rust-based, high performance)
             SECRET:
         volumes:
             - "${MOUNT_DATA}:/data"

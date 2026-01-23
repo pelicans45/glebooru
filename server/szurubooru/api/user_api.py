@@ -58,7 +58,7 @@ def create_user(
     email = ctx.get_param_as_string("email", default="")
     user = users.create_user(name, password, email)
     if ctx.has_param("rank"):
-        users.update_user_rank(user, ctx.get_param_as_string("rank"), ctx.user)
+        users.update_user_rank(user, ctx.get_param_as_string("rank"))
     if ctx.has_param("avatarStyle"):
         users.update_user_avatar(
             user,

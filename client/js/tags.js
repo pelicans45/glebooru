@@ -3,9 +3,32 @@
 const misc = require("./util/misc.js");
 const TagCategoryList = require("./models/tag_category_list.js");
 const Tag = require("./models/tag.js");
+const vars = require("./vars.js");
 
 let _stylesheet = null;
 const minLengthForPartialSearch = 3;
+const tagNamePattern = new RegExp(vars.tagNameRegex);
+
+function isTagNameValid(name) {
+    if (!name) {
+        return false;
+    }
+    if (name === "." || name === "..") {
+        return false;
+    }
+    if (/^\d+$/.test(name)) {
+        return false;
+    }
+    if (
+        name.startsWith("-") ||
+        name.startsWith("_") ||
+        name.endsWith("-") ||
+        name.endsWith("_")
+    ) {
+        return false;
+    }
+    return tagNamePattern.test(name);
+}
 
 function refreshCategoryColorMap() {
     return TagCategoryList.get().then((response) => {
@@ -50,6 +73,14 @@ function _createTagByCategoryAndName(category, name) {
     name = name.trim();
     if (!name) {
         return Promise.reject(new Error("Empty tag name"));
+    }
+    if (!isTagNameValid(name)) {
+        return Promise.reject(
+            new Error(
+                `Invalid tag name. Must match ${vars.tagNameRegex} and ` +
+                    "cannot start or end with '-' or '_'."
+            )
+        );
     }
     // if tag with this name already exists, existing category will be used
     return Tag.get(name).then(
@@ -99,4 +130,5 @@ module.exports = {
     resolveTagAndCategory: resolveTagAndCategory,
     tagListToMatches: tagListToMatches,
     minLengthForPartialSearch: minLengthForPartialSearch,
+    isTagNameValid: isTagNameValid,
 };

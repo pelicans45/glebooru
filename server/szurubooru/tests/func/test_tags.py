@@ -495,7 +495,7 @@ def test_update_tag_category_name(tag_factory):
         tag_categories.get_category_by_name.return_value = "mocked"
         tag = tag_factory()
         tags.update_tag_category_name(tag, "cat")
-        assert tag_categories.get_category_by_name.called_once_with("cat")
+        tag_categories.get_category_by_name.assert_called_once_with("cat")
         assert tag.category == "mocked"
 
 

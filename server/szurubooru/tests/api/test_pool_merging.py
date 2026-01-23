@@ -39,7 +39,7 @@ def test_merging(user_factory, pool_factory, context_factory, post_factory):
                 user=auth_user,
             )
         )
-        pools.merge_pools.called_once_with(source_pool, target_pool)
+        pools.merge_pools.assert_called_once_with(source_pool, target_pool)
         snapshots.merge.assert_called_once_with(
             source_pool, target_pool, auth_user
         )

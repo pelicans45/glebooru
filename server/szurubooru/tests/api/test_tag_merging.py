@@ -39,7 +39,7 @@ def test_merging(user_factory, tag_factory, context_factory, post_factory):
                 user=auth_user,
             )
         )
-        tags.merge_tags.called_once_with(source_tag, target_tag)
+        tags.merge_tags.assert_called_once_with(source_tag, target_tag)
         snapshots.merge.assert_called_once_with(
             source_tag, target_tag, auth_user
         )

@@ -185,5 +185,5 @@ privileges:
 #data_url: /data/
 #data_dir: /var/www/data
 ## usage: schema://user:password@host:port/database_name
-## example: postgres://szuru:dog@localhost:5432/szuru_test
+## example: postgresql+psycopg://szuru:dog@localhost:5432/szuru_test
 #database:

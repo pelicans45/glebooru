@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, UTC
+import re
 from typing import Any, Callable, Dict, List, Optional
 
 import pytz
@@ -98,8 +99,8 @@ def create_user_token(user: model.User, enabled: bool) -> model.UserToken:
     user_token.user = user
     user_token.token = auth.generate_authorization_token()
     user_token.enabled = enabled
-    user_token.creation_time = datetime.utcnow()
-    user_token.last_usage_time = datetime.utcnow()
+    user_token.creation_time = datetime.now(UTC).replace(tzinfo=None)
+    user_token.last_usage_time = datetime.now(UTC).replace(tzinfo=None)
     return user_token
 
 
@@ -113,7 +114,7 @@ def update_user_token_enabled(
 
 def update_user_token_edit_time(user_token: model.UserToken) -> None:
     # assert user_token
-    user_token.last_edit_time = datetime.utcnow()
+    user_token.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
 
 
 def update_user_token_expiration_time(
@@ -121,9 +122,15 @@ def update_user_token_expiration_time(
 ) -> None:
     # assert user_token
     try:
+        if not re.search(r"(Z|[+-]\d{2}:\d{2})$", expiration_time_str):
+            raise InvalidExpirationError(
+                "Expiration is in an invalid format {}".format(
+                    expiration_time_str
+                )
+            )
         expiration_time = rfc3339_parser.parse(expiration_time_str, utc=True)
         expiration_time = expiration_time.astimezone(pytz.UTC)
-        if expiration_time < datetime.utcnow().replace(tzinfo=pytz.UTC):
+        if expiration_time < datetime.now(UTC):
             raise InvalidExpirationError(
                 "Expiration cannot happen in the past"
             )
@@ -147,4 +154,4 @@ def update_user_token_note(user_token: model.UserToken, note: str) -> None:
 
 def bump_usage_time(user_token: model.UserToken) -> None:
     # assert user_token
-    user_token.last_usage_time = datetime.utcnow()
+    user_token.last_usage_time = datetime.now(UTC).replace(tzinfo=None)
