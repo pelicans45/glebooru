@@ -65,14 +65,6 @@ class Tag extends events.EventTarget {
         this._description = value;
     }
 
-    get metric() {
-        return this._metric;
-    }
-
-    set metric(value) {
-        this._metric = value;
-    }
-
     static fromResponse(response) {
         const ret = new Tag();
         ret._updateFromResponse(response);
@@ -107,12 +99,6 @@ class Tag extends events.EventTarget {
             detail.suggestions = this._suggestions.map(
                 (relation) => relation.names[0]
             );
-        }
-        if (this._metric !== this._orig._metric) {
-            detail.metric = {
-                min: this._metric.min,
-                max: this._metric.max
-            };
         }
 
         let promise = this._origName
@@ -190,22 +176,6 @@ class Tag extends events.EventTarget {
             });
     }
 
-    deleteMetric() {
-        return api.delete(
-            uri.formatApiLink("metric", this._origName),
-            {version: this.metric.version})
-            .then((response) => {
-                this.dispatchEvent(
-                    new CustomEvent("delete", {
-                        detail: {
-                            metric: this.metric,
-                        },
-                    })
-                );
-                return Promise.resolve();
-            });
-    }
-
     _updateFromResponse(response) {
         const map = {
             _version: response.version,
@@ -216,7 +186,6 @@ class Tag extends events.EventTarget {
             _creationTime: response.creationTime,
             _lastEditTime: response.lastEditTime,
             _postCount: response.usages || 0,
-            _metric: response.metric,
         };
 
         for (let obj of [this, this._orig]) {

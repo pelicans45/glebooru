@@ -27,6 +27,9 @@ convert:
 # allow posts to be uploaded even if some image processing errors occur
 allow_broken_uploads: false
 
+# reduce background noise during benchmarks
+enable_background_hashing: false
+
 # used to send password reset e-mails
 smtp:
     host: # example: localhost
@@ -143,12 +146,6 @@ privileges:
     'tag_categories:view':          anonymous
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
-
-    'metrics:create':               administrator
-    'metrics:edit:bounds':          administrator
-    'metrics:edit:posts':           administrator
-    'metrics:list':                 administrator
-    'metrics:delete':               administrator
 
     'pools:create':                 power
     'pools:edit:names':             power

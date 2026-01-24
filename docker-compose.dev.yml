@@ -3,6 +3,10 @@ services:
         build: server
         #platform: linux/arm64
         restart: unless-stopped
+        cap_add:
+            - SYS_PTRACE
+        security_opt:
+            - seccomp=unconfined
         depends_on:
             - sql
         environment:

@@ -27,6 +27,7 @@ def get_tag_categories(
     categories = tag_categories.get_all_categories()
     return {
         "results": [_serialize(ctx, category) for category in categories],
+        "_cache": "public, max-age=3600",  # 1 hour - categories rarely change
     }
 
 

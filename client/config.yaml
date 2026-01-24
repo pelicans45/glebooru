@@ -144,12 +144,6 @@ privileges:
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
 
-    'metrics:create':               administrator
-    'metrics:edit:bounds':          administrator
-    'metrics:edit:posts':           administrator
-    'metrics:list':                 administrator
-    'metrics:delete':               administrator
-
     'pools:create':                 power
     'pools:edit:names':             power
     'pools:edit:category':          power

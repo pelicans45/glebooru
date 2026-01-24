@@ -1,0 +1,37 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:04:39  Samples:  19
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.035     CPU time: 0.028
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.033 application  szurubooru/rest/app.py:155
+└─ 0.033 get_posts  szurubooru/api/post_api.py:105
+   └─ 0.033 Executor.execute_and_serialize_batch  szurubooru/search/executor.py:153
+      ├─ 0.018 Executor.execute  szurubooru/search/executor.py:90
+      │  ├─ 0.007 Query.all  sqlalchemy/orm/query.py:2682
+      │  │     [40 frames hidden]  sqlalchemy, psycopg
+      │  ├─ 0.006 Executor._prepare_db_query  szurubooru/search/executor.py:190
+      │  │  └─ 0.006 _tag_name_filter  szurubooru/search/configs/post_search_config.py:102
+      │  │     └─ 0.006 Query.all  sqlalchemy/orm/query.py:2682
+      │  │           [25 frames hidden]  sqlalchemy, psycopg, re
+      │  ├─ 0.002 scoped_session.execute  sqlalchemy/orm/scoping.py:698
+      │  │     [11 frames hidden]  sqlalchemy, psycopg
+      │  ├─ 0.002 Query.offset  <string>:1
+      │  │  └─ 0.002 _generative  sqlalchemy/sql/base.py:277
+      │  │        [10 frames hidden]  <string>, sqlalchemy, re, <built-in>
+      │  └─ 0.001 PostSearchConfig.create_filter_query  szurubooru/search/configs/post_search_config.py:302
+      │     └─ 0.001 contains_eager  sqlalchemy/orm/strategy_options.py:2419
+      │           [8 frames hidden]  sqlalchemy, <string>
+      └─ 0.015 <lambda>  szurubooru/api/post_api.py:114
+         └─ 0.015 serialize_posts_batch  szurubooru/func/posts.py:494
+            ├─ 0.012 _batch_load_tags_for_posts  szurubooru/func/posts.py:573
+            │  └─ 0.012 Query.all  sqlalchemy/orm/query.py:2682
+            │        [27 frames hidden]  sqlalchemy, psycopg
+            └─ 0.003 serialize_post  szurubooru/func/posts.py:430
+               └─ 0.003 PostSerializer.serialize  szurubooru/func/serialization.py:13
+                  └─ 0.003 PostSerializer.serialize_tags_basic  szurubooru/func/posts.py:320
+                     └─ 0.003 sort_tags  szurubooru/func/tags.py:117
+                        └─ 0.003 get_sort_key  szurubooru/func/tags.py:123
+                           └─ 0.003 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+

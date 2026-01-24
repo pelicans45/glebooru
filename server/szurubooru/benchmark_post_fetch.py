@@ -50,6 +50,7 @@ def new_get_post_by_id_optimized(post_id: int) -> Optional[model.Post]:
     return (
         db.session.query(model.Post)
         .options(
+            joinedload(model.Post.statistics),
             # Tags with their names and categories
             selectinload(model.Post.tags)
             .joinedload(model.Tag.names),

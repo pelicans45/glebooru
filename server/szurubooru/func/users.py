@@ -184,6 +184,13 @@ def serialize_micro_user(
 
 
 def get_user_count() -> int:
+    stats = (
+        db.session.query(model.DatabaseStatistics)
+        .filter(model.DatabaseStatistics.id == True)  # noqa: E712
+        .one_or_none()
+    )
+    if stats:
+        return int(stats.user_count or 0)
     return db.session.query(model.User).count()
 
 

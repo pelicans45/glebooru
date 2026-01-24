@@ -129,12 +129,6 @@
         </nav>
     <% } %>
 
-    <% /* if (ctx.post.metrics.length + ctx.post.metricRanges.length) { %>
-        <nav class='metrics'>
-            <h2>Metrics (<%- ctx.post.metrics.length + ctx.post.metricRanges.length %>)</h2>
-            <ul class='compact-post-metrics'></ul>
-        </nav>
-    <% } */ %>
 
     <% if (ctx.canViewSimilar) { %>
         <nav class='see-more'>

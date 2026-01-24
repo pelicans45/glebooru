@@ -146,8 +146,9 @@ def create_app() -> Callable[[Any, Any], Any]:
 
     threading.Thread(target=purge_old_uploads_daemon, daemon=True).start()
 
-    for migration in _live_migrations:
-        threading.Thread(target=migration, daemon=False).start()
+    if config.config.get("enable_background_hashing", True):
+        for migration in _live_migrations:
+            threading.Thread(target=migration, daemon=False).start()
 
     db.session.commit()
 

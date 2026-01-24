@@ -1,0 +1,46 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:06:56  Samples:  21
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.035     CPU time: 0.029
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.034 application  szurubooru/rest/app.py:155
+└─ 0.034 get_post  szurubooru/api/post_api.py:124
+   ├─ 0.030 _serialize_post  szurubooru/api/post_api.py:44
+   │  └─ 0.030 serialize_post  szurubooru/func/posts.py:430
+   │     ├─ 0.019 PostSerializer.serialize  szurubooru/func/serialization.py:13
+   │     │  ├─ 0.008 PostSerializer.serialize_user  szurubooru/func/posts.py:349
+   │     │  │  └─ 0.008 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [33 frames hidden]  sqlalchemy, <built-in>, psycopg
+   │     │  ├─ 0.003 PostSerializer.serialize_own_score  szurubooru/func/posts.py:357
+   │     │  │  └─ 0.003 get_score  szurubooru/func/scores.py:40
+   │     │  │     ├─ 0.002 InstrumentedAttribute.__eq__  sqlalchemy/sql/operators.py:577
+   │     │  │     │     [3 frames hidden]  sqlalchemy
+   │     │  │     └─ 0.001 Query.one_or_none  sqlalchemy/orm/query.py:2761
+   │     │  │           [12 frames hidden]  sqlalchemy, psycopg
+   │     │  ├─ 0.002 PostSerializer.serialize_comments  szurubooru/func/posts.py:415
+   │     │  │  └─ 0.002 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [21 frames hidden]  sqlalchemy, psycopg
+   │     │  ├─ 0.002 PostSerializer.serialize_notes  szurubooru/func/posts.py:409
+   │     │  │  └─ 0.002 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [15 frames hidden]  sqlalchemy, psycopg
+   │     │  ├─ 0.002 PostSerializer.serialize_score  szurubooru/func/posts.py:352
+   │     │  │  └─ 0.002 Post.score  szurubooru/model/post.py:316
+   │     │  │     └─ 0.002 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │           [7 frames hidden]  sqlalchemy
+   │     │  └─ 0.001 PostSerializer.serialize_flags  szurubooru/func/posts.py:301
+   │     ├─ 0.005 Query.all  sqlalchemy/orm/query.py:2682
+   │     │     [22 frames hidden]  sqlalchemy, psycopg
+   │     ├─ 0.004 get_relations_for_posts  szurubooru/func/posts.py:630
+   │     │  └─ 0.004 Query.all  sqlalchemy/orm/query.py:2682
+   │     │        [13 frames hidden]  sqlalchemy, psycopg
+   │     └─ 0.002 get_tag_post_counts  szurubooru/func/posts.py:615
+   │        └─ 0.002 Query.all  sqlalchemy/orm/query.py:2682
+   │              [6 frames hidden]  sqlalchemy
+   └─ 0.004 _get_post  szurubooru/api/post_api.py:40
+      └─ 0.004 get_post_by_id  szurubooru/func/posts.py:714
+         └─ 0.004 try_get_post_by_id  szurubooru/func/posts.py:681
+            └─ 0.004 Query.first  sqlalchemy/orm/query.py:2731
+                  [28 frames hidden]  sqlalchemy, <built-in>, <string>, psy...
+

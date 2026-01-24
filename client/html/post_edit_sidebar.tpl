@@ -79,12 +79,6 @@
             </section>
         <% } %>
 
-        <% /* if (ctx.canEditPostMetrics) { %>
-            <section class='metrics'>
-                <%= ctx.makeTextInput({}) %>
-            </section>
-        <% } */ %>
-
         <% if (ctx.canEditPostNotes) { %>
             <section class='notes'>
                 <a class='add'>Add a note</a>

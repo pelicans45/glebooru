@@ -3,7 +3,6 @@ from typing import Optional
 import sqlalchemy as sa
 
 from szurubooru.model.base import Base
-from szurubooru.model.tag import Tag
 
 
 class TagCategory(Base):
@@ -20,12 +19,20 @@ class TagCategory(Base):
 
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
-
-    tag_count = sa.orm.column_property(
-        sa.sql.expression.select(sa.sql.expression.func.count("Tag.tag_id"))
-        .where(Tag.category_id == tag_category_id)
-        .correlate_except(sa.table("Tag")).scalar_subquery()
+    statistics = sa.orm.relationship(
+        "TagCategoryStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("category", lazy="joined"),
     )
+
+    @property
+    def tag_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.usage_count or 0)
 
     __mapper_args__ = {
         "version_id_col": version,

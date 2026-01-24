@@ -8,7 +8,6 @@ const progress = require("./util/progress.js");
 const uri = require("./util/uri.js");
 
 let fileTokens = {};
-let remoteConfig = null;
 
 class Api extends events.EventTarget {
     constructor() {
@@ -70,53 +69,6 @@ class Api extends events.EventTarget {
         return this._wrappedRequest(url, request.delete, data, {}, options);
     }
 
-    fetchConfig() {
-        if (remoteConfig === null) {
-            return this.get(uri.formatApiLink("info")).then((response) => {
-                remoteConfig = response.config;
-            });
-        } else {
-            return Promise.resolve();
-        }
-    }
-
-    /*
-    getName() {
-        //return remoteConfig.name;
-        return site.name;
-    }
-
-    getTagNameRegex() {
-        return remoteConfig.tagNameRegex;
-    }
-
-    getPoolNameRegex() {
-        return remoteConfig.poolNameRegex;
-    }
-
-    getPasswordRegex() {
-        return remoteConfig.passwordRegex;
-    }
-
-    getUserNameRegex() {
-        return remoteConfig.userNameRegex;
-    }
-
-    getContactEmail() {
-        //return remoteConfig.contactEmail;
-        return "";
-    }
-
-
-    safetyEnabled() {
-        return !!remoteConfig.enableSafety;
-    }
-
-    canSendMails() {
-        //return !!remoteConfig.canSendMails;
-        return false;
-    }
-	*/
 
     hasPrivilege(lookup) {
         let minViableRank = null;

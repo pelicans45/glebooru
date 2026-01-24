@@ -2,7 +2,6 @@
 
 const api = require("../api.js");
 const lens = require("../lens.js");
-const Info = require("../models/info.js");
 const topNavigation = require("../models/top_navigation.js");
 const HomeView = require("../views/home_view.js");
 
@@ -22,20 +21,6 @@ class HomeController {
             isDevelopmentMode: false,
         });
 
-        Info.get().then(
-            (info) => {
-                this._homeView.setStats({
-                    diskUsage: info.diskUsage,
-                    postCount: info.postCount,
-                });
-                this._homeView.setFeaturedPost({
-                    featuredPost: info.featuredPost,
-                    featuringUser: info.featuringUser,
-                    featuringTime: info.featuringTime,
-                });
-            },
-            (error) => this._homeView.showError(error.message)
-        );
     }
 
     showSuccess(message) {

@@ -33,12 +33,10 @@
                         <% if (ctx.editMode) { %>
                             <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
                                 q: ctx.parameters.q,
-                                metrics: ctx.parameters.metrics,
                                 r: Math.round(Math.random() * 998) + 1}) %>'>
                         <% } else { %>
                             <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
                                 q: ctx.parameters.q,
-                                metrics: ctx.parameters.metrics,
                                 r: Math.round(Math.random() * 998) + 1}) %>'>
                         <% } %>
                     <% } else { %>
@@ -141,12 +139,10 @@
                         <% if (ctx.editMode) { %>
                             <a rel='next' href='<%= ctx.getPostEditUrl(ctx.randomPostId, {
                                 q: ctx.parameters.q,
-                                metrics: ctx.parameters.metrics,
                                 r: Math.round(Math.random() * 998) + 1}) %>'>
                         <% } else { %>
                             <a rel='next' href='<%= ctx.getPostUrl(ctx.randomPostId, {
                                 q: ctx.parameters.q,
-                                metrics: ctx.parameters.metrics,
                                 r: Math.round(Math.random() * 998) + 1}) %>'>
                         <% } %>
                     <% } else { %>

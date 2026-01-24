@@ -331,6 +331,50 @@ def update_pool_posts(pool: model.Pool, post_ids: List[int]) -> None:
         raise InvalidPoolNonexistentPostError(
             "The following posts do not exist: " + missing
         )
-    pool.posts.clear()
-    for post in ret:
-        pool.posts.append(post)
+    state = sa.inspect(pool)
+    if state.transient:
+        pool.posts.clear()
+        for post in ret:
+            pool.posts.append(post)
+        return
+
+    if pool.pool_id is None:
+        db.session.flush()
+
+    new_post_ids = {post.post_id for post in ret}
+    if "posts" in state.dict:
+        old_post_ids = {post.post_id for post in state.dict["posts"]}
+    else:
+        old_post_ids = {
+            post_id
+            for (post_id,) in db.session.execute(
+                sa.select(model.PoolPost.post_id).where(
+                    model.PoolPost.pool_id == pool.pool_id
+                )
+            )
+        }
+
+    to_remove = old_post_ids - new_post_ids
+    to_add = new_post_ids - old_post_ids
+
+    if to_remove:
+        db.session.execute(
+            sa.text(
+                "DELETE FROM pool_post "
+                "WHERE pool_id = :pool_id "
+                "AND post_id = ANY(CAST(:post_ids AS int[]))"
+            ),
+            {"pool_id": pool.pool_id, "post_ids": list(to_remove)},
+        )
+
+    if to_add:
+        db.session.execute(
+            sa.text(
+                "INSERT INTO pool_post (pool_id, post_id) "
+                "SELECT :pool_id, unnest(CAST(:post_ids AS int[])) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {"pool_id": pool.pool_id, "post_ids": list(to_add)},
+        )
+
+    sa.orm.attributes.set_committed_value(pool, "posts", ret)

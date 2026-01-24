@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from szurubooru import api, db, errors, model
-from szurubooru.func import metrics, net, posts, snapshots, tags
+from szurubooru.func import net, posts, snapshots, tags
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,6 @@ def inject_config(config_injector):
                 "posts:edit:flags": model.User.RANK_REGULAR,
                 "posts:edit:thumbnail": model.User.RANK_REGULAR,
                 "tags:create": model.User.RANK_MODERATOR,
-                "metrics:edit:posts": model.User.RANK_REGULAR,
                 "uploads:use_downloader": model.User.RANK_REGULAR,
             },
             "allow_broken_uploads": False,
@@ -57,10 +56,6 @@ def test_post_updating(
         "szurubooru.func.posts.serialize_post"
     ), patch(
         "szurubooru.func.snapshots.modify"
-    ), patch(
-        "szurubooru.func.metrics.update_or_create_post_metrics"
-    ), patch(
-        "szurubooru.func.metrics.update_or_create_post_metric_ranges"
     ), fake_datetime(
         "1997-01-01"
     ):
@@ -76,8 +71,6 @@ def test_post_updating(
                     "source": "source",
                     "notes": ["note1", "note2"],
                     "flags": ["flag1", "flag2"],
-                    "metrics": [{"tag_name": "tag1", "value": 1.2}],
-                    "metricRanges": [{"tag_name": "tag2", "low": 1, "high": 2}],
                 },
                 files={
                     "content": "post-content",
@@ -110,10 +103,6 @@ def test_post_updating(
             post, auth_user, options=[]
         )
         snapshots.modify.assert_called_once_with(post, auth_user)
-        metrics.update_or_create_post_metrics.assert_called_once_with(
-            post, [{"tag_name": "tag1", "value": 1.2}])
-        metrics.update_or_create_post_metric_ranges.assert_called_once_with(
-            post, [{"tag_name": "tag2", "low": 1, "high": 2}])
         assert post.last_edit_time == datetime(1997, 1, 1)
 
 
@@ -199,8 +188,6 @@ def test_trying_to_update_non_existing(context_factory, user_factory):
         ({}, {"flags": "..."}),
         ({"content": "..."}, {}),
         ({"thumbnail": "..."}, {}),
-        ({}, {"metrics": "..."}),
-        ({}, {"metricRanges": "..."}),
     ],
 )
 def test_trying_to_update_field_without_privileges(

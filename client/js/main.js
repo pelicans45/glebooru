@@ -62,7 +62,6 @@ const controllers = [
     require("./controllers/user_list_controller.js"),
 
     require("./controllers/user_registration_controller.js"),
-    require("./controllers/metric_sorter_controller.js"),
 
     require("./controllers/password_reset_controller.js"),
     require("./controllers/comments_controller.js"),

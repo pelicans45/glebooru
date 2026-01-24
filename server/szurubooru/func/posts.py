@@ -13,7 +13,6 @@ from szurubooru.func import (
     files,
     image_hash,
     images,
-    metrics,
     mime,
     pools,
     scores,
@@ -219,10 +218,12 @@ class PostSerializer(serialization.BaseSerializer):
             "fileSize": self.serialize_file_size,
             "canvasWidth": self.serialize_canvas_width,
             "canvasHeight": self.serialize_canvas_height,
+            "duration": self.serialize_duration,
             "contentUrl": self.serialize_content_url,
             "thumbnailUrl": self.serialize_thumbnail_url,
             "flags": self.serialize_flags,
             "tags": self.serialize_tags,
+            "tagsBasic": self.serialize_tags_basic,
             "relations": self.serialize_relations,
             "user": self.serialize_user,
             "score": self.serialize_score,
@@ -238,8 +239,6 @@ class PostSerializer(serialization.BaseSerializer):
             "favoritedBy": self.serialize_favorited_by,
             "notes": self.serialize_notes,
             "comments": self.serialize_comments,
-            "metrics": self.serialize_metrics,
-            "metricRanges": self.serialize_metric_ranges,
             "pools": self.serialize_pools,
         }
 
@@ -315,9 +314,6 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
                 "usages": usages,
-                "metric": {"min": tag.metric.min, "max": tag.metric.max}
-                if tag.metric
-                else None,
             })
         return result
 
@@ -327,7 +323,7 @@ class PostSerializer(serialization.BaseSerializer):
                 "names": [name.name for name in tag.names],
                 "category": tag.category.name,
             }
-            for tag in tags.sort_tags(self.post.tags)
+            for tag in tags.sort_tags(self.post.tags, self._preloaded_tag_counts)
         ]
 
     def serialize_relations(self) -> Any:
@@ -417,39 +413,21 @@ class PostSerializer(serialization.BaseSerializer):
         )
 
     def serialize_comments(self) -> Any:
-        return [
-            comments.serialize_comment(comment, self.auth_user)
-            for comment in sorted(
+        if getattr(self.post, "_comments_sorted", False):
+            ordered_comments = self.post.comments
+        else:
+            ordered_comments = sorted(
                 self.post.comments, key=lambda comment: comment.creation_time
             )
+        return [
+            comments.serialize_comment(comment, self.auth_user)
+            for comment in ordered_comments
         ]
 
     def serialize_pools(self) -> List[Any]:
         return [
             pools.serialize_micro_pool(pool)
             for pool in sorted(self.post.pools, key=lambda pool: pool.creation_time)
-        ]
-
-    def serialize_metrics(self) -> Any:
-        # Use eager-loaded tag.names instead of tag_name column_property to avoid N+1
-        def get_tag_name(metric):
-            if metric.metric and metric.metric.tag and metric.metric.tag.names:
-                return metric.metric.tag.names[0].name
-            return ""
-        return [
-            metrics.serialize_post_metric(metric)
-            for metric in sorted(self.post.metrics, key=get_tag_name)
-        ]
-
-    def serialize_metric_ranges(self) -> Any:
-        # Use eager-loaded tag.names instead of tag_name column_property to avoid N+1
-        def get_tag_name(metric_range):
-            if metric_range.metric and metric_range.metric.tag and metric_range.metric.tag.names:
-                return metric_range.metric.tag.names[0].name
-            return ""
-        return [
-            metrics.serialize_post_metric_range(metric_range)
-            for metric_range in sorted(self.post.metric_ranges, key=get_tag_name)
         ]
 
 
@@ -469,35 +447,100 @@ def serialize_post(
         return None
 
     # Pre-fetch data for single post if not provided (avoids N+1 queries)
-    needs_tags = not options or "tags" in options
+    needs_tags = not options or "tags" in options or "tagsBasic" in options
     needs_relations = not options or "relations" in options
+    needs_user = not options or "user" in options
+    needs_notes = not options or "notes" in options
+    needs_comments = not options or "comments" in options
+    needs_own_score = not options or "ownScore" in options
+    needs_own_favorite = not options or "ownFavorite" in options
+    needs_stats = not options or bool(
+        {
+            "score",
+            "tagCount",
+            "favoriteCount",
+            "commentCount",
+            "noteCount",
+            "relationCount",
+            "featureCount",
+            "lastFeatureTime",
+        }.intersection(options)
+    )
 
-    if needs_tags and preloaded_tag_counts is None:
-        # Check if tags are already loaded to avoid triggering lazy load
-        state = sa.orm.attributes.instance_state(post)
-        if 'tags' not in state.dict:
-            # Tags not loaded yet - load them efficiently with a single query
-            loaded_tags = (
-                db.session.query(model.Tag)
-                .join(model.PostTag)
-                .filter(model.PostTag.post_id == post.post_id)
-                .options(
-                    sa.orm.joinedload(model.Tag.names),
-                    sa.orm.joinedload(model.Tag.category),
-                    sa.orm.joinedload(model.Tag.metric),  # Avoid N+1 for tag.metric
-                )
+    state = sa.orm.attributes.instance_state(post)
+
+    if needs_user and "user" not in state.dict:
+        user_obj = None
+        if post.user_id:
+            user_obj = (
+                db.session.query(model.User)
+                .filter(model.User.user_id == post.user_id)
+                .one_or_none()
+            )
+        sa.orm.attributes.set_committed_value(post, "user", user_obj)
+
+    if needs_stats and "statistics" not in state.dict:
+        stats = (
+            db.session.query(model.PostStatistics)
+            .filter(model.PostStatistics.post_id == post.post_id)
+            .one_or_none()
+        )
+        sa.orm.attributes.set_committed_value(post, "statistics", stats)
+
+    stats_obj = post.statistics if "statistics" in state.dict else None
+
+    if needs_comments and "comments" not in state.dict:
+        if stats_obj is not None and getattr(stats_obj, "comment_count", 0) == 0:
+            sa.orm.attributes.set_committed_value(post, "comments", [])
+            post._comments_sorted = True
+        else:
+            comment_list = (
+                db.session.query(model.Comment)
+                .filter(model.Comment.post_id == post.post_id)
+                .order_by(model.Comment.creation_time)
                 .all()
             )
-            # Set the tags without triggering relationship machinery
-            sa.orm.attributes.set_committed_value(post, 'tags', loaded_tags)
+            sa.orm.attributes.set_committed_value(post, "comments", comment_list)
+            post._comments_sorted = True
 
-        # Now get tag counts
-        if post.tags:
+    if needs_notes and "notes" not in state.dict:
+        if stats_obj is not None and getattr(stats_obj, "note_count", 0) == 0:
+            sa.orm.attributes.set_committed_value(post, "notes", [])
+        else:
+            note_list = (
+                db.session.query(model.PostNote)
+                .filter(model.PostNote.post_id == post.post_id)
+                .all()
+            )
+            sa.orm.attributes.set_committed_value(post, "notes", note_list)
+
+    if needs_tags and preloaded_tag_counts is None:
+        if stats_obj is not None and getattr(stats_obj, "tag_count", 0) == 0:
+            sa.orm.attributes.set_committed_value(post, "tags", [])
+            preloaded_tag_counts = {}
+        elif "tags" not in state.dict:
+            tags_by_post, tag_counts = _batch_load_tags_for_posts([post.post_id])
+            sa.orm.attributes.set_committed_value(
+                post, "tags", tags_by_post.get(post.post_id, [])
+            )
+            preloaded_tag_counts = tag_counts
+        elif post.tags:
             tag_ids = [tag.tag_id for tag in post.tags]
             preloaded_tag_counts = get_tag_post_counts(tag_ids)
 
     if preloaded_relations is None and needs_relations:
-        preloaded_relations = get_relations_for_posts([post.post_id])
+        if stats_obj is not None and getattr(stats_obj, "relation_count", 0) == 0:
+            preloaded_relations = {post.post_id: []}
+        else:
+            preloaded_relations = get_relations_for_posts([post.post_id])
+
+    if needs_own_score and preloaded_scores is None:
+        preloaded_scores = scores.get_post_scores_for_user([post.post_id], auth_user)
+
+    if needs_own_favorite and preloaded_favorites is None:
+        preloaded_favorites = scores.get_post_favorites_for_user(
+            [post.post_id], auth_user
+        )
 
     return PostSerializer(
         post,
@@ -537,7 +580,7 @@ def serialize_posts_batch(
     # If options is empty, all fields are serialized
     needs_score = not options or "ownScore" in options
     needs_favorite = not options or "ownFavorite" in options
-    needs_tags = not options or "tags" in options
+    needs_tags = not options or "tags" in options or "tagsBasic" in options
     needs_relations = not options or "relations" in options
 
     preloaded_scores = None
@@ -561,18 +604,19 @@ def serialize_posts_batch(
 
         if not tags_already_loaded:
             # Batch load tags for all posts with a single efficient query
-            tags_by_post = _batch_load_tags_for_posts(post_ids)
+            tags_by_post, tag_counts = _batch_load_tags_for_posts(post_ids)
             for post in post_list:
                 post_tags = tags_by_post.get(post.post_id, [])
                 sa.orm.attributes.set_committed_value(post, 'tags', post_tags)
-
-        # Now collect tag IDs and batch fetch counts
-        all_tag_ids = set()
-        for post in post_list:
-            for tag in post.tags:
-                all_tag_ids.add(tag.tag_id)
-        if all_tag_ids:
-            preloaded_tag_counts = get_tag_post_counts(list(all_tag_ids))
+            preloaded_tag_counts = tag_counts
+        else:
+            # Now collect tag IDs and batch fetch counts
+            all_tag_ids = set()
+            for post in post_list:
+                for tag in post.tags:
+                    all_tag_ids.add(tag.tag_id)
+            if all_tag_ids:
+                preloaded_tag_counts = get_tag_post_counts(list(all_tag_ids))
 
     # Batch fetch relations
     if needs_relations:
@@ -596,30 +640,36 @@ def serialize_posts_batch(
     ]
 
 
-def _batch_load_tags_for_posts(post_ids: List[int]) -> Dict[int, List[model.Tag]]:
-    """Load tags for multiple posts in a single query, returning dict of post_id -> tags."""
+def _batch_load_tags_for_posts(
+    post_ids: List[int],
+) -> Tuple[Dict[int, List[model.Tag]], Dict[int, int]]:
+    """Load tags for multiple posts in a single query, plus tag usage counts."""
     if not post_ids:
-        return {}
+        return {}, {}
 
-    # Query all tags for the given posts with eager loading
     post_tags = (
-        db.session.query(model.PostTag.post_id, model.Tag)
+        db.session.query(
+            model.PostTag.post_id,
+            model.Tag,
+            model.TagStatistics.usage_count,
+        )
         .join(model.Tag, model.PostTag.tag_id == model.Tag.tag_id)
+        .join(model.TagStatistics)
         .filter(model.PostTag.post_id.in_(post_ids))
         .options(
             sa.orm.joinedload(model.Tag.names),
             sa.orm.joinedload(model.Tag.category),
-            sa.orm.joinedload(model.Tag.metric),
         )
         .all()
     )
 
-    # Group by post_id
-    result = {pid: [] for pid in post_ids}
-    for post_id, tag in post_tags:
-        result[post_id].append(tag)
+    tags_by_post = {pid: [] for pid in post_ids}
+    tag_counts: Dict[int, int] = {}
+    for post_id, tag, usage_count in post_tags:
+        tags_by_post[post_id].append(tag)
+        tag_counts[tag.tag_id] = int(usage_count or 0)
 
-    return result
+    return tags_by_post, tag_counts
 
 
 def get_post_relations(post_id: int) -> List[model.Post]:
@@ -638,14 +688,13 @@ def get_tag_post_counts(tag_ids: List[int]) -> Dict[int, int]:
         return {}
     result = (
         db.session.query(
-            model.PostTag.tag_id,
-            sa.func.count(model.PostTag.post_id)
+            model.TagStatistics.tag_id,
+            model.TagStatistics.usage_count,
         )
-        .filter(model.PostTag.tag_id.in_(tag_ids))
-        .group_by(model.PostTag.tag_id)
+        .filter(model.TagStatistics.tag_id.in_(tag_ids))
         .all()
     )
-    return {tag_id: count for tag_id, count in result}
+    return {tag_id: int(count or 0) for tag_id, count in result}
 
 
 def get_relations_for_posts(post_ids: List[int]) -> Dict[int, List[model.Post]]:
@@ -686,6 +735,13 @@ def get_relations_for_posts(post_ids: List[int]) -> Dict[int, List[model.Post]]:
 
 
 def get_post_count() -> int:
+    stats = (
+        db.session.query(model.DatabaseStatistics)
+        .filter(model.DatabaseStatistics.id == True)  # noqa: E712
+        .one_or_none()
+    )
+    if stats:
+        return int(stats.post_count or 0)
     return db.session.query(sa.func.count(model.Post.post_id)).one()[0]
 
 
@@ -709,6 +765,7 @@ def try_get_post_by_id_for_serialization(post_id: int) -> Optional[model.Post]:
         .filter(model.Post.post_id == post_id)
         .options(
             # Tags with names and categories (but not post_count - we batch that)
+            sa.orm.joinedload(model.Post.statistics),
             sa.orm.subqueryload(model.Post.tags).subqueryload(model.Tag.names),
             sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.category),
             sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.implications),
@@ -719,8 +776,6 @@ def try_get_post_by_id_for_serialization(post_id: int) -> Optional[model.Post]:
             sa.orm.subqueryload(model.Post.notes),
             sa.orm.subqueryload(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.names),
             sa.orm.subqueryload(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.category),
-            sa.orm.subqueryload(model.Post.metrics).joinedload(model.PostMetric.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
-            sa.orm.subqueryload(model.Post.metric_ranges).joinedload(model.PostMetricRange.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
         )
         .first()
     )
@@ -748,10 +803,9 @@ def get_posts_by_ids(ids: List[int], eager_load_tags: bool = False) -> List[mode
 
     if eager_load_tags:
         query = query.options(
-            # Tags with names, categories, and metrics for efficient batch serialization
+            # Tags with names and categories for efficient batch serialization
             sa.orm.subqueryload(model.Post.tags).subqueryload(model.Tag.names),
             sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.category),
-            sa.orm.subqueryload(model.Post.tags).joinedload(model.Tag.metric),
             sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.implications),
             sa.orm.subqueryload(model.Post.tags).lazyload(model.Tag.suggestions),
         )
@@ -840,11 +894,10 @@ def create_post(
         tag_names.append("audio")
 
     add_extra_tags(host, tag_names)
+    db.session.add(post)
     new_tags = update_post_tags(
         post, tag_names, category_overrides=category_overrides
     )
-
-    db.session.add(post)
     return post, new_tags
 
 
@@ -1245,7 +1298,56 @@ def update_post_tags(
     existing_tags, new_tags = tags.get_or_create_tags_by_names(
         tag_names, category_overrides
     )
-    post.tags = existing_tags + new_tags
+    all_tags = existing_tags + new_tags
+
+    state = sa.inspect(post)
+    if state.transient:
+        post.tags = all_tags
+        return new_tags
+
+    needs_flush = post.post_id is None or any(
+        tag.tag_id is None for tag in new_tags
+    )
+    if needs_flush:
+        db.session.flush()
+
+    new_tag_ids = {tag.tag_id for tag in all_tags}
+    if "tags" in state.dict:
+        old_tag_ids = {tag.tag_id for tag in state.dict["tags"]}
+    else:
+        old_tag_ids = {
+            tag_id
+            for (tag_id,) in db.session.execute(
+                sa.select(model.PostTag.tag_id).where(
+                    model.PostTag.post_id == post.post_id
+                )
+            )
+        }
+
+    to_remove = old_tag_ids - new_tag_ids
+    to_add = new_tag_ids - old_tag_ids
+
+    if to_remove:
+        db.session.execute(
+            sa.text(
+                "DELETE FROM post_tag "
+                "WHERE post_id = :post_id "
+                "AND tag_id = ANY(CAST(:tag_ids AS int[]))"
+            ),
+            {"post_id": post.post_id, "tag_ids": list(to_remove)},
+        )
+
+    if to_add:
+        db.session.execute(
+            sa.text(
+                "INSERT INTO post_tag (post_id, tag_id) "
+                "SELECT :post_id, unnest(CAST(:tag_ids AS int[])) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {"post_id": post.post_id, "tag_ids": list(to_add)},
+        )
+
+    sa.orm.attributes.set_committed_value(post, "tags", all_tags)
     return new_tags
 
 

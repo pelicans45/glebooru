@@ -39,21 +39,6 @@
                 %></a><%
             %></span><%
         }
-        %><wbr/><%
-        /*
-        if (ctx.canViewMetrics) {
-            %><span class="metrics-btn-holder"><%
-                %><a class='mousetrap button append open metrics-btn'><%
-                    %>Metrics<%
-                    %><i class='la la-chevron-down icon-inline'></i><%
-                %></a><%
-                %><a class='mousetrap button append close metrics-btn'><%
-                    %>Metrics<%
-                    %><i class='la la-chevron-up icon-inline'></i><%
-                %></a><%
-            %></span><%
-        }
-        */
     %></form><%
     %><div class='bulk-edit-block hidden'><%
         if (ctx.canBulkEditTags) {
@@ -89,7 +74,4 @@
         %></form><%
     %><% } %>
     </div>
-    <% if (ctx.canViewMetrics) {
-        %><div class='metrics-block hidden'></div><%
-    }
 %></div>

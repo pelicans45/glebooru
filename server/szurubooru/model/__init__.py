@@ -1,7 +1,6 @@
 import szurubooru.model.util
 from szurubooru.model.base import Base
 from szurubooru.model.comment import Comment, CommentScore
-from szurubooru.model.metric import Metric, PostMetric, PostMetricRange
 from szurubooru.model.pool import Pool, PoolName, PoolPost
 from szurubooru.model.pool_category import PoolCategory
 from szurubooru.model.post import (
@@ -18,3 +17,13 @@ from szurubooru.model.snapshot import Snapshot
 from szurubooru.model.tag import Tag, TagImplication, TagName, TagSuggestion
 from szurubooru.model.tag_category import TagCategory
 from szurubooru.model.user import User, UserToken
+from szurubooru.model.statistics import (
+    CommentStatistics,
+    DatabaseStatistics,
+    PoolCategoryStatistics,
+    PoolStatistics,
+    PostStatistics,
+    TagCategoryStatistics,
+    TagStatistics,
+    UserStatistics,
+)

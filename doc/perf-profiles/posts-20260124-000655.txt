@@ -1,0 +1,51 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:06:55  Samples:  38
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.068     CPU time: 0.058
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.066 application  szurubooru/rest/app.py:155
+└─ 0.066 get_posts  szurubooru/api/post_api.py:105
+   ├─ 0.064 Executor.execute_and_serialize_batch  szurubooru/search/executor.py:153
+   │  ├─ 0.033 <lambda>  szurubooru/api/post_api.py:114
+   │  │  └─ 0.033 serialize_posts_batch  szurubooru/func/posts.py:494
+   │  │     ├─ 0.026 _batch_load_tags_for_posts  szurubooru/func/posts.py:573
+   │  │     │  ├─ 0.024 Query.all  sqlalchemy/orm/query.py:2682
+   │  │     │  │     [52 frames hidden]  sqlalchemy, <string>, psycopg
+   │  │     │  └─ 0.002 list.append  <built-in>
+   │  │     └─ 0.007 serialize_post  szurubooru/func/posts.py:430
+   │  │        └─ 0.007 PostSerializer.serialize  szurubooru/func/serialization.py:13
+   │  │           ├─ 0.003 PostSerializer.serialize_tags_basic  szurubooru/func/posts.py:320
+   │  │           │  ├─ 0.002 sort_tags  szurubooru/func/tags.py:117
+   │  │           │  │  └─ 0.002 get_sort_key  szurubooru/func/tags.py:123
+   │  │           │  └─ 0.001 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │  │           ├─ 0.002 PostSerializer.serialize_thumbnail_url  szurubooru/func/posts.py:290
+   │  │           │  └─ 0.002 get_post_content_url  szurubooru/func/posts.py:110
+   │  │           │     └─ 0.002 get_post_security_hash  szurubooru/func/posts.py:102
+   │  │           │        └─ 0.002 new  hmac.py:200
+   │  │           └─ 0.002 PostSerializer.serialize_score  szurubooru/func/posts.py:352
+   │  │              └─ 0.002 Post.score  szurubooru/model/post.py:316
+   │  │                 └─ 0.002 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │  └─ 0.031 Executor.execute  szurubooru/search/executor.py:90
+   │     ├─ 0.019 Executor._prepare_db_query  szurubooru/search/executor.py:190
+   │     │  ├─ 0.017 _tag_name_filter  szurubooru/search/configs/post_search_config.py:102
+   │     │  │  ├─ 0.012 Query.all  sqlalchemy/orm/query.py:2682
+   │     │  │  │     [40 frames hidden]  sqlalchemy, psycopg, <string>
+   │     │  │  ├─ 0.003 InstrumentedAttribute.in_  sqlalchemy/sql/operators.py:844
+   │     │  │  │     [23 frames hidden]  sqlalchemy
+   │     │  │  └─ 0.002 [self]  szurubooru/search/configs/post_search_config.py
+   │     │  └─ 0.002 PostSearchConfig.finalize_query  szurubooru/search/configs/post_search_config.py:314
+   │     │     └─ 0.002 InstrumentedAttribute.desc  sqlalchemy/sql/operators.py:1739
+   │     │           [13 frames hidden]  sqlalchemy
+   │     ├─ 0.006 PostSearchConfig.create_filter_query  szurubooru/search/configs/post_search_config.py:302
+   │     │  ├─ 0.005 contains_eager  sqlalchemy/orm/strategy_options.py:2419
+   │     │  │     [13 frames hidden]  sqlalchemy, <string>, <built-in>
+   │     │  └─ 0.001 scoped_session.query  sqlalchemy/orm/scoping.py:1640
+   │     │        [3 frames hidden]  sqlalchemy
+   │     ├─ 0.003 scoped_session.execute  sqlalchemy/orm/scoping.py:698
+   │     │     [11 frames hidden]  sqlalchemy, psycopg
+   │     └─ 0.003 Query.all  sqlalchemy/orm/query.py:2682
+   │           [12 frames hidden]  sqlalchemy, psycopg
+   └─ 0.002 [self]  szurubooru/api/post_api.py
+

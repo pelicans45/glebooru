@@ -1,0 +1,26 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:22:19  Samples:  11
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.020     CPU time: 0.017
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.019 application  szurubooru/rest/app.py:155
+└─ 0.019 get_posts  szurubooru/api/post_api.py:105
+   └─ 0.019 Executor.execute_and_serialize_batch  szurubooru/search/executor.py:153
+      └─ 0.019 <lambda>  szurubooru/api/post_api.py:114
+         └─ 0.019 serialize_posts_batch  szurubooru/func/posts.py:494
+            ├─ 0.012 get_tag_post_counts  szurubooru/func/posts.py:615
+            │  ├─ 0.010 Query.all  sqlalchemy/orm/query.py:2682
+            │  │     [28 frames hidden]  sqlalchemy, psycopg
+            │  └─ 0.002 InstrumentedAttribute.in_  sqlalchemy/sql/operators.py:844
+            │        [12 frames hidden]  sqlalchemy
+            └─ 0.007 serialize_post  szurubooru/func/posts.py:430
+               └─ 0.007 PostSerializer.serialize  szurubooru/func/serialization.py:13
+                  └─ 0.007 PostSerializer.serialize_tags_basic  szurubooru/func/posts.py:320
+                     └─ 0.007 sort_tags  szurubooru/func/tags.py:117
+                        ├─ 0.007 get_sort_key  szurubooru/func/tags.py:123
+                        │  ├─ 0.005 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+                        │  └─ 0.002 [self]  szurubooru/func/tags.py
+                        └─ 0.000 sorted  <built-in>
+

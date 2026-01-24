@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 from szurubooru import db, model, rest, search
 from szurubooru.func import (
     auth,
-    metrics,
     serialization,
     snapshots,
     tags,
@@ -72,7 +71,8 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
     tag_name = params["tag_name"]
     cached = get_cached_tag_list(tag_name)
     if cached:
-        return cached
+        # Return cached response with HTTP cache header
+        return {**cached, "_cache": "public, max-age=300"}
 
     tag = _get_tag(params)
     result = tags.get_tag_siblings(tag, limit=5000)
@@ -84,6 +84,8 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
 
     resp = {"results": serialized_siblings}
     set_cached_tag_list(tag_name, resp)
+    # Add HTTP cache header (5 minutes)
+    resp["_cache"] = "public, max-age=300"
     return resp
 
 
@@ -92,17 +94,24 @@ def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respon
     # auth.verify_privilege(ctx.user, "tags:list")
     cached = get_cached_tag_list("all")
     if cached:
-        return cached
+        # Return cached response with HTTP cache header
+        return {**cached, "_cache": "public, max-age=300"}
 
     resp = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
     set_cached_tag_list("all", resp)
+    # Add HTTP cache header (5 minutes)
+    resp["_cache"] = "public, max-age=300"
     return resp
 
 
 @rest.routes.get("/tags/?")
 def get_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "tags:list")
-    return _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
+    result = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
+    # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
+    if ctx.user.rank == "anonymous":
+        result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
+    return result
 
 
 @rest.routes.get("/tag-siblings/(?P<tag_name>.+)")
@@ -115,7 +124,11 @@ def get_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response
         serialized_siblings.append(
             {"tag": _serialize(ctx, sibling), "occurrences": occurrences}
         )
-    return {"results": serialized_siblings}
+    resp = {"results": serialized_siblings}
+    # Cache for anonymous users (2 minutes)
+    if ctx.user.rank == "anonymous":
+        resp["_cache"] = "public, max-age=120"
+    return resp
 
 
 """
@@ -184,14 +197,6 @@ def update_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         implications = ctx.get_param_as_string_list("implications")
         _create_if_needed(implications, ctx.user)
         tags.update_tag_implications(tag, implications)
-    if ctx.has_param("metric"):
-        auth.verify_privilege(ctx.user, "metrics:edit:bounds")
-        new_metric = metrics.update_or_create_metric(tag, ctx.get_param("metric"))
-        if new_metric is not None:
-            auth.verify_privilege(ctx.user, "metrics:create")
-            db.session.flush()
-            # snapshots.create(new_metric, ctx.user)
-
     tag.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(tag, ctx.user)

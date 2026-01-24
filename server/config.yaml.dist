@@ -33,6 +33,9 @@ convert:
 # allow posts to be uploaded even if some image processing errors occur
 allow_broken_uploads: false
 
+# run background hashing tasks on startup (post signatures + md5 checksums)
+enable_background_hashing: true
+
 # used to send password reset e-mails
 smtp:
     host: # example: localhost
@@ -140,12 +143,6 @@ privileges:
     'tag_categories:view':          anonymous
     'tag_categories:delete':        moderator
     'tag_categories:set_default':   moderator
-
-    'metrics:create':               power
-    'metrics:edit:bounds':          power
-    'metrics:edit:posts':           regular
-    'metrics:list':                 regular
-    'metrics:delete':               moderator
 
     'pools:create':                 regular
     'pools:edit:names':             power

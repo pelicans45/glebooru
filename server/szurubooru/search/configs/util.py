@@ -167,6 +167,44 @@ def create_str_filter(
     return wrapper
 
 
+def create_lowercase_str_filter(
+    column: SaColumn,
+    transformer: Callable[[str], str] = wildcard_transformer,
+) -> Filter:
+    def wrapper(
+        query: SaQuery,
+        criterion: Optional[criteria.BaseCriterion],
+        negated: bool,
+    ) -> SaQuery:
+        #assert criterion
+        if isinstance(criterion, criteria.PlainCriterion):
+            values = [criterion.value]
+        elif isinstance(criterion, criteria.ArrayCriterion):
+            values = criterion.values
+        else:
+            raise ValueError("str criterion error")
+
+        exact_values = []
+        wildcard_values = []
+        for value in values:
+            unescaped = unescape(value, make_wildcards_special=True)
+            if WILDCARD in unescaped:
+                wildcard_values.append(value)
+            else:
+                exact_values.append(unescape(value).lower())
+
+        expr = sa.sql.false()
+        if exact_values:
+            expr = expr | column.in_(exact_values)
+        for value in wildcard_values:
+            expr = expr | column.like(transformer(value.lower()))
+
+        if negated:
+            expr = ~expr
+        return query.filter(expr)
+
+    return wrapper
+
 def apply_date_criterion_to_column(
     column: SaQuery, criterion: criteria.BaseCriterion
 ) -> SaQuery:

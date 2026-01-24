@@ -1,0 +1,38 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:17:56  Samples:  23
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.082     CPU time: 0.064
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.081 application  szurubooru/rest/app.py:155
+└─ 0.081 get_posts  szurubooru/api/post_api.py:105
+   └─ 0.081 Executor.execute_and_serialize_batch  szurubooru/search/executor.py:153
+      ├─ 0.050 <lambda>  szurubooru/api/post_api.py:114
+      │  └─ 0.050 serialize_posts_batch  szurubooru/func/posts.py:494
+      │     ├─ 0.047 _batch_load_tags_for_posts  szurubooru/func/posts.py:573
+      │     │  └─ 0.047 Query.all  sqlalchemy/orm/query.py:2682
+      │     │        [31 frames hidden]  sqlalchemy, psycopg
+      │     │           0.029 ClassManager.new_instance  sqlalchemy/orm/instrumentation.py:502
+      │     └─ 0.003 serialize_post  szurubooru/func/posts.py:430
+      │        └─ 0.003 PostSerializer.serialize  szurubooru/func/serialization.py:13
+      │           ├─ 0.002 PostSerializer.serialize_thumbnail_url  szurubooru/func/posts.py:290
+      │           │  └─ 0.002 get_post_content_url  szurubooru/func/posts.py:110
+      │           │     └─ 0.002 get_extension  szurubooru/func/mime.py:69
+      │           └─ 0.001 PostSerializer.serialize_tags_basic  szurubooru/func/posts.py:320
+      │              └─ 0.001 sort_tags  szurubooru/func/tags.py:117
+      │                 └─ 0.001 get_sort_key  szurubooru/func/tags.py:123
+      │                    └─ 0.001 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+      └─ 0.032 Executor.execute  szurubooru/search/executor.py:90
+         ├─ 0.016 Executor._prepare_db_query  szurubooru/search/executor.py:190
+         │  └─ 0.016 _tag_name_filter  szurubooru/search/configs/post_search_config.py:102
+         │     ├─ 0.014 Query.all  sqlalchemy/orm/query.py:2682
+         │     │     [15 frames hidden]  sqlalchemy, psycopg
+         │     └─ 0.002 Query.filter  <string>:1
+         │        └─ 0.002 _generative  sqlalchemy/sql/base.py:277
+         │              [4 frames hidden]  <string>, sqlalchemy
+         ├─ 0.008 Query.all  sqlalchemy/orm/query.py:2682
+         │     [37 frames hidden]  sqlalchemy, psycopg, weakref
+         └─ 0.007 scoped_session.execute  sqlalchemy/orm/scoping.py:698
+               [30 frames hidden]  sqlalchemy, psycopg
+

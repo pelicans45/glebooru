@@ -20,10 +20,10 @@ class TagSearchConfig(BaseSearchConfig):
         return (
             db.session.query(model.Tag)
             .join(model.TagCategory)
+            .join(model.TagStatistics)
             .options(
                 sa.orm.defer(model.Tag.first_name),
-                sa.orm.defer(model.Tag.suggestion_count),
-                sa.orm.defer(model.Tag.implication_count),
+                sa.orm.contains_eager(model.Tag.statistics),
                 strategy(model.Tag.names),
                 strategy(model.Tag.suggestions).joinedload(model.Tag.names),
                 strategy(model.Tag.implications).joinedload(model.Tag.names),
@@ -31,7 +31,10 @@ class TagSearchConfig(BaseSearchConfig):
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Tag), model.Tag
+        return (
+            db.session.query(model.Tag).join(model.TagStatistics),
+            model.Tag,
+        )
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()
@@ -45,7 +48,7 @@ class TagSearchConfig(BaseSearchConfig):
             model.Tag.tag_id,
             model.TagName.tag_id,
             model.TagName.name,
-            search_util.create_str_filter,
+            search_util.create_lowercase_str_filter,
         )
 
     @property
@@ -58,7 +61,7 @@ class TagSearchConfig(BaseSearchConfig):
                         model.Tag.tag_id,
                         model.TagName.tag_id,
                         model.TagName.name,
-                        search_util.create_str_filter,
+                        search_util.create_lowercase_str_filter,
                     ),
                 ),
                 (
@@ -85,15 +88,21 @@ class TagSearchConfig(BaseSearchConfig):
                 ),
                 (
                     ["usage-count", "post-count", "usages"],
-                    search_util.create_num_filter(model.Tag.post_count),
+                    search_util.create_num_filter(
+                        model.TagStatistics.usage_count
+                    ),
                 ),
                 (
                     ["suggestion-count"],
-                    search_util.create_num_filter(model.Tag.suggestion_count),
+                    search_util.create_num_filter(
+                        model.TagStatistics.suggestion_count
+                    ),
                 ),
                 (
                     ["implication-count"],
-                    search_util.create_num_filter(model.Tag.implication_count),
+                    search_util.create_num_filter(
+                        model.TagStatistics.implication_count
+                    ),
                 ),
                 (
                     ["suggested-by"],
@@ -103,7 +112,7 @@ class TagSearchConfig(BaseSearchConfig):
                         model.TagSuggestion.parent_id,
                         model.TagName.tag_id,
                         model.TagName.name,
-                        search_util.create_str_filter,
+                        search_util.create_lowercase_str_filter,
                     ),
                 ),
                 (
@@ -114,7 +123,7 @@ class TagSearchConfig(BaseSearchConfig):
                         model.TagSuggestion.child_id,
                         model.TagName.tag_id,
                         model.TagName.name,
-                        search_util.create_str_filter,
+                        search_util.create_lowercase_str_filter,
                     ),
                 ),
                 (
@@ -125,7 +134,7 @@ class TagSearchConfig(BaseSearchConfig):
                         model.TagImplication.parent_id,
                         model.TagName.tag_id,
                         model.TagName.name,
-                        search_util.create_str_filter,
+                        search_util.create_lowercase_str_filter,
                     ),
                 ),
                 (
@@ -136,7 +145,7 @@ class TagSearchConfig(BaseSearchConfig):
                         model.TagImplication.child_id,
                         model.TagName.tag_id,
                         model.TagName.name,
-                        search_util.create_str_filter,
+                        search_util.create_lowercase_str_filter,
                     ),
                 ),
             ]
@@ -167,15 +176,15 @@ class TagSearchConfig(BaseSearchConfig):
                 ),
                 (
                     ["usage-count", "post-count", "usages"],
-                    (model.Tag.post_count, self.SORT_DESC),
+                    (model.TagStatistics.usage_count, self.SORT_DESC),
                 ),
                 (
                     ["suggestion-count"],
-                    (model.Tag.suggestion_count, self.SORT_DESC),
+                    (model.TagStatistics.suggestion_count, self.SORT_DESC),
                 ),
                 (
                     ["implication-count"],
-                    (model.Tag.implication_count, self.SORT_DESC),
+                    (model.TagStatistics.implication_count, self.SORT_DESC),
                 ),
             ]
         )

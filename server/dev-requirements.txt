@@ -3,3 +3,5 @@ pytest-cov>=2.2.1
 pytest-postgresql>=5.0.0
 freezegun>=0.3.6
 pycodestyle>=2.0.0
+pyinstrument>=5.1.0
+py-spy>=0.3.14

@@ -13,7 +13,6 @@ const TagInputControl = require("./tag_input_control.js");
 const PoolInputControl = require("./pool_input_control.js");
 const ExpanderControl = require("../controls/expander_control.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
-const PostMetricInputControl = require("./post_metric_input_control.js");
 
 const template = views.getTemplate("post-edit-sidebar");
 
@@ -38,7 +37,6 @@ class PostEditSidebarControl extends events.EventTarget {
                 canEditPostSafety: api.hasPrivilege("posts:edit:safety"),
                 canEditPostSource: api.hasPrivilege("posts:edit:source"),
                 canEditPostTags: api.hasPrivilege("posts:edit:tags"),
-                canEditPostMetrics: api.hasPrivilege("metrics:edit:posts"),
                 canEditPostRelations: api.hasPrivilege("posts:edit:relations"),
                 canEditPostNotes:
                     api.hasPrivilege("posts:edit:notes") &&
@@ -69,13 +67,6 @@ class PostEditSidebarControl extends events.EventTarget {
             `Tags (${this._post.tagNames.length})`,
             this._hostNode.querySelectorAll(".tags")
         );
-        /*
-        this._metricsExpander = new ExpanderControl(
-            "post-metrics",
-            `Metrics (${this._post.tags.filterMetrics().length})`,
-            this._hostNode.querySelectorAll(".metrics")
-        );
-		*/
         this._notesExpander = new ExpanderControl(
             "post-notes",
             "Notes",
@@ -123,14 +114,6 @@ class PostEditSidebarControl extends events.EventTarget {
             );
         }
 
-        /*
-        if (this._metricInputNode) {
-            this._metricControl = new PostMetricInputControl(
-                this._metricInputNode,
-                this._ctx
-            );
-        }
-			*/
 
         if (this._contentInputNode) {
             this._contentFileDropper = new FileDropperControl(
@@ -244,23 +227,8 @@ class PostEditSidebarControl extends events.EventTarget {
             this._tagControl.addEventListener("change", (e) => {
                 this.dispatchEvent(new CustomEvent("change"));
                 this._syncExpanderTitles();
-                /*
-                this._post.removeMetricsWithoutTag();
-                if (this._metricControl) {
-                    this._metricControl.refreshContent();
-                }
-				*/
             });
         }
-
-        /*
-        if (this._metricControl) {
-            this._metricControl.addEventListener("change", (e) => {
-                this.dispatchEvent(new CustomEvent("change"));
-                this._syncExpanderTitles();
-            });
-        }
-		*/
 
         if (this._noteTextareaNode) {
             this._noteTextareaNode.addEventListener("change", (e) =>
@@ -304,15 +272,6 @@ class PostEditSidebarControl extends events.EventTarget {
         this._notesExpander.title = `Notes (${this._post.notes.length})`;
         this._tagsExpander.title = `Tags (${this._post.tagNames.length})`;
         this._poolsExpander.title = `Pools (${this._post.pools.length})`;
-        /*
-        let metricCount = this._post.tags.filterMetrics().length;
-        if (metricCount > 0) {
-            this._metricsExpander.containerNode.style.display = "block";
-            this._metricsExpander.title = `Metrics (${metricCount})`;
-        } else {
-            this._metricsExpander.containerNode.style.display = "none";
-        }
-			*/
     }
 
     _evtPostContentChange(e) {
@@ -621,10 +580,6 @@ class PostEditSidebarControl extends events.EventTarget {
 
     get _noteTextareaNode() {
         return this._formNode.querySelector(".notes textarea");
-    }
-
-    get _metricInputNode() {
-        return this._formNode.querySelector(".metrics input");
     }
 
     enableForm() {

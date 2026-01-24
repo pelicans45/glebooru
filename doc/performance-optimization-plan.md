@@ -23,9 +23,6 @@ These are the specific code paths that remain expensive even after recent optimi
   - `server/szurubooru/search/configs/post_search_config.py` sorts by `model.Post.tag_count` / `comment_count` / `score`, which are correlated subqueries.
   - `server/szurubooru/search/configs/tag_search_config.py` filters/sorts by `Tag.post_count` (correlated subquery).
 
-- **Disk usage in /api/info**
-  - `server/szurubooru/api/info_api.py` scans the filesystem on cold start. This is expensive and not persistent across restarts.
-
 Recent improvements (already present) reduce N+1, but do not fix the underlying cost of per-row aggregates. The fastest read-path solution is to precompute these counts in the database.
 
 ---
@@ -33,13 +30,12 @@ Recent improvements (already present) reduce N+1, but do not fix the underlying 
 ## 2) Target Architecture (Option A)
 
 ### Core Principle
-All frequently used counts and sort keys must be stored in dedicated statistics tables and kept in sync via database triggers. This eliminates correlated subqueries, makes sorting/filtering O(1) per row, and makes `/api/info` a constant-time query.
+All frequently used counts and sort keys must be stored in dedicated statistics tables and kept in sync via database triggers. This eliminates correlated subqueries and makes sorting/filtering O(1) per row.
 
 ### Statistics Tables (Design)
 
 **database_statistics** (single-row table)
 - `id` BOOLEAN PRIMARY KEY (always true)
-- `disk_usage` BIGINT
 - `post_count` BIGINT
 - `tag_count` BIGINT
 - `pool_count` BIGINT
@@ -84,21 +80,6 @@ All frequently used counts and sort keys must be stored in dedicated statistics 
 - `tag_category_statistics(category_id, usage_count)`
 - `pool_category_statistics(category_id, usage_count)`
 
-### Disk Usage Tracking
-
-To make disk usage constant-time, track file sizes in DB:
-- Add columns to `post`:
-  - `generated_thumbnail_size BIGINT NOT NULL DEFAULT 0`
-  - `custom_thumbnail_size BIGINT NOT NULL DEFAULT 0`
-- Add column to `user`:
-  - `custom_avatar_size BIGINT NOT NULL DEFAULT 0`
-
-Disk usage formula:
-```
-  disk_usage = SUM(post.file_size + post.generated_thumbnail_size + post.custom_thumbnail_size)
-             + SUM(user.custom_avatar_size)
-```
-
 ### Trigger Strategy
 
 Use **DEFERRABLE INITIALLY DEFERRED** constraint triggers to reduce lock time and deadlock risk. Triggers must handle INSERT, DELETE, and UPDATE where relevant (especially for merge operations that use UPDATE).
@@ -116,8 +97,8 @@ Critical trigger cases:
 - **post_feature**: INSERT/DELETE update feature count + last_feature_time.
 - **tag**: INSERT/DELETE update database tag_count and tag_category usage counts.
 - **pool**: INSERT/DELETE/UPDATE update database pool_count and pool_category usage counts.
-- **post**: INSERT/DELETE/UPDATE update database post_count and disk_usage.
-- **user**: INSERT/DELETE/UPDATE update database user_count and disk_usage.
+- **post**: INSERT/DELETE/UPDATE update database post_count.
+- **user**: INSERT/DELETE/UPDATE update database user_count.
 
 ### Indexes (Read-Path Optimized)
 
@@ -160,26 +141,16 @@ Add SQLAlchemy models for statistics tables and change usage to reference them d
 - **Tag search**: join `tag_statistics`, update usage-count filters/sorts.
 - Where possible, use `database_statistics` for count queries without filters (fast total count).
 
-### /api/info
-
-- Replace filesystem scan with query to `database_statistics.disk_usage`.
-
-### File Size Updates (Write Path)
-
-- When generating or replacing thumbnails, update `post.generated_thumbnail_size` and `post.custom_thumbnail_size` accordingly.
-- When user avatar is updated, update `user.custom_avatar_size`.
-
 ---
 
 ## 4) Database Migration Plan (Single Comprehensive Migration)
 
 1. **Upgrade PostgreSQL 16 → 18** (already planned).
-2. **Create statistics tables** and supporting columns (`generated_thumbnail_size`, `custom_thumbnail_size`, `custom_avatar_size`).
+2. **Create statistics tables**.
 3. **Backfill statistics** using INSERT … SELECT with GROUP BY:
    - Tag usage counts from `post_tag`.
    - Post counts, comment counts, favorite counts, etc. from their tables.
    - Database counts from main tables.
-   - Disk usage computed from post file sizes + thumbnail sizes + avatar sizes.
 4. **Install triggers** (DEFERRABLE INITIALLY DEFERRED).
 5. **Deploy code changes** to use stats tables.
 6. **Verification step:**
@@ -285,7 +256,7 @@ Use a combination of HTTP benchmarking and DB-level query profiling:
 
 - **HTTP load testing:** `wrk` or `hey` for simple endpoints, `vegeta` for scripted workloads.
 - **DB profiling:** `pg_stat_statements` and `auto_explain` to capture slow queries.
-- **System metrics:** CPU, I/O, memory (e.g., `pidstat`, `iostat`, `pg_stat_activity`).
+- **System telemetry:** CPU, I/O, memory (e.g., `pidstat`, `iostat`, `pg_stat_activity`).
 
 Recommended test flow:
 1. Warm-up run to populate caches.
@@ -299,7 +270,6 @@ Recommended test flow:
 - Gallery listing p95 latency reduced by at least 2–5x on tag-heavy datasets.
 - Post view p95 latency reduced by at least 2x.
 - Tag list/autocomplete p95 latency reduced by 5–20x.
-- /api/info response time becomes near-instant (<10ms) after startup.
 - No regression in correctness (counts match aggregates).
 
 ---

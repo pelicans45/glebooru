@@ -61,15 +61,7 @@ def get_listing_posts(limit: int = 100) -> List[model.Post]:
         db.session.query(model.Post)
         .options(
             sa.orm.lazyload("*"),
-            sa.orm.defer(model.Post.score),
-            sa.orm.defer(model.Post.favorite_count),
-            sa.orm.defer(model.Post.comment_count),
-            sa.orm.defer(model.Post.last_favorite_time),
-            sa.orm.defer(model.Post.last_comment_creation_time),
-            sa.orm.defer(model.Post.last_comment_edit_time),
-            sa.orm.defer(model.Post.note_count),
-            sa.orm.defer(model.Post.tag_count),
-            sa.orm.defer(model.Post.relation_count),
+            sa.orm.joinedload(model.Post.statistics),
         )
         .order_by(model.Post.post_id.desc())
         .limit(limit)

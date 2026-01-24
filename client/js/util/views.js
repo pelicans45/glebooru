@@ -213,7 +213,6 @@ function getPostUrl(id, parameters) {
         parameters
             ? {
                   q: q,
-                  metrics: parameters.metrics,
                   r: parameters.r,
               }
             : {}
@@ -232,22 +231,7 @@ function getPostEditUrl(id, parameters) {
         parameters
             ? {
                   q: q,
-                  metrics: parameters.metrics,
                   r: parameters.r,
-              }
-            : {}
-    );
-}
-
-function getMetricSorterUrl(id, parameters) {
-    return uri.formatClientLink(
-        "",
-        id,
-        "metric-sorter",
-        parameters
-            ? {
-                  q: parameters.q ? parameters.q.trim() : "",
-                  metrics: parameters.metrics,
               }
             : {}
     );
@@ -546,7 +530,6 @@ function getTemplate(templatePath) {
         Object.assign(ctx, {
             getPostUrl: getPostUrl,
             getPostEditUrl: getPostEditUrl,
-            getMetricSorterUrl: getMetricSorterUrl,
             makeRelativeTime: makeRelativeTime,
             makeFileSize: makeFileSize,
             makeMarkdown: makeMarkdown,
@@ -722,6 +705,5 @@ module.exports = {
     showError: showError,
     showSuccess: showSuccess,
     showInfo: showInfo,
-    getMetricSorterUrl: getMetricSorterUrl,
     makeNewTabPostLink: makeNewTabPostLink,
 };

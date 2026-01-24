@@ -20,11 +20,18 @@ class PoolSearchConfig(BaseSearchConfig):
         return (
             db.session.query(model.Pool)
             .join(model.PoolCategory)
-            .options(strategy(model.Pool.names))
+            .join(model.PoolStatistics)
+            .options(
+                sa.orm.contains_eager(model.Pool.statistics),
+                strategy(model.Pool.names),
+            )
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Pool), model.Pool
+        return (
+            db.session.query(model.Pool).join(model.PoolStatistics),
+            model.Pool,
+        )
 
     def create_around_query(self) -> SaQuery:
         raise NotImplementedError()
@@ -78,7 +85,9 @@ class PoolSearchConfig(BaseSearchConfig):
                 ),
                 (
                     ["post-count"],
-                    search_util.create_num_filter(model.Pool.post_count),
+                    search_util.create_num_filter(
+                        model.PoolStatistics.post_count
+                    ),
                 ),
             ]
         )
@@ -106,6 +115,9 @@ class PoolSearchConfig(BaseSearchConfig):
                     ],
                     (model.Pool.last_edit_time, self.SORT_DESC),
                 ),
-                (["post-count"], (model.Pool.post_count, self.SORT_DESC)),
+                (
+                    ["post-count"],
+                    (model.PoolStatistics.post_count, self.SORT_DESC),
+                ),
             ]
         )

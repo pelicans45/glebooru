@@ -1,0 +1,40 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 00:17:57  Samples:  19
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 0.033     CPU time: 0.029
+/   _/                      v5.1.2
+
+Profile at /opt/app/szurubooru/middleware/request_profiler.py:67
+
+0.032 application  szurubooru/rest/app.py:155
+└─ 0.032 get_post  szurubooru/api/post_api.py:124
+   ├─ 0.027 _serialize_post  szurubooru/api/post_api.py:44
+   │  └─ 0.027 serialize_post  szurubooru/func/posts.py:430
+   │     ├─ 0.015 PostSerializer.serialize  szurubooru/func/serialization.py:13
+   │     │  ├─ 0.005 PostSerializer.serialize_comments  szurubooru/func/posts.py:415
+   │     │  │  └─ 0.005 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [63 frames hidden]  sqlalchemy, psycopg
+   │     │  ├─ 0.004 PostSerializer.serialize_score  szurubooru/func/posts.py:352
+   │     │  │  └─ 0.004 Post.score  szurubooru/model/post.py:316
+   │     │  │     └─ 0.004 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │           [52 frames hidden]  sqlalchemy
+   │     │  ├─ 0.003 PostSerializer.serialize_user  szurubooru/func/posts.py:349
+   │     │  │  └─ 0.003 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [39 frames hidden]  sqlalchemy, psycopg
+   │     │  ├─ 0.002 PostSerializer.serialize_own_favorite  szurubooru/func/posts.py:363
+   │     │  │  └─ 0.002 InstrumentedAttribute.__get__  sqlalchemy/orm/attributes.py:555
+   │     │  │        [18 frames hidden]  sqlalchemy, psycopg
+   │     │  └─ 0.001 PostSerializer.serialize_own_score  szurubooru/func/posts.py:357
+   │     │     └─ 0.001 get_score  szurubooru/func/scores.py:40
+   │     │        └─ 0.001 Query.one_or_none  sqlalchemy/orm/query.py:2761
+   │     │              [12 frames hidden]  sqlalchemy, psycopg
+   │     ├─ 0.010 Query.all  sqlalchemy/orm/query.py:2682
+   │     │     [61 frames hidden]  sqlalchemy, psycopg
+   │     └─ 0.002 get_relations_for_posts  szurubooru/func/posts.py:630
+   │        └─ 0.002 InstrumentedAttribute.in_  sqlalchemy/sql/operators.py:844
+   │              [12 frames hidden]  sqlalchemy
+   └─ 0.005 _get_post  szurubooru/api/post_api.py:40
+      └─ 0.005 get_post_by_id  szurubooru/func/posts.py:714
+         └─ 0.005 try_get_post_by_id  szurubooru/func/posts.py:681
+            └─ 0.005 Query.first  sqlalchemy/orm/query.py:2731
+                  [28 frames hidden]  sqlalchemy
+

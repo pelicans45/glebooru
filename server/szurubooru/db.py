@@ -17,8 +17,13 @@ def _create_engine() -> sa.Engine:
     """
     Create SQLAlchemy engine with optimized settings for PostgreSQL.
 
-    Connection pool settings are tuned for a WSGI application with
-    multiple threads serving concurrent requests.
+    Connection pool settings are tuned for Granian WSGI with multiple
+    worker processes. Each worker gets its own connection pool.
+
+    For a 2 vCPU / 2GB RAM server with Granian (2 workers, 4 threads):
+      - pool_size=4: Base connections per worker (matches blocking-threads)
+      - max_overflow=4: Burst capacity under load
+      - Total max connections: 2 workers × 8 = 16 (well under PG default of 100)
     """
     database_url = config.config["database"]
 
@@ -27,10 +32,8 @@ def _create_engine() -> sa.Engine:
         database_url,
         # Connection pooling configuration
         poolclass=QueuePool,
-        # Keep conservative to avoid exhausting max_connections when using
-        # multiple WSGI worker processes.
-        pool_size=4,            # Base connections per process
-        max_overflow=4,         # Additional connections under load
+        pool_size=4,            # Base connections (match Granian blocking-threads)
+        max_overflow=4,         # Burst capacity under load
         pool_timeout=15,        # Seconds to wait for connection
         pool_recycle=1800,      # Recycle connections after 30 minutes
         pool_pre_ping=True,     # Verify connection validity before use

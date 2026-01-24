@@ -21,7 +21,7 @@ from szurubooru import db, model
 _SPECIAL_TOKEN_PATTERN = re.compile(
     r'(sort|type|safety|rating|id|score|uploader|upload|submit|fav|comment|'
     r'source|tag-count|file-size|width|height|area|ar|date|time|pool|special|'
-    r'category|flag|note|similar|metric):',
+    r'category|flag|note|similar):',
     re.IGNORECASE
 )
 
@@ -70,10 +70,11 @@ def resolve_tag_id_single(tag_name: str) -> Optional[int]:
     Resolve a single exact tag name to tag ID. Optimized for the common case.
     Returns None if tag not found.
     """
+    name = (tag_name or "").lower()
     result = (
         db.session.query(model.Tag.tag_id)
         .join(model.TagName)
-        .filter(sa.func.lower(model.TagName.name) == tag_name.lower())
+        .filter(model.TagName.name == name)
         .first()
     )
     return result[0] if result else None
@@ -104,7 +105,7 @@ def resolve_tag_ids(tag_names: List[str]) -> Set[int]:
         results = (
             db.session.query(model.Tag.tag_id)
             .join(model.TagName)
-            .filter(sa.func.lower(model.TagName.name).in_(exact_names))
+            .filter(model.TagName.name.in_(exact_names))
             .all()
         )
         tag_ids.update(r[0] for r in results)
@@ -112,7 +113,7 @@ def resolve_tag_ids(tag_names: List[str]) -> Set[int]:
     # Query for wildcard patterns (batch with OR)
     if wildcard_patterns:
         conditions = [
-            sa.func.lower(model.TagName.name).like(pattern)
+            model.TagName.name.like(pattern)
             for pattern in wildcard_patterns
         ]
         results = (

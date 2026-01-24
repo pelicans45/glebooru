@@ -36,11 +36,20 @@ class User(Base):
     )
 
     comments = sa.orm.relationship("Comment", overlaps="user")
+    statistics = sa.orm.relationship(
+        "UserStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("user", lazy="joined"),
+    )
 
     @property
     def post_count(self) -> int:
+        if self.statistics:
+            return int(self.statistics.upload_count or 0)
         from szurubooru.db import session
-
         return (
             session.query(sa.sql.expression.func.sum(1))
             .filter(Post.user_id == self.user_id)
@@ -50,8 +59,9 @@ class User(Base):
 
     @property
     def comment_count(self) -> int:
+        if self.statistics:
+            return int(self.statistics.comment_count or 0)
         from szurubooru.db import session
-
         return (
             session.query(sa.sql.expression.func.sum(1))
             .filter(Comment.user_id == self.user_id)
@@ -61,8 +71,9 @@ class User(Base):
 
     @property
     def favorite_post_count(self) -> int:
+        if self.statistics:
+            return int(self.statistics.favorite_count or 0)
         from szurubooru.db import session
-
         return (
             session.query(sa.sql.expression.func.sum(1))
             .filter(PostFavorite.user_id == self.user_id)

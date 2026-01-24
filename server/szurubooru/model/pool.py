@@ -84,17 +84,20 @@ class Pool(Base):
         collection_class=ordering_list("order"),
     )
     posts = association_proxy("_posts", "post")
-
-    post_count = sa.orm.column_property(
-        (
-            sa.sql.expression.select(
-                sa.sql.expression.func.count(PoolPost.post_id)
-            )
-            .where(PoolPost.pool_id == pool_id)
-            .scalar_subquery()
-        ),
-        deferred=True,
+    statistics = sa.orm.relationship(
+        "PoolStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("pool", lazy="joined"),
     )
+
+    @property
+    def post_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.post_count or 0)
 
     first_name = sa.orm.column_property(
         (

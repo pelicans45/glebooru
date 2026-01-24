@@ -9,7 +9,6 @@ const views = require("../util/views.js");
 const TagList = require("../models/tag_list.js");
 const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js");
 const PostListTagAutoCompleteControl = require("../controls/post_list_tag_auto_complete_control.js");
-const MetricHeaderControl = require("../controls/metric_header_control");
 
 const template = views.getTemplate("posts-header");
 
@@ -317,23 +316,6 @@ class PostsHeaderView extends events.EventTarget {
             );
         }
 
-        /*
-        if (this._metricsButtonHolderNode) {
-            this._metricControl = new MetricHeaderControl(
-                this._metricsBlockNode,
-                ctx
-            );
-            this._metricControl.addEventListener("submit", (e) =>
-                this._navigate()
-            );
-            this._metricsOpenButtonNode.addEventListener("click", (e) =>
-                this._evtOpenMetricsBtnClick(e)
-            );
-            this._metricsCloseButtonNode.addEventListener("click", (e) =>
-                this._evtCloseMetricsBtnClick(e)
-            );
-        }
-			*/
 
         for (let editor of this._bulkEditors) {
             editor.addEventListener("submit", (e) => {
@@ -357,9 +339,6 @@ class PostsHeaderView extends events.EventTarget {
             this._openBulkEditor(this._bulkDeleteEditor);
         } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
             this._openBulkEditor(this._bulkAddRelationEditor);
-        }
-        if (ctx.parameters.metrics && this._metricsBlockNode) {
-            this._toggleMetricsBlock(true);
         }
     }
 
@@ -437,22 +416,6 @@ class PostsHeaderView extends events.EventTarget {
         return this._hostNode.querySelector(".bulk-add-relation");
     }
 
-    get _metricsButtonHolderNode() {
-        return this._hostNode.querySelector(".metrics-btn-holder");
-    }
-
-    get _metricsOpenButtonNode() {
-        return this._hostNode.querySelector(".metrics-btn.open");
-    }
-
-    get _metricsCloseButtonNode() {
-        return this._hostNode.querySelector(".metrics-btn.close");
-    }
-
-    get _metricsBlockNode() {
-        return this._hostNode.querySelector(".metrics-block");
-    }
-
     _evtOpenBulkEditBtnClick(e) {
         e.preventDefault();
         this._toggleBulkEditBlock(true);
@@ -491,23 +454,6 @@ class PostsHeaderView extends events.EventTarget {
             otherEditor.toggleOpen(false);
             otherEditor.toggleHide(false);
         }
-    }
-
-    _evtOpenMetricsBtnClick(e) {
-        e.preventDefault();
-        this._toggleMetricsBlock(true);
-        this._navigate();
-    }
-
-    _evtCloseMetricsBtnClick(e) {
-        e.preventDefault();
-        this._toggleMetricsBlock(false);
-        this._navigate();
-    }
-
-    _toggleMetricsBlock(open) {
-        this._metricsButtonHolderNode.classList.toggle("opened", open);
-        this._metricsBlockNode.classList.toggle("hidden", !open);
     }
 
     _evtSafetyButtonClick(e, url) {
@@ -574,11 +520,6 @@ class PostsHeaderView extends events.EventTarget {
     _evtFormSubmit(e) {
         e.preventDefault();
         this._navigate();
-        /*
-        if (this._metricControl) {
-            this._metricControl.refreshQuery(this._queryInputNode.value);
-        }
-		*/
     }
 
     _handleSortButtonClick(e, sort) {
@@ -604,7 +545,6 @@ class PostsHeaderView extends events.EventTarget {
         let parameters = {
             q: this._queryInputNode.value.trim(),
             r: this._ctx.parameters.r,
-            metrics: this._ctx.parameters.metrics,
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query

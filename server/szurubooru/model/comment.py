@@ -59,10 +59,20 @@ class Comment(Base):
     scores = sa.orm.relationship(
         "CommentScore", cascade="all, delete-orphan", lazy="joined", overlaps="comment"
     )
+    statistics = sa.orm.relationship(
+        "CommentStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("comment", lazy="joined"),
+    )
 
     @property
     def score(self) -> int:
-        # Use eager-loaded scores instead of running a query
+        if self.statistics:
+            return int(self.statistics.score or 0)
+        # Fallback to eager-loaded scores if stats missing
         return sum(s.score for s in self.scores)
 
     __mapper_args__ = {

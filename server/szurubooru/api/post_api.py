@@ -11,7 +11,6 @@ from szurubooru.func import (
     auth,
     favorites,
     image_hash,
-    metrics,
     mime,
     posts,
     random_post,
@@ -109,10 +108,17 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     _search_executor_config.user = ctx.user
     # Use batch serialization for optimized N+1 query handling
     options = serialization.get_serialization_options(ctx)
-    return _search_executor.execute_and_serialize_batch(
+    use_cache = bool(options)
+    result = _search_executor.execute_and_serialize_batch(
         ctx,
         lambda post_list: posts.serialize_posts_batch(post_list, ctx.user, options),
+        use_cache=use_cache,
     )
+    # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
+    # Short TTL ensures edits are visible quickly while still benefiting from caching
+    if ctx.user.rank == "anonymous" and not ctx.has_param("_nocache"):
+        result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
+    return result
 
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")
@@ -121,7 +127,12 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     # Benchmark showed simple ORM filter is fastest for posts with few relationships
     # Use get_post_by_id (simple filter) rather than eager loading which adds overhead
     post = _get_post(params)
-    return _serialize_post(ctx, post)
+    result = _serialize_post(ctx, post)
+    # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
+    # Short TTL ensures edits are visible quickly while still benefiting from caching
+    if ctx.user.rank == "anonymous" and not ctx.has_param("_nocache"):
+        result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
+    return result
 
 
 @rest.routes.get("/random-post/?")
@@ -361,14 +372,6 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if ctx.has_file("thumbnail"):
         auth.verify_privilege(ctx.user, "posts:edit:thumbnail")
         posts.update_post_thumbnail(post, ctx.get_file("thumbnail"))
-    if ctx.has_param("metrics"):
-        auth.verify_privilege(ctx.user, "metrics:edit:posts")
-        metrics.update_or_create_post_metrics(post, ctx.get_param_as_list("metrics"))
-    if ctx.has_param("metricRanges"):
-        auth.verify_privilege(ctx.user, "metrics:edit:posts")
-        metrics.update_or_create_post_metric_ranges(
-            post, ctx.get_param_as_list("metricRanges")
-        )
     post.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
@@ -416,7 +419,11 @@ def merge_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
 def get_featured_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view:featured")
     post = posts.try_get_featured_post()
-    return _serialize_post(ctx, post)
+    result = _serialize_post(ctx, post)
+    # Cache for 5 minutes - only changes when admin features a new post
+    if result and ctx.user.rank == "anonymous":
+        result["_cache"] = "public, max-age=300"
+    return result
 
 
 @rest.routes.post("/featured-post/?")

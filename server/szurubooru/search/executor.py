@@ -88,7 +88,11 @@ class Executor:
         }
 
     def execute(
-        self, query_text: str, offset: int, limit: int
+        self,
+        query_text: str,
+        offset: int,
+        limit: int,
+        use_cache: bool = True,
     ) -> Tuple[int, List[model.Base]]:
         search_query = self.parser.parse(query_text)
         self.config.on_search_query_parsed(search_query)
@@ -104,7 +108,7 @@ class Executor:
                 break
 
         key = (id(self.config), hash(search_query), offset, limit)
-        if not disable_eager_loads and cache.has(key):
+        if use_cache and not disable_eager_loads and cache.has(key):
             return cache.get(key)
 
         filter_query = self.config.create_filter_query(disable_eager_loads)
@@ -122,7 +126,8 @@ class Executor:
         count = db.session.execute(count_statement).scalar()
 
         ret = (count, entities)
-        cache.put(key, ret)
+        if use_cache and not disable_eager_loads:
+            cache.put(key, ret)
         return ret
 
     def execute_and_serialize(
@@ -149,6 +154,7 @@ class Executor:
         self,
         ctx: rest.Context,
         batch_serializer: Callable[[list], list],
+        use_cache: bool = True,
     ) -> rest.Response:
         """
         Execute search and serialize results using batch serialization.
@@ -160,7 +166,7 @@ class Executor:
             query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
-        count, entities = self.execute(query, offset, limit)
+        count, entities = self.execute(query, offset, limit, use_cache=use_cache)
         return {
             "query": query,
             "offset": offset,

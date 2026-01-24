@@ -33,16 +33,7 @@ function unescapeParam(text) {
 }
 
 function getPostsQuery(parameters) {
-    let normalQuery = parameters.q ? parameters.q.trim() : "";
-    if (!parameters.metrics) {
-        return normalQuery;
-    }
-    let metricQuery = parameters.metrics
-        .split(" ") //see metric_header_control
-        .filter((m) => m)
-        .map((m) => m + " sort:metric-" + m)
-        .join(" ");
-    return normalQuery + " " + metricQuery;
+    return parameters.q ? parameters.q.trim() : "";
 }
 
 function formatClientLink(...values) {

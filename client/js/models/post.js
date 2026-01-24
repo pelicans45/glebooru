@@ -9,8 +9,6 @@ const NoteList = require("./note_list.js");
 const CommentList = require("./comment_list.js");
 const PoolList = require("./pool_list.js");
 const Pool = require("./pool.js");
-//const PostMetricList = require("./post_metric_list.js");
-//const PostMetricRangeList = require("./post_metric_range_list.js");
 const misc = require("../util/misc.js");
 const vars = require("../vars.js");
 const lens = require("../lens.js");
@@ -29,8 +27,6 @@ class Post extends events.EventTarget {
             obj._notes = new NoteList();
             obj._comments = new CommentList();
             obj._pools = new PoolList();
-            //obj._metrics = new PostMetricList();
-            //obj._metricRanges = new PostMetricRangeList();
         }
 
         this._updateFromResponse({});
@@ -153,14 +149,6 @@ class Post extends events.EventTarget {
 
     get pools() {
         return this._pools;
-    }
-
-    get metrics() {
-        return this._metrics;
-    }
-
-    get metricRanges() {
-        return this._metricRanges;
     }
 
     get score() {
@@ -315,21 +303,6 @@ class Post extends events.EventTarget {
                 text: note.text,
             }));
         }
-        /*
-        if (misc.arraysDiffer(this._metrics, this._orig._metrics)) {
-            detail.metrics = this._metrics.map((metric) => ({
-                tag_name: metric.tagName,
-                value: metric.value,
-            }));
-        }
-        if (misc.arraysDiffer(this._metricRanges, this._orig._metricRanges)) {
-            detail.metricRanges = this._metricRanges.map((metricRange) => ({
-                tag_name: metricRange.tagName,
-                low: metricRange.low,
-                high: metricRange.high,
-            }));
-        }
-		*/
         if (this._newContent) {
             files.content = this._newContent;
         }
@@ -540,15 +513,6 @@ class Post extends events.EventTarget {
             });
     }
 
-    removeMetricsWithoutTag() {
-        this._metrics
-            .filter((pm) => !this._tags.findByName(pm.tagName))
-            .map((pm) => this._metrics.remove(pm));
-        this._metricRanges
-            .filter((pmr) => !this._tags.findByName(pmr.tagName))
-            .map((pmr) => this._metricRanges.remove(pmr));
-    }
-
     getTaggedEnrichedFilename() {
         const tagNames = [];
 
@@ -662,10 +626,6 @@ class Post extends events.EventTarget {
             obj._notes.sync(response.notes);
             obj._comments.sync(response.comments);
             obj._pools.sync(response.pools);
-            /*
-            obj._metrics.sync(response.metrics);
-            obj._metricRanges.sync(response.metricRanges);
-			*/
         }
 
         Object.assign(this, map);

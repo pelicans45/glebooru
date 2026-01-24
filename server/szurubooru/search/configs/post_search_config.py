@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 import sqlalchemy as sa
 
 from szurubooru import db, errors, model
-from szurubooru.func import metrics, util
+from szurubooru.func import util
 from szurubooru.search import criteria, tokens
 from szurubooru.search.configs import util as search_util
 from szurubooru.search.configs.base_search_config import (
@@ -99,6 +99,63 @@ def _user_filter(
     )(query, criterion, negated)
 
 
+def _tag_name_filter(
+    query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
+) -> SaQuery:
+    if isinstance(criterion, criteria.PlainCriterion):
+        values = [criterion.value]
+    elif isinstance(criterion, criteria.ArrayCriterion):
+        values = criterion.values
+    else:
+        raise ValueError("tag criterion error")
+
+    has_wildcard = False
+    for value in values:
+        unescaped = search_util.unescape(
+            value, make_wildcards_special=True
+        )
+        if search_util.WILDCARD in unescaped:
+            has_wildcard = True
+            break
+
+    if has_wildcard:
+        tag_filter = search_util.create_subquery_filter(
+            model.Post.post_id,
+            model.PostTag.post_id,
+            model.TagName.name,
+            lambda column: search_util.create_lowercase_str_filter(
+                column, search_util.wildcard_transformer
+            ),
+            lambda subquery: subquery.join(model.Tag).join(model.TagName),
+        )
+        return tag_filter(query, criterion, negated)
+
+    names = [search_util.unescape(value).lower() for value in values]
+    if not names:
+        return query
+
+    tag_ids = [
+        row[0]
+        for row in db.session.query(model.TagName.tag_id)
+        .filter(model.TagName.name.in_(names))
+        .all()
+    ]
+
+    if not tag_ids:
+        return query if negated else query.filter(sa.sql.false())
+
+    subquery = (
+        db.session.query(model.PostTag.post_id.label("foreign_id"))
+        .filter(model.PostTag.tag_id.in_(tag_ids))
+        .options(sa.orm.lazyload("*"))
+    )
+    subquery = sa.select(subquery.subquery("t"))
+    expression = model.Post.post_id.in_(subquery)
+    if negated:
+        expression = ~expression
+    return query.filter(expression)
+
+
 def _note_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
@@ -176,67 +233,6 @@ def _similar_filter(
         )
 
 
-def _create_metric_num_filter(name: str):
-    def wrapper(
-        query: SaQuery,
-        criterion: Optional[criteria.BaseCriterion],
-        negated: bool,
-    ) -> SaQuery:
-        # assert criterion
-        t = sa.orm.aliased(model.TagName)
-        pm = sa.orm.aliased(model.PostMetric)
-        expr = t.name == name
-        expr = expr & search_util.apply_num_criterion_to_column(
-            pm.value, criterion, search_util.float_transformer
-        )
-        if negated:
-            expr = ~expr
-        ret = (
-            query.join(pm, pm.post_id == model.Post.post_id)
-            .join(t, t.tag_id == pm.tag_id)
-            .filter(expr)
-        )
-        return ret
-
-    return wrapper
-
-
-def _metric_presence_filter(
-    query: SaQuery,
-    criterion: Optional[criteria.BaseCriterion],
-    negated: bool,
-) -> SaQuery:
-    # assert criterion
-    t = sa.orm.aliased(model.TagName)
-    tag_name_filter = search_util.apply_str_criterion_to_column(
-        t.name, criterion
-    )
-    pm = sa.orm.aliased(model.PostMetric)
-    subquery = (
-        db.session.query(pm.post_id)
-        .join(t, t.tag_id == pm.tag_id)
-        .filter(tag_name_filter)
-        .subquery()
-    )
-    post_filter = model.Post.post_id.in_(sa.select(subquery.c.post_id))
-    if negated:
-        post_filter = ~post_filter
-    return query.filter(post_filter)
-
-
-def _create_metric_sort_column(metric_name: str):
-    t = sa.orm.aliased(model.TagName)
-    pm = sa.orm.aliased(model.PostMetric)
-    ret = (
-        db.session.query(pm.value)
-        .filter(pm.post_id == model.Post.post_id)
-        .join(t, t.tag_id == pm.tag_id)
-        .filter(t.name == metric_name)
-        .scalar_subquery()
-    )
-    return ret
-
-
 def _category_filter(
     query: SaQuery, criterion: Optional[criteria.BaseCriterion], negated: bool
 ) -> SaQuery:
@@ -268,10 +264,6 @@ def _category_filter(
 class PostSearchConfig(BaseSearchConfig):
     def __init__(self) -> None:
         self.user = None  # type: Optional[model.User]
-        self.all_metric_names = []
-
-    def refresh_metrics(self) -> None:
-        self.all_metric_names = metrics.get_all_metric_tag_names()
 
     def on_search_query_parsed(self, search_query: SearchQuery) -> SaQuery:
         new_special_tokens = []
@@ -298,42 +290,26 @@ class PostSearchConfig(BaseSearchConfig):
         search_query.special_tokens = new_special_tokens
 
     def create_around_query(self) -> SaQuery:
-        self.refresh_metrics()
-        return db.session.query(model.Post).options(sa.orm.lazyload("*"))
+        return (
+            db.session.query(model.Post)
+            .join(model.Post.statistics)
+            .options(
+                sa.orm.lazyload("*"),
+                sa.orm.contains_eager(model.Post.statistics),
+            )
+        )
 
     def create_filter_query(self, disable_eager_loads: bool) -> SaQuery:
-        self.refresh_metrics()
-        strategy = (
-            sa.orm.lazyload if disable_eager_loads else sa.orm.subqueryload
-        )
-        return db.session.query(model.Post).options(
+        return db.session.query(model.Post).join(model.Post.statistics).options(
             sa.orm.lazyload("*"),
-            # Defer heavier column_property subqueries for better listing performance
-            # These are only needed when explicitly requested via fields parameter
-            sa.orm.defer(model.Post.last_favorite_time),
-            sa.orm.defer(model.Post.last_comment_creation_time),
-            sa.orm.defer(model.Post.last_comment_edit_time),
-            sa.orm.defer(model.Post.note_count),
-            sa.orm.defer(model.Post.tag_count),
-            sa.orm.defer(model.Post.relation_count),
-            # Tags with names and categories
-            strategy(model.Post.tags).subqueryload(model.Tag.names),
-            strategy(model.Post.tags).joinedload(model.Tag.category),
-            strategy(model.Post.tags).defer(model.Tag.post_count),
-            strategy(model.Post.tags).lazyload(model.Tag.implications),
-            strategy(model.Post.tags).lazyload(model.Tag.suggestions),
-            # Eagerly load relationships accessed during serialization to avoid N+1
-            strategy(model.Post.favorited_by),  # User is eager via model
-            strategy(model.Post.comments),  # User is eager via model
-            strategy(model.Post.notes),
-            strategy(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.names),
-            strategy(model.Post._pools).joinedload(model.PoolPost.pool).joinedload(model.Pool.category),
-            strategy(model.Post.metrics).joinedload(model.PostMetric.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
-            strategy(model.Post.metric_ranges).joinedload(model.PostMetricRange.metric).joinedload(model.Metric.tag).subqueryload(model.Tag.names),
+            sa.orm.contains_eager(model.Post.statistics),
         )
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Post), model.Post
+        return (
+            db.session.query(model.Post).join(model.Post.statistics),
+            model.Post,
+        )
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
         return query.order_by(model.Post.post_id.desc())
@@ -344,288 +320,287 @@ class PostSearchConfig(BaseSearchConfig):
 
     @property
     def anonymous_filter(self) -> Optional[Filter]:
-        return search_util.create_subquery_filter(
-            model.Post.post_id,
-            model.PostTag.post_id,
-            model.TagName.name,
-            search_util.create_str_filter,
-            lambda subquery: subquery.join(model.Tag).join(model.TagName),
-        )
+        return _tag_name_filter
 
     @property
     def named_filters(self) -> Dict[str, Filter]:
-        filters = {
-            "metric-" + name: _create_metric_num_filter(name)
-            for name in self.all_metric_names
-        }
-        filters.update(
-            util.unalias_dict(
-                [
-                    (
-                        ["id"],
-                        search_util.create_num_filter(model.Post.post_id),
+        return util.unalias_dict(
+            [
+                (
+                    ["id"],
+                    search_util.create_num_filter(model.Post.post_id),
+                ),
+                (
+                    ["tag"],
+                    _tag_name_filter,
+                ),
+                (
+                    ["score"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.score
                     ),
-                    (
-                        ["tag"],
-                        search_util.create_subquery_filter(
-                            model.Post.post_id,
-                            model.PostTag.post_id,
-                            model.TagName.name,
-                            search_util.create_str_filter,
-                            lambda subquery: subquery.join(model.Tag).join(
-                                model.TagName
-                            ),
-                        ),
+                ),
+                (["uploader", "upload", "submit"], _user_filter),
+                (
+                    ["comment"],
+                    search_util.create_subquery_filter(
+                        model.Post.post_id,
+                        model.Comment.post_id,
+                        model.User.name,
+                        search_util.create_str_filter,
+                        lambda subquery: subquery.join(model.User),
                     ),
-                    (["metric"], _metric_presence_filter),
-                    (
-                        ["score"],
-                        search_util.create_num_filter(model.Post.score),
+                ),
+                (
+                    ["fav"],
+                    search_util.create_subquery_filter(
+                        model.Post.post_id,
+                        model.PostFavorite.post_id,
+                        model.User.name,
+                        search_util.create_str_filter,
+                        lambda subquery: subquery.join(model.User),
                     ),
-                    (["uploader", "upload", "submit"], _user_filter),
-                    (
-                        ["comment"],
-                        search_util.create_subquery_filter(
-                            model.Post.post_id,
-                            model.Comment.post_id,
-                            model.User.name,
-                            search_util.create_str_filter,
-                            lambda subquery: subquery.join(model.User),
-                        ),
+                ),
+                (["liked"], _create_score_filter(1)),
+                (["disliked"], _create_score_filter(-1)),
+                (
+                    ["source"],
+                    search_util.create_str_filter(
+                        model.Post.source, _source_transformer
                     ),
-                    (
-                        ["fav"],
-                        search_util.create_subquery_filter(
-                            model.Post.post_id,
-                            model.PostFavorite.post_id,
-                            model.User.name,
-                            search_util.create_str_filter,
-                            lambda subquery: subquery.join(model.User),
-                        ),
+                ),
+                (
+                    ["tag-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.tag_count
                     ),
-                    (["liked"], _create_score_filter(1)),
-                    (["disliked"], _create_score_filter(-1)),
-                    (
-                        ["source"],
-                        search_util.create_str_filter(
-                            model.Post.source, _source_transformer
-                        ),
+                ),
+                (
+                    ["comment-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.comment_count
                     ),
-                    (
-                        ["tag-count"],
-                        search_util.create_num_filter(model.Post.tag_count),
+                ),
+                (
+                    ["fav-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.favorite_count
                     ),
-                    (
-                        ["comment-count"],
-                        search_util.create_num_filter(
-                            model.Post.comment_count
-                        ),
+                ),
+                (
+                    ["note-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.note_count
                     ),
-                    (
-                        ["fav-count"],
-                        search_util.create_num_filter(
-                            model.Post.favorite_count
-                        ),
+                ),
+                (
+                    ["relation-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.relation_count
                     ),
-                    (
-                        ["note-count"],
-                        search_util.create_num_filter(model.Post.note_count),
+                ),
+                (
+                    ["feature-count"],
+                    search_util.create_num_filter(
+                        model.PostStatistics.feature_count
                     ),
-                    (
-                        ["relation-count"],
-                        search_util.create_num_filter(
-                            model.Post.relation_count
-                        ),
+                ),
+                (
+                    ["type"],
+                    search_util.create_str_filter(
+                        model.Post.type, _type_transformer
                     ),
-                    (
-                        ["feature-count"],
-                        search_util.create_num_filter(
-                            model.Post.feature_count
-                        ),
+                ),
+                (
+                    ["content-checksum", "sha1"],
+                    search_util.create_str_filter(model.Post.checksum),
+                ),
+                (
+                    ["md5"],
+                    search_util.create_str_filter(model.Post.checksum_md5),
+                ),
+                (
+                    ["file-size"],
+                    search_util.create_num_filter(model.Post.file_size),
+                ),
+                (
+                    ["image-width", "width"],
+                    search_util.create_num_filter(model.Post.canvas_width),
+                ),
+                (
+                    ["image-height", "height"],
+                    search_util.create_num_filter(
+                        model.Post.canvas_height
                     ),
-                    (
-                        ["type"],
-                        search_util.create_str_filter(
-                            model.Post.type, _type_transformer
-                        ),
+                ),
+                (
+                    ["image-area", "area"],
+                    search_util.create_num_filter(model.Post.canvas_area),
+                ),
+                (
+                    [
+                        "image-aspect-ratio",
+                        "image-ar",
+                        "aspect-ratio",
+                        "ar",
+                    ],
+                    search_util.create_num_filter(
+                        model.Post.canvas_aspect_ratio,
+                        transformer=search_util.float_transformer,
                     ),
-                    (
-                        ["content-checksum", "sha1"],
-                        search_util.create_str_filter(model.Post.checksum),
+                ),
+                (
+                    ["creation-date", "creation-time", "date", "time"],
+                    search_util.create_date_filter(
+                        model.Post.creation_time
                     ),
-                    (
-                        ["md5"],
-                        search_util.create_str_filter(model.Post.checksum_md5),
+                ),
+                (
+                    [
+                        "last-edit-date",
+                        "last-edit-time",
+                        "edit-date",
+                        "edit-time",
+                    ],
+                    search_util.create_date_filter(
+                        model.Post.last_edit_time
                     ),
-                    (
-                        ["file-size"],
-                        search_util.create_num_filter(model.Post.file_size),
+                ),
+                (
+                    ["comment-date", "comment-time"],
+                    search_util.create_date_filter(
+                        model.PostStatistics.last_comment_creation_time
                     ),
-                    (
-                        ["image-width", "width"],
-                        search_util.create_num_filter(model.Post.canvas_width),
+                ),
+                (
+                    ["fav-date", "fav-time"],
+                    search_util.create_date_filter(
+                        model.PostStatistics.last_favorite_time
                     ),
-                    (
-                        ["image-height", "height"],
-                        search_util.create_num_filter(
-                            model.Post.canvas_height
-                        ),
+                ),
+                (
+                    ["feature-date", "feature-time"],
+                    search_util.create_date_filter(
+                        model.PostStatistics.last_feature_time
                     ),
-                    (
-                        ["image-area", "area"],
-                        search_util.create_num_filter(model.Post.canvas_area),
+                ),
+                (
+                    ["safety", "rating"],
+                    search_util.create_str_filter(
+                        model.Post.safety, _safety_transformer
                     ),
-                    (
-                        [
-                            "image-aspect-ratio",
-                            "image-ar",
-                            "aspect-ratio",
-                            "ar",
-                        ],
-                        search_util.create_num_filter(
-                            model.Post.canvas_aspect_ratio,
-                            transformer=search_util.float_transformer,
-                        ),
+                ),
+                (["note-text"], _note_filter),
+                (
+                    ["flag"],
+                    search_util.create_str_filter(
+                        model.Post.flags_string, _flag_transformer
                     ),
-                    (
-                        ["creation-date", "creation-time", "date", "time"],
-                        search_util.create_date_filter(
-                            model.Post.creation_time
-                        ),
-                    ),
-                    (
-                        [
-                            "last-edit-date",
-                            "last-edit-time",
-                            "edit-date",
-                            "edit-time",
-                        ],
-                        search_util.create_date_filter(
-                            model.Post.last_edit_time
-                        ),
-                    ),
-                    (
-                        ["comment-date", "comment-time"],
-                        search_util.create_date_filter(
-                            model.Post.last_comment_creation_time
-                        ),
-                    ),
-                    (
-                        ["fav-date", "fav-time"],
-                        search_util.create_date_filter(
-                            model.Post.last_favorite_time
-                        ),
-                    ),
-                    (
-                        ["feature-date", "feature-time"],
-                        search_util.create_date_filter(
-                            model.Post.last_feature_time
-                        ),
-                    ),
-                    (
-                        ["safety", "rating"],
-                        search_util.create_str_filter(
-                            model.Post.safety, _safety_transformer
-                        ),
-                    ),
-                    (["note-text"], _note_filter),
-                    (
-                        ["flag"],
-                        search_util.create_str_filter(
-                            model.Post.flags_string, _flag_transformer
-                        ),
-                    ),
-                    (["pool"], _pool_filter),
-                    (["similar"], _similar_filter),
-                    (["category"], _category_filter),
-                ]
-            )
+                ),
+                (["pool"], _pool_filter),
+                (["similar"], _similar_filter),
+                (["category"], _category_filter),
+            ]
         )
-        return filters
 
     @property
     def sort_columns(self) -> Dict[str, Tuple[SaColumn, str]]:
-        filters = {
-            "metric-" + name: (
-                search_util.SortColumn(
-                    _create_metric_sort_column(name), nulls_last=True
+        return util.unalias_dict(
+            [
+                (
+                    ["random"],
+                    (sa.sql.expression.func.random(), self.SORT_NONE),
                 ),
-                self.SORT_ASC,
-            )
-            for name in self.all_metric_names
-        }
-        filters.update(
-            util.unalias_dict(
-                [
+                (["id"], (model.Post.post_id, self.SORT_DESC)),
+                (
+                    ["score"],
+                    (model.PostStatistics.score, self.SORT_DESC),
+                ),
+                (
+                    ["tag-count"],
+                    (model.PostStatistics.tag_count, self.SORT_DESC),
+                ),
+                (
+                    ["comment-count"],
                     (
-                        ["random"],
-                        (sa.sql.expression.func.random(), self.SORT_NONE),
+                        model.PostStatistics.comment_count,
+                        self.SORT_DESC,
                     ),
-                    (["id"], (model.Post.post_id, self.SORT_DESC)),
-                    (["score"], (model.Post.score, self.SORT_DESC)),
-                    (["tag-count"], (model.Post.tag_count, self.SORT_DESC)),
+                ),
+                (
+                    ["fav-count"],
                     (
-                        ["comment-count"],
-                        (model.Post.comment_count, self.SORT_DESC),
+                        model.PostStatistics.favorite_count,
+                        self.SORT_DESC,
                     ),
+                ),
+                (
+                    ["note-count"],
+                    (model.PostStatistics.note_count, self.SORT_DESC),
+                ),
+                (
+                    ["relation-count"],
                     (
-                        ["fav-count"],
-                        (model.Post.favorite_count, self.SORT_DESC),
+                        model.PostStatistics.relation_count,
+                        self.SORT_DESC,
                     ),
-                    (["note-count"], (model.Post.note_count, self.SORT_DESC)),
+                ),
+                (
+                    ["feature-count"],
                     (
-                        ["relation-count"],
-                        (model.Post.relation_count, self.SORT_DESC),
+                        model.PostStatistics.feature_count,
+                        self.SORT_DESC,
                     ),
+                ),
+                (["file-size"], (model.Post.file_size, self.SORT_DESC)),
+                (
+                    ["image-width", "width"],
+                    (model.Post.canvas_width, self.SORT_DESC),
+                ),
+                (
+                    ["image-height", "height"],
+                    (model.Post.canvas_height, self.SORT_DESC),
+                ),
+                (
+                    ["image-area", "area"],
+                    (model.Post.canvas_area, self.SORT_DESC),
+                ),
+                (
+                    ["creation-date", "creation-time", "date", "time"],
+                    (model.Post.creation_time, self.SORT_DESC),
+                ),
+                (
+                    [
+                        "last-edit-date",
+                        "last-edit-time",
+                        "edit-date",
+                        "edit-time",
+                    ],
+                    (model.Post.last_edit_time, self.SORT_DESC),
+                ),
+                (
+                    ["comment-date", "comment-time"],
                     (
-                        ["feature-count"],
-                        (model.Post.feature_count, self.SORT_DESC),
+                        model.PostStatistics.last_comment_creation_time,
+                        self.SORT_DESC,
                     ),
-                    (["file-size"], (model.Post.file_size, self.SORT_DESC)),
+                ),
+                (
+                    ["fav-date", "fav-time"],
                     (
-                        ["image-width", "width"],
-                        (model.Post.canvas_width, self.SORT_DESC),
+                        model.PostStatistics.last_favorite_time,
+                        self.SORT_DESC,
                     ),
+                ),
+                (
+                    ["feature-date", "feature-time"],
                     (
-                        ["image-height", "height"],
-                        (model.Post.canvas_height, self.SORT_DESC),
+                        model.PostStatistics.last_feature_time,
+                        self.SORT_DESC,
                     ),
-                    (
-                        ["image-area", "area"],
-                        (model.Post.canvas_area, self.SORT_DESC),
-                    ),
-                    (
-                        ["creation-date", "creation-time", "date", "time"],
-                        (model.Post.creation_time, self.SORT_DESC),
-                    ),
-                    (
-                        [
-                            "last-edit-date",
-                            "last-edit-time",
-                            "edit-date",
-                            "edit-time",
-                        ],
-                        (model.Post.last_edit_time, self.SORT_DESC),
-                    ),
-                    (
-                        ["comment-date", "comment-time"],
-                        (
-                            model.Post.last_comment_creation_time,
-                            self.SORT_DESC,
-                        ),
-                    ),
-                    (
-                        ["fav-date", "fav-time"],
-                        (model.Post.last_favorite_time, self.SORT_DESC),
-                    ),
-                    (
-                        ["feature-date", "feature-time"],
-                        (model.Post.last_feature_time, self.SORT_DESC),
-                    ),
-                ]
-            )
+                ),
+            ]
         )
-        return filters
 
     @property
     def special_filters(self) -> Dict[str, Filter]:
@@ -652,9 +627,9 @@ class PostSearchConfig(BaseSearchConfig):
         negated: bool,
     ) -> SaQuery:
         expr = (
-            (model.Post.comment_count == 0)
-            & (model.Post.favorite_count == 0)
-            & (model.Post.score == 0)
+            (model.PostStatistics.comment_count == 0)
+            & (model.PostStatistics.favorite_count == 0)
+            & (model.PostStatistics.score == 0)
         )
         if negated:
             expr = ~expr

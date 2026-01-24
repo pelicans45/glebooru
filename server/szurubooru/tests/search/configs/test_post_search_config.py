@@ -879,70 +879,12 @@ def test_tumbleweed(
     verify_unpaged("-special:tumbleweed", [1, 2, 3])
 
 
-@pytest.mark.parametrize("input,expected_post_ids", [
-    ("sort:id,asc metric-a:1..3", [1, 2, 3]),
-    ("sort:id,asc metric-a-min:2", [2, 3]),
-    ("sort:id,asc metric-a:1.5..", [2, 3]),
-    ("sort:id,asc metric-a:1..3 metric-b:2..", [2]),
-    ("sort:id,asc c metric-a:3..", [3]),
-    ("sort:id,asc metric-b:..2", [1, 2]),
-    ("sort:id,asc metric-b:..1.9", [1]),
-    ("sort:metric-a", [1, 2, 3, 5, 4]),
-    ("sort:metric-a,desc", [3, 2, 1, 5, 4]),
-    ("metric-a:1..3 metric-b:1..3 sort:metric-b,desc", [2, 1]),
-    ("metric-a:1..3 sort:metric-b,desc", [2, 1, 3]),
-    ("metric-a:2..3 metric-b:1..3 sort:metric-b,desc", [2]),
-    ("metric-a:2..3 sort:metric-b,desc", [2, 3]),
-    ("sort:id,asc metric:a", [1, 2, 3]),
-    ("sort:id,asc -metric:a", [4, 5]),
-    ("sort:id,asc metric:a -metric:b", [3]),
-])
-def test_metrics(
-        input,
-        expected_post_ids,
-        post_factory,
-        tag_factory,
-        metric_factory,
-        post_metric_factory,
-        post_metric_range_factory,
-        verify_unpaged):
-    tag_a = tag_factory(names=["a"])
-    tag_b = tag_factory(names=["b"])
-    tag_c = tag_factory(names=["c"])
-    post1 = post_factory(id=1, tags=[tag_a, tag_b, tag_c])
-    post2 = post_factory(id=2, tags=[tag_a, tag_b, tag_c])
-    post3 = post_factory(id=3, tags=[tag_a, tag_b, tag_c])
-    post4 = post_factory(id=4, tags=[tag_a, tag_b, tag_c])
-    post5 = post_factory(id=5, tags=[tag_a, tag_b, tag_c])
-    metric_a = metric_factory(tag=tag_a)
-    metric_b = metric_factory(tag=tag_b)
-    metric_c = metric_factory(tag=tag_c)
-    a1 = post_metric_factory(post=post1, metric=metric_a, value=1)
-    b1 = post_metric_factory(post=post1, metric=metric_b, value=1)
-    c1 = post_metric_factory(post=post1, metric=metric_c, value=1)
-    a2 = post_metric_factory(post=post2, metric=metric_a, value=2)
-    b2 = post_metric_factory(post=post2, metric=metric_b, value=2)
-    a3 = post_metric_factory(post=post3, metric=metric_a, value=3)
-    c3 = post_metric_factory(post=post3, metric=metric_c, value=3)
-    r_a4 = post_metric_range_factory(post=post4, metric=metric_a,
-                                     low=1.5, high=2.5)
-    db.session.add_all([tag_a, tag_b, tag_c,
-                        post1, post2, post3, post4, post5,
-                        metric_a, metric_b, metric_c,
-                        a1, b1, c1, a2, b2, a3, c3, r_a4])
-    db.session.flush()
-    verify_unpaged(input, expected_post_ids, True)
-
-
 @pytest.mark.parametrize("input,expected_prev_id,expected_next_id", [
     ("", 3, 1), # default order is actually descending
     ("sort:id,asc", 1, 3),
     ("sort:id,desc", 3, 1),
     ("sort:tag-count,asc", 1, 3),
     ("sort:tag-count,desc", 3, 1),
-    ("metric-a:0..2 sort:metric-a", 3, 1),
-    ("metric-a:0..2 sort:metric-a,desc", 1, 3),
-    ("sort:metric-b", 3, 1),
 ])
 def test_around_query(
         input,
@@ -950,8 +892,6 @@ def test_around_query(
         expected_next_id,
         post_factory,
         tag_factory,
-        metric_factory,
-        post_metric_factory,
         verify_around):
     tag_a = tag_factory(names=["a"])
     tag_b = tag_factory(names=["b"])
@@ -960,14 +900,6 @@ def test_around_query(
     post1 = post_factory(id=1, tags=[tag_a])
     post2 = post_factory(id=2, tags=[tag_a, tag_b])
     post3 = post_factory(id=3, tags=[tag_a, tag_b, tag_c])
-    metric_a = metric_factory(tag=tag_a)
-    metric_b = metric_factory(tag=tag_b)
-    pm1 = post_metric_factory(post=post1, metric=metric_a, value=1.4)
-    pm2 = post_metric_factory(post=post2, metric=metric_a, value=1)
-    pm3 = post_metric_factory(post=post3, metric=metric_a, value=0.3)
-    db.session.add_all([tag_a, tag_b, tag_c,
-                        post1, post2, post3,
-                        metric_a, metric_b, pm1, pm2, pm3])
     db.session.add_all([tag_a, tag_b, tag_c, post1, post2, post3])
     db.session.flush()
     verify_around(input, 2, expected_prev_id, expected_next_id)

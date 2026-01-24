@@ -65,6 +65,9 @@ def _verify_name_validity(name: str) -> None:
     if util.value_exceeds_column_size(name, model.TagName.name):
         raise InvalidTagNameError("Tag name is too long")
 
+    if name != name.lower():
+        raise InvalidTagNameError("Tag name must be lowercase")
+
     name_regex = config.config["tag_name_regex"]
     if not re.fullmatch(name_regex, name):
         raise InvalidTagNameError(
@@ -157,7 +160,6 @@ class TagSerializer(serialization.BaseSerializer):
             "usages": self.serialize_usages,
             "suggestions": self.serialize_suggestions,
             "implications": self.serialize_implications,
-            "metric": self.serialize_metric,
         }
 
     def serialize_names(self) -> Any:
@@ -193,16 +195,6 @@ class TagSerializer(serialization.BaseSerializer):
             for relation in sort_tags(self.tag.implications)
         ]
 
-    def serialize_metric(self) -> Any:
-        if not self.tag.metric:
-            return None
-        else:
-            return {
-                "version": self.tag.metric.version,
-                "min": self.tag.metric.min,
-                "max": self.tag.metric.max,
-            }
-
 
 def serialize_tag(
     tag: model.Tag, options: List[str] = []
@@ -213,10 +205,11 @@ def serialize_tag(
 
 
 def try_get_tag_by_name(name: str) -> Optional[model.Tag]:
+    name = (name or "").lower()
     return (
         db.session.query(model.Tag)
         .join(model.TagName)
-        .filter(sa.func.lower(model.TagName.name) == name.lower())
+        .filter(model.TagName.name == name)
         .one_or_none()
     )
 
@@ -236,9 +229,7 @@ def get_tags_by_names(names: List[str]) -> List[model.Tag]:
     return (
         db.session.query(model.Tag)
         .join(model.TagName)
-        .filter(
-            sa.func.lower(model.TagName.name).in_(lowered_names)
-        )
+        .filter(model.TagName.name.in_(lowered_names))
         .all()
     )
 
@@ -246,7 +237,7 @@ def get_tags_by_names(names: List[str]) -> List[model.Tag]:
 def get_or_create_tags_by_names(
     names: List[str], category_overrides: Optional[Dict[str, str]] = None
 ) -> Tuple[List[model.Tag], List[model.Tag]]:
-    names = util.icase_unique(names)
+    names = [name.lower() for name in util.icase_unique(names)]
     existing_tags = get_tags_by_names(names)
     new_tags = []
     tag_category_name = tag_categories.get_default_category_name()
@@ -317,8 +308,6 @@ def merge_tags(source_tag: model.Tag, target_tag: model.Tag) -> None:
     # assert target_tag
     if source_tag.tag_id == target_tag.tag_id:
         raise InvalidTagRelationError("Cannot merge tag with itself")
-    if source_tag.metric or target_tag.metric:
-        raise InvalidTagRelationError("Cannot merge tags with metrics")
 
     def merge_posts(source_tag_id: int, target_tag_id: int) -> None:
         alias1 = model.PostTag
@@ -406,7 +395,10 @@ def update_tag_category_name(tag: model.Tag, category_name: str) -> None:
 def update_tag_names(tag: model.Tag, names: List[str]) -> None:
     # sanitize
     # assert tag
-    names = util.icase_unique([name for name in names if name])
+    names = [
+        name.lower()
+        for name in util.icase_unique([name for name in names if name])
+    ]
     if not len(names):
         raise InvalidTagNameError("At least one name must be specified")
     for name in names:
@@ -415,7 +407,7 @@ def update_tag_names(tag: model.Tag, names: List[str]) -> None:
     # check for existing tags
     expr = sa.sql.false()
     for name in names:
-        expr = expr | (sa.func.lower(model.TagName.name) == name.lower())
+        expr = expr | (model.TagName.name == name)
     if tag.tag_id:
         expr = expr & (model.TagName.tag_id != tag.tag_id)
     existing_tags = db.session.query(model.TagName).filter(expr).all()
@@ -436,7 +428,7 @@ def update_tag_names(tag: model.Tag, names: List[str]) -> None:
     # set alias order to match the request
     for i, name in enumerate(names):
         for tag_name in tag.names:
-            if tag_name.name.lower() == name.lower():
+            if tag_name.name == name:
                 tag_name.order = i
 
 

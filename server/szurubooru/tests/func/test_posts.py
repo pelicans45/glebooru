@@ -77,9 +77,6 @@ def test_serialize_post(
     comment_factory,
     tag_factory,
     tag_category_factory,
-    metric_factory,
-    post_metric_factory,
-    post_metric_range_factory,
     pool_factory,
     pool_category_factory,
     config_injector,
@@ -105,20 +102,11 @@ def test_serialize_post(
             names=["tag1", "tag2"],
             category=tag_category_factory("test-cat1")
         )
-        tag1.metric = metric_factory(tag=tag1, min=-2.5, max=2.5)
         tag3 = tag_factory(
             names=["tag3"],
             category=tag_category_factory("test-cat2")
         )
         post.tags = [tag1, tag3]
-        post.metrics = [
-            post_metric_factory(post=post, metric=tag1.metric, value=-1.2)
-        ]
-        post.metric_ranges = [
-            post_metric_range_factory(
-                post=post, metric=tag1.metric, low=2, high=3
-            )
-        ]
         post.safety = model.Post.SAFETY_SAFE
         post.source = "4gag"
         post.type = model.Post.TYPE_IMAGE
@@ -221,16 +209,11 @@ def test_serialize_post(
                     "names": ["tag1", "tag2"],
                     "category": "test-cat1",
                     "usages": 1,
-                    "metric": {
-                        "min": -2.5,
-                        "max": 2.5
-                    },
                 },
                 {
                     "names": ["tag3"],
                     "category": "test-cat2",
                     "usages": 1,
-                    "metric": None,
                 },
             ],
             "relations": [],
@@ -265,21 +248,6 @@ def test_serialize_post(
             "favoritedBy": ["fav1"],
             "mimeType": "image/jpeg",
             "comments": ["commenter1", "commenter2"],
-            "metrics": [
-                {
-                    "tag_name": "tag1",
-                    "post_id": 1,
-                    "value": -1.2
-                }
-            ],
-            "metricRanges": [
-                {
-                    "tag_name": "tag1",
-                    "post_id": 1,
-                    "low": 2,
-                    "high": 3
-                }
-            ],
         }
 
 

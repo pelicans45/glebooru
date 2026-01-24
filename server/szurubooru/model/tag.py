@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 
 from szurubooru.model.base import Base
-from szurubooru.model.post import PostTag
 
 
 class TagSuggestion(Base):
@@ -96,6 +95,14 @@ class Tag(Base):
         lazy="joined",
         order_by="TagName.order",
     )
+    statistics = sa.orm.relationship(
+        "TagStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("tag", lazy="joined"),
+    )
     suggestions = sa.orm.relationship(
         "Tag",
         secondary="tag_suggestion",
@@ -110,23 +117,6 @@ class Tag(Base):
         secondaryjoin=tag_id == TagImplication.child_id,
         lazy="joined",
     )
-    metric = sa.orm.relationship(
-        "Metric",
-        uselist=False,
-        cascade="all, delete-orphan",
-        back_populates="tag",
-    )
-
-    post_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            sa.sql.expression.func.count(PostTag.post_id)
-        )
-        .where(PostTag.tag_id == tag_id)
-        .correlate_except(PostTag)
-        .scalar_subquery(),
-        deferred=True,  # Avoid N+1 queries - use batch pre-fetch instead
-    )
-
     first_name = sa.orm.column_property(
         (
             sa.sql.expression.select(TagName.name)
@@ -138,27 +128,23 @@ class Tag(Base):
         deferred=True,
     )
 
-    suggestion_count = sa.orm.column_property(
-        (
-            sa.sql.expression.select(
-                sa.sql.expression.func.count(TagSuggestion.child_id)
-            )
-            .where(TagSuggestion.parent_id == tag_id)
-            .scalar_subquery()
-        ),
-        deferred=True,
-    )
+    @property
+    def post_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.usage_count or 0)
 
-    implication_count = sa.orm.column_property(
-        (
-            sa.sql.expression.select(
-                sa.sql.expression.func.count(TagImplication.child_id)
-            )
-            .where(TagImplication.parent_id == tag_id)
-            .scalar_subquery()
-        ),
-        deferred=True,
-    )
+    @property
+    def suggestion_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.suggestion_count or 0)
+
+    @property
+    def implication_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.implication_count or 0)
 
     __mapper_args__ = {
         "version_id_col": version,

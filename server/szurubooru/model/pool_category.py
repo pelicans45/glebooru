@@ -3,7 +3,6 @@ from typing import Optional
 import sqlalchemy as sa
 
 from szurubooru.model.base import Base
-from szurubooru.model.pool import Pool
 
 
 class PoolCategory(Base):
@@ -19,15 +18,20 @@ class PoolCategory(Base):
 
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
-
-    pool_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            sa.sql.expression.func.count("Pool.pool_id")
-        )
-        .where(Pool.category_id == pool_category_id)
-        .correlate_except(sa.table("Pool"))
-        .scalar_subquery()
+    statistics = sa.orm.relationship(
+        "PoolCategoryStatistics",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="joined",
+        backref=sa.orm.backref("category", lazy="joined"),
     )
+
+    @property
+    def pool_count(self) -> int:
+        if not self.statistics:
+            return 0
+        return int(self.statistics.usage_count or 0)
 
     __mapper_args__ = {
         "version_id_col": version,

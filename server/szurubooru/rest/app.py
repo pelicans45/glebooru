@@ -208,7 +208,12 @@ def application(
                 start_response(response.get("status_code", "200"), [("content-type", content_type)])
                 return (response.get("content", "").encode("utf-8"),)
 
-            start_response("200", [("content-type", "application/json")])
+            # Build response headers, including cache control if specified
+            headers = [("content-type", "application/json")]
+            if "_cache" in response:
+                headers.append(("cache-control", response.pop("_cache")))
+
+            start_response("200", headers)
             return (_dump_json(response),)
 
         except Exception as ex:

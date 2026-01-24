@@ -214,9 +214,6 @@ class TagList extends AbstractList {
         }
     }
 
-    filterMetrics() {
-        return this.filter((tag) => tag.metric);
-    }
 }
 
 TagList._itemClass = Tag;
