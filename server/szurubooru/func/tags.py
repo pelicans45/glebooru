@@ -118,8 +118,6 @@ def sort_tags(
     tags: List[model.Tag],
     preloaded_counts: dict = None,
 ) -> List[model.Tag]:
-    default_category_name = tag_categories.get_default_category_name()
-
     def get_sort_key(tag):
         # Use preloaded counts if available to avoid N+1 queries
         if preloaded_counts is not None:
@@ -128,7 +126,7 @@ def sort_tags(
             post_count = tag.post_count
         return (
             tag.category.order,
-            default_category_name == tag.category.name,
+            bool(tag.category.default),
             tag.category.name,
             -post_count,
             tag.names[0].name,
@@ -238,7 +236,29 @@ def get_or_create_tags_by_names(
     names: List[str], category_overrides: Optional[Dict[str, str]] = None
 ) -> Tuple[List[model.Tag], List[model.Tag]]:
     names = [name.lower() for name in util.icase_unique(names)]
-    existing_tags = get_tags_by_names(names)
+    if len(names) == 0:
+        return [], []
+
+    existing_name_rows = (
+        db.session.query(model.TagName.name, model.TagName.tag_id)
+        .filter(model.TagName.name.in_(names))
+        .all()
+    )
+    existing_name_to_tag = {name: tag_id for name, tag_id in existing_name_rows}
+    existing_tag_ids = set(existing_name_to_tag.values())
+    existing_tags = []
+    if existing_tag_ids:
+        existing_tags = (
+            db.session.query(model.Tag)
+            .options(
+                sa.orm.lazyload("*"),
+                sa.orm.joinedload(model.Tag.category),
+                sa.orm.joinedload(model.Tag.names),
+                sa.orm.joinedload(model.Tag.statistics),
+            )
+            .filter(model.Tag.tag_id.in_(existing_tag_ids))
+            .all()
+        )
     new_tags = []
     tag_category_name = tag_categories.get_default_category_name()
     category_overrides = {
@@ -247,14 +267,7 @@ def get_or_create_tags_by_names(
         if name
     }
     for name in names:
-        found = False
-        for existing_tag in existing_tags:
-            if _check_name_intersection(
-                _get_names(existing_tag), [name], False
-            ):
-                found = True
-                break
-        if not found:
+        if name not in existing_name_to_tag:
             category_name = category_overrides.get(
                 name.lower(), tag_category_name
             )

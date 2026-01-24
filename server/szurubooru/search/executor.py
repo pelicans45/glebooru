@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import sqlalchemy as sa
 from szurubooru.func import cache
@@ -87,13 +87,15 @@ class Executor:
             "random": serializer(entities[2]),
         }
 
-    def execute(
+    def _execute_internal(
         self,
         query_text: str,
         offset: int,
         limit: int,
         use_cache: bool = True,
-    ) -> Tuple[int, List[model.Base]]:
+        include_count: bool = True,
+        include_has_more: bool = False,
+    ) -> Tuple[Optional[int], List[model.Base], Optional[bool]]:
         search_query = self.parser.parse(query_text)
         self.config.on_search_query_parsed(search_query)
 
@@ -107,7 +109,14 @@ class Executor:
                 disable_eager_loads = True
                 break
 
-        key = (id(self.config), hash(search_query), offset, limit)
+        key = (
+            id(self.config),
+            hash(search_query),
+            offset,
+            limit,
+            include_count,
+            include_has_more,
+        )
         if use_cache and not disable_eager_loads and cache.has(key):
             return cache.get(key)
 
@@ -115,25 +124,74 @@ class Executor:
         # Note: lazyload("*") is already applied in create_filter_query
         # Don't add another one here as it would override specific eager loads
         filter_query = self._prepare_db_query(filter_query, search_query, True)
-        entities = filter_query.offset(offset).limit(limit).all()
+        query_limit = limit + 1 if include_has_more else limit
+        entities = filter_query.offset(offset).limit(query_limit).all()
+        has_more = None
+        if include_has_more:
+            has_more = len(entities) > limit
+            if has_more:
+                entities = entities[:limit]
 
-        count_query, model = self.config.create_count_query(disable_eager_loads)
-        count_query = count_query.options(sa.orm.lazyload("*"))
-        count_query = self._prepare_db_query(count_query, search_query, False)
-        count_statement = count_query.statement.select_from(model).with_only_columns(
-            sa.func.count()
-        ).order_by(None)
-        count = db.session.execute(count_statement).scalar()
+        count = None
+        if include_count:
+            count_query, model = self.config.create_count_query(
+                disable_eager_loads
+            )
+            count_query = count_query.options(sa.orm.lazyload("*"))
+            count_query = self._prepare_db_query(count_query, search_query, False)
+            count_statement = (
+                count_query.statement.select_from(model)
+                .with_only_columns(sa.func.count())
+                .order_by(None)
+            )
+            count = db.session.execute(count_statement).scalar()
 
-        ret = (count, entities)
+        ret = (count, entities, has_more)
         if use_cache and not disable_eager_loads:
             cache.put(key, ret)
         return ret
+
+    def execute(
+        self,
+        query_text: str,
+        offset: int,
+        limit: int,
+        use_cache: bool = True,
+    ) -> Tuple[int, List[model.Base]]:
+        count, entities, _has_more = self._execute_internal(
+            query_text,
+            offset,
+            limit,
+            use_cache=use_cache,
+            include_count=True,
+            include_has_more=False,
+        )
+        return count or 0, entities
+
+    def execute_with_metadata(
+        self,
+        query_text: str,
+        offset: int,
+        limit: int,
+        use_cache: bool = True,
+        include_count: bool = True,
+        include_has_more: bool = False,
+    ) -> Tuple[Optional[int], List[model.Base], Optional[bool]]:
+        return self._execute_internal(
+            query_text,
+            offset,
+            limit,
+            use_cache=use_cache,
+            include_count=include_count,
+            include_has_more=include_has_more,
+        )
 
     def execute_and_serialize(
         self,
         ctx: rest.Context,
         serializer: Callable[[model.Base], rest.Response],
+        include_count: bool = True,
+        include_has_more: bool = False,
     ) -> rest.Response:
         if ctx.has_param("query"):
             query = ctx.get_param_as_string("query", default="")
@@ -141,20 +199,27 @@ class Executor:
             query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)#max=100)
-        count, entities = self.execute(query, offset, limit)
-        return {
+        count, entities, has_more = self.execute_with_metadata(
+            query, offset, limit, include_count=include_count, include_has_more=include_has_more
+        )
+        response = {
             "query": query,
             "offset": offset,
             "limit": limit,
             "total": count,
             "results": [serializer(entity) for entity in entities],
         }
+        if include_has_more:
+            response["hasMore"] = bool(has_more)
+        return response
 
     def execute_and_serialize_batch(
         self,
         ctx: rest.Context,
         batch_serializer: Callable[[list], list],
         use_cache: bool = True,
+        include_count: bool = True,
+        include_has_more: bool = False,
     ) -> rest.Response:
         """
         Execute search and serialize results using batch serialization.
@@ -166,14 +231,24 @@ class Executor:
             query = ctx.get_param_as_string("q", default="")
         offset = ctx.get_param_as_int("offset", default=0, min=0)
         limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
-        count, entities = self.execute(query, offset, limit, use_cache=use_cache)
-        return {
+        count, entities, has_more = self.execute_with_metadata(
+            query,
+            offset,
+            limit,
+            use_cache=use_cache,
+            include_count=include_count,
+            include_has_more=include_has_more,
+        )
+        response = {
             "query": query,
             "offset": offset,
             "limit": limit,
             "total": count,
             "results": batch_serializer(entities),
         }
+        if include_has_more:
+            response["hasMore"] = bool(has_more)
+        return response
 
     def count(self, query_text: str) -> int:
         search_query = self.parser.parse(query_text)

@@ -20,7 +20,10 @@ class PostList extends AbstractList {
         );
     }
 
-    static search(text, offset, limit, fields, r, canSeeNewPosts) {
+    static search(text, offset, limit, fields, r, canSeeNewPosts, options = {}) {
+        const browsingSettings = settings.get();
+        const skipCount = browsingSettings.endlessScroll ? 1 : null;
+        const beforeId = options.beforeId || null;
         return api
             .get(
                 uri.formatApiLink(
@@ -31,6 +34,8 @@ class PostList extends AbstractList {
                         limit: limit,
                         fields: fields.join(","),
                         r: r,
+                        skipCount: skipCount,
+                        beforeId: beforeId,
                     },
                     { showProgress: false }
                 )

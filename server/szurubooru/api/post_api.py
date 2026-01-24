@@ -7,6 +7,8 @@ from typing import Dict, List, Optional
 import sqlalchemy as sa
 
 from szurubooru import db, errors, model, rest, search
+from szurubooru.search import parser as search_parser
+from szurubooru.search import tokens as search_tokens
 from szurubooru.func import (
     auth,
     favorites,
@@ -39,6 +41,21 @@ def _get_post_id(params: Dict[str, str]) -> int:
 
 def _get_post(params: Dict[str, str]) -> model.Post:
     return posts.get_post_by_id(_get_post_id(params))
+
+
+def _cursor_is_compatible(query_text: str) -> bool:
+    parsed = search_parser.Parser().parse(query_text or "")
+    if not parsed.sort_tokens:
+        return True
+    for token in parsed.sort_tokens:
+        if token.name != "id":
+            return False
+        if token.order in (
+            search_tokens.SortToken.SORT_ASC,
+            search_tokens.SortToken.SORT_NEGATED_DEFAULT,
+        ):
+            return False
+    return True
 
 
 def _serialize_post(ctx: rest.Context, post: Optional[model.Post]) -> rest.Response:
@@ -106,14 +123,45 @@ def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
     _search_executor_config.user = ctx.user
-    # Use batch serialization for optimized N+1 query handling
+    if ctx.has_param("query"):
+        query_text = ctx.get_param_as_string("query", default="")
+    else:
+        query_text = ctx.get_param_as_string("q", default="")
+    offset = ctx.get_param_as_int("offset", default=0, min=0)
+    limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
     options = serialization.get_serialization_options(ctx)
     use_cache = bool(options)
-    result = _search_executor.execute_and_serialize_batch(
-        ctx,
-        lambda post_list: posts.serialize_posts_batch(post_list, ctx.user, options),
-        use_cache=use_cache,
+    skip_count = ctx.get_param_as_bool("skipCount", default=False)
+    before_id = (
+        ctx.get_param_as_int("beforeId", min=1)
+        if ctx.has_param("beforeId")
+        else None
     )
+    exec_query = query_text
+    exec_offset = offset
+    if before_id and _cursor_is_compatible(query_text):
+        cursor_value = max(0, before_id - 1)
+        cursor_filter = f"id:..{cursor_value}"
+        exec_query = f"{cursor_filter} {query_text}".strip()
+        exec_offset = 0
+
+    count, entities, has_more = _search_executor.execute_with_metadata(
+        exec_query,
+        exec_offset,
+        limit,
+        use_cache=use_cache,
+        include_count=not skip_count,
+        include_has_more=skip_count,
+    )
+    result = {
+        "query": query_text,
+        "offset": offset,
+        "limit": limit,
+        "total": count,
+        "results": posts.serialize_posts_batch(entities, ctx.user, options),
+    }
+    if skip_count:
+        result["hasMore"] = bool(has_more)
     # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
     # Short TTL ensures edits are visible quickly while still benefiting from caching
     if ctx.user.rank == "anonymous" and not ctx.has_param("_nocache"):
@@ -303,7 +351,7 @@ def create_snapshots_for_post(
 @rest.routes.put("/post/(?P<post_id>[^/]+)/?")
 def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     post = _get_post(params)
-    previous_post_tag_count = len(post.tags)
+    previous_post_tag_count = None
     versions.verify_version(post, ctx)
     versions.bump_version(post)
     new_tag_categories = _get_new_tag_categories(ctx)
@@ -321,6 +369,11 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         )
     new_tags = []
     if ctx.has_param("tags"):
+        previous_post_tag_count = db.session.execute(
+            sa.select(sa.func.count(model.PostTag.tag_id)).where(
+                model.PostTag.post_id == post.post_id
+            )
+        ).scalar_one()
         new_tag_names = ctx.get_param_as_string_list("tags")
         if not auth.has_privilege(ctx.user, "posts:edit:tags"):
             existing_tags = tags.get_tags_by_names(new_tag_names)
@@ -376,7 +429,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
-    if previous_post_tag_count != len(post.tags):
+    if previous_post_tag_count is not None and previous_post_tag_count != len(post.tags):
         tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
 
@@ -519,7 +572,12 @@ def get_posts_lookalikes(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
-    threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
+    threshold = ctx.get_param_as_float(
+        "threshold",
+        default=image_hash.DISTANCE_CUTOFF,
+        min=0,
+        max=1,
+    )
     if ctx.has_param("query"):
         query = ctx.get_param_as_string("query", default=None)
     else:

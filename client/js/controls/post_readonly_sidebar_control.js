@@ -295,7 +295,7 @@ class PostReadonlySidebarControl extends events.EventTarget {
     _fetchLookalikes() {
         const limit = similarPostCount;
         const fields = ["id", "thumbnailUrl"];
-        const threshold = 0.6;
+        const threshold = 0.12;
         return PostList.reverseSearch(
             this._post.id,
             limit,

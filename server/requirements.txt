@@ -4,6 +4,8 @@ python-multipart>=0.0.6
 certifi>=2017.11.5
 coloredlogs==5.0
 numpy>=1.8.2
+opencv-python-headless>=4.13.0.90
+pdqhash>=0.2.8
 pillow>=4.3.0
 # pillow-heif provides both HEIF and AVIF support (Python 3.14 compatible)
 pillow-heif>=0.18.0

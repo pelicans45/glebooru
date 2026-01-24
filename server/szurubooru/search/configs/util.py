@@ -191,13 +191,13 @@ def create_lowercase_str_filter(
             if WILDCARD in unescaped:
                 wildcard_values.append(value)
             else:
-                exact_values.append(unescape(value).lower())
+                exact_values.append(unescape(value))
 
         expr = sa.sql.false()
         if exact_values:
             expr = expr | column.in_(exact_values)
         for value in wildcard_values:
-            expr = expr | column.like(transformer(value.lower()))
+            expr = expr | column.like(transformer(value))
 
         if negated:
             expr = ~expr

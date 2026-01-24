@@ -269,14 +269,19 @@ class PostListController {
             },
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);
+                const beforeId = this._getBeforeIdForOffset(offset, limit);
                 return PostList.search(
                     query,
                     offset,
                     limit,
                     fields,
                     this._ctx.parameters.r,
-                    true //this._canSeeNewPosts,
-                );
+                    true, //this._canSeeNewPosts,
+                    { beforeId: beforeId }
+                ).then((response) => {
+                    this._storePageAnchor(offset, response);
+                    return response;
+                });
             },
             pageRenderer: (pageCtx) => {
                 Object.assign(pageCtx, {
@@ -312,6 +317,51 @@ class PostListController {
             },
             readPageFromCache: (rawPage) => PostList.fromResponse(rawPage),
         });
+    }
+
+    _getBeforeIdForOffset(offset, limit) {
+        const prevOffset = offset - limit;
+        if (prevOffset < 0) {
+            return null;
+        }
+        const state = this._ctx.state;
+        if (!state) {
+            return null;
+        }
+        if (state.pageAnchors && state.pageAnchors[prevOffset]) {
+            return state.pageAnchors[prevOffset].lastId || null;
+        }
+        if (!state.pageCache || !state.pageCache.pages) {
+            return null;
+        }
+        const cachedPage = state.pageCache.pages[prevOffset];
+        if (!cachedPage || !cachedPage.raw_data || !cachedPage.raw_data.length) {
+            return null;
+        }
+        const last = cachedPage.raw_data[cachedPage.raw_data.length - 1];
+        if (!last || !last.id) {
+            return null;
+        }
+        return last.id;
+    }
+
+    _storePageAnchor(offset, response) {
+        if (!response || !response.results) {
+            return;
+        }
+        const state = this._ctx.state || {};
+        const raw = response.results.raw_data;
+        if (!raw || !raw.length) {
+            return;
+        }
+        if (!state.pageAnchors) {
+            state.pageAnchors = {};
+        }
+        state.pageAnchors[offset] = {
+            firstId: raw[0].id,
+            lastId: raw[raw.length - 1].id,
+        };
+        this._ctx.state = state;
     }
 }
 

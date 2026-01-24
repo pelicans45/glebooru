@@ -302,6 +302,8 @@ class PostSerializer(serialization.BaseSerializer):
         return self.post.flags
 
     def serialize_tags(self) -> Any:
+        if not self.post.tags:
+            return []
         result = []
         # Pass preloaded counts to sort_tags to avoid N+1 on tag.post_count
         for tag in tags.sort_tags(self.post.tags, self._preloaded_tag_counts):
@@ -318,6 +320,8 @@ class PostSerializer(serialization.BaseSerializer):
         return result
 
     def serialize_tags_basic(self) -> Any:
+        if not self.post.tags:
+            return []
         return [
             {
                 "names": [name.name for name in tag.names],
@@ -454,6 +458,8 @@ def serialize_post(
     needs_comments = not options or "comments" in options
     needs_own_score = not options or "ownScore" in options
     needs_own_favorite = not options or "ownFavorite" in options
+    needs_favorited_by = not options or "favoritedBy" in options
+    needs_pools = not options or "pools" in options
     needs_stats = not options or bool(
         {
             "score",
@@ -469,25 +475,27 @@ def serialize_post(
 
     state = sa.orm.attributes.instance_state(post)
 
-    if needs_user and "user" not in state.dict:
-        user_obj = None
-        if post.user_id:
-            user_obj = (
-                db.session.query(model.User)
-                .filter(model.User.user_id == post.user_id)
-                .one_or_none()
-            )
-        sa.orm.attributes.set_committed_value(post, "user", user_obj)
+    need_user_load = needs_user and "user" not in state.dict
+    need_stats_load = needs_stats and "statistics" not in state.dict
+    stats_obj = post.statistics if "statistics" in state.dict else None
 
-    if needs_stats and "statistics" not in state.dict:
-        stats = (
-            db.session.query(model.PostStatistics)
-            .filter(model.PostStatistics.post_id == post.post_id)
+    if need_user_load or need_stats_load:
+        row = (
+            db.session.query(model.User, model.PostStatistics)
+            .select_from(model.Post)
+            .outerjoin(model.User, model.User.user_id == model.Post.user_id)
+            .outerjoin(
+                model.PostStatistics,
+                model.PostStatistics.post_id == model.Post.post_id,
+            )
+            .filter(model.Post.post_id == post.post_id)
             .one_or_none()
         )
-        sa.orm.attributes.set_committed_value(post, "statistics", stats)
-
-    stats_obj = post.statistics if "statistics" in state.dict else None
+        user_obj, stats_obj = row if row else (None, None)
+        if need_user_load:
+            sa.orm.attributes.set_committed_value(post, "user", user_obj)
+        if need_stats_load:
+            sa.orm.attributes.set_committed_value(post, "statistics", stats_obj)
 
     if needs_comments and "comments" not in state.dict:
         if stats_obj is not None and getattr(stats_obj, "comment_count", 0) == 0:
@@ -514,6 +522,14 @@ def serialize_post(
             )
             sa.orm.attributes.set_committed_value(post, "notes", note_list)
 
+    if needs_favorited_by and "favorited_by" not in state.dict:
+        if stats_obj is not None and getattr(stats_obj, "favorite_count", 0) == 0:
+            sa.orm.attributes.set_committed_value(post, "favorited_by", [])
+
+    if needs_pools and "_pools" not in state.dict:
+        if stats_obj is not None and getattr(stats_obj, "pool_count", 0) == 0:
+            sa.orm.attributes.set_committed_value(post, "_pools", [])
+
     if needs_tags and preloaded_tag_counts is None:
         if stats_obj is not None and getattr(stats_obj, "tag_count", 0) == 0:
             sa.orm.attributes.set_committed_value(post, "tags", [])
@@ -525,8 +541,9 @@ def serialize_post(
             )
             preloaded_tag_counts = tag_counts
         elif post.tags:
-            tag_ids = [tag.tag_id for tag in post.tags]
-            preloaded_tag_counts = get_tag_post_counts(tag_ids)
+            preloaded_tag_counts = {
+                tag.tag_id: int(tag.post_count or 0) for tag in post.tags
+            }
 
     if preloaded_relations is None and needs_relations:
         if stats_obj is not None and getattr(stats_obj, "relation_count", 0) == 0:
@@ -582,6 +599,18 @@ def serialize_posts_batch(
     needs_favorite = not options or "ownFavorite" in options
     needs_tags = not options or "tags" in options or "tagsBasic" in options
     needs_relations = not options or "relations" in options
+    needs_stats = not options or bool(
+        {
+            "score",
+            "tagCount",
+            "favoriteCount",
+            "commentCount",
+            "noteCount",
+            "relationCount",
+            "featureCount",
+            "lastFeatureTime",
+        }.intersection(options)
+    )
 
     preloaded_scores = None
     preloaded_favorites = None
@@ -596,6 +625,27 @@ def serialize_posts_batch(
     if needs_favorite:
         preloaded_favorites = scores.get_post_favorites_for_user(post_ids, auth_user)
 
+    # Ensure statistics are loaded in batch when needed to avoid N+1 queries.
+    if needs_stats or needs_tags:
+        missing_stats_ids = []
+        for post in post_list:
+            state = sa.orm.attributes.instance_state(post)
+            if "statistics" not in state.dict:
+                missing_stats_ids.append(post.post_id)
+        if missing_stats_ids:
+            stats_rows = (
+                db.session.query(model.PostStatistics)
+                .filter(model.PostStatistics.post_id.in_(missing_stats_ids))
+                .all()
+            )
+            stats_by_post = {stat.post_id: stat for stat in stats_rows}
+            for post in post_list:
+                state = sa.orm.attributes.instance_state(post)
+                if "statistics" not in state.dict:
+                    sa.orm.attributes.set_committed_value(
+                        post, "statistics", stats_by_post.get(post.post_id)
+                    )
+
     # Batch fetch tags and tag post counts
     if needs_tags:
         # Check if tags are already loaded on the first post
@@ -603,20 +653,38 @@ def serialize_posts_batch(
         tags_already_loaded = 'tags' in first_post_state.dict
 
         if not tags_already_loaded:
-            # Batch load tags for all posts with a single efficient query
-            tags_by_post, tag_counts = _batch_load_tags_for_posts(post_ids)
+            posts_with_tags = []
+            posts_without_tags = []
             for post in post_list:
-                post_tags = tags_by_post.get(post.post_id, [])
-                sa.orm.attributes.set_committed_value(post, 'tags', post_tags)
+                state = sa.orm.attributes.instance_state(post)
+                stats = state.dict.get("statistics")
+                if stats is not None and getattr(stats, "tag_count", 0) == 0:
+                    posts_without_tags.append(post)
+                else:
+                    posts_with_tags.append(post)
+
+            tags_by_post = {}
+            tag_counts = {}
+            if posts_with_tags:
+                # Batch load tags only for posts that actually have tags
+                tags_by_post, tag_counts = _batch_load_tags_for_posts(
+                    [post.post_id for post in posts_with_tags]
+                )
+                for post in posts_with_tags:
+                    post_tags = tags_by_post.get(post.post_id, [])
+                    sa.orm.attributes.set_committed_value(
+                        post, 'tags', post_tags
+                    )
+            for post in posts_without_tags:
+                sa.orm.attributes.set_committed_value(post, 'tags', [])
             preloaded_tag_counts = tag_counts
         else:
-            # Now collect tag IDs and batch fetch counts
-            all_tag_ids = set()
+            # Tags already loaded; build counts from tag.statistics to avoid extra query
+            tag_counts: Dict[int, int] = {}
             for post in post_list:
                 for tag in post.tags:
-                    all_tag_ids.add(tag.tag_id)
-            if all_tag_ids:
-                preloaded_tag_counts = get_tag_post_counts(list(all_tag_ids))
+                    tag_counts[tag.tag_id] = int(tag.post_count or 0)
+            preloaded_tag_counts = tag_counts
 
     # Batch fetch relations
     if needs_relations:
@@ -651,12 +719,12 @@ def _batch_load_tags_for_posts(
         db.session.query(
             model.PostTag.post_id,
             model.Tag,
-            model.TagStatistics.usage_count,
         )
         .join(model.Tag, model.PostTag.tag_id == model.Tag.tag_id)
-        .join(model.TagStatistics)
+        .join(model.Tag.statistics)
         .filter(model.PostTag.post_id.in_(post_ids))
         .options(
+            sa.orm.contains_eager(model.Tag.statistics),
             sa.orm.joinedload(model.Tag.names),
             sa.orm.joinedload(model.Tag.category),
         )
@@ -665,9 +733,9 @@ def _batch_load_tags_for_posts(
 
     tags_by_post = {pid: [] for pid in post_ids}
     tag_counts: Dict[int, int] = {}
-    for post_id, tag, usage_count in post_tags:
+    for post_id, tag in post_tags:
         tags_by_post[post_id].append(tag)
-        tag_counts[tag.tag_id] = int(usage_count or 0)
+        tag_counts[tag.tag_id] = int(tag.post_count or 0)
 
     return tags_by_post, tag_counts
 
@@ -1047,7 +1115,9 @@ def generate_post_signature(
             logger.warning(
                 "Falling back to placeholder image hash for %s", ext
             )
-            unpacked_signature = image_hash.np.zeros(image_hash.SIG_NUMS)
+            unpacked_signature = image_hash.np.zeros(
+                image_hash.SIG_NUMS, dtype=image_hash.np.uint8
+            )
             packed_signature = image_hash.pack_signature(unpacked_signature)
             words = image_hash.generate_words(unpacked_signature)
             signature = model.PostSignature(
@@ -1208,13 +1278,21 @@ def update_post_content(
 
     post.file_size = len(content)
     try:
-        image = images.Image(content)
-        post.canvas_width = image.width
-        post.canvas_height = image.height
-        if post.type in (model.Post.TYPE_VIDEO, model.Post.TYPE_AUDIO):
-            post.duration = int(round(image.duration)) if image.duration > 0 else None
-        else:
+        if post.type in (model.Post.TYPE_IMAGE, model.Post.TYPE_ANIMATION):
+            post.canvas_width, post.canvas_height = images.get_image_dimensions(
+                content
+            )
             post.duration = None
+        else:
+            image = images.Image(content)
+            post.canvas_width = image.width
+            post.canvas_height = image.height
+            if post.type in (model.Post.TYPE_VIDEO, model.Post.TYPE_AUDIO):
+                post.duration = (
+                    int(round(image.duration)) if image.duration > 0 else None
+                )
+            else:
+                post.duration = None
     except errors.ProcessingError as ex:
         logging.exception(ex)
         if mime.is_heif(post.mime_type):
@@ -1277,11 +1355,16 @@ def generate_post_thumbnail(post: model.Post) -> None:
         content = files.get(get_post_content_path(post))
     try:
         # assert content
-        image = images.Image(content)
         thumb_width, thumb_height = _get_thumbnail_dimensions()
         if get_post_thumbnail_extension(post) == "gif":
+            image = images.Image(content)
             thumbnail_content = image.to_gif_thumbnail(thumb_width, thumb_height)
+        elif post.type == model.Post.TYPE_IMAGE:
+            thumbnail_content = images.resize_image_to_jpeg(
+                content, thumb_width, thumb_height
+            )
         else:
+            image = images.Image(content)
             image.resize_fill(thumb_width, thumb_height)
             thumbnail_content = image.to_jpeg()
         files.save(get_post_thumbnail_path(post), thumbnail_content)
@@ -1614,7 +1697,8 @@ def search_by_signature(
     FROM post_signature AS s
     CROSS JOIN LATERAL unnest(s.words, :q) AS a(word, query)
     {join_clause}
-    WHERE a.word = a.query {where_clause}
+    WHERE s.words && :q
+      AND a.word = a.query {where_clause}
     GROUP BY s.post_id
     ORDER BY score DESC LIMIT :limit;
     """
@@ -1624,13 +1708,12 @@ def search_by_signature(
     params = {"q": query_words, "limit": limit}
 
     if query:
-        join_clause = """
-        JOIN post_tag pt ON s.post_id = pt.post_id
-        JOIN tag t ON pt.tag_id = t.id
-        JOIN tag_name tn ON t.id = tn.tag_id
-        """
-        where_clause = "AND tn.name = :query"
-        params["query"] = query
+        tag = tags.try_get_tag_by_name(query)
+        if not tag:
+            return []
+        join_clause = "JOIN post_tag pt ON s.post_id = pt.post_id"
+        where_clause = "AND pt.tag_id = :tag_id"
+        params["tag_id"] = tag.tag_id
 
     dbquery = dbquery.format(join_clause=join_clause, where_clause=where_clause)
 

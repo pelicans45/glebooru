@@ -1,0 +1,4 @@
+services:
+  server:
+    ports:
+      - "4002:6666"

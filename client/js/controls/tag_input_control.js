@@ -443,7 +443,7 @@ class TagInputControl extends events.EventTarget {
     _loadSuggestionsFromLookalikes() {
         const limit = 20;
         const fields = ["id", "thumbnailUrl", "tags"];
-        const threshold = 1;
+        const threshold = 0.12;
         PostList.reverseSearch(this._post.id, limit, threshold, fields).then(
             (response) => {
                 const tagOccurrences = {};

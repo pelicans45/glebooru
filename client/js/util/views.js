@@ -64,6 +64,8 @@ function makeThumbnail(url, useBackgroundImage) {
             class: "gallery-thumb",
             src: url,
             draggable: "false",
+            loading: "lazy",
+            decoding: "async",
         })
     );
 }

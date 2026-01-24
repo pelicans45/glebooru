@@ -105,10 +105,7 @@ class TagList extends AbstractList {
     static getRelevant(query, offset, limit) {
         return this.getAllRelevant().then((_tags) => {
             const term = query;
-            const pattern =
-                term.length < tags.minLengthForPartialSearch
-                    ? term + "*"
-                    : "*" + term + "*";
+            const pattern = term + "*";
 
             return Promise.resolve(
                 _tags.results

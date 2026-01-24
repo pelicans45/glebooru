@@ -22,3 +22,4 @@ docker-compose.dev.windows.yml
 
 client/js/.*
 .vscode
+doc/

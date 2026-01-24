@@ -27,6 +27,7 @@ class EndlessPageView {
         this.minOffsetShown = null;
         this.maxOffsetShown = null;
         this.totalRecords = null;
+        this._hasMore = null;
         this.currentOffset = 0;
         this.defaultLimit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
 
@@ -142,10 +143,6 @@ class EndlessPageView {
             return;
         }
 
-        if (this.totalRecords === null) {
-            return;
-        }
-
         const scrollThreshold = topPageNode.scrollHeight * 0.40;
 
         if (this.minOffsetShown > 0 && window.scrollY < scrollThreshold) {
@@ -159,10 +156,11 @@ class EndlessPageView {
 
         const pageBottom =
             this._pagesHolderNode.getBoundingClientRect().bottom;
-        if (
-            this.maxOffsetShown < this.totalRecords &&
-            pageBottom < window.innerHeight + scrollThreshold
-        ) {
+        const hasMore =
+            this.totalRecords !== null
+                ? this.maxOffsetShown < this.totalRecords
+                : this._hasMore;
+        if (hasMore && pageBottom < window.innerHeight + scrollThreshold) {
             this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
         }
     }
@@ -203,6 +201,7 @@ class EndlessPageView {
                     offset: data.offset,
                     limit: data.limit,
                     total: data.total,
+                    hasMore: data.hasMore,
                     results: ctx.readPageFromCache(data.raw_data),
                 };
                 this._renderPage(ctx, true, response);
@@ -227,6 +226,7 @@ class EndlessPageView {
                             offset: response.offset,
                             limit: response.limit,
                             total: response.total,
+                            hasMore: response.hasMore,
                             raw_data: response.results.raw_data,
                         };
                     }
@@ -248,28 +248,41 @@ class EndlessPageView {
     _renderPage(ctx, append, response) {
         let pageNode = null;
 
-        if (response.total) {
-            const totalPages = Math.ceil(response.total / response.limit);
-            const page = Math.ceil(
-                (response.offset + response.limit) / response.limit
-            );
-            pageNode = pageTemplate({
-                totalPages: totalPages,
-                page: page,
-            });
+        const hasResults = response.results && response.results.length;
+        const hasTotal =
+            response.total !== undefined && response.total !== null;
+
+        if (hasResults) {
+            pageNode = pageTemplate({});
             pageNode.setAttribute("data-offset", response.offset);
             pageNode.setAttribute("data-limit", response.limit);
+
+            let isLastPage = false;
+            if (hasTotal) {
+                const totalPages = Math.ceil(response.total / response.limit);
+                const page = Math.ceil(
+                    (response.offset + response.limit) / response.limit
+                );
+                isLastPage = page === totalPages;
+            } else if (response.hasMore !== undefined) {
+                isLastPage = !response.hasMore;
+            }
 
             ctx.pageRenderer({
                 parameters: ctx.parameters,
                 response: response,
                 addFlexAlignment:
-                    settings.get().layoutType === "default" &&
-                    page === totalPages,
+                    settings.get().layoutType === "default" && isLastPage,
                 hostNode: pageNode.querySelector(".page-content-holder"),
             });
 
-            this.totalRecords = response.total;
+            if (hasTotal) {
+                this.totalRecords = response.total;
+            } else if (response.hasMore !== undefined) {
+                this._hasMore = response.hasMore;
+            } else {
+                this._hasMore = response.results.length >= response.limit;
+            }
 
             if (
                 response.offset < this.minOffsetShown ||
@@ -287,7 +300,9 @@ class EndlessPageView {
             }
             response.results.addEventListener("remove", (e) => {
                 this.maxOffsetShown--;
-                this.totalRecords--;
+                if (this.totalRecords !== null) {
+                    this.totalRecords--;
+                }
             });
 
             /*
@@ -328,10 +343,11 @@ class EndlessPageView {
                     );
                 }
             }
-        } else if (!response.results.length) {
+        } else if (!hasResults) {
             this.showInfo("No results");
             // Set noindex for empty search results (soft 404)
             seo.setNoIndex();
+            this._hasMore = false;
         }
 
         this._initialPageLoad = false;

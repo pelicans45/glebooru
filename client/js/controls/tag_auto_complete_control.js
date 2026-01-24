@@ -65,10 +65,7 @@ class TagAutoCompleteControl extends AutoCompleteControl {
                     return Promise.resolve([]);
                 }
                 const term = misc.escapeSearchTerm(text);
-                const query =
-                    (text.length < tags.minLengthForPartialSearch
-                        ? term + "*"
-                        : "*" + term + "*") + " sort:usages";
+                const query = term + "* sort:usages";
 
                 return new Promise((resolve, reject) => {
                     TagList.search(query, 0, this._options.maxResults, [

@@ -26,6 +26,95 @@ def convert_heif_to_png(content: bytes) -> bytes:
     return img_byte_arr.getvalue()
 
 
+def get_image_dimensions(content: bytes) -> tuple[int, int]:
+    try:
+        import cv2
+        import numpy as np
+
+        img = cv2.imdecode(np.frombuffer(content, np.uint8), cv2.IMREAD_UNCHANGED)
+        if img is not None:
+            height, width = img.shape[:2]
+            return int(width), int(height)
+    except Exception:
+        pass
+
+    try:
+        with PILImage.open(BytesIO(content)) as image:
+            return int(image.width), int(image.height)
+    except (UnidentifiedImageError, OSError, ValueError) as ex:
+        raise errors.ProcessingError("Unable to decode image") from ex
+
+
+def resize_image_to_jpeg(content: bytes, width: int, height: int) -> bytes:
+    try:
+        import cv2
+        import numpy as np
+
+        img = cv2.imdecode(np.frombuffer(content, np.uint8), cv2.IMREAD_UNCHANGED)
+        if img is None:
+            raise ValueError("OpenCV decode returned empty image")
+        if img.ndim == 2:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        elif img.shape[2] == 4:
+            b, g, r, a = cv2.split(img)
+            alpha = a.astype("float32") / 255.0
+            inv_alpha = 1.0 - alpha
+            b = b.astype("float32") * alpha + 255.0 * inv_alpha
+            g = g.astype("float32") * alpha + 255.0 * inv_alpha
+            r = r.astype("float32") * alpha + 255.0 * inv_alpha
+            img = cv2.merge(
+                [b.astype("uint8"), g.astype("uint8"), r.astype("uint8")]
+            )
+        src_height, src_width = img.shape[:2]
+        if src_width > src_height:
+            new_height = max(1, int(round(height)))
+            new_width = max(
+                1, int(round(src_width * (new_height / float(src_height))))
+            )
+        else:
+            new_width = max(1, int(round(width)))
+            new_height = max(
+                1, int(round(src_height * (new_width / float(src_width))))
+            )
+        resized = cv2.resize(
+            img, (new_width, new_height), interpolation=cv2.INTER_AREA
+        )
+        ok, encoded = cv2.imencode(
+            ".jpg", resized, [cv2.IMWRITE_JPEG_QUALITY, 90]
+        )
+        if not ok:
+            raise errors.ProcessingError("Unable to encode JPEG thumbnail")
+        return encoded.tobytes()
+    except Exception:
+        pass
+
+    try:
+        with PILImage.open(BytesIO(content)) as image:
+            if image.mode not in ("RGB", "RGBA"):
+                image = image.convert("RGBA")
+            if image.mode == "RGBA":
+                background = PILImage.new("RGB", image.size, (255, 255, 255))
+                background.paste(image, mask=image.split()[3])
+                image = background
+            src_width, src_height = image.size
+            if src_width > src_height:
+                new_height = max(1, int(round(height)))
+                new_width = max(
+                    1, int(round(src_width * (new_height / float(src_height))))
+                )
+            else:
+                new_width = max(1, int(round(width)))
+                new_height = max(
+                    1, int(round(src_height * (new_width / float(src_width))))
+                )
+            image = image.resize((new_width, new_height), PILImage.LANCZOS)
+            buffer = BytesIO()
+            image.save(buffer, format="JPEG", quality=90)
+            return buffer.getvalue()
+    except Exception as ex:
+        raise errors.ProcessingError("Unable to generate JPEG thumbnail") from ex
+
+
 class Image:
     def __init__(self, content: bytes) -> None:
         self.content = content

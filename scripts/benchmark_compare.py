@@ -94,7 +94,7 @@ def main() -> int:
     lines.append(f"# {args.title}")
     lines.append("")
     lines.append(f"Baseline: {args.pre}")
-    lines.append(f"Post-implementation (iter=120): {args.post}")
+    lines.append(f"Post-implementation: {args.post}")
     if args.write_report:
         lines.append(f"Write benchmark: {args.write_report}")
     lines.append("")

@@ -118,22 +118,23 @@ def _build_url(base: str, path: str, params: Optional[Dict[str, str]] = None) ->
     return url
 
 
-def _find_post_samples(base_url: str, timeout: float, target: int = 5) -> dict:
+def _find_post_samples(
+    base_url: str, timeout: float, target: int = 5, skip_count: bool = False
+) -> dict:
     categories = {"no_tags": [], "few_tags": [], "many_tags": []}
     offset = 0
     page_size = 200
     max_offset = 2000
 
     while offset <= max_offset:
-        url = _build_url(
-            base_url,
-            "/posts",
-            {
-                "offset": str(offset),
-                "limit": str(page_size),
-                "fields": "id,tags",
-            },
-        )
+        params = {
+            "offset": str(offset),
+            "limit": str(page_size),
+            "fields": "id,tags",
+        }
+        if skip_count:
+            params["skipCount"] = "1"
+        url = _build_url(base_url, "/posts", params)
         status, _elapsed, data, _err = _request_json(url, timeout)
         if status != 200 or not data or "results" not in data:
             break
@@ -170,6 +171,36 @@ def _pick_common_tag(sample: dict) -> Optional[str]:
                 if names:
                     return names[0]
     return None
+
+
+def _get_before_id_for_offset(
+    base_url: str,
+    offset: int,
+    limit: int,
+    timeout: float,
+    skip_count: bool,
+    query_text: str,
+) -> Optional[int]:
+    if offset <= 0:
+        return None
+    prev_offset = max(0, offset - limit)
+    params = {
+        "offset": str(prev_offset),
+        "limit": str(limit),
+        "fields": "id",
+        "query": query_text or "",
+    }
+    if skip_count:
+        params["skipCount"] = "1"
+    url = _build_url(base_url, "/posts", params)
+    status, _elapsed, data, _err = _request_json(url, timeout)
+    if status != 200 or not data:
+        return None
+    results = data.get("results") or []
+    if not results:
+        return None
+    last = results[-1]
+    return last.get("id")
 
 
 def _markdown_report(
@@ -255,13 +286,24 @@ def main() -> int:
         default="API Benchmark Results",
         help="Markdown report title",
     )
+    parser.add_argument(
+        "--skip-count",
+        action="store_true",
+        help="Skip total count for /posts requests (uses limit+1 for hasMore).",
+    )
     args = parser.parse_args()
 
     warnings: List[str] = []
+    gallery_fields_ok = True
+    post_fields_ok = True
 
     # Preflight
+    preflight_params = {"limit": "1"}
+    if args.skip_count:
+        preflight_params["skipCount"] = "1"
+        warnings.append("Skip-count enabled for /posts benchmark requests.")
     status, _elapsed, data, err = _request_json(
-        _build_url(args.base_url, "/posts", {"limit": "1"}), args.timeout
+        _build_url(args.base_url, "/posts", preflight_params), args.timeout
     )
     if status != 200:
         print(f"Preflight failed: status={status} err={err}", file=sys.stderr)
@@ -270,14 +312,32 @@ def main() -> int:
     total_posts = None
     if data and "total" in data:
         total_posts = data["total"]
+    if args.skip_count and total_posts is None:
+        status, _elapsed, data, _err = _request_json(
+            _build_url(args.base_url, "/posts", {"limit": "1"}), args.timeout
+        )
+        if status == 200 and data and "total" in data:
+            total_posts = data["total"]
 
-    samples = _find_post_samples(args.base_url, args.timeout)
+    samples = _find_post_samples(
+        args.base_url, args.timeout, skip_count=args.skip_count
+    )
     common_tag = _pick_common_tag(samples)
 
     # Determine a large offset for pagination test
     large_offset = 0
     if isinstance(total_posts, int) and total_posts > 100:
         large_offset = min(20000, total_posts - 50)
+    keyset_before_id = None
+    if large_offset:
+        keyset_before_id = _get_before_id_for_offset(
+            args.base_url,
+            large_offset,
+            42,
+            args.timeout,
+            args.skip_count,
+            "",
+        )
 
     # Field sets
     gallery_fields_client = (
@@ -303,13 +363,17 @@ def main() -> int:
     )
 
     # Validate client fieldsets
+    gallery_check_params = {"limit": "1", "fields": gallery_fields_client}
+    if args.skip_count:
+        gallery_check_params["skipCount"] = "1"
     gallery_check_url = _build_url(
         args.base_url,
         "/posts",
-        {"limit": "1", "fields": gallery_fields_client},
+        gallery_check_params,
     )
     status, _elapsed, _data, _err = _request_json(gallery_check_url, args.timeout)
     if status != 200:
+        gallery_fields_ok = False
         warnings.append(
             "Gallery client fieldset (tagsBasic) returned non-200; using safe fieldset with tags."
         )
@@ -321,6 +385,7 @@ def main() -> int:
     )
     status, _elapsed, _data, _err = _request_json(post_check_url, args.timeout)
     if status != 200:
+        post_fields_ok = False
         warnings.append(
             "Post client fieldset (includes duration) returned non-200; using safe fieldset without duration."
         )
@@ -328,15 +393,16 @@ def main() -> int:
     results: List[dict] = []
 
     # Gallery listing baseline
-    gallery_fields = gallery_fields_safe if warnings else gallery_fields_client
+    gallery_fields = (
+        gallery_fields_client if gallery_fields_ok else gallery_fields_safe
+    )
+    gallery_params = {"limit": "42", "fields": gallery_fields, "query": ""}
+    if args.skip_count:
+        gallery_params["skipCount"] = "1"
     results.append(
         _benchmark_endpoint(
             "Gallery (default query)",
-            _build_url(
-                args.base_url,
-                "/posts",
-                {"limit": "42", "fields": gallery_fields, "query": ""},
-            ),
+            _build_url(args.base_url, "/posts", gallery_params),
             args.iterations,
             args.concurrency,
             args.timeout,
@@ -346,17 +412,20 @@ def main() -> int:
 
     # Gallery with tag filter
     if common_tag:
+        tag_params = {
+            "limit": "42",
+            "fields": gallery_fields,
+            "query": common_tag,
+        }
+        if args.skip_count:
+            tag_params["skipCount"] = "1"
         results.append(
             _benchmark_endpoint(
                 f"Gallery (tag filter: {common_tag})",
                 _build_url(
                     args.base_url,
                     "/posts",
-                    {
-                        "limit": "42",
-                        "fields": gallery_fields,
-                        "query": common_tag,
-                    },
+                    tag_params,
                 ),
                 args.iterations,
                 args.concurrency,
@@ -366,17 +435,20 @@ def main() -> int:
         )
 
     # Gallery with sort:tag-count
+    sort_params = {
+        "limit": "42",
+        "fields": gallery_fields,
+        "query": "sort:tag-count",
+    }
+    if args.skip_count:
+        sort_params["skipCount"] = "1"
     results.append(
         _benchmark_endpoint(
             "Gallery (sort:tag-count)",
             _build_url(
                 args.base_url,
                 "/posts",
-                {
-                    "limit": "42",
-                    "fields": gallery_fields,
-                    "query": "sort:tag-count",
-                },
+                sort_params,
             ),
             args.iterations,
             args.concurrency,
@@ -387,18 +459,45 @@ def main() -> int:
 
     # Gallery with large offset
     if large_offset:
+        large_params = {
+            "limit": "42",
+            "fields": gallery_fields,
+            "query": "",
+            "offset": str(large_offset),
+        }
+        if args.skip_count:
+            large_params["skipCount"] = "1"
         results.append(
             _benchmark_endpoint(
                 f"Gallery (large offset {large_offset})",
                 _build_url(
                     args.base_url,
                     "/posts",
-                    {
-                        "limit": "42",
-                        "fields": gallery_fields,
-                        "query": "",
-                        "offset": str(large_offset),
-                    },
+                    large_params,
+                ),
+                args.iterations,
+                args.concurrency,
+                args.timeout,
+                args.warmup,
+            )
+        )
+    if large_offset and keyset_before_id:
+        keyset_params = {
+            "limit": "42",
+            "fields": gallery_fields,
+            "query": "",
+            "offset": str(large_offset),
+            "beforeId": str(keyset_before_id),
+        }
+        if args.skip_count:
+            keyset_params["skipCount"] = "1"
+        results.append(
+            _benchmark_endpoint(
+                f"Gallery (keyset offset {large_offset})",
+                _build_url(
+                    args.base_url,
+                    "/posts",
+                    keyset_params,
                 ),
                 args.iterations,
                 args.concurrency,
@@ -408,7 +507,7 @@ def main() -> int:
         )
 
     # Individual post loads
-    post_fields = post_fields_safe if warnings else post_fields_client
+    post_fields = post_fields_client if post_fields_ok else post_fields_safe
 
     def add_post_benchmarks(label: str, posts: List[dict]):
         for post in posts:

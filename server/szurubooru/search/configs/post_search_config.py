@@ -130,7 +130,7 @@ def _tag_name_filter(
         )
         return tag_filter(query, criterion, negated)
 
-    names = [search_util.unescape(value).lower() for value in values]
+    names = [search_util.unescape(value) for value in values]
     if not names:
         return query
 
@@ -200,7 +200,7 @@ def _similar_filter(
                 pt_alias.post_id.label("post_id"),
                 sa.func.count(pt_alias.tag_id).label("similarity"),
             )
-            .filter(pt_alias.tag_id.in_(tag_select))
+            .join(tag_subquery, tag_subquery.c.tag_id == pt_alias.tag_id)
             .group_by(pt_alias.post_id)
             .having(sa.func.count(pt_alias.tag_id) > 0)
             .subquery("similar_posts")
@@ -216,7 +216,7 @@ def _similar_filter(
                 pt_alias.post_id.label("post_id"),
                 sa.func.count(pt_alias.tag_id).label("similarity"),
             )
-            .filter(pt_alias.tag_id.in_(tag_select))
+            .join(tag_subquery, tag_subquery.c.tag_id == pt_alias.tag_id)
             .group_by(pt_alias.post_id)
             .having(sa.func.count(pt_alias.tag_id) > 0)
             .subquery("similar_posts")
@@ -262,8 +262,39 @@ def _category_filter(
 
 
 class PostSearchConfig(BaseSearchConfig):
+    STATS_NAMED_FILTERS = {
+        "score",
+        "tag-count",
+        "comment-count",
+        "fav-count",
+        "note-count",
+        "relation-count",
+        "feature-count",
+        "comment-date",
+        "comment-time",
+        "fav-date",
+        "fav-time",
+        "feature-date",
+        "feature-time",
+    }
+    STATS_SORT_COLUMNS = {
+        "score",
+        "tag-count",
+        "comment-count",
+        "fav-count",
+        "note-count",
+        "relation-count",
+        "feature-count",
+        "comment-date",
+        "fav-date",
+        "feature-date",
+    }
+    STATS_SPECIAL_TOKENS = {"tumbleweed"}
+
     def __init__(self) -> None:
         self.user = None  # type: Optional[model.User]
+        self._needs_stats_join = False
+        self._needs_stats_join_for_count = False
 
     def on_search_query_parsed(self, search_query: SearchQuery) -> SaQuery:
         new_special_tokens = []
@@ -288,28 +319,42 @@ class PostSearchConfig(BaseSearchConfig):
             else:
                 new_special_tokens.append(token)
         search_query.special_tokens = new_special_tokens
+        needs_stats_filter = any(
+            token.name in self.STATS_NAMED_FILTERS
+            for token in search_query.named_tokens
+        )
+        needs_stats_filter = needs_stats_filter or any(
+            token.value in self.STATS_SPECIAL_TOKENS
+            for token in search_query.special_tokens
+        )
+        needs_stats_sort = any(
+            token.name in self.STATS_SORT_COLUMNS
+            for token in search_query.sort_tokens
+        )
+        self._needs_stats_join = needs_stats_filter or needs_stats_sort
+        self._needs_stats_join_for_count = needs_stats_filter
 
     def create_around_query(self) -> SaQuery:
-        return (
-            db.session.query(model.Post)
-            .join(model.Post.statistics)
-            .options(
-                sa.orm.lazyload("*"),
-                sa.orm.contains_eager(model.Post.statistics),
+        query = db.session.query(model.Post).options(sa.orm.lazyload("*"))
+        if self._needs_stats_join:
+            query = query.join(model.Post.statistics).options(
+                sa.orm.contains_eager(model.Post.statistics)
             )
-        )
+        return query
 
     def create_filter_query(self, disable_eager_loads: bool) -> SaQuery:
-        return db.session.query(model.Post).join(model.Post.statistics).options(
-            sa.orm.lazyload("*"),
-            sa.orm.contains_eager(model.Post.statistics),
-        )
+        query = db.session.query(model.Post).options(sa.orm.lazyload("*"))
+        if self._needs_stats_join:
+            query = query.join(model.Post.statistics).options(
+                sa.orm.contains_eager(model.Post.statistics)
+            )
+        return query
 
     def create_count_query(self, _disable_eager_loads: bool) -> SaQuery:
-        return (
-            db.session.query(model.Post).join(model.Post.statistics),
-            model.Post,
-        )
+        query = db.session.query(model.Post)
+        if self._needs_stats_join_for_count:
+            query = query.join(model.Post.statistics)
+        return (query, model.Post)
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
         return query.order_by(model.Post.post_id.desc())
