@@ -4,6 +4,7 @@
 # Client Development Artifacts
 */*_modules/
 client/public
+client/client/dist
 
 # Server Development Artifacts
 .coverage
