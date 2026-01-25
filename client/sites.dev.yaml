@@ -1,6 +1,6 @@
-main_domain: booru
+main_domain: boorudev
 
-booru:
+boorudev:
   name: booru dev
   description: booru dev
   meta_description: Test description
