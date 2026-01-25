@@ -73,6 +73,8 @@ services:
         depends_on:
             - client
         restart: unless-stopped
+        environment:
+            NGINX_ENTRYPOINT_QUIET_LOGS: "1"
         volumes:
             - "./server/nginx/etc:/etc/nginx:ro"
         ports:

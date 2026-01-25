@@ -1695,9 +1695,9 @@ def search_by_signature(
     dbquery = """
     SELECT s.post_id, s.signature, count(a.query) AS score
     FROM post_signature AS s
-    CROSS JOIN LATERAL unnest(s.words, :q) AS a(word, query)
+    CROSS JOIN LATERAL unnest(s.words, CAST(:q AS integer[])) AS a(word, query)
     {join_clause}
-    WHERE s.words && :q
+    WHERE s.words && CAST(:q AS integer[])
       AND a.word = a.query {where_clause}
     GROUP BY s.post_id
     ORDER BY score DESC LIMIT :limit;
