@@ -9,6 +9,7 @@ import pdqhash
 from PIL import Image, UnidentifiedImageError
 
 from szurubooru import errors
+from szurubooru.func import mime
 
 try:
     import cv2
@@ -24,6 +25,11 @@ PDQ_WORD_COUNT = PDQ_HASH_BITS // PDQ_WORD_BITS
 # Recommended PDQ threshold is ~31 bits; expose normalized cutoff.
 DISTANCE_CUTOFF_BITS = 31
 DISTANCE_CUTOFF = DISTANCE_CUTOFF_BITS / PDQ_HASH_BITS
+
+DUPLICATE_DISTANCE_CUTOFF_BITS = 16
+DUPLICATE_DISTANCE_CUTOFF = DUPLICATE_DISTANCE_CUTOFF_BITS / PDQ_HASH_BITS
+
+ANIMATED_FRAME_SAMPLE_COUNT = 8
 
 SIG_NUMS = PDQ_HASH_BITS
 
@@ -64,11 +70,55 @@ def _preprocess_image_rgb(content: bytes) -> NpMatrix:
         ) from ex
 
 
+def _compute_pdq_from_rgb(rgb: NpMatrix) -> NpMatrix:
+    signature, _quality = pdqhash.compute(rgb)
+    return np.asarray(signature, dtype=np.uint8)
+
+
+def _sample_frame_indices(frame_count: int) -> List[int]:
+    if frame_count <= 1:
+        return [0]
+    if frame_count <= ANIMATED_FRAME_SAMPLE_COUNT:
+        return list(range(frame_count))
+    indices = np.linspace(
+        0, frame_count - 1, num=ANIMATED_FRAME_SAMPLE_COUNT, dtype=int
+    ).tolist()
+    return sorted(set(indices))
+
+
+def _aggregate_signatures(signatures: List[NpMatrix]) -> NpMatrix:
+    if not signatures:
+        return np.zeros(PDQ_HASH_BITS, dtype=np.uint8)
+    sig_array = np.asarray(signatures, dtype=np.uint8)
+    if sig_array.ndim == 1:
+        return sig_array.astype(np.uint8)
+    threshold = sig_array.shape[0] / 2.0
+    return (np.sum(sig_array, axis=0) >= threshold).astype(np.uint8)
+
+
+def _generate_signature_animated_gif(content: bytes) -> NpMatrix:
+    with Image.open(BytesIO(content)) as image:
+        if not getattr(image, "is_animated", False) or getattr(
+            image, "n_frames", 1
+        ) <= 1:
+            return _compute_pdq_from_rgb(
+                np.asarray(image.convert("RGB"), dtype=np.uint8)
+            )
+        indices = _sample_frame_indices(image.n_frames)
+        signatures = []
+        for index in indices:
+            image.seek(index)
+            frame_rgb = np.asarray(image.convert("RGB"), dtype=np.uint8)
+            signatures.append(_compute_pdq_from_rgb(frame_rgb))
+        return _aggregate_signatures(signatures)
+
+
 def generate_signature(content: bytes) -> NpMatrix:
     try:
+        if mime.is_animated_gif(content):
+            return _generate_signature_animated_gif(content)
         rgb = _preprocess_image_rgb(content)
-        signature, _quality = pdqhash.compute(rgb)
-        return np.asarray(signature, dtype=np.uint8)
+        return _compute_pdq_from_rgb(rgb)
     except Exception as ex:
         raise errors.ProcessingError(
             "Unable to generate a signature hash for this image"

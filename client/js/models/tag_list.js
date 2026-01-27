@@ -13,6 +13,8 @@ let allRelevantTags = null;
 let topRelevantMatches = null;
 let allRelevantTagsPromise = null;
 let topRelevantMatchesPromise = null;
+let allRelevantTagsMinimal = null;
+let allRelevantTagsMinimalPromise = null;
 
 const fields = [
     "names",
@@ -22,6 +24,7 @@ const fields = [
     "usages",
     "category",
 ];
+const minimalFields = ["names", "usages", "category"];
 
 class TagList extends AbstractList {
     static search(text, offset, limit, fields, all) {
@@ -102,8 +105,55 @@ class TagList extends AbstractList {
         return allRelevantTagsPromise;
     }
 
+    static getAllRelevantMinimal(refresh) {
+        if (allRelevantTagsMinimal && !refresh) {
+            return Promise.resolve(allRelevantTagsMinimal);
+        }
+        if (allRelevantTagsMinimalPromise && !refresh) {
+            return allRelevantTagsMinimalPromise;
+        }
+        if (allRelevantTagsMinimalPromise && refresh) {
+            return allRelevantTagsMinimalPromise;
+        }
+
+        if (refresh) {
+            allRelevantTagsMinimal = null;
+        }
+
+        const loader = lens.isUniversal
+            ? this.search("sort:usages", 0, 5000, minimalFields, true)
+            : api
+                .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
+                    noProgress: true,
+                })
+                .then((response) => {
+                    for (const result of response.results) {
+                        result.tag.usages = result.occurrences;
+                    }
+
+                    const results = lens.excludeRedundantTags(
+                        response.results.map((result) => result.tag)
+                    );
+
+                    return Object.assign({}, response, {
+                        results: this.fromResponse(results),
+                    });
+                });
+
+        allRelevantTagsMinimalPromise = loader
+            .then((response) => {
+                allRelevantTagsMinimal = response;
+                return allRelevantTagsMinimal;
+            })
+            .finally(() => {
+                allRelevantTagsMinimalPromise = null;
+            });
+
+        return allRelevantTagsMinimalPromise;
+    }
+
     static getRelevant(query, offset, limit) {
-        return this.getAllRelevant().then((_tags) => {
+        return this.getAllRelevantMinimal().then((_tags) => {
             const term = query;
             const pattern = term + "*";
 
@@ -131,7 +181,7 @@ class TagList extends AbstractList {
             return topRelevantMatchesPromise;
         }
 
-        topRelevantMatchesPromise = this.getAllRelevant(refresh)
+        topRelevantMatchesPromise = this.getAllRelevantMinimal(refresh)
             .then((response) => {
                 topRelevantMatches = tags.tagListToMatches(
                     response.results.copy().slice(0, vars.maxSuggestedResults),
@@ -153,6 +203,8 @@ class TagList extends AbstractList {
         topRelevantMatches = null;
         allRelevantTagsPromise = null;
         topRelevantMatchesPromise = null;
+        allRelevantTagsMinimal = null;
+        allRelevantTagsMinimalPromise = null;
         if (!preload) {
             return Promise.resolve();
         }

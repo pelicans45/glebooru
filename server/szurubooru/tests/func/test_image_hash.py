@@ -18,7 +18,7 @@ def test_signature_functions(read_asset, config_injector):
     assert array_equal(sig2, sig2_repacked)
 
     dist1 = image_hash.normalized_distance([sig1], sig2)
-    assert abs(dist1[0] - 0.19713075553164386) < 1e-8
+    assert abs(dist1[0] - 0.1171875) < 1e-8
 
     dist2 = image_hash.normalized_distance([sig2], sig2)
     assert abs(dist2[0]) < 1e-8
@@ -26,7 +26,7 @@ def test_signature_functions(read_asset, config_injector):
     words1 = image_hash.generate_words(sig1)
     words2 = image_hash.generate_words(sig2)
     words_match = sum(word1 == word2 for word1, word2 in zip(words1, words2))
-    assert words_match == 18
+    assert words_match == 4
 
 
 def test_signature_heif(read_asset, config_injector):
@@ -43,7 +43,7 @@ def test_signature_heif(read_asset, config_injector):
     assert array_equal(sig2, sig2_repacked)
 
     dist1 = image_hash.normalized_distance([sig1], sig2)
-    assert abs(dist1[0] - 0.136777724290135) < 1e-8
+    assert abs(dist1[0] - 0.0234375) < 1e-8
 
     dist2 = image_hash.normalized_distance([sig2], sig2)
     assert abs(dist2[0]) < 1e-8
@@ -51,7 +51,7 @@ def test_signature_heif(read_asset, config_injector):
     words1 = image_hash.generate_words(sig1)
     words2 = image_hash.generate_words(sig2)
     words_match = sum(word1 == word2 for word1, word2 in zip(words1, words2))
-    assert words_match == 43
+    assert words_match == 11
 
 
 def test_signature_avif(read_asset, config_injector):
@@ -68,7 +68,7 @@ def test_signature_avif(read_asset, config_injector):
     assert array_equal(sig2, sig2_repacked)
 
     dist1 = image_hash.normalized_distance([sig1], sig2)
-    assert abs(dist1[0] - 0.22628712858355998) < 1e-8
+    assert abs(dist1[0] - 0.125) < 1e-8
 
     dist2 = image_hash.normalized_distance([sig2], sig2)
     assert abs(dist2[0]) < 1e-8
@@ -76,4 +76,4 @@ def test_signature_avif(read_asset, config_injector):
     words1 = image_hash.generate_words(sig1)
     words2 = image_hash.generate_words(sig2)
     words_match = sum(word1 == word2 for word1, word2 in zip(words1, words2))
-    assert words_match == 12
+    assert words_match == 3

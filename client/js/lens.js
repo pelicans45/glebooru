@@ -7,7 +7,10 @@ for (const [domain, data] of Object.entries(config.sites)) {
     hostnameFilters[domain] = data.query;
 }
 
-const site = config.sites[location.hostname];
+const activeHostname = config.sites[location.hostname]
+    ? location.hostname
+    : vars.mainDomain;
+const site = config.sites[activeHostname];
 
 if (!site) {
     throw "Unable to load site data";
@@ -15,7 +18,7 @@ if (!site) {
 const name = site.name;
 
 const universalHostname = vars.mainDomain;
-const isUniversal = location.hostname === universalHostname;
+const isUniversal = activeHostname === universalHostname;
 const filterHostnames = objectFlip(hostnameFilters);
 const hostnameFilter = getHostnameFilter();
 let excludedTags = new Set(getExcludedTags());
@@ -38,7 +41,7 @@ function objectFlip(obj) {
 }
 
 function getHostnameFilter() {
-    return hostnameFilters[location.hostname];
+    return hostnameFilters[activeHostname];
 }
 
 function getExcludedTags() {
@@ -47,7 +50,7 @@ function getExcludedTags() {
         return tags;
     }
     for (const [hostname, tag] of Object.entries(hostnameFilters)) {
-        if (hostname !== location.hostname && tag) {
+        if (hostname !== activeHostname && tag) {
             tags.push(tag);
         }
     }

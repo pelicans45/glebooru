@@ -30,6 +30,10 @@ class EndlessPageView {
         this._hasMore = null;
         this.currentOffset = 0;
         this.defaultLimit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
+        this._preloadMarginPx = Math.max(
+            800,
+            Math.round(window.innerHeight * 1.5)
+        );
 
         const initialOffset = parseInt(ctx.parameters.offset || 0);
         if (this._isCacheValid(ctx)) {
@@ -55,23 +59,10 @@ class EndlessPageView {
 			*/
         }
 
-        // TODO: replace with scroll listener?
-
-        this._timeout = window.setInterval(() => {
-            window.requestAnimationFrame(() => {
-                const topPageNode = this._topPageNode;
-                if (!topPageNode) {
-                    //console.log("topPageNode is null");
-                    return;
-                }
-
-                this._probePageLoad(ctx, topPageNode);
-                this._syncUrl(ctx, topPageNode);
-                if (this._shouldUseCache(ctx)) {
-                    ctx.browserState.scrollY = window.scrollY;
-                }
-            });
-        }, 250);
+        this._installScrollHandler(ctx);
+        if (!this._installIntersectionObservers(ctx)) {
+            this._startLegacyProbe(ctx);
+        }
 
         views.monitorNodeRemoval(this._pagesHolderNode, () => this._destroy());
     }
@@ -112,6 +103,18 @@ class EndlessPageView {
 
     _destroy() {
         window.clearInterval(this._timeout);
+        if (this._scrollHandler) {
+            window.removeEventListener("scroll", this._scrollHandler);
+            this._scrollHandler = null;
+        }
+        if (this._bottomObserver) {
+            this._bottomObserver.disconnect();
+            this._bottomObserver = null;
+        }
+        if (this._topObserver) {
+            this._topObserver.disconnect();
+            this._topObserver = null;
+        }
         this._active = false;
     }
 
@@ -163,6 +166,114 @@ class EndlessPageView {
         if (hasMore && pageBottom < window.innerHeight + scrollThreshold) {
             this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
         }
+    }
+
+    _installScrollHandler(ctx) {
+        this._scrollHandler = () => {
+            if (this._scrollRaf) {
+                return;
+            }
+            this._scrollRaf = window.requestAnimationFrame(() => {
+                this._scrollRaf = null;
+                const topPageNode = this._topPageNode;
+                if (!topPageNode) {
+                    return;
+                }
+                this._syncUrl(ctx, topPageNode);
+                if (this._shouldUseCache(ctx)) {
+                    ctx.browserState.scrollY = window.scrollY;
+                }
+            });
+        };
+        window.addEventListener("scroll", this._scrollHandler, {
+            passive: true,
+        });
+    }
+
+    _startLegacyProbe(ctx) {
+        this._timeout = window.setInterval(() => {
+            window.requestAnimationFrame(() => {
+                const topPageNode = this._topPageNode;
+                if (!topPageNode) {
+                    return;
+                }
+                this._probePageLoad(ctx, topPageNode);
+            });
+        }, 250);
+    }
+
+    _installIntersectionObservers(ctx) {
+        if (!("IntersectionObserver" in window)) {
+            return false;
+        }
+
+        const preloadPx = this._preloadMarginPx;
+        this._bottomObserver = new IntersectionObserver(
+            (entries) => {
+                if (!this._active || this._runningRequests) {
+                    return;
+                }
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    this._maybeLoadNextPage(ctx);
+                }
+            },
+            {
+                root: null,
+                rootMargin: `0px 0px ${preloadPx}px 0px`,
+                threshold: 0,
+            }
+        );
+
+        this._topObserver = new IntersectionObserver(
+            (entries) => {
+                if (!this._active || this._runningRequests) {
+                    return;
+                }
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    this._maybeLoadPrevPage(ctx);
+                }
+            },
+            {
+                root: null,
+                rootMargin: `${preloadPx}px 0px 0px 0px`,
+                threshold: 0,
+            }
+        );
+
+        if (this.bottomPageGuardNode) {
+            this._bottomObserver.observe(this.bottomPageGuardNode);
+        }
+        if (this.topPageGuardNode) {
+            this._topObserver.observe(this.topPageGuardNode);
+        }
+
+        return true;
+    }
+
+    _maybeLoadPrevPage(ctx) {
+        if (this.minOffsetShown === null || this.minOffsetShown <= 0) {
+            return;
+        }
+        this._loadPage(
+            ctx,
+            this.minOffsetShown - this.defaultLimit,
+            this.defaultLimit,
+            false
+        );
+    }
+
+    _maybeLoadNextPage(ctx) {
+        if (this.maxOffsetShown === null) {
+            return;
+        }
+        const hasMore =
+            this.totalRecords !== null
+                ? this.maxOffsetShown < this.totalRecords
+                : this._hasMore;
+        if (!hasMore) {
+            return;
+        }
+        this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
     }
 
     _shouldUseCache(ctx) {
@@ -233,6 +344,7 @@ class EndlessPageView {
                     window.requestAnimationFrame(() => {
                         let pageNode = this._renderPage(ctx, append, response);
                         this._runningRequests--;
+                        this._prefetchIfNeeded(ctx);
                         resolve(pageNode);
                     });
                 },
@@ -352,6 +464,21 @@ class EndlessPageView {
 
         this._initialPageLoad = false;
         return pageNode;
+    }
+
+    _prefetchIfNeeded(ctx) {
+        if (!this._active || this._runningRequests) {
+            return;
+        }
+        const guard = this.bottomPageGuardNode;
+        if (!guard) {
+            return;
+        }
+        const rect = guard.getBoundingClientRect();
+        const threshold = window.innerHeight + this._preloadMarginPx;
+        if (rect.top <= threshold) {
+            this._maybeLoadNextPage(ctx);
+        }
     }
 
     clearMessages() {

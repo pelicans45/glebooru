@@ -73,9 +73,12 @@ def _benchmark_endpoint(
     concurrency: int,
     timeout: float,
     warmup: int,
+    pre_request=None,
 ) -> dict:
     # Warmup (serial)
     for _ in range(warmup):
+        if pre_request:
+            pre_request()
         _request_json(url, timeout)
 
     timings: List[float] = []
@@ -83,6 +86,8 @@ def _benchmark_endpoint(
     errors: List[str] = []
 
     def task() -> Tuple[int, float, Optional[str]]:
+        if pre_request:
+            pre_request()
         status, elapsed, _data, err = _request_json(url, timeout)
         return status, elapsed, err
 
@@ -118,8 +123,32 @@ def _build_url(base: str, path: str, params: Optional[Dict[str, str]] = None) ->
     return url
 
 
+def _add_params(params: Dict[str, str], extra: Dict[str, str]) -> Dict[str, str]:
+    if not extra:
+        return params
+    merged = dict(params)
+    merged.update(extra)
+    return merged
+
+
+def _purge_cache(base_url: str, timeout: float) -> None:
+    if base_url.endswith("/"):
+        base_url = base_url[:-1]
+    url = f"{base_url}/__cache_bust__"
+    req = urllib.request.Request(url, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout):
+            pass
+    except Exception:
+        pass
+
+
 def _find_post_samples(
-    base_url: str, timeout: float, target: int = 5, skip_count: bool = False
+    base_url: str,
+    timeout: float,
+    target: int = 5,
+    skip_count: bool = False,
+    use_tag_count: bool = False,
 ) -> dict:
     categories = {"no_tags": [], "few_tags": [], "many_tags": []}
     offset = 0
@@ -127,23 +156,36 @@ def _find_post_samples(
     max_offset = 2000
 
     while offset <= max_offset:
+        fields = "id,tagCount" if use_tag_count else "id,tags"
         params = {
             "offset": str(offset),
             "limit": str(page_size),
-            "fields": "id,tags",
+            "fields": fields,
         }
         if skip_count:
             params["skipCount"] = "1"
         url = _build_url(base_url, "/posts", params)
         status, _elapsed, data, _err = _request_json(url, timeout)
         if status != 200 or not data or "results" not in data:
+            if not use_tag_count:
+                # Fall back to tagCount if tag serialization fails.
+                return _find_post_samples(
+                    base_url,
+                    timeout,
+                    target=target,
+                    skip_count=skip_count,
+                    use_tag_count=True,
+                )
             break
         results = data.get("results", [])
         if not results:
             break
 
         for post in results:
-            tag_count = len(post.get("tags", []))
+            if use_tag_count:
+                tag_count = post.get("tagCount") or 0
+            else:
+                tag_count = len(post.get("tags", []))
             if tag_count == 0 and len(categories["no_tags"]) < target:
                 categories["no_tags"].append(post)
             elif 1 <= tag_count <= 3 and len(categories["few_tags"]) < target:
@@ -291,14 +333,48 @@ def main() -> int:
         action="store_true",
         help="Skip total count for /posts requests (uses limit+1 for hasMore).",
     )
+    parser.add_argument(
+        "--tag-filter",
+        default="",
+        help="Override tag filter query for the tag-filter benchmark.",
+    )
+    parser.add_argument(
+        "--force-safe-fields",
+        action="store_true",
+        help="Use safe field sets (tags, no duration) even if client fields work.",
+    )
+    parser.add_argument(
+        "--field-mode",
+        choices=("auto", "safe", "core"),
+        default="auto",
+        help=(
+            "Field selection mode for benchmarks: "
+            "auto (default), safe (tags/no duration), "
+            "or core (no tags/relations/comments)."
+        ),
+    )
+    parser.add_argument(
+        "--cold-cache",
+        action="store_true",
+        help="Purge cache before each request and add _nocache=1 to all URLs.",
+    )
     args = parser.parse_args()
 
     warnings: List[str] = []
     gallery_fields_ok = True
     post_fields_ok = True
 
+    extra_params: Dict[str, str] = {}
+    if args.cold_cache:
+        extra_params["_nocache"] = "1"
+        warnings.append("Cold-cache mode enabled; purging cache before each request.")
+        if args.concurrency > 1:
+            warnings.append(
+                "Cold-cache mode with concurrency>1 may still allow cross-request warming."
+            )
+
     # Preflight
-    preflight_params = {"limit": "1"}
+    preflight_params = _add_params({"limit": "1", "fields": "id"}, extra_params)
     if args.skip_count:
         preflight_params["skipCount"] = "1"
         warnings.append("Skip-count enabled for /posts benchmark requests.")
@@ -314,15 +390,23 @@ def main() -> int:
         total_posts = data["total"]
     if args.skip_count and total_posts is None:
         status, _elapsed, data, _err = _request_json(
-            _build_url(args.base_url, "/posts", {"limit": "1"}), args.timeout
+            _build_url(
+                args.base_url, "/posts", _add_params({"limit": "1"}, extra_params)
+            ),
+            args.timeout,
         )
         if status == 200 and data and "total" in data:
             total_posts = data["total"]
 
     samples = _find_post_samples(
-        args.base_url, args.timeout, skip_count=args.skip_count
+        args.base_url,
+        args.timeout,
+        skip_count=args.skip_count,
+        use_tag_count=args.field_mode == "core",
     )
     common_tag = _pick_common_tag(samples)
+    if args.tag_filter:
+        common_tag = args.tag_filter
 
     # Determine a large offset for pagination test
     large_offset = 0
@@ -341,12 +425,16 @@ def main() -> int:
 
     # Field sets
     gallery_fields_client = (
-        "id,thumbnailUrl,contentUrl,creationTime,type,safety,score,"
-        "favoriteCount,commentCount,tagsBasic,version"
+        "id,thumbnailUrl,contentUrl,type,safety,score,"
+        "favoriteCount,commentCount,tagsBasic"
     )
     gallery_fields_safe = (
-        "id,thumbnailUrl,contentUrl,creationTime,type,safety,score,"
-        "favoriteCount,commentCount,version,tags"
+        "id,thumbnailUrl,contentUrl,type,safety,score,"
+        "favoriteCount,commentCount,tags"
+    )
+    gallery_fields_core = (
+        "id,thumbnailUrl,contentUrl,type,safety,score,"
+        "favoriteCount,commentCount"
     )
 
     post_fields_client = (
@@ -361,9 +449,16 @@ def main() -> int:
         "contentUrl,thumbnailUrl,flags,tags,relations,user,score,ownScore,"
         "ownFavorite,favoriteCount,commentCount,notes,comments"
     )
+    post_fields_core = (
+        "id,version,creationTime,lastEditTime,safety,source,type,mimeType,"
+        "checksum,checksumMD5,fileSize,canvasWidth,canvasHeight,"
+        "contentUrl,thumbnailUrl,flags,score,favoriteCount,commentCount"
+    )
 
     # Validate client fieldsets
-    gallery_check_params = {"limit": "1", "fields": gallery_fields_client}
+    gallery_check_params = _add_params(
+        {"limit": "1", "fields": gallery_fields_client}, extra_params
+    )
     if args.skip_count:
         gallery_check_params["skipCount"] = "1"
     gallery_check_url = _build_url(
@@ -381,7 +476,7 @@ def main() -> int:
     post_check_url = _build_url(
         args.base_url,
         f"/post/{samples.get('few_tags', [{}])[0].get('id', 1)}",
-        {"fields": post_fields_client},
+        _add_params({"fields": post_fields_client}, extra_params),
     )
     status, _elapsed, _data, _err = _request_json(post_check_url, args.timeout)
     if status != 200:
@@ -390,13 +485,33 @@ def main() -> int:
             "Post client fieldset (includes duration) returned non-200; using safe fieldset without duration."
         )
 
+    if args.force_safe_fields or args.field_mode == "safe":
+        gallery_fields_ok = False
+        post_fields_ok = False
+        warnings.append("Force-safe-fields enabled; using safe field sets.")
+
+    if args.field_mode == "core":
+        gallery_fields_ok = False
+        post_fields_ok = False
+        warnings.append("Core field mode enabled; using minimal field sets.")
+
     results: List[dict] = []
+    purge_hook = (
+        (lambda: _purge_cache(args.base_url, args.timeout))
+        if args.cold_cache
+        else None
+    )
 
     # Gallery listing baseline
-    gallery_fields = (
-        gallery_fields_client if gallery_fields_ok else gallery_fields_safe
+    if args.field_mode == "core":
+        gallery_fields = gallery_fields_core
+    else:
+        gallery_fields = (
+            gallery_fields_client if gallery_fields_ok else gallery_fields_safe
+        )
+    gallery_params = _add_params(
+        {"limit": "42", "fields": gallery_fields, "query": ""}, extra_params
     )
-    gallery_params = {"limit": "42", "fields": gallery_fields, "query": ""}
     if args.skip_count:
         gallery_params["skipCount"] = "1"
     results.append(
@@ -407,16 +522,20 @@ def main() -> int:
             args.concurrency,
             args.timeout,
             args.warmup,
+            pre_request=purge_hook,
         )
     )
 
     # Gallery with tag filter
     if common_tag:
-        tag_params = {
-            "limit": "42",
-            "fields": gallery_fields,
-            "query": common_tag,
-        }
+        tag_params = _add_params(
+            {
+                "limit": "42",
+                "fields": gallery_fields,
+                "query": common_tag,
+            },
+            extra_params,
+        )
         if args.skip_count:
             tag_params["skipCount"] = "1"
         results.append(
@@ -431,15 +550,19 @@ def main() -> int:
                 args.concurrency,
                 args.timeout,
                 args.warmup,
+                pre_request=purge_hook,
             )
         )
 
     # Gallery with sort:tag-count
-    sort_params = {
-        "limit": "42",
-        "fields": gallery_fields,
-        "query": "sort:tag-count",
-    }
+    sort_params = _add_params(
+        {
+            "limit": "42",
+            "fields": gallery_fields,
+            "query": "sort:tag-count",
+        },
+        extra_params,
+    )
     if args.skip_count:
         sort_params["skipCount"] = "1"
     results.append(
@@ -454,17 +577,21 @@ def main() -> int:
             args.concurrency,
             args.timeout,
             args.warmup,
+            pre_request=purge_hook,
         )
     )
 
     # Gallery with large offset
     if large_offset:
-        large_params = {
-            "limit": "42",
-            "fields": gallery_fields,
-            "query": "",
-            "offset": str(large_offset),
-        }
+        large_params = _add_params(
+            {
+                "limit": "42",
+                "fields": gallery_fields,
+                "query": "",
+                "offset": str(large_offset),
+            },
+            extra_params,
+        )
         if args.skip_count:
             large_params["skipCount"] = "1"
         results.append(
@@ -479,16 +606,20 @@ def main() -> int:
                 args.concurrency,
                 args.timeout,
                 args.warmup,
+                pre_request=purge_hook,
             )
         )
     if large_offset and keyset_before_id:
-        keyset_params = {
-            "limit": "42",
-            "fields": gallery_fields,
-            "query": "",
-            "offset": str(large_offset),
-            "beforeId": str(keyset_before_id),
-        }
+        keyset_params = _add_params(
+            {
+                "limit": "42",
+                "fields": gallery_fields,
+                "query": "",
+                "offset": str(large_offset),
+                "beforeId": str(keyset_before_id),
+            },
+            extra_params,
+        )
         if args.skip_count:
             keyset_params["skipCount"] = "1"
         results.append(
@@ -503,11 +634,15 @@ def main() -> int:
                 args.concurrency,
                 args.timeout,
                 args.warmup,
+                pre_request=purge_hook,
             )
         )
 
     # Individual post loads
-    post_fields = post_fields_client if post_fields_ok else post_fields_safe
+    if args.field_mode == "core":
+        post_fields = post_fields_core
+    else:
+        post_fields = post_fields_client if post_fields_ok else post_fields_safe
 
     def add_post_benchmarks(label: str, posts: List[dict]):
         for post in posts:
@@ -520,12 +655,13 @@ def main() -> int:
                     _build_url(
                         args.base_url,
                         f"/post/{post_id}",
-                        {"fields": post_fields},
+                        _add_params({"fields": post_fields}, extra_params),
                     ),
                     args.iterations,
                     args.concurrency,
                     args.timeout,
                     args.warmup,
+                    pre_request=purge_hook,
                 )
             )
 

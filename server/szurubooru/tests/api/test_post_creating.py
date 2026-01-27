@@ -1,6 +1,8 @@
+import io
 from unittest.mock import patch
 
 import pytest
+from PIL import Image
 
 from szurubooru import api, db, errors, model
 from szurubooru.func import net, posts, snapshots, tags
@@ -386,6 +388,129 @@ def test_errors_not_spending_ids(
     assert post1_id > 0
     assert post2_id > 0
     assert post2_id == post1_id + 1
+
+
+def _encode_image_variant(
+    content: bytes,
+    *,
+    scale: float = 1.0,
+    quality: int = 85,
+    fmt: str = "JPEG",
+) -> bytes:
+    with Image.open(io.BytesIO(content)) as image:
+        image = image.convert("RGB")
+        if scale != 1.0:
+            new_width = max(1, int(image.width * scale))
+            new_height = max(1, int(image.height * scale))
+            image = image.resize((new_width, new_height), Image.LANCZOS)
+        buffer = io.BytesIO()
+        save_kwargs = {}
+        if fmt.upper() == "JPEG":
+            save_kwargs["quality"] = quality
+            save_kwargs["optimize"] = True
+        if fmt.upper() == "WEBP":
+            save_kwargs["quality"] = quality
+        image.save(buffer, format=fmt, **save_kwargs)
+        return buffer.getvalue()
+
+
+def _configure_upload_env(config_injector, tmpdir):
+    config_injector(
+        {
+            "data_dir": str(tmpdir.mkdir("data")),
+            "data_url": "example.com",
+            "thumbnails": {
+                "post_width": 300,
+                "post_height": 300,
+            },
+            "privileges": {
+                "posts:create:identified": model.User.RANK_REGULAR,
+                "uploads:use_downloader": model.User.RANK_POWER,
+            },
+            "allow_broken_uploads": False,
+            "secret": "test",
+        }
+    )
+
+
+def test_near_duplicate_detection_rejects_variants(
+    config_injector, tmpdir, context_factory, read_asset, user_factory
+):
+    _configure_upload_env(config_injector, tmpdir)
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+
+    original = read_asset("jpeg.jpg")
+    resized = _encode_image_variant(original, scale=0.7, quality=82)
+    recompressed = _encode_image_variant(original, scale=1.0, quality=35)
+
+    api.post_api.create_post(
+        context_factory(
+            params={"safety": "safe", "tags": []},
+            files={"content": original},
+            user=auth_user,
+        )
+    )
+
+    with pytest.raises(posts.PostAlreadyUploadedError):
+        api.post_api.create_post(
+            context_factory(
+                params={"safety": "safe", "tags": []},
+                files={"content": resized},
+                user=auth_user,
+            )
+        )
+
+    with pytest.raises(posts.PostAlreadyUploadedError):
+        api.post_api.create_post(
+            context_factory(
+                params={"safety": "safe", "tags": []},
+                files={"content": recompressed},
+                user=auth_user,
+            )
+        )
+
+    try:
+        webp_variant = _encode_image_variant(
+            original, scale=1.0, quality=80, fmt="WEBP"
+        )
+    except Exception:
+        pytest.skip("WebP encoding not available in this environment")
+
+    with pytest.raises(posts.PostAlreadyUploadedError):
+        api.post_api.create_post(
+            context_factory(
+                params={"safety": "safe", "tags": []},
+                files={"content": webp_variant},
+                user=auth_user,
+            )
+        )
+
+
+def test_near_duplicate_detection_rejects_animated_gif_variants(
+    config_injector, tmpdir, context_factory, read_asset, user_factory
+):
+    _configure_upload_env(config_injector, tmpdir)
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+
+    gif_one = read_asset("gif-duplicate-1.gif")
+    gif_two = read_asset("gif-duplicate-2.gif")
+
+    api.post_api.create_post(
+        context_factory(
+            params={"safety": "safe", "tags": []},
+            files={"content": gif_one},
+            user=auth_user,
+        )
+    )
+
+    with pytest.raises(posts.PostAlreadyUploadedError):
+        api.post_api.create_post(
+            context_factory(
+                params={"safety": "safe", "tags": []},
+                files={"content": gif_two},
+                user=auth_user,
+            )
+        )
 
 
 def test_trying_to_omit_content(context_factory, user_factory):

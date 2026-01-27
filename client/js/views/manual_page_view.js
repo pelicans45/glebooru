@@ -91,13 +91,26 @@ class ManualPageView {
                     this._navigateToPrevNextPage("next");
                 });
 
+                const hasTotal =
+                    response.total !== undefined && response.total !== null;
+                const hasMore =
+                    response.hasMore !== undefined
+                        ? response.hasMore
+                        : response.results.length >= limit;
                 let removedItems = 0;
-                if (response.total) {
+                if (hasTotal) {
                     this._refreshNav(
                         offset,
                         limit,
                         response.total,
                         removedItems,
+                        ctx
+                    );
+                } else if (offset > 0 || hasMore) {
+                    this._refreshNavWithoutTotal(
+                        offset,
+                        limit,
+                        hasMore,
                         ctx
                     );
                 }
@@ -110,13 +123,15 @@ class ManualPageView {
 
                 response.results.addEventListener("remove", (e) => {
                     removedItems++;
-                    this._refreshNav(
-                        offset,
-                        limit,
-                        response.total,
-                        removedItems,
-                        ctx
-                    );
+                    if (hasTotal) {
+                        this._refreshNav(
+                            offset,
+                            limit,
+                            response.total,
+                            removedItems,
+                            ctx
+                        );
+                    }
                 });
 
                 views.syncScrollPosition();
@@ -183,6 +198,43 @@ class ManualPageView {
                 nextPage: Math.min(totalPages, Math.max(1, currentPage + 1)),
                 currentPage: currentPage,
                 totalPages: totalPages,
+                pages: pages,
+            })
+        );
+    }
+
+    _refreshNavWithoutTotal(offset, limit, hasMore, ctx) {
+        const currentPage = Math.floor((offset + limit - 1) / limit) + 1;
+        const prevPage = currentPage > 1 ? currentPage - 1 : currentPage;
+        const nextPage = hasMore ? currentPage + 1 : currentPage;
+        const pages = new Map();
+        const defaultLimit = ctx.defaultLimit;
+
+        const makePage = (pageNumber, active) => {
+            return {
+                number: pageNumber,
+                offset: (pageNumber - 1) * limit,
+                limit: limit === defaultLimit ? null : limit,
+                active: active,
+            };
+        };
+
+        if (prevPage !== currentPage) {
+            pages.set(prevPage, makePage(prevPage, false));
+        }
+        pages.set(currentPage, makePage(currentPage, true));
+        if (nextPage !== currentPage) {
+            pages.set(nextPage, makePage(nextPage, false));
+        }
+
+        views.replaceContent(
+            this._pageNavNode,
+            navTemplate({
+                getClientUrlForPage: ctx.getClientUrlForPage,
+                prevPage: prevPage,
+                nextPage: nextPage,
+                currentPage: currentPage,
+                totalPages: nextPage,
                 pages: pages,
             })
         );

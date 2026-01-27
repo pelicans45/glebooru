@@ -107,13 +107,21 @@ def get_post_security_hash(id: int) -> str:
     ).hexdigest()[0:16]
 
 
+def _get_post_security_hash_cached(post: model.Post) -> str:
+    cached = getattr(post, "_security_hash", None)
+    if cached is None:
+        cached = get_post_security_hash(post.post_id)
+        setattr(post, "_security_hash", cached)
+    return cached
+
+
 def get_post_content_url(post: model.Post) -> str:
     # assert post
     base_url = config.config.get("data_url") or ""
     if base_url and not base_url.endswith("/"):
         base_url += "/"
     extension = mime.get_extension(post.mime_type) or "dat"
-    security_hash = get_post_security_hash(post.post_id)
+    security_hash = _get_post_security_hash_cached(post)
     return f"{base_url}posts/{post.post_id}_{security_hash}.{extension}"
 
 
@@ -129,7 +137,7 @@ def get_post_thumbnail_url(post: model.Post) -> str:
     base_url = config.config.get("data_url") or ""
     if base_url and not base_url.endswith("/"):
         base_url += "/"
-    security_hash = get_post_security_hash(post.post_id)
+    security_hash = _get_post_security_hash_cached(post)
     return (
         f"{base_url}generated-thumbnails/"
         f"{post.post_id}_{security_hash}.{get_post_thumbnail_extension(post)}"
@@ -140,13 +148,13 @@ def get_post_content_path(post: model.Post) -> str:
     # assert post
     # assert post.post_id
     extension = mime.get_extension(post.mime_type) or "dat"
-    security_hash = get_post_security_hash(post.post_id)
+    security_hash = _get_post_security_hash_cached(post)
     return f"posts/{post.post_id}_{security_hash}.{extension}"
 
 
 def get_post_thumbnail_path(post: model.Post) -> str:
     # assert post
-    security_hash = get_post_security_hash(post.post_id)
+    security_hash = _get_post_security_hash_cached(post)
     return (
         f"generated-thumbnails/{post.post_id}_{security_hash}."
         f"{get_post_thumbnail_extension(post)}"
@@ -155,7 +163,7 @@ def get_post_thumbnail_path(post: model.Post) -> str:
 
 def get_post_thumbnail_backup_path(post: model.Post) -> str:
     # assert post
-    security_hash = get_post_security_hash(post.post_id)
+    security_hash = _get_post_security_hash_cached(post)
     return f"posts/custom-thumbnails/{post.post_id}_{security_hash}.dat"
 
 
@@ -502,12 +510,17 @@ def serialize_post(
             sa.orm.attributes.set_committed_value(post, "comments", [])
             post._comments_sorted = True
         else:
-            comment_list = (
+            comment_query = (
                 db.session.query(model.Comment)
                 .filter(model.Comment.post_id == post.post_id)
                 .order_by(model.Comment.creation_time)
-                .all()
             )
+            # Avoid eager-loading comment scores for anonymous users.
+            if not auth_user or not auth_user.user_id:
+                comment_query = comment_query.options(
+                    sa.orm.lazyload(model.Comment.scores)
+                )
+            comment_list = comment_query.all()
             sa.orm.attributes.set_committed_value(post, "comments", comment_list)
             post._comments_sorted = True
 
@@ -1096,21 +1109,25 @@ def purge_post_signature(post: model.Post) -> None:
     )
 
 
-def generate_post_signature(
-    post: model.Post, content: bytes
-) -> Optional[model.PostSignature]:
-    ext = mime.get_extension(post.mime_type) if post.mime_type else None
-    try:
-        unpacked_signature = image_hash.generate_signature(content)
-        packed_signature = image_hash.pack_signature(unpacked_signature)
-        words = image_hash.generate_words(unpacked_signature)
+def _build_post_signature(
+    post: model.Post, unpacked_signature: NpMatrix
+) -> model.PostSignature:
+    packed_signature = image_hash.pack_signature(unpacked_signature)
+    words = image_hash.generate_words(unpacked_signature)
+    signature = model.PostSignature(
+        post=post, signature=packed_signature, words=words
+    )
+    db.session.add(signature)
+    return signature
 
-        signature = model.PostSignature(
-            post=post, signature=packed_signature, words=words
-        )
-        db.session.add(signature)
-        return signature
+
+def _generate_signature_bits(
+    content: bytes, mime_type: Optional[str]
+) -> Tuple[NpMatrix, bool]:
+    try:
+        return image_hash.generate_signature(content), False
     except errors.ProcessingError:
+        ext = mime.get_extension(mime_type) if mime_type else None
         if ext in {"avif", "heic", "heif"}:
             logger.warning(
                 "Falling back to placeholder image hash for %s", ext
@@ -1118,13 +1135,33 @@ def generate_post_signature(
             unpacked_signature = image_hash.np.zeros(
                 image_hash.SIG_NUMS, dtype=image_hash.np.uint8
             )
-            packed_signature = image_hash.pack_signature(unpacked_signature)
-            words = image_hash.generate_words(unpacked_signature)
-            signature = model.PostSignature(
-                post=post, signature=packed_signature, words=words
-            )
-            db.session.add(signature)
-            return signature
+            return unpacked_signature, True
+        raise
+
+
+def _find_near_duplicate_post_id(
+    signature: NpMatrix, exclude_post_id: Optional[int] = None
+) -> Optional[int]:
+    matches = search_by_signature(
+        signature,
+        limit=50,
+        distance_cutoff=image_hash.DUPLICATE_DISTANCE_CUTOFF,
+    )
+    for _distance, post in matches:
+        if post and post.post_id != exclude_post_id:
+            return post.post_id
+    return None
+
+
+def generate_post_signature(
+    post: model.Post, content: bytes
+) -> Optional[model.PostSignature]:
+    try:
+        unpacked_signature, _is_placeholder = _generate_signature_bits(
+            content, post.mime_type
+        )
+        return _build_post_signature(post, unpacked_signature)
+    except errors.ProcessingError:
         if not config.config["allow_broken_uploads"]:
             raise InvalidPostContentError("Unable to generate image hash data")
         return None
@@ -1274,7 +1311,24 @@ def update_post_content(
     if update_signature:
         if content_changed:
             purge_post_signature(post)
-        post.signature = generate_post_signature(post, content)
+        try:
+            unpacked_signature, is_placeholder = _generate_signature_bits(
+                content, post.mime_type
+            )
+            if not is_placeholder:
+                other_post_id = _find_near_duplicate_post_id(
+                    unpacked_signature, post.post_id
+                )
+                if other_post_id:
+                    raise PostAlreadyUploadedError(other_post_id)
+            post.signature = _build_post_signature(post, unpacked_signature)
+        except errors.ProcessingError as ex:
+            logging.exception(ex)
+            if not config.config["allow_broken_uploads"]:
+                raise InvalidPostContentError(
+                    "Unable to process image signature"
+                ) from ex
+            post.signature = None
 
     post.file_size = len(content)
     try:

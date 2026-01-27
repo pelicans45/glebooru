@@ -141,6 +141,35 @@ def test_filter_by_tag(
 @pytest.mark.parametrize(
     "input,expected_post_ids",
     [
+        ("-tag:t1", [2, 3, 5]),
+        ("-tag:t1,t2", [3, 5]),
+        ("-tag:t1 -tag:t2", [3, 5]),
+        ("-t1 -t2", [3, 5]),
+    ],
+)
+def test_filter_by_tag_negated(
+    verify_unpaged, post_factory, tag_factory, input, expected_post_ids
+):
+    tag1 = tag_factory(names=["t1"])
+    tag2 = tag_factory(names=["t2"])
+    tag3 = tag_factory(names=["t3"])
+    post1 = post_factory(id=1)
+    post2 = post_factory(id=2)
+    post3 = post_factory(id=3)
+    post4 = post_factory(id=4)
+    post5 = post_factory(id=5)
+    post1.tags = [tag1]
+    post2.tags = [tag2]
+    post3.tags = [tag3]
+    post4.tags = [tag1, tag2]
+    db.session.add_all([tag1, tag2, tag3, post1, post2, post3, post4, post5])
+    db.session.flush()
+    verify_unpaged(input, expected_post_ids)
+
+
+@pytest.mark.parametrize(
+    "input,expected_post_ids",
+    [
         ("score:1", [1]),
         ("score:3", [3]),
         ("score:1,3", [1, 3]),

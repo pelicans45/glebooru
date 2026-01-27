@@ -49,13 +49,16 @@ class SuggestionList {
         return Object.keys(this._suggestions).length;
     }
 
-    set(suggestion, weight) {
-        if (
-            Object.prototype.hasOwnProperty.call(this._suggestions, suggestion)
-        ) {
-            weight = Math.max(weight, this._suggestions[suggestion]);
-        }
-        this._suggestions[suggestion] = weight;
+    set(suggestion, weight, category) {
+        const existing = this._suggestions[suggestion];
+        const nextWeight = existing
+            ? Math.max(weight, existing.weight)
+            : weight;
+        const nextCategory = category || (existing && existing.category);
+        this._suggestions[suggestion] = {
+            weight: nextWeight,
+            category: nextCategory || null,
+        };
     }
 
     ban(suggestion) {
@@ -66,8 +69,12 @@ class SuggestionList {
         let tuples = [];
         for (let suggestion of Object.keys(this._suggestions)) {
             if (!this._banned.includes(suggestion)) {
-                const weight = this._suggestions[suggestion];
-                tuples.push([suggestion, weight.toFixed(1)]);
+                const entry = this._suggestions[suggestion];
+                tuples.push([
+                    suggestion,
+                    entry.weight.toFixed(1),
+                    entry.category,
+                ]);
             }
         }
         tuples.sort((a, b) => {
@@ -76,7 +83,11 @@ class SuggestionList {
             return weightDiff === 0 ? nameDiff : weightDiff;
         });
         return tuples.map((tuple) => {
-            return { tagName: tuple[0], weight: tuple[1] };
+            return {
+                tagName: tuple[0],
+                weight: tuple[1],
+                category: tuple[2],
+            };
         });
     }
 }
@@ -426,7 +437,8 @@ class TagInputControl extends events.EventTarget {
                 for (let sibling of siblings) {
                     this._suggestions.set(
                         sibling.tag.names[0],
-                        (sibling.occurrences * 4.9) / maxSiblingOccurrences
+                        (sibling.occurrences * 4.9) / maxSiblingOccurrences,
+                        sibling.tag ? sibling.tag.category : null
                     );
                 }
                 for (let suggestion of tag.suggestions || []) {
@@ -447,6 +459,7 @@ class TagInputControl extends events.EventTarget {
         PostList.reverseSearch(this._post.id, limit, threshold, fields).then(
             (response) => {
                 const tagOccurrences = {};
+                const tagCategories = {};
                 for (let post of response.results) {
                     for (let tag of post.tags) {
                         const name = tag.names[0];
@@ -455,12 +468,19 @@ class TagInputControl extends events.EventTarget {
                         }
                         let count = tagOccurrences[name] || 0;
                         tagOccurrences[name] = count + 1;
+                        if (!tagCategories[name] && tag.category) {
+                            tagCategories[name] = tag.category;
+                        }
                     }
                 }
                 for (const [tagName, count] of Object.entries(
                     tagOccurrences
                 )) {
-                    this._suggestions.set(tagName, count);
+                    this._suggestions.set(
+                        tagName,
+                        count,
+                        tagCategories[tagName]
+                    );
                 }
                 if (this._suggestions.length) {
                     this._openSuggestionsPopup();
@@ -483,6 +503,7 @@ class TagInputControl extends events.EventTarget {
         for (let tuple of this._suggestions.getAll()) {
             const tagName = tuple.tagName;
             const weight = tuple.weight;
+            const category = tuple.category;
             if (this.tags.isTaggedWith(tagName)) {
                 continue;
             }
@@ -491,11 +512,11 @@ class TagInputControl extends events.EventTarget {
             addLinkNode.textContent = tagName;
             addLinkNode.classList.add("add-tag");
             addLinkNode.setAttribute("href", "");
-            Tag.get(tagName).then((tag) => {
+            if (category) {
                 addLinkNode.classList.add(
-                    misc.makeCssName(tag.category, "tag")
+                    misc.makeCssName(category, "tag")
                 );
-            });
+            }
             addLinkNode.addEventListener("click", (e) => {
                 e.preventDefault();
                 listNode.removeChild(listItemNode);

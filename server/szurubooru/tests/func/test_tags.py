@@ -539,7 +539,7 @@ def test_update_tag_names_reusing_own_name(config_injector, tag_factory, name):
     db.session.add(tag)
     db.session.flush()
     tags.update_tag_names(tag, [name])
-    assert [tag_name.name for tag_name in tag.names] == [name]
+    assert [tag_name.name for tag_name in tag.names] == [name.lower()]
 
 
 def test_update_tag_names_changing_primary_name(config_injector, tag_factory):

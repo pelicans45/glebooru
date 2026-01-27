@@ -112,7 +112,12 @@ def _build_url(base: str, path: str, params: Optional[Dict[str, str]] = None) ->
     return url
 
 
-def _pick_tags(base_url: str, timeout: float) -> Tuple[Optional[dict], Optional[dict], Optional[int]]:
+def _pick_tags(
+    base_url: str,
+    timeout: float,
+    force_exclude: str,
+    force_include: str,
+) -> Tuple[Optional[dict], Optional[dict], Optional[int]]:
     status, _elapsed, data, _err = _request_json(
         _build_url(base_url, "/posts", {"limit": "1"}), timeout
     )
@@ -137,18 +142,34 @@ def _pick_tags(base_url: str, timeout: float) -> Tuple[Optional[dict], Optional[
         target = int(round(total_posts * 0.10))
 
     exclude = None
-    if target is not None:
-        exclude = min(tags, key=lambda t: abs((t.get("usages") or 0) - target))
-    if not exclude:
-        exclude = tags[0]
-
     include = None
-    for tag in tags:
-        if tag is not exclude:
-            include = tag
-            break
-    if not include:
-        include = exclude
+
+    if force_exclude:
+        exclude = next(
+            (tag for tag in tags if _name_of(tag) == force_exclude),
+            None,
+        )
+    if force_include:
+        include = next(
+            (tag for tag in tags if _name_of(tag) == force_include),
+            None,
+        )
+
+    if exclude is None:
+        if target is not None:
+            exclude = min(
+                tags, key=lambda t: abs((t.get("usages") or 0) - target)
+            )
+        if not exclude:
+            exclude = tags[0]
+
+    if include is None:
+        for tag in tags:
+            if tag is not exclude:
+                include = tag
+                break
+        if not include:
+            include = exclude
     return exclude, include, total_posts
 
 
@@ -232,10 +253,20 @@ def main() -> int:
         default="Tag Exclusion Benchmark",
         help="Markdown report title",
     )
+    parser.add_argument(
+        "--exclude-tag",
+        default="",
+        help="Force exclusion tag name (e.g., tag_00000).",
+    )
+    parser.add_argument(
+        "--include-tag",
+        default="",
+        help="Force inclusion tag name (e.g., tag_00001).",
+    )
     args = parser.parse_args()
 
     exclude_tag, include_tag, total_posts = _pick_tags(
-        args.base_url, args.timeout
+        args.base_url, args.timeout, args.exclude_tag, args.include_tag
     )
     if not exclude_tag or not include_tag:
         raise SystemExit("Failed to select tags; ensure /tags endpoint works.")

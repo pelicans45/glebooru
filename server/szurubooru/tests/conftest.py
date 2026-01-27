@@ -143,7 +143,258 @@ def _create_session(postgresql_connection):
         poolclass=NullPool,
     )
     session_factory = orm.sessionmaker(bind=engine, autoflush=False)
-    return session_factory(), engine
+    session = session_factory()
+    _attach_statistics_refresher(session)
+    return session, engine
+
+
+# Tests use create_all() so stats triggers aren't installed; recompute stats.
+def _refresh_statistics(connection: sa.Connection) -> None:
+    connection.execute(sa.text("DELETE FROM database_statistics"))
+    connection.execute(sa.text("DELETE FROM tag_category_statistics"))
+    connection.execute(sa.text("DELETE FROM pool_category_statistics"))
+    connection.execute(sa.text("DELETE FROM tag_statistics"))
+    connection.execute(sa.text("DELETE FROM post_statistics"))
+    connection.execute(sa.text("DELETE FROM pool_statistics"))
+    connection.execute(sa.text("DELETE FROM user_statistics"))
+    connection.execute(sa.text("DELETE FROM comment_statistics"))
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO database_statistics (
+                id, post_count, tag_count, pool_count, user_count, comment_count
+            )
+            SELECT
+                TRUE,
+                (SELECT COUNT(*) FROM post),
+                (SELECT COUNT(*) FROM tag),
+                (SELECT COUNT(*) FROM pool),
+                (SELECT COUNT(*) FROM "user"),
+                (SELECT COUNT(*) FROM comment)
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO tag_category_statistics (category_id, usage_count)
+            SELECT
+                tc.id,
+                COALESCE(COUNT(t.id), 0)
+            FROM tag_category tc
+            LEFT JOIN tag t ON t.category_id = tc.id
+            GROUP BY tc.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO pool_category_statistics (category_id, usage_count)
+            SELECT
+                pc.id,
+                COALESCE(COUNT(p.id), 0)
+            FROM pool_category pc
+            LEFT JOIN pool p ON p.category_id = pc.id
+            GROUP BY pc.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO tag_statistics (
+                tag_id, usage_count, suggestion_count, implication_count
+            )
+            SELECT
+                t.id,
+                COALESCE(pt.cnt, 0) AS usage_count,
+                COALESCE(ts.cnt, 0) AS suggestion_count,
+                COALESCE(ti.cnt, 0) AS implication_count
+            FROM tag t
+            LEFT JOIN (
+                SELECT tag_id, COUNT(*) AS cnt
+                FROM post_tag
+                GROUP BY tag_id
+            ) pt ON pt.tag_id = t.id
+            LEFT JOIN (
+                SELECT parent_id AS tag_id, COUNT(*) AS cnt
+                FROM tag_suggestion
+                GROUP BY parent_id
+            ) ts ON ts.tag_id = t.id
+            LEFT JOIN (
+                SELECT parent_id AS tag_id, COUNT(*) AS cnt
+                FROM tag_implication
+                GROUP BY parent_id
+            ) ti ON ti.tag_id = t.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO post_statistics (
+                post_id, tag_count, pool_count, note_count, comment_count,
+                relation_count, score, favorite_count, feature_count,
+                last_comment_creation_time, last_comment_edit_time,
+                last_favorite_time, last_feature_time
+            )
+            SELECT
+                p.id,
+                COALESCE(pt.cnt, 0) AS tag_count,
+                COALESCE(pp.cnt, 0) AS pool_count,
+                COALESCE(pn.cnt, 0) AS note_count,
+                COALESCE(pc.cnt, 0) AS comment_count,
+                COALESCE(pr.cnt, 0) AS relation_count,
+                COALESCE(ps.sum_score, 0) AS score,
+                COALESCE(pf.cnt, 0) AS favorite_count,
+                COALESCE(pfeat.cnt, 0) AS feature_count,
+                pc.max_creation,
+                pc.max_edit,
+                pf.max_time,
+                pfeat.max_time
+            FROM post p
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS cnt
+                FROM post_tag
+                GROUP BY post_id
+            ) pt ON pt.post_id = p.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS cnt
+                FROM pool_post
+                GROUP BY post_id
+            ) pp ON pp.post_id = p.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS cnt
+                FROM post_note
+                GROUP BY post_id
+            ) pn ON pn.post_id = p.id
+            LEFT JOIN (
+                SELECT
+                    post_id,
+                    COUNT(*) AS cnt,
+                    MAX(creation_time) AS max_creation,
+                    MAX(last_edit_time) AS max_edit
+                FROM comment
+                GROUP BY post_id
+            ) pc ON pc.post_id = p.id
+            LEFT JOIN (
+                SELECT post_id, SUM(score) AS sum_score
+                FROM post_score
+                GROUP BY post_id
+            ) ps ON ps.post_id = p.id
+            LEFT JOIN (
+                SELECT
+                    post_id,
+                    COUNT(*) AS cnt,
+                    MAX(time) AS max_time
+                FROM post_favorite
+                GROUP BY post_id
+            ) pf ON pf.post_id = p.id
+            LEFT JOIN (
+                SELECT
+                    post_id,
+                    COUNT(*) AS cnt,
+                    MAX(time) AS max_time
+                FROM post_feature
+                GROUP BY post_id
+            ) pfeat ON pfeat.post_id = p.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS cnt
+                FROM (
+                    SELECT parent_id AS post_id FROM post_relation
+                    UNION ALL
+                    SELECT child_id AS post_id FROM post_relation
+                ) rel
+                GROUP BY post_id
+            ) pr ON pr.post_id = p.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO pool_statistics (pool_id, post_count)
+            SELECT
+                p.id,
+                COALESCE(pp.cnt, 0) AS post_count
+            FROM pool p
+            LEFT JOIN (
+                SELECT pool_id, COUNT(*) AS cnt
+                FROM pool_post
+                GROUP BY pool_id
+            ) pp ON pp.pool_id = p.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO user_statistics (user_id, upload_count, comment_count, favorite_count)
+            SELECT
+                u.id,
+                COALESCE(p.cnt, 0) AS upload_count,
+                COALESCE(c.cnt, 0) AS comment_count,
+                COALESCE(f.cnt, 0) AS favorite_count
+            FROM "user" u
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) AS cnt
+                FROM post
+                WHERE user_id IS NOT NULL
+                GROUP BY user_id
+            ) p ON p.user_id = u.id
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) AS cnt
+                FROM comment
+                WHERE user_id IS NOT NULL
+                GROUP BY user_id
+            ) c ON c.user_id = u.id
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) AS cnt
+                FROM post_favorite
+                WHERE user_id IS NOT NULL
+                GROUP BY user_id
+            ) f ON f.user_id = u.id
+            """
+        )
+    )
+
+    connection.execute(
+        sa.text(
+            """
+            INSERT INTO comment_statistics (comment_id, score)
+            SELECT
+                c.id,
+                COALESCE(cs.sum_score, 0) AS score
+            FROM comment c
+            LEFT JOIN (
+                SELECT comment_id, SUM(score) AS sum_score
+                FROM comment_score
+                GROUP BY comment_id
+            ) cs ON cs.comment_id = c.id
+            """
+        )
+    )
+
+
+def _attach_statistics_refresher(session: orm.Session) -> None:
+    def _after_flush_postexec(_session, _flush_context) -> None:
+        if _session.info.get("_refreshing_statistics"):
+            return
+        _session.info["_refreshing_statistics"] = True
+        try:
+            _refresh_statistics(_session.connection())
+        finally:
+            _session.info["_refreshing_statistics"] = False
+
+    sa.event.listen(session, "after_flush_postexec", _after_flush_postexec)
 
 
 @pytest.fixture(scope="function")

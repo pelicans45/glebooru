@@ -13,6 +13,14 @@ from szurubooru.search.typing import SaColumn, SaQuery
 
 
 class PoolSearchConfig(BaseSearchConfig):
+    def __init__(self) -> None:
+        self._sort_includes_name = False
+
+    def on_search_query_parsed(self, search_query) -> None:
+        self._sort_includes_name = any(
+            token.name == "name" for token in search_query.sort_tokens
+        )
+
     def create_filter_query(self, _disable_eager_loads: bool) -> SaQuery:
         strategy = (
             sa.orm.lazyload if _disable_eager_loads else sa.orm.subqueryload
@@ -37,6 +45,8 @@ class PoolSearchConfig(BaseSearchConfig):
         raise NotImplementedError()
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
+        if self._sort_includes_name:
+            return query
         return query.order_by(model.Pool.first_name.asc())
 
     @property

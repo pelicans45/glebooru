@@ -37,21 +37,40 @@ class Api extends events.EventTarget {
         ]);
     }
 
+    _base64Encode(value) {
+        if (typeof Buffer !== "undefined") {
+            return new Buffer(value).toString("base64");
+        }
+        if (typeof btoa !== "undefined") {
+            return btoa(unescape(encodeURIComponent(value)));
+        }
+        throw new Error("No base64 encoder available");
+    }
+
     get(url, options, transform) {
         if (url in this.cache) {
-            return new Promise((resolve, reject) => {
+            const cachedPromise = new Promise((resolve) => {
                 resolve(this.cache[url]);
             });
+            cachedPromise.abort = () => {};
+            return cachedPromise;
         }
-        return this._wrappedRequest(url, request.get, {}, {}, options).then(
-            (response) => {
-                if (transform) {
-                    transform(response);
-                }
-                this.cache[url] = response;
-                return Promise.resolve(response);
-            }
+        const requestPromise = this._wrappedRequest(
+            url,
+            request.get,
+            {},
+            {},
+            options
         );
+        const wrappedPromise = requestPromise.then((response) => {
+            if (transform) {
+                transform(response);
+            }
+            this.cache[url] = response;
+            return Promise.resolve(response);
+        });
+        wrappedPromise.abort = () => requestPromise.abort();
+        return wrappedPromise;
     }
 
     post(url, data, files, options) {
@@ -393,19 +412,18 @@ class Api extends events.EventTarget {
                     req.set(
                         "Authorization",
                         "Token " +
-                            new Buffer(
+                            this._base64Encode(
                                 this.userName + ":" + this.token
-                            ).toString("base64")
+                            )
                     );
                 } else if (this.userName && this.userPassword) {
-                    req.auth(
-                        this.userName,
-                        encodeURIComponent(this.userPassword).replace(
-                            /%([0-9A-F]{2})/g,
-                            (match, p1) => {
-                                return String.fromCharCode("0x" + p1);
-                            }
-                        )
+                    req.auth = null;
+                    req.set(
+                        "Authorization",
+                        "Basic " +
+                            this._base64Encode(
+                                this.userName + ":" + this.userPassword
+                            )
                     );
                 }
             } catch (e) {

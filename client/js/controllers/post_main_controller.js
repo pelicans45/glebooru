@@ -57,7 +57,12 @@ class PostMainController extends BasePostController {
 
         Promise.all([
             Post.get(ctx.parameters.id, { fields: postFields }),
-            PostList.getAround(ctx.parameters.id, query, ctx.parameters.r),
+            PostList.getAround(
+                ctx.parameters.id,
+                query,
+                ctx.parameters.r,
+                ["id", "type", "contentUrl"]
+            ),
         ]).then(
             (responses) => {
                 const [post, aroundResponse] = responses;
@@ -94,32 +99,12 @@ class PostMainController extends BasePostController {
                     ? aroundResponse.next.id
                     : null;
 
-                // Preload nearby posts
-                if (prevPostId) {
-                    Post.get(prevPostId, {
-                        noProgress: true,
-                        fields: ["id", "type", "contentUrl"],
-                    }).then(
-                        misc.preloadPostImages
-                    );
-                    PostList.getAround(
-                        prevPostId,
-                        parameters ? parameters.query : null,
-                        { noProgress: true }
-                    );
+                // Preload nearby posts using data from around response
+                if (aroundResponse.prev) {
+                    misc.preloadPostImages(aroundResponse.prev);
                 }
-                if (nextPostId) {
-                    Post.get(nextPostId, {
-                        noProgress: true,
-                        fields: ["id", "type", "contentUrl"],
-                    }).then(
-                        misc.preloadPostImages
-                    );
-                    PostList.getAround(
-                        nextPostId,
-                        parameters ? parameters.query : null,
-                        { noProgress: true }
-                    );
+                if (aroundResponse.next) {
+                    misc.preloadPostImages(aroundResponse.next);
                 }
 
                 this._post = post;

@@ -73,6 +73,7 @@ services:
         depends_on:
             - client
         restart: unless-stopped
+        entrypoint: ["nginx", "-g", "daemon off;"]
         environment:
             NGINX_ENTRYPOINT_QUIET_LOGS: "1"
         volumes:

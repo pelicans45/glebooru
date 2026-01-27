@@ -46,6 +46,7 @@ class AutoCompleteControl {
         this._activeResult = -1;
         this._backspaced = false;
         this._requestId = 0;
+        this._pendingRequest = null;
 
         this._install();
     }
@@ -278,24 +279,31 @@ class AutoCompleteControl {
         }
 
         const requestId = ++this._requestId;
-        this._options.getMatches(textToFind).then((matches) => {
-            if (requestId !== this._requestId) {
-                return;
-            }
-            const oldResults = this._results.slice();
-            this._results = matches.slice(0, this._options.maxResults);
-            const oldResultsHash = JSON.stringify(oldResults);
-            const newResultsHash = JSON.stringify(this._results);
-            if (oldResultsHash !== newResultsHash || this._backspaced) {
-                this._activeResult = -1;
-                this._refreshList();
-            }
-            if (this._backspaced) {
-                this._backspaced = false;
-            }
-            // TODO: keep refresh here?
-            //this._refreshList();
-        });
+        if (this._pendingRequest && this._pendingRequest.abort) {
+            this._pendingRequest.abort();
+        }
+        const pending = this._options.getMatches(textToFind);
+        this._pendingRequest = pending;
+        pending
+            .then((matches) => {
+                if (requestId !== this._requestId) {
+                    return;
+                }
+                const oldResults = this._results.slice();
+                this._results = matches.slice(0, this._options.maxResults);
+                const oldResultsHash = JSON.stringify(oldResults);
+                const newResultsHash = JSON.stringify(this._results);
+                if (oldResultsHash !== newResultsHash || this._backspaced) {
+                    this._activeResult = -1;
+                    this._refreshList();
+                }
+                if (this._backspaced) {
+                    this._backspaced = false;
+                }
+                // TODO: keep refresh here?
+                //this._refreshList();
+            })
+            .catch(() => {});
     }
 
     _refreshList() {

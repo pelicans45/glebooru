@@ -1,6 +1,7 @@
 "use strict";
 
 const api = require("../api.js");
+const config = require("../config.js");
 const uri = require("../util/uri.js");
 const tags = require("../tags.js");
 const events = require("../events.js");
@@ -514,6 +515,15 @@ class Post extends events.EventTarget {
     }
 
     getTaggedEnrichedFilename() {
+        if (config.environment === "development" && this._contentUrl) {
+            const filename = this._contentUrl
+                .split("?")[0]
+                .split("/")
+                .pop();
+            if (filename) {
+                return filename;
+            }
+        }
         const tagNames = [];
 
         // 4 characters for the file extension
@@ -546,6 +556,15 @@ class Post extends events.EventTarget {
     }
 
     getEnrichedFilename() {
+        if (config.environment === "development" && this._contentUrl) {
+            const filename = this._contentUrl
+                .split("?")[0]
+                .split("/")
+                .pop();
+            if (filename) {
+                return filename;
+            }
+        }
         let hostname = location.hostname;
         if (!hostname.includes("www.")) {
             hostname = "www." + hostname;
@@ -554,6 +573,15 @@ class Post extends events.EventTarget {
     }
 
     getEnrichedThumbnailFilename() {
+        if (config.environment === "development" && this._thumbnailUrl) {
+            const filename = this._thumbnailUrl
+                .split("?")[0]
+                .split("/")
+                .pop();
+            if (filename) {
+                return filename;
+            }
+        }
         let hostname = location.hostname;
         if (!hostname.includes("www.")) {
             hostname = "www." + hostname;

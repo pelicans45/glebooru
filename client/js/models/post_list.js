@@ -9,20 +9,27 @@ const AbstractList = require("./abstract_list.js");
 const Post = require("./post.js");
 
 class PostList extends AbstractList {
-    static getAround(id, searchQuery, r, options) {
+    static getAround(id, searchQuery, r, fields, options) {
+        const params = {
+            q: PostList.decorateSearchQuery(searchQuery || ""),
+            fields: "id",
+            r: r,
+        };
+        if (fields && fields.length) {
+            params.fields = fields.join(",");
+        }
         return api.get(
             uri.formatApiLink("post", id, "around", {
-                q: PostList.decorateSearchQuery(searchQuery || ""),
-                fields: "id",
-                r: r,
+                q: params.q,
+                fields: params.fields,
+                r: params.r,
             }),
             options
         );
     }
 
     static search(text, offset, limit, fields, r, canSeeNewPosts, options = {}) {
-        const browsingSettings = settings.get();
-        const skipCount = browsingSettings.endlessScroll ? 1 : null;
+        const skipCount = "1";
         const beforeId = options.beforeId || null;
         return api
             .get(

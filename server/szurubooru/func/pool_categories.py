@@ -118,11 +118,22 @@ def update_category_color(category: model.PoolCategory, color: str) -> None:
 def try_get_category_by_name(
     name: str, lock: bool = False
 ) -> Optional[model.PoolCategory]:
+    if lock:
+        row = db.session.execute(
+            sa.text(
+                "SELECT id FROM pool_category "
+                "WHERE lower(name) = :name "
+                "FOR UPDATE"
+            ),
+            {"name": name.lower()},
+        ).scalar()
+        if not row:
+            return None
+        return db.session.get(model.PoolCategory, row)
+
     query = db.session.query(model.PoolCategory).filter(
         sa.func.lower(model.PoolCategory.name) == name.lower()
     )
-    if lock:
-        query = query.with_for_update()
     return query.one_or_none()
 
 
@@ -148,11 +159,25 @@ def get_all_categories() -> List[model.PoolCategory]:
 def try_get_default_category(
     lock: bool = False,
 ) -> Optional[model.PoolCategory]:
+    if lock:
+        row = db.session.execute(
+            sa.text(
+                'SELECT id FROM pool_category WHERE "default" = true '
+                "FOR UPDATE"
+            )
+        ).scalar()
+        if not row:
+            row = db.session.execute(
+                sa.text(
+                    "SELECT id FROM pool_category "
+                    "ORDER BY id ASC LIMIT 1 FOR UPDATE"
+                )
+            ).scalar()
+        return db.session.get(model.PoolCategory, row) if row else None
+
     query = db.session.query(model.PoolCategory).filter(
         model.PoolCategory.default
     )
-    if lock:
-        query = query.with_for_update()
     category = query.first()
     # if for some reason (e.g. as a result of migration) there's no default
     # category, get the first record available.
@@ -160,8 +185,6 @@ def try_get_default_category(
         query = db.session.query(model.PoolCategory).order_by(
             model.PoolCategory.pool_category_id.asc()
         )
-        if lock:
-            query = query.with_for_update()
         category = query.first()
     return category
 

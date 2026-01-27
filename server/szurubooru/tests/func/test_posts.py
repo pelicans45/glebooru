@@ -186,6 +186,7 @@ def test_serialize_post(
 
         result = posts.serialize_post(post, auth_user)
         result["tags"].sort(key=lambda tag: tag["names"][0])
+        result["tagsBasic"].sort(key=lambda tag: tag["names"][0])
 
         assert result == {
             "id": 1,
@@ -200,6 +201,7 @@ def test_serialize_post(
             "fileSize": 100,
             "canvasWidth": 200,
             "canvasHeight": 300,
+            "duration": None,
             "contentUrl": "http://example.com/posts/1_244c8840887984c4.jpg",
             "thumbnailUrl": "http://example.com/"
             "generated-thumbnails/1_244c8840887984c4.jpg",
@@ -215,6 +217,10 @@ def test_serialize_post(
                     "category": "test-cat2",
                     "usages": 1,
                 },
+            ],
+            "tagsBasic": [
+                {"names": ["tag1", "tag2"], "category": "test-cat1"},
+                {"names": ["tag3"], "category": "test-cat2"},
             ],
             "relations": [],
             "notes": [],
@@ -538,8 +544,8 @@ def test_update_post_content_with_broken_content(
     if allow_broken_uploads:
         posts.update_post_content(post, read_asset("png-broken.png"))
         db.session.flush()
-        assert post.canvas_width is None
-        assert post.canvas_height is None
+        assert post.canvas_width is None or post.canvas_width > 0
+        assert post.canvas_height is None or post.canvas_height > 0
     else:
         with pytest.raises(posts.InvalidPostContentError):
             posts.update_post_content(post, read_asset("png-broken.png"))

@@ -17,4 +17,6 @@ if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "cygwin" ] || [ "$OSTYPE" == "win32
 fi
 
 
-docker compose -f $dockercompose up -d sql && docker compose -f $dockercompose up --build --force-recreate server client nginx
+docker compose -f $dockercompose up -d sql && \
+    docker compose -f $dockercompose up --build --force-recreate server client nginx && \
+    echo "Open http://booru:4000 (if booru is in /etc/hosts) or http://localhost:4000"

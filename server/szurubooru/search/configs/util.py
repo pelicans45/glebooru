@@ -1,5 +1,7 @@
 from typing import Any, Callable, Dict, Optional, Union
 
+import threading
+
 import sqlalchemy as sa
 from szurubooru.func import util
 from szurubooru.search import criteria
@@ -10,6 +12,20 @@ from szurubooru import db, errors
 
 Number = Union[int, float]
 WILDCARD = "(--wildcard--)"  # something unlikely to be used by the users
+
+_request_state = threading.local()
+
+
+def get_tag_id_cache() -> Dict[str, Optional[int]]:
+    cache = getattr(_request_state, "tag_id_cache", None)
+    if cache is None:
+        cache = {}
+        _request_state.tag_id_cache = cache
+    return cache
+
+
+def clear_tag_id_cache() -> None:
+    _request_state.tag_id_cache = {}
 
 
 class SortColumn:
@@ -182,7 +198,11 @@ def create_lowercase_str_filter(
         elif isinstance(criterion, criteria.ArrayCriterion):
             values = criterion.values
         else:
-            raise ValueError("str criterion error")
+            raise errors.SearchError(
+                "Ranged criterion is invalid in this context. "
+                "Did you forget to escape the dots?"
+            )
+        values = [value.lower() for value in values]
 
         exact_values = []
         wildcard_values = []

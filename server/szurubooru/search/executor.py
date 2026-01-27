@@ -1,4 +1,5 @@
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from dataclasses import dataclass
+from typing import Callable, Dict, List, Optional, Tuple, Union, Type
 
 import sqlalchemy as sa
 from szurubooru.func import cache
@@ -11,6 +12,13 @@ from szurubooru.search.typing import SaQuery
 from szurubooru import db, errors, model, rest
 
 import logging
+
+@dataclass(frozen=True)
+class _CachedSearchResult:
+    model: Optional[Type[model.Base]]
+    ids: List[object]
+    count: Optional[int]
+    has_more: Optional[bool]
 
 def _format_dict_keys(source: Dict) -> List[str]:
     return list(sorted(source.keys()))
@@ -45,6 +53,31 @@ class Executor:
         if isinstance(column, search_util.SortColumn):
             return column.column, column.nulls_last
         return column, False
+
+    def _hydrate_cached_entities(
+        self, cached: _CachedSearchResult
+    ) -> List[model.Base]:
+        if not cached.ids or not cached.model:
+            return []
+        mapper = sa.inspect(cached.model)
+        pk_cols = mapper.primary_key
+        if len(pk_cols) != 1:
+            entities = [db.session.get(cached.model, pk) for pk in cached.ids]
+            return [entity for entity in entities if entity is not None]
+        pk_col = pk_cols[0]
+        rows = (
+            db.session.query(cached.model)
+            .filter(pk_col.in_(cached.ids))
+            .all()
+        )
+        by_id = {}
+        for row in rows:
+            identity = sa.inspect(row).identity
+            if not identity:
+                continue
+            key = identity[0] if len(identity) == 1 else identity
+            by_id[key] = row
+        return [by_id[pk] for pk in cached.ids if pk in by_id]
 
     def get_around(
         self, query_text: str, entity_id: int
@@ -118,7 +151,14 @@ class Executor:
             include_has_more,
         )
         if use_cache and not disable_eager_loads and cache.has(key):
-            return cache.get(key)
+            cached = cache.get(key)
+            if isinstance(cached, _CachedSearchResult):
+                return (
+                    cached.count,
+                    self._hydrate_cached_entities(cached),
+                    cached.has_more,
+                )
+            return (0, [], None)
 
         filter_query = self.config.create_filter_query(disable_eager_loads)
         # Note: lazyload("*") is already applied in create_filter_query
@@ -148,7 +188,22 @@ class Executor:
 
         ret = (count, entities, has_more)
         if use_cache and not disable_eager_loads:
-            cache.put(key, ret)
+            cached_ids = []
+            for entity in entities:
+                identity = sa.inspect(entity).identity
+                if not identity:
+                    continue
+                cached_ids.append(identity[0] if len(identity) == 1 else identity)
+            model_cls = type(entities[0]) if entities else None
+            cache.put(
+                key,
+                _CachedSearchResult(
+                    model=model_cls,
+                    ids=cached_ids,
+                    count=count,
+                    has_more=has_more,
+                ),
+            )
         return ret
 
     def execute(
@@ -363,15 +418,12 @@ class Executor:
             column, nulls_last = self._unwrap_sort_column(column)
             order = _get_order(sort_token.order, default_order)
 
-            # the order column may be joined, so we need to query its value:
-            column_query = db.session.query(
-                self.config.id_column, column
-            ).options(sa.orm.lazyload("*"))
+            # the order column may be joined, so reuse the config around query
             column_query = (
-                # empty search query because we already know entity id
-                self._prepare_db_query(
-                    column_query, SearchQuery(), False
-                ).filter(self.config.id_column == entity_id)
+                self.config.create_around_query()
+                .options(sa.orm.lazyload("*"))
+                .with_entities(self.config.id_column, column)
+                .filter(self.config.id_column == entity_id)
             )
             id, column_value = column_query.one_or_none()
             # it's possible that this entity doesn't have the column

@@ -12,12 +12,42 @@ MIN_TAGS="${MIN_TAGS:-1}"
 MAX_TAGS="${MAX_TAGS:-20}"
 TAGS="${TAGS:-2000}"
 
+WITH_FILES="${WITH_FILES:-1}"
+FILE_VARIANTS="${FILE_VARIANTS:-64}"
+IMAGE_WIDTH="${IMAGE_WIDTH:-640}"
+IMAGE_HEIGHT="${IMAGE_HEIGHT:-360}"
+THUMB_WIDTH="${THUMB_WIDTH:-300}"
+THUMB_HEIGHT="${THUMB_HEIGHT:-300}"
+SKEWED_TAGS="${SKEWED_TAGS:-1}"
+ZIPF_ALPHA="${ZIPF_ALPHA:-1.1}"
+EXCLUSION_TAG_RATE="${EXCLUSION_TAG_RATE:-0.10}"
+
 ITERATIONS="${ITERATIONS:-30}"
 CONCURRENCY="${CONCURRENCY:-5}"
 TIMEOUT="${TIMEOUT:-20}"
 WARMUP="${WARMUP:-3}"
 
 mkdir -p "$(dirname "$OUTPUT")"
+
+FILE_ARGS=()
+if [[ "$WITH_FILES" == "1" ]]; then
+    FILE_ARGS=(
+        --with-files
+        --file-variants "$FILE_VARIANTS"
+        --image-width "$IMAGE_WIDTH"
+        --image-height "$IMAGE_HEIGHT"
+        --thumb-width "$THUMB_WIDTH"
+        --thumb-height "$THUMB_HEIGHT"
+    )
+fi
+
+TAG_ARGS=()
+if [[ "$SKEWED_TAGS" == "1" ]]; then
+    TAG_ARGS=(--skewed-tags --zipf-alpha "$ZIPF_ALPHA")
+fi
+if [[ -n "$EXCLUSION_TAG_RATE" ]]; then
+    TAG_ARGS+=(--exclusion-tag-rate "$EXCLUSION_TAG_RATE")
+fi
 
 docker compose -f docker-compose.dev.yml stop server
 docker compose -f docker-compose.dev.yml run --rm -w /opt/app server \
@@ -27,7 +57,9 @@ docker compose -f docker-compose.dev.yml run --rm -w /opt/app server \
     --min-tags "$MIN_TAGS" \
     --max-tags "$MAX_TAGS" \
     --tags "$TAGS" \
-    --seed "$SEED"
+    --seed "$SEED" \
+    "${FILE_ARGS[@]}" \
+    "${TAG_ARGS[@]}"
 docker compose -f docker-compose.dev.yml up -d server
 
 python - <<'PY'

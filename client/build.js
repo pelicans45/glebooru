@@ -221,6 +221,7 @@ async function buildJsBundle() {
         minify: minify,
         sourcemap: DEV ? "inline" : "none",
         target: "browser",
+        format: "esm",
         define: {
             "process.env.NODE_ENV": minify ? '"production"' : '"development"',
         },

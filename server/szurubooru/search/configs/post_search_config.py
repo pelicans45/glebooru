@@ -107,7 +107,10 @@ def _tag_name_filter(
     elif isinstance(criterion, criteria.ArrayCriterion):
         values = criterion.values
     else:
-        raise ValueError("tag criterion error")
+        raise errors.SearchError(
+            "Ranged criterion is invalid in this context. "
+            "Did you forget to escape the dots?"
+        )
 
     has_wildcard = False
     for value in values:
@@ -130,29 +133,53 @@ def _tag_name_filter(
         )
         return tag_filter(query, criterion, negated)
 
-    names = [search_util.unescape(value) for value in values]
+    names = [search_util.unescape(value).lower() for value in values]
     if not names:
         return query
 
-    tag_ids = [
-        row[0]
-        for row in db.session.query(model.TagName.tag_id)
-        .filter(model.TagName.name.in_(names))
-        .all()
-    ]
+    tag_id_cache = search_util.get_tag_id_cache()
+    tag_ids = set()
+    missing = []
+    for name in names:
+        if name in tag_id_cache:
+            cached_id = tag_id_cache[name]
+            if cached_id is not None:
+                tag_ids.add(cached_id)
+        else:
+            missing.append(name)
+
+    if missing:
+        rows = (
+            db.session.query(model.TagName.name, model.TagName.tag_id)
+            .filter(model.TagName.name.in_(missing))
+            .all()
+        )
+        found = {name: tag_id for name, tag_id in rows}
+        for name in missing:
+            tag_id = found.get(name)
+            tag_id_cache[name] = tag_id
+            if tag_id is not None:
+                tag_ids.add(tag_id)
 
     if not tag_ids:
         return query if negated else query.filter(sa.sql.false())
 
+    if negated:
+        exists_clause = sa.exists().where(
+            sa.and_(
+                model.PostTag.post_id == model.Post.post_id,
+                model.PostTag.tag_id.in_(list(tag_ids)),
+            )
+        )
+        return query.filter(~exists_clause)
+
     subquery = (
         db.session.query(model.PostTag.post_id.label("foreign_id"))
-        .filter(model.PostTag.tag_id.in_(tag_ids))
+        .filter(model.PostTag.tag_id.in_(list(tag_ids)))
         .options(sa.orm.lazyload("*"))
     )
     subquery = sa.select(subquery.subquery("t"))
     expression = model.Post.post_id.in_(subquery)
-    if negated:
-        expression = ~expression
     return query.filter(expression)
 
 
@@ -286,8 +313,11 @@ class PostSearchConfig(BaseSearchConfig):
         "relation-count",
         "feature-count",
         "comment-date",
+        "comment-time",
         "fav-date",
+        "fav-time",
         "feature-date",
+        "feature-time",
     }
     STATS_SPECIAL_TOKENS = {"tumbleweed"}
 
@@ -319,6 +349,48 @@ class PostSearchConfig(BaseSearchConfig):
             else:
                 new_special_tokens.append(token)
         search_query.special_tokens = new_special_tokens
+
+        def _collect_values(criterion):
+            if isinstance(criterion, criteria.PlainCriterion):
+                return [criterion.value]
+            if isinstance(criterion, criteria.ArrayCriterion):
+                return list(criterion.values)
+            return None
+
+        merged_negated_values = []
+        new_anonymous_tokens = []
+        for token in search_query.anonymous_tokens:
+            if token.negated:
+                values = _collect_values(token.criterion)
+                if values is not None:
+                    merged_negated_values.extend(values)
+                    continue
+            new_anonymous_tokens.append(token)
+        search_query.anonymous_tokens = new_anonymous_tokens
+
+        new_named_tokens = []
+        for token in search_query.named_tokens:
+            if token.name == "tag" and token.negated:
+                values = _collect_values(token.criterion)
+                if values is not None:
+                    merged_negated_values.extend(values)
+                    continue
+            new_named_tokens.append(token)
+        search_query.named_tokens = new_named_tokens
+
+        if merged_negated_values:
+            merged_criterion = criteria.ArrayCriterion(
+                ",".join(merged_negated_values),
+                merged_negated_values,
+            )
+            search_query.named_tokens.append(
+                tokens.NamedToken(
+                    name="tag",
+                    criterion=merged_criterion,
+                    negated=True,
+                )
+            )
+
         needs_stats_filter = any(
             token.name in self.STATS_NAMED_FILTERS
             for token in search_query.named_tokens

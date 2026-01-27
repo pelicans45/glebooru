@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 
 from szurubooru.model.base import Base
+from szurubooru.model.statistics import TagStatistics
 
 
 class TagSuggestion(Base):
@@ -68,7 +69,7 @@ class TagName(Base):
     order = sa.Column("ord", sa.Integer, nullable=False, index=True)
 
     def __init__(self, name: str, order: int) -> None:
-        self.name = name
+        self.name = (name or "").lower()
         self.order = order
 
 
@@ -133,6 +134,12 @@ class Tag(Base):
         if not self.statistics:
             return 0
         return int(self.statistics.usage_count or 0)
+
+    @post_count.setter
+    def post_count(self, value: int) -> None:
+        if not self.statistics:
+            self.statistics = TagStatistics(tag_id=self.tag_id)
+        self.statistics.usage_count = int(value or 0)
 
     @property
     def suggestion_count(self) -> int:

@@ -377,4 +377,5 @@ def update_pool_posts(pool: model.Pool, post_ids: List[int]) -> None:
             {"pool_id": pool.pool_id, "post_ids": list(to_add)},
         )
 
-    sa.orm.attributes.set_committed_value(pool, "posts", ret)
+    # Avoid association_proxy writes; reload posts on demand.
+    db.session.expire(pool, ["_posts"])

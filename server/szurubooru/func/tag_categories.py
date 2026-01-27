@@ -128,11 +128,22 @@ def update_category_order(category: model.TagCategory, order: int) -> None:
 def try_get_category_by_name(
     name: str, lock: bool = False
 ) -> Optional[model.TagCategory]:
+    if lock:
+        row = db.session.execute(
+            sa.text(
+                "SELECT id FROM tag_category "
+                "WHERE lower(name) = :name "
+                "FOR UPDATE"
+            ),
+            {"name": name.lower()},
+        ).scalar()
+        if not row:
+            return None
+        return db.session.get(model.TagCategory, row)
+
     query = db.session.query(model.TagCategory).filter(
         sa.func.lower(model.TagCategory.name) == name.lower()
     )
-    if lock:
-        query = query.with_for_update()
     return query.one_or_none()
 
 
@@ -158,11 +169,25 @@ def get_all_categories() -> List[model.TagCategory]:
 def try_get_default_category(
     lock: bool = False,
 ) -> Optional[model.TagCategory]:
+    if lock:
+        row = db.session.execute(
+            sa.text(
+                'SELECT id FROM tag_category WHERE "default" = true '
+                "FOR UPDATE"
+            )
+        ).scalar()
+        if not row:
+            row = db.session.execute(
+                sa.text(
+                    "SELECT id FROM tag_category "
+                    "ORDER BY id ASC LIMIT 1 FOR UPDATE"
+                )
+            ).scalar()
+        return db.session.get(model.TagCategory, row) if row else None
+
     query = db.session.query(model.TagCategory).filter(
         model.TagCategory.default
     )
-    if lock:
-        query = query.with_for_update()
     category = query.first()
     # if for some reason (e.g. as a result of migration) there's no default
     # category, get the first record available.
@@ -170,8 +195,6 @@ def try_get_default_category(
         query = db.session.query(model.TagCategory).order_by(
             model.TagCategory.tag_category_id.asc()
         )
-        if lock:
-            query = query.with_for_update()
         category = query.first()
     return category
 

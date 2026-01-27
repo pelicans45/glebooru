@@ -11,6 +11,7 @@ from szurubooru.search import parser as search_parser
 from szurubooru.search import tokens as search_tokens
 from szurubooru.func import (
     auth,
+    cache,
     favorites,
     image_hash,
     mime,
@@ -130,7 +131,11 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     offset = ctx.get_param_as_int("offset", default=0, min=0)
     limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
     options = serialization.get_serialization_options(ctx)
-    use_cache = bool(options)
+    cacheable = (
+        ctx.user.rank == "anonymous"
+        and not ctx.has_param("_nocache")
+    )
+    use_cache = bool(options) and not cacheable
     skip_count = ctx.get_param_as_bool("skipCount", default=False)
     before_id = (
         ctx.get_param_as_int("beforeId", min=1)
@@ -144,6 +149,22 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
         cursor_filter = f"id:..{cursor_value}"
         exec_query = f"{cursor_filter} {query_text}".strip()
         exec_offset = 0
+
+    cache_key = None
+    if cacheable:
+        cache_key = (
+            "posts_response",
+            query_text,
+            offset,
+            limit,
+            before_id,
+            skip_count,
+            tuple(options),
+        )
+        if cache.has(cache_key):
+            cached = cache.get(cache_key)
+            if isinstance(cached, dict):
+                return cached
 
     count, entities, has_more = _search_executor.execute_with_metadata(
         exec_query,
@@ -164,22 +185,41 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
         result["hasMore"] = bool(has_more)
     # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
     # Short TTL ensures edits are visible quickly while still benefiting from caching
-    if ctx.user.rank == "anonymous" and not ctx.has_param("_nocache"):
+    if cacheable:
         result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
+        if cache_key is not None:
+            cache.put(cache_key, result)
     return result
 
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")
 def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:view")
-    # Benchmark showed simple ORM filter is fastest for posts with few relationships
-    # Use get_post_by_id (simple filter) rather than eager loading which adds overhead
+    cacheable = (
+        ctx.user.rank == "anonymous"
+        and not ctx.has_param("_nocache")
+    )
+    options = serialization.get_serialization_options(ctx)
+    cache_key = None
+    if cacheable:
+        cache_key = (
+            "post_response",
+            params.get("post_id"),
+            tuple(options),
+        )
+        if cache.has(cache_key):
+            cached = cache.get(cache_key)
+            if isinstance(cached, dict):
+                return cached
+
     post = _get_post(params)
     result = _serialize_post(ctx, post)
     # Cache for anonymous users (30 seconds + 60s stale-while-revalidate)
     # Short TTL ensures edits are visible quickly while still benefiting from caching
-    if ctx.user.rank == "anonymous" and not ctx.has_param("_nocache"):
+    if cacheable:
         result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
+        if cache_key is not None:
+            cache.put(cache_key, result)
     return result
 
 
