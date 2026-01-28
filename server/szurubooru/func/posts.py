@@ -1140,12 +1140,14 @@ def _generate_signature_bits(
 
 
 def _find_near_duplicate_post_id(
-    signature: NpMatrix, exclude_post_id: Optional[int] = None
+    signature: NpMatrix,
+    exclude_post_id: Optional[int] = None,
+    distance_cutoff: float = image_hash.DUPLICATE_DISTANCE_CUTOFF_STATIC,
 ) -> Optional[int]:
     matches = search_by_signature(
         signature,
         limit=50,
-        distance_cutoff=image_hash.DUPLICATE_DISTANCE_CUTOFF,
+        distance_cutoff=distance_cutoff,
     )
     for _distance, post in matches:
         if post and post.post_id != exclude_post_id:
@@ -1316,8 +1318,15 @@ def update_post_content(
                 content, post.mime_type
             )
             if not is_placeholder:
+                distance_cutoff = (
+                    image_hash.DUPLICATE_DISTANCE_CUTOFF_ANIMATED
+                    if post.type == model.Post.TYPE_ANIMATION
+                    else image_hash.DUPLICATE_DISTANCE_CUTOFF_STATIC
+                )
                 other_post_id = _find_near_duplicate_post_id(
-                    unpacked_signature, post.post_id
+                    unpacked_signature,
+                    post.post_id,
+                    distance_cutoff=distance_cutoff,
                 )
                 if other_post_id:
                     raise PostAlreadyUploadedError(other_post_id)

@@ -36,6 +36,7 @@ router.enter(null, (ctx, next) => {
 const tags = require("./tags.js");
 const pools = require("./pools.js");
 const api = require("./api.js");
+require("./controllers/top_navigation_controller.js");
 
 // register controller routes
 const controllers = [

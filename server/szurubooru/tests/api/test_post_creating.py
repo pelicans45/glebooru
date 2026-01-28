@@ -342,6 +342,7 @@ def test_errors_not_spending_ids(
             },
             "privileges": {
                 "posts:create:identified": model.User.RANK_REGULAR,
+                "tags:create": model.User.RANK_REGULAR,
                 "uploads:use_downloader": model.User.RANK_POWER,
             },
             "secret": "test",
@@ -422,9 +423,14 @@ def _configure_upload_env(config_injector, tmpdir):
             "thumbnails": {
                 "post_width": 300,
                 "post_height": 300,
+                "avatar_width": 64,
+                "avatar_height": 64,
             },
+            "webhooks": [],
+            "tag_name_regex": "^[a-z0-9_-]{1,80}$",
             "privileges": {
                 "posts:create:identified": model.User.RANK_REGULAR,
+                "tags:create": model.User.RANK_REGULAR,
                 "uploads:use_downloader": model.User.RANK_POWER,
             },
             "allow_broken_uploads": False,
@@ -434,9 +440,17 @@ def _configure_upload_env(config_injector, tmpdir):
 
 
 def test_near_duplicate_detection_rejects_variants(
-    config_injector, tmpdir, context_factory, read_asset, user_factory
+    config_injector,
+    tmpdir,
+    context_factory,
+    read_asset,
+    user_factory,
+    tag_category_factory,
 ):
     _configure_upload_env(config_injector, tmpdir)
+    default_category = tag_category_factory(default=True)
+    db.session.add(default_category)
+    db.session.flush()
     auth_user = user_factory(rank=model.User.RANK_REGULAR)
 
     original = read_asset("jpeg.jpg")
@@ -487,9 +501,17 @@ def test_near_duplicate_detection_rejects_variants(
 
 
 def test_near_duplicate_detection_rejects_animated_gif_variants(
-    config_injector, tmpdir, context_factory, read_asset, user_factory
+    config_injector,
+    tmpdir,
+    context_factory,
+    read_asset,
+    user_factory,
+    tag_category_factory,
 ):
     _configure_upload_env(config_injector, tmpdir)
+    default_category = tag_category_factory(default=True)
+    db.session.add(default_category)
+    db.session.flush()
     auth_user = user_factory(rank=model.User.RANK_REGULAR)
 
     gif_one = read_asset("gif-duplicate-1.gif")

@@ -27,11 +27,12 @@ const fields = [
 const minimalFields = ["names", "usages", "category"];
 
 class TagList extends AbstractList {
-    static search(text, offset, limit, fields, all) {
+    static search(text, offset, limit, fields, all, options) {
         let path = "tags";
         if (all) {
             path = "all-tags";
         }
+        options = Object.assign({ noProgress: true }, options || {});
         return api
             .get(
                 uri.formatApiLink(path, {
@@ -40,7 +41,7 @@ class TagList extends AbstractList {
                     limit: limit,
                     fields: fields.join(","),
                 }),
-                { noProgress: true },
+                options,
                 (response) => {
                     /*
                     response.results = lens.excludeRedundantTags(
@@ -74,7 +75,10 @@ class TagList extends AbstractList {
         }
 
         const loader = lens.isUniversal
-            ? this.search("sort:usages", 0, 5000, fields, true)
+            ? this.search("sort:usages", 0, 5000, fields, true, {
+                persistCache: true,
+                cacheDurationMs: 10 * 60 * 1000,
+            })
             : api
                 .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
                     noProgress: true,
@@ -121,7 +125,10 @@ class TagList extends AbstractList {
         }
 
         const loader = lens.isUniversal
-            ? this.search("sort:usages", 0, 5000, minimalFields, true)
+            ? this.search("sort:usages", 0, 5000, minimalFields, true, {
+                persistCache: true,
+                cacheDurationMs: 10 * 60 * 1000,
+            })
             : api
                 .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
                     noProgress: true,
@@ -205,6 +212,7 @@ class TagList extends AbstractList {
         topRelevantMatchesPromise = null;
         allRelevantTagsMinimal = null;
         allRelevantTagsMinimalPromise = null;
+        api.clearPersistentCache("all-tags");
         if (!preload) {
             return Promise.resolve();
         }

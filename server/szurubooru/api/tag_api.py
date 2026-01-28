@@ -72,7 +72,10 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
     cached = get_cached_tag_list(tag_name)
     if cached:
         # Return cached response with HTTP cache header
-        return {**cached, "_cache": "public, max-age=300"}
+        return {
+            **cached,
+            "_cache": "public, max-age=300, stale-while-revalidate=300",
+        }
 
     tag = _get_tag(params)
     result = tags.get_tag_siblings(tag, limit=5000)
@@ -85,7 +88,7 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
     resp = {"results": serialized_siblings}
     set_cached_tag_list(tag_name, resp)
     # Add HTTP cache header (5 minutes)
-    resp["_cache"] = "public, max-age=300"
+    resp["_cache"] = "public, max-age=300, stale-while-revalidate=300"
     return resp
 
 
@@ -95,12 +98,15 @@ def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respon
     cached = get_cached_tag_list("all")
     if cached:
         # Return cached response with HTTP cache header
-        return {**cached, "_cache": "public, max-age=300"}
+        return {
+            **cached,
+            "_cache": "public, max-age=300, stale-while-revalidate=300",
+        }
 
     resp = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
     set_cached_tag_list("all", resp)
     # Add HTTP cache header (5 minutes)
-    resp["_cache"] = "public, max-age=300"
+    resp["_cache"] = "public, max-age=300, stale-while-revalidate=300"
     return resp
 
 

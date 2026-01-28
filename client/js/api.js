@@ -17,6 +17,8 @@ class Api extends events.EventTarget {
         this.userPassword = null;
         this.token = null;
         this.cache = {};
+        this.persistentCache = {};
+        this.pending = {};
         this.allRanks = [
             "anonymous",
             "restricted",
@@ -48,6 +50,20 @@ class Api extends events.EventTarget {
     }
 
     get(url, options, transform) {
+        options = options || {};
+
+        if (options.persistCache) {
+            const entry = this.persistentCache[url];
+            if (entry) {
+                if (!entry.expiresAt || entry.expiresAt > Date.now()) {
+                    const cachedPromise = Promise.resolve(entry.value);
+                    cachedPromise.abort = () => {};
+                    return cachedPromise;
+                }
+                delete this.persistentCache[url];
+            }
+        }
+
         if (url in this.cache) {
             const cachedPromise = new Promise((resolve) => {
                 resolve(this.cache[url]);
@@ -55,6 +71,11 @@ class Api extends events.EventTarget {
             cachedPromise.abort = () => {};
             return cachedPromise;
         }
+
+        if (this.pending[url]) {
+            return this.pending[url];
+        }
+
         const requestPromise = this._wrappedRequest(
             url,
             request.get,
@@ -62,14 +83,28 @@ class Api extends events.EventTarget {
             {},
             options
         );
-        const wrappedPromise = requestPromise.then((response) => {
-            if (transform) {
-                transform(response);
-            }
-            this.cache[url] = response;
-            return Promise.resolve(response);
-        });
+        const wrappedPromise = requestPromise
+            .then((response) => {
+                if (transform) {
+                    transform(response);
+                }
+                if (options.persistCache) {
+                    const ttlMs =
+                        options.cacheDurationMs || 10 * 60 * 1000;
+                    this.persistentCache[url] = {
+                        value: response,
+                        expiresAt: Date.now() + ttlMs,
+                    };
+                } else {
+                    this.cache[url] = response;
+                }
+                return Promise.resolve(response);
+            })
+            .finally(() => {
+                delete this.pending[url];
+            });
         wrappedPromise.abort = () => requestPromise.abort();
+        this.pending[url] = wrappedPromise;
         return wrappedPromise;
     }
 
@@ -86,6 +121,18 @@ class Api extends events.EventTarget {
     delete(url, data, options) {
         this.cache = {};
         return this._wrappedRequest(url, request.delete, data, {}, options);
+    }
+
+    clearPersistentCache(prefix = "") {
+        if (!prefix) {
+            this.persistentCache = {};
+            return;
+        }
+        for (const key of Object.keys(this.persistentCache)) {
+            if (key.indexOf(prefix) !== -1) {
+                delete this.persistentCache[key];
+            }
+        }
     }
 
 

@@ -132,6 +132,114 @@ def test_trying_to_retrieve_single_without_privileges(
         )
 
 
+def test_get_posts_before_id_applies_cursor_filter(
+    user_factory, context_factory
+):
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+    with patch(
+        "szurubooru.api.post_api._search_executor.execute_with_metadata"
+    ) as execute:
+        execute.return_value = (0, [], False)
+        result = api.post_api.get_posts(
+            context_factory(
+                params={
+                    "query": "tag:t1",
+                    "offset": 40,
+                    "limit": 20,
+                    "beforeId": 123,
+                },
+                user=auth_user,
+            )
+        )
+        assert result["query"] == "tag:t1"
+        execute.assert_called_once()
+        query_text, offset, limit = execute.call_args[0][:3]
+        assert query_text == "id:..122 tag:t1"
+        assert offset == 0
+        assert limit == 20
+
+
+def test_get_posts_before_id_ignored_for_incompatible_sort(
+    user_factory, context_factory
+):
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+    with patch(
+        "szurubooru.api.post_api._search_executor.execute_with_metadata"
+    ) as execute:
+        execute.return_value = (0, [], False)
+        result = api.post_api.get_posts(
+            context_factory(
+                params={
+                    "query": "sort:score tag:t1",
+                    "offset": 40,
+                    "limit": 20,
+                    "beforeId": 123,
+                },
+                user=auth_user,
+            )
+        )
+        assert result["query"] == "sort:score tag:t1"
+        execute.assert_called_once()
+        query_text, offset, limit = execute.call_args[0][:3]
+        assert query_text == "sort:score tag:t1"
+        assert offset == 40
+        assert limit == 20
+
+
+def test_get_posts_skip_count_includes_has_more(
+    user_factory, post_factory, context_factory
+):
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+    post1 = post_factory(id=1)
+    post2 = post_factory(id=2)
+    post3 = post_factory(id=3)
+    db.session.add_all([post1, post2, post3])
+    db.session.flush()
+    with patch("szurubooru.func.posts.serialize_posts_batch") as serialize:
+        serialize.side_effect = (
+            lambda posts, *_args, **_kwargs: [p.post_id for p in posts]
+        )
+        result = api.post_api.get_posts(
+            context_factory(
+                params={
+                    "query": "",
+                    "offset": 0,
+                    "limit": 2,
+                    "skipCount": "1",
+                },
+                user=auth_user,
+            )
+        )
+        assert result["total"] is None
+        assert result["hasMore"] is True
+        assert len(result["results"]) == 2
+
+
+def test_get_posts_skip_count_false_excludes_has_more(
+    user_factory, post_factory, context_factory
+):
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+    post1 = post_factory(id=1)
+    post2 = post_factory(id=2)
+    db.session.add_all([post1, post2])
+    db.session.flush()
+    with patch("szurubooru.func.posts.serialize_posts_batch") as serialize:
+        serialize.side_effect = (
+            lambda posts, *_args, **_kwargs: [p.post_id for p in posts]
+        )
+        result = api.post_api.get_posts(
+            context_factory(
+                params={
+                    "query": "",
+                    "offset": 0,
+                    "limit": 2,
+                },
+                user=auth_user,
+            )
+        )
+        assert "hasMore" not in result
+
+
 @pytest.mark.parametrize("query,expected_id", [
     ("sort:id,asc", 2),
     ("sort:id,asc id:2..", 2),

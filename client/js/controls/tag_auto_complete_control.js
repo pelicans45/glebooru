@@ -45,13 +45,63 @@ class TagAutoCompleteControl extends AutoCompleteControl {
                 isTaggedWith: (tag) => input.value.split(" ").includes(tag),
                 isNegationAllowed: false,
                 useRemoteSearch: lens.isUniversal,
+                useHybridSearch: lens.isUniversal,
                 debounceMs: lens.isUniversal ? 150 : 0,
             },
             options
         );
 
         const useRemoteSearch = options.useRemoteSearch;
-        if (useRemoteSearch) {
+        if (useRemoteSearch && options.useHybridSearch) {
+            options.getMatches = (text) => {
+                const negated =
+                    options.isNegationAllowed && text[0] === "-";
+                if (negated) {
+                    text = text.substring(1);
+                }
+                if (!text) {
+                    return Promise.resolve([]);
+                }
+                if (text.includes(":")) {
+                    return Promise.resolve([]);
+                }
+
+                const term = misc.escapeSearchTerm(text);
+                const query = term + "* sort:usages";
+
+                const localPromise = TagList.getRelevant(
+                    text,
+                    0,
+                    this._options.maxResults
+                ).then((response) =>
+                    _tagListToMatches(
+                        text,
+                        response,
+                        this._options,
+                        negated
+                    )
+                );
+
+                const remotePromise = TagList.search(
+                    query,
+                    0,
+                    this._options.maxResults,
+                    ["names", "category", "usages"]
+                ).then((response) =>
+                    _tagListToMatches(
+                        text,
+                        response.results,
+                        this._options,
+                        negated
+                    )
+                );
+
+                return {
+                    optimistic: localPromise,
+                    final: remotePromise,
+                };
+            };
+        } else if (useRemoteSearch) {
             options.getMatches = (text) => {
                 const negated =
                     options.isNegationAllowed && text[0] === "-";

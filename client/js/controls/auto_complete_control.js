@@ -282,26 +282,44 @@ class AutoCompleteControl {
         if (this._pendingRequest && this._pendingRequest.abort) {
             this._pendingRequest.abort();
         }
+
+        const applyResults = (matches) => {
+            if (requestId !== this._requestId) {
+                return;
+            }
+            const oldResults = this._results.slice();
+            this._results = matches.slice(0, this._options.maxResults);
+            const oldResultsHash = JSON.stringify(oldResults);
+            const newResultsHash = JSON.stringify(this._results);
+            if (oldResultsHash !== newResultsHash || this._backspaced) {
+                this._activeResult = -1;
+                this._refreshList();
+            }
+            if (this._backspaced) {
+                this._backspaced = false;
+            }
+        };
+
         const pending = this._options.getMatches(textToFind);
-        this._pendingRequest = pending;
-        pending
+        let finalPromise = pending;
+        let optimistic = null;
+        if (pending && pending.final) {
+            finalPromise = pending.final;
+            optimistic = pending.optimistic;
+        }
+
+        if (optimistic) {
+            Promise.resolve(optimistic)
+                .then((matches) => {
+                    applyResults(matches);
+                })
+                .catch(() => {});
+        }
+
+        this._pendingRequest = finalPromise;
+        finalPromise
             .then((matches) => {
-                if (requestId !== this._requestId) {
-                    return;
-                }
-                const oldResults = this._results.slice();
-                this._results = matches.slice(0, this._options.maxResults);
-                const oldResultsHash = JSON.stringify(oldResults);
-                const newResultsHash = JSON.stringify(this._results);
-                if (oldResultsHash !== newResultsHash || this._backspaced) {
-                    this._activeResult = -1;
-                    this._refreshList();
-                }
-                if (this._backspaced) {
-                    this._backspaced = false;
-                }
-                // TODO: keep refresh here?
-                //this._refreshList();
+                applyResults(matches);
             })
             .catch(() => {});
     }

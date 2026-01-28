@@ -527,7 +527,7 @@ class Post extends events.EventTarget {
         const tagNames = [];
 
         // 4 characters for the file extension
-        let nameLength = this.id.length + 4;
+        let nameLength = String(this.id).length + 4;
 
         const sortedTags = [...lens.excludeRedundantTags(this._tags)].sort(
             (a, b) => b.postCount - a.postCount
@@ -631,7 +631,9 @@ class Post extends events.EventTarget {
             _user: response.user,
             _safety: response.safety,
             _contentUrl: response.contentUrl,
-            _fullContentUrl: new URL(response.contentUrl, baseUrl).href,
+            _fullContentUrl: response.contentUrl
+                ? new URL(response.contentUrl, baseUrl).href
+                : null,
             _thumbnailUrl: response.thumbnailUrl,
             _source: response.source,
             _canvasWidth: response.canvasWidth,

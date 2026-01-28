@@ -69,6 +69,8 @@ class ManualPageView {
     }
 
     run(ctx) {
+        this._runToken = (this._runToken || 0) + 1;
+        const runToken = this._runToken;
         const offset = parseInt(ctx.parameters.offset || 0);
         const limit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
         this.clearMessages();
@@ -76,6 +78,9 @@ class ManualPageView {
 
         ctx.requestPage(offset, limit).then(
             (response) => {
+                if (runToken !== this._runToken) {
+                    return;
+                }
                 ctx.pageRenderer({
                     manualPageView: true,
                     parameters: ctx.parameters,
@@ -137,6 +142,9 @@ class ManualPageView {
                 views.syncScrollPosition();
             },
             (response) => {
+                if (runToken !== this._runToken) {
+                    return;
+                }
                 this.showError(response.message);
             }
         );

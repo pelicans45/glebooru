@@ -17,8 +17,8 @@ glebooru is a modern image board (booru) application, forked from szurubooru. It
 
 ### Client Development
 ```bash
-npm --prefix client run build    # Build client bundles
-npm --prefix client run watch    # Watch mode for development
+bun --cwd client run build       # Build client bundles
+bun --cwd client run watch       # Watch mode for development
 ```
 
 ### Running Tests
@@ -31,6 +31,12 @@ docker compose -f docker-compose.dev.yml exec server pytest szurubooru/tests/api
 
 # Run specific test
 docker compose -f docker-compose.dev.yml exec server pytest szurubooru/tests/api/test_file.py::test_name
+
+# Run Playwright E2E tests against the live dev stack
+bun --cwd client run e2e
+
+# Install Playwright browsers (first-time setup)
+bun --cwd client run e2e:install
 ```
 
 ### Database Migrations

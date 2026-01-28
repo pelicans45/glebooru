@@ -5,6 +5,9 @@
 */*_modules/
 client/public
 client/client/dist
+client/test-results/
+client/playwright-report/
+client/.playwright/
 
 # Server Development Artifacts
 .coverage

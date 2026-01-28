@@ -13,13 +13,14 @@
 
 set -e  # Exit on error
 set -u  # Exit on undefined variable
+set -o pipefail  # Fail on errors in piped commands
 
 # Configuration
 BACKUP_DIR="${BACKUP_DIR:-/opt/backup}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/szurubooru_pg16_${TIMESTAMP}.sql.gz"
-OLD_CONTAINER="${OLD_CONTAINER:-booru-sql-1}"
-NEW_CONTAINER="${NEW_CONTAINER:-booru-sql-1}"
+OLD_CONTAINER="${OLD_CONTAINER:-}"
+NEW_CONTAINER="${NEW_CONTAINER:-}"
 DB_USER="${POSTGRES_USER:-szurubooru}"
 DB_NAME="${POSTGRES_DB:-$DB_USER}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.yml}"
@@ -42,12 +43,30 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+get_sql_container_id() {
+    docker compose -f "$COMPOSE_FILE" ps -q sql
+}
+
 check_prerequisites() {
     log_info "Checking prerequisites..."
 
     # Check if docker is available
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
+        exit 1
+    fi
+
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        log_error "Compose file not found: $COMPOSE_FILE"
+        exit 1
+    fi
+
+    SQL_IMAGE=$(docker compose -f "$COMPOSE_FILE" config | awk '
+        $1 == "sql:" {in_sql=1; next}
+        in_sql && $1 == "image:" {print $2; exit}
+    ')
+    if [ -n "$SQL_IMAGE" ] && ! echo "$SQL_IMAGE" | grep -q "postgres:18"; then
+        log_error "Compose sql image is not postgres:18 (found: $SQL_IMAGE)"
         exit 1
     fi
 
@@ -70,7 +89,14 @@ check_prerequisites() {
 verify_old_postgres() {
     log_info "Verifying PostgreSQL 16 container is running..."
 
-    if ! docker ps --format '{{.Names}}' | grep -q "^${OLD_CONTAINER}$"; then
+    if [ -z "$OLD_CONTAINER" ]; then
+        OLD_CONTAINER=$(get_sql_container_id)
+    fi
+    if [ -z "$OLD_CONTAINER" ]; then
+        log_error "Could not find sql container via docker compose"
+        exit 1
+    fi
+    if [ "$(docker inspect -f '{{.State.Running}}' "$OLD_CONTAINER" 2>/dev/null || echo "false")" != "true" ]; then
         log_error "Container $OLD_CONTAINER is not running"
         exit 1
     fi
@@ -151,6 +177,48 @@ remove_old_volume() {
     log_info "Removing old PostgreSQL data volume..."
     log_warn "This will delete the old database! Make sure backup is valid!"
 
+    if [ -z "$OLD_CONTAINER" ]; then
+        OLD_CONTAINER=$(get_sql_container_id)
+    fi
+    if [ -z "$OLD_CONTAINER" ]; then
+        log_error "Could not find sql container to inspect mounts"
+        exit 1
+    fi
+
+    MOUNT_TYPE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql"}}{{.Type}}{{end}}{{end}}' "$OLD_CONTAINER")
+    MOUNT_SOURCE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql"}}{{.Source}}{{end}}{{end}}' "$OLD_CONTAINER")
+    PGDATA_PATH=$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$OLD_CONTAINER" | awk -F= '$1=="PGDATA"{print $2}')
+    if [ -z "$PGDATA_PATH" ]; then
+        PGDATA_PATH="/var/lib/postgresql/data"
+    fi
+
+    if [ "$MOUNT_TYPE" = "bind" ] && [ -n "$MOUNT_SOURCE" ] && [ -n "$PGDATA_PATH" ]; then
+        log_info "Detected bind mount for PostgreSQL data at: $MOUNT_SOURCE"
+        REL_PGDATA="${PGDATA_PATH#/var/lib/postgresql/}"
+        HOST_PGDATA="${MOUNT_SOURCE}/${REL_PGDATA}"
+
+        if [ -d "$HOST_PGDATA" ]; then
+            log_warn "Old PGDATA detected at $HOST_PGDATA"
+            log_info "PostgreSQL 18 uses a different PGDATA path, so removal is optional."
+            read -p "Move old PGDATA to backup directory for rollback? (y/N) " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                DEST_DIR="${BACKUP_DIR}/pg16_data_${TIMESTAMP}"
+                log_info "Moving $HOST_PGDATA -> $DEST_DIR"
+                mkdir -p "$DEST_DIR"
+                mv "$HOST_PGDATA" "$DEST_DIR"
+                log_info "Old PGDATA moved"
+            else
+                log_info "Leaving old PGDATA in place"
+            fi
+        else
+            log_info "No PGDATA directory found at $HOST_PGDATA"
+        fi
+
+        log_info "Bind mount detected, skipping docker volume removal"
+        return
+    fi
+
     read -p "Type 'DELETE' to confirm volume removal: " -r
     if [ "$REPLY" != "DELETE" ]; then
         log_error "Volume removal cancelled"
@@ -176,8 +244,8 @@ remove_old_volume() {
 start_new_postgres() {
     log_info "Starting PostgreSQL 18 container..."
 
-    # Pull the new image first
-    docker pull postgres:18.1
+    # Pull the image defined in compose
+    docker compose -f "$COMPOSE_FILE" pull sql
 
     # Start the new PostgreSQL container
     docker compose -f "$COMPOSE_FILE" up -d sql
@@ -185,6 +253,9 @@ start_new_postgres() {
     # Wait for PostgreSQL to be ready
     log_info "Waiting for PostgreSQL 18 to be ready..."
     for i in {1..30}; do
+        if [ -z "$NEW_CONTAINER" ]; then
+            NEW_CONTAINER=$(get_sql_container_id)
+        fi
         if docker exec "$NEW_CONTAINER" pg_isready -U "$DB_USER" &>/dev/null; then
             log_info "PostgreSQL 18 is ready"
             break
@@ -268,13 +339,10 @@ verify_restoration() {
 configure_postgres_18() {
     log_info "Applying PostgreSQL 18 optimizations..."
 
-    # Copy custom postgresql.conf if it exists
+    # Compose already mounts config at /etc/postgresql/postgresql.conf
     if [ -f "server/postgres/postgresql.conf" ]; then
-        log_info "Copying custom postgresql.conf..."
-        docker cp server/postgres/postgresql.conf "${NEW_CONTAINER}:/var/lib/postgresql/18/docker/postgresql.conf"
-
-        # Reload configuration
-        docker exec "$NEW_CONTAINER" psql -U "$DB_USER" -d postgres -c "SELECT pg_reload_conf();"
+        log_info "postgresql.conf present in repo; using compose-mounted config"
+        docker exec "$NEW_CONTAINER" psql -U "$DB_USER" -d postgres -c "SELECT pg_reload_conf();" >/dev/null
         log_info "Configuration reloaded"
     else
         log_warn "No custom postgresql.conf found, using defaults"
@@ -283,7 +351,7 @@ configure_postgres_18() {
 
 start_application() {
     log_info "Starting application services..."
-    docker compose -f "$COMPOSE_FILE" up -d
+    docker compose -f "$COMPOSE_FILE" up -d --build --force-recreate
     log_info "Application services started"
 }
 

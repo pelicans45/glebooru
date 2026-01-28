@@ -118,6 +118,7 @@ def test_filter_by_id(verify_unpaged, post_factory, input, expected_post_ids):
         ("tag:t1", [1]),
         ("tag:t2", [2]),
         ("tag:t1,t2", [1, 2]),
+        ("tag:T1", [1]),
         ("tag:t4a", [4]),
         ("tag:t4b", [4]),
     ],
@@ -144,6 +145,7 @@ def test_filter_by_tag(
         ("-tag:t1", [2, 3, 5]),
         ("-tag:t1,t2", [3, 5]),
         ("-tag:t1 -tag:t2", [3, 5]),
+        ("-tag:T1", [2, 3, 5]),
         ("-t1 -t2", [3, 5]),
     ],
 )

@@ -57,8 +57,8 @@ FROM oven/bun:1.1.43-alpine AS development
 
 WORKDIR /opt/app
 
-# Install nginx in alpine (much faster than debian)
-RUN apk add --no-cache nginx bash && \
+# Install nginx and browser deps for Playwright (dev-only)
+RUN apk add --no-cache nginx bash chromium nss freetype harfbuzz ttf-freefont ca-certificates && \
     mkdir -p /var/www /run/nginx /tmp/nginx-cache && \
     chmod 777 /tmp/nginx-cache
 
@@ -75,6 +75,8 @@ COPY . ./
 # Pre-build (will be overwritten if volume mounted)
 ARG DEV=1
 ENV GLEBOORU_DEV=${DEV}
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 RUN bun build.js && \
     chmod -R a+r /var/www
 

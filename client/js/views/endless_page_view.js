@@ -17,6 +17,9 @@ class EndlessPageView {
     run(ctx) {
         this._destroy();
 
+        this._runToken = (this._runToken || 0) + 1;
+        const runToken = this._runToken;
+
         this._active = true;
         this._runningRequests = 0;
         this._initialPageLoad = true;
@@ -40,13 +43,17 @@ class EndlessPageView {
             this._loadCachedPages(ctx);
         } else {
             this._clearCache(ctx);
-            this._loadPage(ctx, initialOffset, this.defaultLimit, true).then(
-                (pageNode) => {
-                    if (initialOffset !== 0) {
-                        pageNode.scrollIntoView();
-                    }
+            this._loadPage(
+                ctx,
+                initialOffset,
+                this.defaultLimit,
+                true,
+                runToken
+            ).then((pageNode) => {
+                if (pageNode && initialOffset !== 0) {
+                    pageNode.scrollIntoView();
                 }
-            );
+            });
 
             /*
 			.then(
@@ -84,21 +91,19 @@ class EndlessPageView {
     }
 
     get _topPageNode() {
-        return document.querySelector(".page");
-
         let topPageNode = null;
         let element = document.elementFromPoint(
             window.innerWidth / 2,
             window.innerHeight / 2
         );
-        while (element.parentNode !== null) {
+        while (element && element.parentNode !== null) {
             if (element.classList.contains("page")) {
                 topPageNode = element;
                 break;
             }
             element = element.parentNode;
         }
-        return topPageNode;
+        return topPageNode || document.querySelector(".page");
     }
 
     _destroy() {
@@ -258,7 +263,8 @@ class EndlessPageView {
             ctx,
             this.minOffsetShown - this.defaultLimit,
             this.defaultLimit,
-            false
+            false,
+            this._runToken
         );
     }
 
@@ -273,7 +279,13 @@ class EndlessPageView {
         if (!hasMore) {
             return;
         }
-        this._loadPage(ctx, this.maxOffsetShown, this.defaultLimit, true);
+        this._loadPage(
+            ctx,
+            this.maxOffsetShown,
+            this.defaultLimit,
+            true,
+            this._runToken
+        );
     }
 
     _shouldUseCache(ctx) {
@@ -307,7 +319,10 @@ class EndlessPageView {
         // k-v map of page offset to raw response
         const pages = ctx.browserState.pageCache.pages || {};
         window.requestAnimationFrame(() => {
-            for (const [offset, data] of Object.entries(pages)) {
+            const ordered = Object.entries(pages).sort(
+                ([a], [b]) => parseInt(a) - parseInt(b)
+            );
+            for (const [offset, data] of ordered) {
                 const response = {
                     offset: data.offset,
                     limit: data.limit,
@@ -321,14 +336,15 @@ class EndlessPageView {
         });
     }
 
-    _loadPage(ctx, offset, limit, append) {
+    _loadPage(ctx, offset, limit, append, runToken = this._runToken) {
         this._runningRequests++;
         return new Promise((resolve, reject) => {
             ctx.requestPage(offset, limit).then(
                 (response) => {
-                    if (!this._active) {
+                    if (!this._active || runToken !== this._runToken) {
                         this._runningRequests--;
-                        return Promise.reject();
+                        resolve(null);
+                        return;
                     }
                     if (this._shouldUseCache(ctx)) {
                         // Need to extract raw_data, otherwise it can't be stored in history
@@ -342,6 +358,11 @@ class EndlessPageView {
                         };
                     }
                     window.requestAnimationFrame(() => {
+                        if (runToken !== this._runToken) {
+                            this._runningRequests--;
+                            resolve(null);
+                            return;
+                        }
                         let pageNode = this._renderPage(ctx, append, response);
                         this._runningRequests--;
                         this._prefetchIfNeeded(ctx);
@@ -349,6 +370,11 @@ class EndlessPageView {
                     });
                 },
                 (error) => {
+                    if (runToken !== this._runToken) {
+                        this._runningRequests--;
+                        resolve(null);
+                        return;
+                    }
                     this.showError(error.message);
                     this._runningRequests--;
                     reject();
