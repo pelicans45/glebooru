@@ -1,6 +1,8 @@
 from datetime import datetime, UTC
 from typing import Any, Callable, Optional, Tuple
 
+import sqlalchemy as sa
+
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from szurubooru import db, errors, model
@@ -38,6 +40,8 @@ def unset_favorite(entity: model.Base, user: Optional[model.User]) -> None:
     fav_entity = _get_fav_entity(entity, user)
     if fav_entity:
         db.session.delete(fav_entity)
+        _refresh_favorite_statistics(entity.post_id)
+        db.session.expire(entity, ["statistics"])
 
 
 def set_favorite(entity: model.Base, user: Optional[model.User]) -> None:
@@ -45,6 +49,11 @@ def set_favorite(entity: model.Base, user: Optional[model.User]) -> None:
 
     # assert entity
     # assert user
+    if user is None:
+        raise errors.AuthError("Authentication required")
+    if user.user_id is None:
+        db.session.add(user)
+        db.session.flush()
     try:
         scores.set_score(entity, user, 1)
     except scores.InvalidScoreTargetError:
@@ -60,5 +69,31 @@ def set_favorite(entity: model.Base, user: Optional[model.User]) -> None:
     )
     insert_stmt = insert_stmt.on_conflict_do_nothing(
         index_elements=[column_name, "user_id"]
+    )
+    db.session.execute(insert_stmt)
+    _refresh_favorite_statistics(entity.post_id)
+    db.session.expire(entity, ["statistics"])
+
+
+def _refresh_favorite_statistics(post_id: int) -> None:
+    count, last_time = db.session.execute(
+        sa.select(
+            sa.func.count(model.PostFavorite.post_id),
+            sa.func.max(model.PostFavorite.time),
+        ).where(model.PostFavorite.post_id == post_id)
+    ).one()
+    insert_stmt = pg_insert(model.PostStatistics.__table__).values(
+        {
+            "post_id": post_id,
+            "favorite_count": count,
+            "last_favorite_time": last_time,
+        }
+    )
+    insert_stmt = insert_stmt.on_conflict_do_update(
+        index_elements=["post_id"],
+        set_={
+            "favorite_count": count,
+            "last_favorite_time": last_time,
+        },
     )
     db.session.execute(insert_stmt)

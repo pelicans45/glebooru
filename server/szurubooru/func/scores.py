@@ -1,6 +1,8 @@
 import datetime
 from typing import Any, Callable, Tuple
 
+import sqlalchemy as sa
+
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from szurubooru import db, errors, model
@@ -12,6 +14,47 @@ class InvalidScoreTargetError(errors.ValidationError):
 
 class InvalidScoreValueError(errors.ValidationError):
     pass
+
+
+def _ensure_user_id(user: model.User) -> None:
+    if user is None:
+        raise errors.AuthError("Authentication required")
+    if user.user_id is None:
+        db.session.add(user)
+        db.session.flush()
+
+
+def _refresh_score_statistics(entity: model.Base) -> None:
+    resource_type, _, _ = model.util.get_resource_info(entity)
+    if resource_type == "post":
+        post_id = entity.post_id
+        sum_score = db.session.execute(
+            sa.select(sa.func.coalesce(sa.func.sum(model.PostScore.score), 0)).where(
+                model.PostScore.post_id == post_id
+            )
+        ).scalar_one()
+        insert_stmt = pg_insert(model.PostStatistics.__table__).values(
+            {"post_id": post_id, "score": sum_score}
+        )
+        insert_stmt = insert_stmt.on_conflict_do_update(
+            index_elements=["post_id"], set_={"score": sum_score}
+        )
+        db.session.execute(insert_stmt)
+        return
+    if resource_type == "comment":
+        comment_id = entity.comment_id
+        sum_score = db.session.execute(
+            sa.select(
+                sa.func.coalesce(sa.func.sum(model.CommentScore.score), 0)
+            ).where(model.CommentScore.comment_id == comment_id)
+        ).scalar_one()
+        insert_stmt = pg_insert(model.CommentStatistics.__table__).values(
+            {"comment_id": comment_id, "score": sum_score}
+        )
+        insert_stmt = insert_stmt.on_conflict_do_update(
+            index_elements=["comment_id"], set_={"score": sum_score}
+        )
+        db.session.execute(insert_stmt)
 
 
 def _get_table_info(
@@ -34,14 +77,19 @@ def _get_score_entity(entity: model.Base, user: model.User) -> model.Base:
 def delete_score(entity: model.Base, user: model.User) -> None:
     # assert entity
     # assert user
+    _ensure_user_id(user)
     score_entity = _get_score_entity(entity, user)
     if score_entity:
         db.session.delete(score_entity)
+        _refresh_score_statistics(entity)
+        db.session.expire(entity, ["scores", "statistics"])
 
 
 def get_score(entity: model.Base, user: model.User) -> int:
     # assert entity
     # assert user
+    if not user or not user.user_id:
+        return 0
     table, get_column = _get_table_info(entity)
     row = (
         db.session.query(table.score)
@@ -91,6 +139,7 @@ def set_score(entity: model.Base, user: model.User, score: int) -> None:
 
     # assert entity
     # assert user
+    _ensure_user_id(user)
     if not score:
         delete_score(entity, user)
         try:
@@ -118,6 +167,8 @@ def set_score(entity: model.Base, user: model.User, score: int) -> None:
         set_={"score": score, "time": now},
     )
     db.session.execute(insert_stmt)
+    _refresh_score_statistics(entity)
+    db.session.expire(entity, ["scores", "statistics"])
     if score < 1:
         try:
             favorites.unset_favorite(entity, user)

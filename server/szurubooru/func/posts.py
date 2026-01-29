@@ -931,7 +931,9 @@ SITE_TAGS = {
 def add_extra_tags(host, tag_names):
     if not host:
         return
-    site = config.config["sites"][host]
+    site = config.config["sites"].get(host)
+    if not site:
+        return
     site_tag = site.get("query")
     if site_tag and site_tag not in tag_names:
         tag_names.append(site_tag)
