@@ -120,6 +120,18 @@ def _get_new_tag_categories(ctx: rest.Context) -> Dict[str, str]:
     return normalized
 
 
+def _raise_if_duplicate_checksum(post: Optional[model.Post]) -> None:
+    if not post or not post.checksum:
+        return
+    other_post_id = db.session.execute(
+        sa.select(model.Post.post_id)
+        .where(model.Post.checksum == post.checksum)
+        .where(model.Post.post_id != (post.post_id or 0))
+    ).scalar_one_or_none()
+    if other_post_id:
+        raise posts.PostAlreadyUploadedError(other_post_id)
+
+
 @rest.routes.get("/posts/?")
 def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:list")
@@ -374,7 +386,12 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
             None if anonymous else ctx.user,
         )
     """
-    ctx.session.commit()
+    try:
+        ctx.session.commit()
+    except sa.exc.IntegrityError:
+        ctx.session.rollback()
+        _raise_if_duplicate_checksum(post)
+        raise
     if tag_names:
         tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)
@@ -468,7 +485,12 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     post.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.flush()
     snapshots.modify(post, ctx.user)
-    ctx.session.commit()
+    try:
+        ctx.session.commit()
+    except sa.exc.IntegrityError:
+        ctx.session.rollback()
+        _raise_if_duplicate_checksum(post)
+        raise
     if previous_post_tag_count is not None and previous_post_tag_count != len(post.tags):
         tag_api.clear_all_cached_tag_lists()
     return _serialize_post(ctx, post)

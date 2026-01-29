@@ -78,7 +78,8 @@ class TagListController {
 				const query = (this._ctx.parameters.q || "").trim();
 
                 if (!query) {
-                    return TagList.getAllRelevant().then((response) => {
+                    const apiPromise = TagList.getAllRelevant();
+                    const returnedPromise = apiPromise.then((response) => {
 						const r = {};
 						r.results = response.results.copy().slice(offset, offset + limit);
 						r.total = response.results.length;
@@ -87,6 +88,8 @@ class TagListController {
 						r.offset = offset;
 						return Promise.resolve(r);
 					});
+                    returnedPromise.abort = () => apiPromise.abort && apiPromise.abort();
+                    return returnedPromise;
                 }
 
                 return TagList.search(

@@ -45,7 +45,7 @@ test.describe("Gallery render race", () => {
             callCount += 1;
             const ids = callCount === 1 ? [1001, 1002] : [2001, 2002];
             if (callCount === 1) {
-                await new Promise((resolve) => setTimeout(resolve, 800));
+                await new Promise((resolve) => setTimeout(resolve, 1500));
             }
             await route.fulfill({
                 status: 200,
@@ -55,17 +55,20 @@ test.describe("Gallery render race", () => {
         });
 
         await page.goto("/");
+        await expect
+            .poll(() => callCount, { timeout: 5000 })
+            .toBeGreaterThanOrEqual(1);
 
         // Trigger a second request before the initial one returns.
-        await page.waitForTimeout(100);
-        const searchInput = page.locator('input[name="search-text"]');
+        const searchInput = page.locator('form.search input[name="search-text"]');
         await searchInput.fill("race_test_tag");
         await searchInput.press("Enter");
+        await expect(page).toHaveURL(/race_test_tag/);
 
         await expect
             .poll(() => callCount, { timeout: 5000 })
             .toBeGreaterThanOrEqual(2);
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(1600);
 
         const ids = await page
             .locator(".post-list li")

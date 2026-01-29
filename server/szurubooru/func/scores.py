@@ -1,6 +1,8 @@
 import datetime
 from typing import Any, Callable, Tuple
 
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+
 from szurubooru import db, errors, model
 
 
@@ -100,21 +102,24 @@ def set_score(entity: model.Base, user: model.User, score: int) -> None:
         raise InvalidScoreValueError(
             "Score %r is invalid. Valid scores: %r." % (score, (-1, 1))
         )
-    score_entity = _get_score_entity(entity, user)
-    if score_entity:
-        score_entity.score = score
-        if score < 1:
-            try:
-                favorites.unset_favorite(entity, user)
-            except favorites.InvalidFavoriteTargetError:
-                pass
-    else:
-        table, get_column = _get_table_info(entity)
-        score_entity = table()
-        setattr(score_entity, get_column(table).name, get_column(entity))
-        score_entity.score = score
-        score_entity.user = user
-        score_entity.time = datetime.datetime.now(datetime.UTC).replace(
-            tzinfo=None
-        )
-        db.session.add(score_entity)
+    table_cls, get_column = _get_table_info(entity)
+    column_name = get_column(table_cls).name
+    now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
+    insert_stmt = pg_insert(table_cls.__table__).values(
+        {
+            column_name: get_column(entity),
+            "user_id": user.user_id,
+            "score": score,
+            "time": now,
+        }
+    )
+    insert_stmt = insert_stmt.on_conflict_do_update(
+        index_elements=[column_name, "user_id"],
+        set_={"score": score, "time": now},
+    )
+    db.session.execute(insert_stmt)
+    if score < 1:
+        try:
+            favorites.unset_favorite(entity, user)
+        except favorites.InvalidFavoriteTargetError:
+            pass

@@ -49,6 +49,62 @@ class Api extends events.EventTarget {
         throw new Error("No base64 encoder available");
     }
 
+    _makeAbortError() {
+        const error = new Error(
+            "The request was aborted due to user cancellation"
+        );
+        error.isAbort = true;
+        error.name = "AbortError";
+        return error;
+    }
+
+    isAbortError(error) {
+        return (
+            !!error &&
+            (error.isAbort === true ||
+                error.name === "AbortError" ||
+                error.code === "ABORT_ERR")
+        );
+    }
+
+    _createPendingConsumer(entry) {
+        entry.refCount += 1;
+        let aborted = false;
+        let rejectConsumer = null;
+
+        const consumerPromise = new Promise((resolve, reject) => {
+            rejectConsumer = reject;
+            entry.promise.then(
+                (response) => {
+                    if (!aborted) {
+                        resolve(response);
+                    }
+                },
+                (error) => {
+                    if (!aborted) {
+                        reject(error);
+                    }
+                }
+            );
+        });
+
+        consumerPromise.abort = () => {
+            if (aborted) {
+                return;
+            }
+            aborted = true;
+            entry.refCount = Math.max(0, entry.refCount - 1);
+            if (rejectConsumer) {
+                rejectConsumer(this._makeAbortError());
+            }
+            if (entry.refCount === 0 && !entry.settled) {
+                entry.requestPromise.abort();
+            }
+        };
+
+        return consumerPromise;
+    }
+
     get(url, options, transform) {
         options = options || {};
 
@@ -73,7 +129,7 @@ class Api extends events.EventTarget {
         }
 
         if (this.pending[url]) {
-            return this.pending[url];
+            return this._createPendingConsumer(this.pending[url]);
         }
 
         const requestPromise = this._wrappedRequest(
@@ -83,7 +139,13 @@ class Api extends events.EventTarget {
             {},
             options
         );
-        const wrappedPromise = requestPromise
+        const entry = {
+            requestPromise: requestPromise,
+            promise: null,
+            refCount: 0,
+            settled: false,
+        };
+        entry.promise = requestPromise
             .then((response) => {
                 if (transform) {
                     transform(response);
@@ -101,11 +163,12 @@ class Api extends events.EventTarget {
                 return Promise.resolve(response);
             })
             .finally(() => {
+                entry.settled = true;
                 delete this.pending[url];
             });
-        wrappedPromise.abort = () => requestPromise.abort();
-        this.pending[url] = wrappedPromise;
-        return wrappedPromise;
+
+        this.pending[url] = entry;
+        return this._createPendingConsumer(entry);
     }
 
     post(url, data, files, options) {
@@ -484,11 +547,7 @@ class Api extends events.EventTarget {
                 if (options.showProgress) {
                     progress.done();
                 }
-                reject(
-                    new Error(
-                        "The request was aborted due to user cancellation"
-                    )
-                );
+                reject(this._makeAbortError());
             };
 
             req.end((error, response) => {

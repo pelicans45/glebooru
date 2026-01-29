@@ -1,6 +1,8 @@
 from datetime import datetime, UTC
 from typing import Any, Callable, Optional, Tuple
 
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+
 from szurubooru import db, errors, model
 
 
@@ -47,11 +49,16 @@ def set_favorite(entity: model.Base, user: Optional[model.User]) -> None:
         scores.set_score(entity, user, 1)
     except scores.InvalidScoreTargetError:
         pass
-    fav_entity = _get_fav_entity(entity, user)
-    if not fav_entity:
-        table, get_column = _get_table_info(entity)
-        fav_entity = table()
-        setattr(fav_entity, get_column(table).name, get_column(entity))
-        fav_entity.user = user
-        fav_entity.time = datetime.now(UTC).replace(tzinfo=None)
-        db.session.add(fav_entity)
+    table_cls, get_column = _get_table_info(entity)
+    column_name = get_column(table_cls).name
+    insert_stmt = pg_insert(table_cls.__table__).values(
+        {
+            column_name: get_column(entity),
+            "user_id": user.user_id,
+            "time": datetime.now(UTC).replace(tzinfo=None),
+        }
+    )
+    insert_stmt = insert_stmt.on_conflict_do_nothing(
+        index_elements=[column_name, "user_id"]
+    )
+    db.session.execute(insert_stmt)

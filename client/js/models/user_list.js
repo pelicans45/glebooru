@@ -7,21 +7,22 @@ const User = require("./user.js");
 
 class UserList extends AbstractList {
     static search(text, offset, limit) {
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink("users", {
                     q: text,
                     offset: offset,
                     limit: limit,
                 })
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
                         results: UserList.fromResponse(response.results),
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 }
 

@@ -138,7 +138,7 @@ class PostListController {
                 return e.detail.post.tags.addByName(tagData.name);
             })
         )
-            .then(e.detail.post.save())
+            .then(() => e.detail.post.save())
             .catch((error) => window.alert(error.message));
     }
 
@@ -268,7 +268,7 @@ class PostListController {
             requestPage: (offset, limit) => {
                 let query = uri.getPostsQuery(this._ctx.parameters);
                 const beforeId = this._getBeforeIdForOffset(offset, limit);
-                return PostList.search(
+                const apiPromise = PostList.search(
                     query,
                     offset,
                     limit,
@@ -276,10 +276,13 @@ class PostListController {
                     this._ctx.parameters.r,
                     true, //this._canSeeNewPosts,
                     { beforeId: beforeId }
-                ).then((response) => {
+                );
+                const returnedPromise = apiPromise.then((response) => {
                     this._storePageAnchor(offset, response);
                     return response;
                 });
+                returnedPromise.abort = () => apiPromise.abort();
+                return returnedPromise;
             },
             pageRenderer: (pageCtx) => {
                 Object.assign(pageCtx, {

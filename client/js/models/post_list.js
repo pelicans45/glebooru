@@ -18,7 +18,7 @@ class PostList extends AbstractList {
         if (fields && fields.length) {
             params.fields = fields.join(",");
         }
-        return api.get(
+        const apiPromise = api.get(
             uri.formatApiLink("post", id, "around", {
                 q: params.q,
                 fields: params.fields,
@@ -26,13 +26,14 @@ class PostList extends AbstractList {
             }),
             options
         );
+        apiPromise.abort = apiPromise.abort || (() => {});
+        return apiPromise;
     }
 
     static search(text, offset, limit, fields, r, canSeeNewPosts, options = {}) {
         const skipCount = "1";
         const beforeId = options.beforeId || null;
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink(
                     "posts",
                     {
@@ -46,8 +47,8 @@ class PostList extends AbstractList {
                     },
                     { showProgress: false }
                 )
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 let results;
 
                 if (!canSeeNewPosts) {
@@ -83,36 +84,38 @@ class PostList extends AbstractList {
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 
     static getMedian(text, fields) {
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink("posts", "median", {
                     q: PostList.decorateSearchQuery(text || ""),
                     fields: fields.join(","),
                 })
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
                         results: PostList.fromResponse(response.results),
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 
     static reverseSearch(id, limit, threshold, fields, query) {
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink("post", id, "reverse-search", {
                     limit: limit,
                     threshold: threshold,
                     fields: fields.join(","),
                     q: query,
                 })
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 const results = response.similarPosts.map((sim) => sim.post);
                 return Promise.resolve(
                     Object.assign({}, response, {
@@ -120,6 +123,8 @@ class PostList extends AbstractList {
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 
     static decorateSearchQuery(text) {

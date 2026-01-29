@@ -7,22 +7,23 @@ const Pool = require("./pool.js");
 
 class PoolList extends AbstractList {
     static search(text, offset, limit, fields) {
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink("pools", {
                     q: text,
                     offset: offset,
                     limit: limit,
                     fields: fields.join(","),
                 })
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
                         results: PoolList.fromResponse(response.results),
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 
     hasPoolId(poolId) {

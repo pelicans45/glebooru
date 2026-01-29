@@ -33,8 +33,7 @@ class TagList extends AbstractList {
             path = "all-tags";
         }
         options = Object.assign({ noProgress: true }, options || {});
-        return api
-            .get(
+        const apiPromise = api.get(
                 uri.formatApiLink(path, {
                     q: text,
                     offset: offset,
@@ -49,14 +48,16 @@ class TagList extends AbstractList {
                     );
 					*/
                 }
-            )
-            .then((response) => {
+            );
+        const returnedPromise = apiPromise.then((response) => {
                 return Promise.resolve(
                     Object.assign({}, response, {
                         results: TagList.fromResponse(response.results),
                     })
                 );
             });
+        returnedPromise.abort = () => apiPromise.abort();
+        return returnedPromise;
     }
 
     static getAllRelevant(refresh) {
@@ -74,28 +75,34 @@ class TagList extends AbstractList {
             allRelevantTags = null;
         }
 
-        const loader = lens.isUniversal
-            ? this.search("sort:usages", 0, 5000, fields, true, {
+        let loader = null;
+        if (lens.isUniversal) {
+            loader = this.search("sort:usages", 0, 5000, fields, true, {
                 persistCache: true,
                 cacheDurationMs: 10 * 60 * 1000,
-            })
-            : api
-                .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
+            });
+        } else {
+            const apiPromise = api.get(
+                uri.formatApiLink("lens-tags", lens.hostnameFilter),
+                {
                     noProgress: true,
-                })
-                .then((response) => {
-                    for (const result of response.results) {
-                        result.tag.usages = result.occurrences;
-                    }
+                }
+            );
+            loader = apiPromise.then((response) => {
+                for (const result of response.results) {
+                    result.tag.usages = result.occurrences;
+                }
 
-                    const results = lens.excludeRedundantTags(
-                        response.results.map((result) => result.tag)
-                    );
+                const results = lens.excludeRedundantTags(
+                    response.results.map((result) => result.tag)
+                );
 
-                    return Object.assign({}, response, {
-                        results: this.fromResponse(results),
-                    });
+                return Object.assign({}, response, {
+                    results: this.fromResponse(results),
                 });
+            });
+            loader.abort = () => apiPromise.abort();
+        }
 
         allRelevantTagsPromise = loader
             .then((response) => {
@@ -105,6 +112,7 @@ class TagList extends AbstractList {
             .finally(() => {
                 allRelevantTagsPromise = null;
             });
+        allRelevantTagsPromise.abort = () => loader.abort && loader.abort();
 
         return allRelevantTagsPromise;
     }
@@ -124,28 +132,34 @@ class TagList extends AbstractList {
             allRelevantTagsMinimal = null;
         }
 
-        const loader = lens.isUniversal
-            ? this.search("sort:usages", 0, 5000, minimalFields, true, {
+        let loader = null;
+        if (lens.isUniversal) {
+            loader = this.search("sort:usages", 0, 5000, minimalFields, true, {
                 persistCache: true,
                 cacheDurationMs: 10 * 60 * 1000,
-            })
-            : api
-                .get(uri.formatApiLink("lens-tags", lens.hostnameFilter), {
+            });
+        } else {
+            const apiPromise = api.get(
+                uri.formatApiLink("lens-tags", lens.hostnameFilter),
+                {
                     noProgress: true,
-                })
-                .then((response) => {
-                    for (const result of response.results) {
-                        result.tag.usages = result.occurrences;
-                    }
+                }
+            );
+            loader = apiPromise.then((response) => {
+                for (const result of response.results) {
+                    result.tag.usages = result.occurrences;
+                }
 
-                    const results = lens.excludeRedundantTags(
-                        response.results.map((result) => result.tag)
-                    );
+                const results = lens.excludeRedundantTags(
+                    response.results.map((result) => result.tag)
+                );
 
-                    return Object.assign({}, response, {
-                        results: this.fromResponse(results),
-                    });
+                return Object.assign({}, response, {
+                    results: this.fromResponse(results),
                 });
+            });
+            loader.abort = () => apiPromise.abort();
+        }
 
         allRelevantTagsMinimalPromise = loader
             .then((response) => {
@@ -155,6 +169,8 @@ class TagList extends AbstractList {
             .finally(() => {
                 allRelevantTagsMinimalPromise = null;
             });
+        allRelevantTagsMinimalPromise.abort = () =>
+            loader.abort && loader.abort();
 
         return allRelevantTagsMinimalPromise;
     }

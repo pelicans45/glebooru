@@ -156,6 +156,7 @@ def create_app() -> Callable[[Any, Any], Any]:
     rest.errors.handle(errors.ValidationError, _on_validation_error)
     rest.errors.handle(errors.SearchError, _on_search_error)
     rest.errors.handle(errors.IntegrityError, _on_integrity_error)
+    rest.errors.handle(sa.exc.IntegrityError, _on_integrity_error)
     rest.errors.handle(errors.NotFoundError, _on_not_found_error)
     rest.errors.handle(errors.ProcessingError, _on_processing_error)
     rest.errors.handle(errors.ThirdPartyError, _on_third_party_error)

@@ -16,7 +16,7 @@ const DEV_OUTPUT = "/tmp/glebooru-build-test-dev";
 beforeAll(async () => {
     console.log("Building production...");
     execSync(`rm -rf ${TEST_OUTPUT}`, { stdio: "inherit" });
-    execSync(`OUTPUT_PATH=${TEST_OUTPUT} bun build.js`, {
+    execSync(`OUTPUT_PATH=${TEST_OUTPUT} GLEBOORU_DEV=0 bun build.js`, {
         cwd: import.meta.dir,
         stdio: "inherit",
     });
@@ -186,7 +186,7 @@ describe("Production Build", () => {
 });
 
 describe("Development Build", () => {
-    const domain = "booru"; // Dev domain
+    const domain = "boorudev"; // Dev domain
 
     test("creates dev domain directories", () => {
         expect(existsSync(`${DEV_OUTPUT}/${domain}/js`)).toBe(true);

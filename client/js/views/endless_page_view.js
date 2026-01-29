@@ -4,21 +4,26 @@ const settings = require("../models/settings.js");
 const router = require("../router.js");
 const views = require("../util/views.js");
 const seo = require("../util/seo.js");
+const api = require("../api.js");
 
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
+let globalRunToken = 0;
 
 class EndlessPageView {
     constructor(ctx) {
         this._hostNode = document.getElementById("content-holder");
         views.replaceContent(this._hostNode, holderTemplate());
+        this._activeRequests = new Set();
     }
 
     run(ctx) {
         this._destroy();
 
-        this._runToken = (this._runToken || 0) + 1;
+        globalRunToken += 1;
+        this._runToken = globalRunToken;
         const runToken = this._runToken;
+        this._ctx = ctx;
 
         this._active = true;
         this._runningRequests = 0;
@@ -107,6 +112,7 @@ class EndlessPageView {
     }
 
     _destroy() {
+        this._abortActiveRequests();
         window.clearInterval(this._timeout);
         if (this._scrollHandler) {
             window.removeEventListener("scroll", this._scrollHandler);
@@ -121,6 +127,15 @@ class EndlessPageView {
             this._topObserver = null;
         }
         this._active = false;
+    }
+
+    _abortActiveRequests() {
+        for (const request of this._activeRequests) {
+            if (request && request.abort) {
+                request.abort();
+            }
+        }
+        this._activeRequests.clear();
     }
 
     _syncUrl(ctx, topPageNode) {
@@ -339,9 +354,22 @@ class EndlessPageView {
     _loadPage(ctx, offset, limit, append, runToken = this._runToken) {
         this._runningRequests++;
         return new Promise((resolve, reject) => {
-            ctx.requestPage(offset, limit).then(
+            const requestPromise = ctx.requestPage(offset, limit);
+            if (requestPromise && requestPromise.abort) {
+                this._activeRequests.add(requestPromise);
+            }
+            requestPromise.finally(() => {
+                if (requestPromise && requestPromise.abort) {
+                    this._activeRequests.delete(requestPromise);
+                }
+            });
+            requestPromise.then(
                 (response) => {
-                    if (!this._active || runToken !== this._runToken) {
+                    if (
+                        !this._active ||
+                        runToken !== globalRunToken ||
+                        ctx !== this._ctx
+                    ) {
                         this._runningRequests--;
                         resolve(null);
                         return;
@@ -358,7 +386,7 @@ class EndlessPageView {
                         };
                     }
                     window.requestAnimationFrame(() => {
-                        if (runToken !== this._runToken) {
+                        if (runToken !== globalRunToken || ctx !== this._ctx) {
                             this._runningRequests--;
                             resolve(null);
                             return;
@@ -370,7 +398,12 @@ class EndlessPageView {
                     });
                 },
                 (error) => {
-                    if (runToken !== this._runToken) {
+                    if (runToken !== globalRunToken || ctx !== this._ctx) {
+                        this._runningRequests--;
+                        resolve(null);
+                        return;
+                    }
+                    if (api.isAbortError(error)) {
                         this._runningRequests--;
                         resolve(null);
                         return;
