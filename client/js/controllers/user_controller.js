@@ -11,8 +11,12 @@ const topNavigation = require("../models/top_navigation.js");
 const UserView = require("../views/user_view.js");
 const EmptyView = require("../views/empty_view.js");
 
+let globalRunToken = 0;
+
 class UserController {
     constructor(ctx, section) {
+        const runToken = ++globalRunToken;
+
         const userName = ctx.parameters.name;
         topNavigation.activate("users");
         // Set canonical to base user URL (without section suffix like /edit)
@@ -48,6 +52,9 @@ class UserController {
 
         Promise.all([userTokenPromise, User.get(userName)]).then(
             (responses) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 const [userTokens, user] = responses;
                 const isLoggedIn = api.isLoggedIn(user);
                 const infix = isLoggedIn ? "self" : "any";
@@ -137,6 +144,9 @@ class UserController {
                 }
             },
             (error) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 this._view = new EmptyView();
                 this._view.showError(error.message);
             }

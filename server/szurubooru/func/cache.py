@@ -1,4 +1,5 @@
 from datetime import datetime, UTC
+import threading
 from typing import Any, Dict, List
 
 
@@ -14,29 +15,45 @@ class LruCache:
         self.length = length
         self.hash = {}  # type: Dict[object, LruCacheItem]
         self.item_list = []  # type: List[LruCacheItem]
+        self._lock = threading.RLock()
 
     def insert_item(self, item: LruCacheItem) -> None:
-        if item.key in self.hash:
-            item_index = next(
-                i for i, v in enumerate(self.item_list) if v.key == item.key
-            )
-            self.item_list[:] = (
-                self.item_list[:item_index] + self.item_list[item_index + 1 :]
-            )
-            self.item_list.insert(0, item)
-        else:
-            if len(self.item_list) > self.length:
-                self.remove_item(self.item_list[-1])
+        with self._lock:
+            if item.key in self.hash:
+                old_item = self.hash[item.key]
+                try:
+                    self.item_list.remove(old_item)
+                except ValueError:
+                    pass
             self.hash[item.key] = item
             self.item_list.insert(0, item)
+            while len(self.item_list) > self.length:
+                self.remove_item(self.item_list[-1], locked=True)
 
     def remove_all(self) -> None:
-        self.hash = {}
-        self.item_list = []
+        with self._lock:
+            self.hash = {}
+            self.item_list = []
 
-    def remove_item(self, item: LruCacheItem) -> None:
-        del self.hash[item.key]
-        del self.item_list[self.item_list.index(item)]
+    def remove_item(self, item: LruCacheItem, locked: bool = False) -> None:
+        if not locked:
+            self._lock.acquire()
+        try:
+            if item.key in self.hash:
+                del self.hash[item.key]
+            try:
+                self.item_list.remove(item)
+            except ValueError:
+                pass
+        finally:
+            if not locked:
+                self._lock.release()
+
+    def remove_key(self, key: object) -> None:
+        with self._lock:
+            item = self.hash.get(key)
+            if item:
+                self.remove_item(item, locked=True)
 
 
 _CACHE = LruCache(length=100)
@@ -47,16 +64,20 @@ def purge() -> None:
 
 
 def has(key: object) -> bool:
-    return key in _CACHE.hash
+    with _CACHE._lock:
+        return key in _CACHE.hash
 
 
 def get(key: object) -> Any:
-    return _CACHE.hash[key].value
+    with _CACHE._lock:
+        item = _CACHE.hash.get(key)
+        if not item:
+            return None
+        return item.value
 
 
 def remove(key: object) -> None:
-    if has(key):
-        del _CACHE.hash[key]
+    _CACHE.remove_key(key)
 
 
 def put(key: object, value: Any) -> None:

@@ -23,8 +23,8 @@ function _isSameOrigin(href) {
 }
 
 function _getBaseHref() {
-    const bases = document.getElementById("base");
-    return bases.length > 0
+    const bases = document.getElementsByTagName("base");
+    return bases && bases.length > 0
         ? bases[0].href.replace(origin, "").replace(/\/+$/, "")
         : "";
 }

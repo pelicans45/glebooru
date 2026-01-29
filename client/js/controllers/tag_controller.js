@@ -10,8 +10,12 @@ const topNavigation = require("../models/top_navigation.js");
 const TagView = require("../views/tag_view.js");
 const EmptyView = require("../views/empty_view.js");
 
+let globalRunToken = 0;
+
 class TagController {
     constructor(ctx, section) {
+        const runToken = ++globalRunToken;
+
         topNavigation.activate("tags");
         if (!api.hasPrivilege("tags:view")) {
             this._view = new EmptyView();
@@ -24,6 +28,9 @@ class TagController {
             Tag.get(ctx.parameters.name),
         ]).then(
             (responses) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 const [tagCategoriesResponse, tag] = responses;
 
                 // Set canonical to base tag URL (without section suffix like /edit, /merge)
@@ -72,6 +79,9 @@ class TagController {
                 );
             },
             (error) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 this._view = new EmptyView();
                 this._view.showError(error.message);
             }

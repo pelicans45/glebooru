@@ -11,8 +11,12 @@ const topNavigation = require("../models/top_navigation.js");
 const PoolView = require("../views/pool_view.js");
 const EmptyView = require("../views/empty_view.js");
 
+let globalRunToken = 0;
+
 class PoolController {
     constructor(ctx, section) {
+        const runToken = ++globalRunToken;
+
         topNavigation.activate("pools");
 
         if (!api.hasPrivilege("pools:view")) {
@@ -26,6 +30,9 @@ class PoolController {
             Pool.get(ctx.parameters.id),
         ]).then(
             (responses) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 const [poolCategoriesResponse, pool] = responses;
 
                 // Set canonical to base pool URL (without section suffix like /edit, /merge)
@@ -69,6 +76,9 @@ class PoolController {
                 );
             },
             (error) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 this._view = new EmptyView();
                 this._view.showError(error.message);
             }

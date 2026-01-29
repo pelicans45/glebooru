@@ -150,8 +150,11 @@ class Executor:
             include_count,
             include_has_more,
         )
-        if use_cache and not disable_eager_loads and cache.has(key):
+        if use_cache and not disable_eager_loads:
             cached = cache.get(key)
+        else:
+            cached = None
+        if cached is not None:
             if isinstance(cached, _CachedSearchResult):
                 return (
                     cached.count,

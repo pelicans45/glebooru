@@ -1,21 +1,28 @@
-from typing import List
+from typing import List, Optional
 
 import sqlalchemy as sa
 
 from szurubooru import db, model, search
 from szurubooru.func import posts as posts_func
 
-#_search_executor_config = search.configs.PostSearchConfig()
-#_search_executor = search.Executor(_search_executor_config)
-
-
-# TODO(hunternif): this ignores the query, e.g. rating.
-# (But we're actually using a "similar" search query on the client anyway.)
 def find_similar_posts(
-    source_post: model.Post, limit: int, query_text: str = ''
+    source_post: model.Post,
+    limit: int,
+    query_text: str = "",
+    user: Optional[model.User] = None,
 ) -> List[model.Post]:
     if not source_post:
         return []
+
+    if query_text:
+        # Use full search to respect filters (rating, tag exclusions, etc.).
+        # Also exclude the source post itself to preserve previous behavior.
+        config = search.configs.PostSearchConfig()
+        config.user = user
+        executor = search.Executor(config)
+        full_query = f"similar:{source_post.post_id} -id:{source_post.post_id} {query_text}".strip()
+        _count, posts = executor.execute(full_query, 0, limit, use_cache=False)
+        return posts
 
     pt_source = sa.orm.aliased(model.PostTag)
     pt_match = sa.orm.aliased(model.PostTag)

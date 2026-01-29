@@ -16,9 +16,13 @@ const EmptyView = require("../views/empty_view.js");
 const TagList = require("../models/tag_list.js");
 const PostListTagAutoCompleteControl = require("../controls/post_list_tag_auto_complete_control.js");
 
+let globalRunToken = 0;
+
 class PostMainController extends BasePostController {
     constructor(ctx, editMode) {
         super(ctx);
+
+        const runToken = ++globalRunToken;
 
         let parameters = ctx.parameters;
         let query = uri.getPostsQuery(parameters);
@@ -65,6 +69,9 @@ class PostMainController extends BasePostController {
             ),
         ]).then(
             (responses) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 const [post, aroundResponse] = responses;
 				/*
                 if (lens.checkHostnameFilterRedirect(post)) {
@@ -185,6 +192,9 @@ class PostMainController extends BasePostController {
                 }
             },
             (error) => {
+                if (runToken !== globalRunToken) {
+                    return;
+                }
                 this._view = new EmptyView();
                 this._view.showError(error.message);
             }

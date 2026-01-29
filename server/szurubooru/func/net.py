@@ -13,7 +13,7 @@ from szurubooru.func import mime
 _dl_chunk_size = 2**15
 
 VALID_DOMAINS = ["i.4cdn.org"]
-VALID_URL_PREFIXES = ("https://" + d for d in VALID_DOMAINS)
+VALID_URL_PREFIXES = tuple("https://" + d for d in VALID_DOMAINS)
 
 
 class DownloadError(errors.ProcessingError):

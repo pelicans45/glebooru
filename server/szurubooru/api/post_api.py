@@ -173,10 +173,9 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             skip_count,
             tuple(options),
         )
-        if cache.has(cache_key):
-            cached = cache.get(cache_key)
-            if isinstance(cached, dict):
-                return cached
+        cached = cache.get(cache_key)
+        if isinstance(cached, dict):
+            return cached
 
     count, entities, has_more = _search_executor.execute_with_metadata(
         exec_query,
@@ -219,10 +218,9 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
             params.get("post_id"),
             tuple(options),
         )
-        if cache.has(cache_key):
-            cached = cache.get(cache_key)
-            if isinstance(cached, dict):
-                return cached
+        cached = cache.get(cache_key)
+        if isinstance(cached, dict):
+            return cached
 
     post = _get_post(params)
     result = _serialize_post(ctx, post)
@@ -699,7 +697,7 @@ def get_posts_similar_by_tags(
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
-    results = similar.find_similar_posts(post, limit, query_text)
+    results = similar.find_similar_posts(post, limit, query_text, ctx.user)
     return {
         "query": query_text,
         "limit": limit,
