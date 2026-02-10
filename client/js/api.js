@@ -313,6 +313,12 @@ class Api extends events.EventTarget {
 
     login(userName, userPassword, doRemember) {
         this.cache = {};
+        const previousAuth = {
+            userName: this.userName,
+            userPassword: this.userPassword,
+            token: this.token,
+            user: this.user,
+        };
         return new Promise((resolve, reject) => {
             this.userName = userName;
             this.userPassword = userPassword;
@@ -328,6 +334,10 @@ class Api extends events.EventTarget {
                     this.dispatchEvent(new CustomEvent("login"));
                 },
                 (error) => {
+                    this.userName = previousAuth.userName;
+                    this.userPassword = previousAuth.userPassword;
+                    this.token = previousAuth.token;
+                    this.user = previousAuth.user;
                     reject(error);
                     //this.logout();
                 }
