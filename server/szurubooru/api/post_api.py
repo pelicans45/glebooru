@@ -26,8 +26,7 @@ from szurubooru.func import (
     versions,
 )
 
-
-
+from . import tag_api
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
@@ -256,77 +255,20 @@ def get_random_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Res
         post = posts.get_post_by_id(int(query_text))
         return _serialize_random_post(ctx, post)
 
-    # Fast path for simple tag queries (99% of calls)
-    if random_post.is_simple_tag_query(query_text):
-        included_tags, excluded_tags = random_post.parse_tag_tokens(query_text)
+    soft_exclude_tags = random_post.parse_soft_exclude_param(
+        ctx.get_param_as_string("soft_exclude", default="")
+    )
+    post = random_post.select_random_post(
+        ctx.user,
+        query_text,
+        excluding_post_id=excluding_id,
+        soft_exclude_tags=soft_exclude_tags,
+    )
+    if post:
+        return _serialize_random_post(ctx, post)
 
-        # Ultra-fast path for single tag without exclusions (most common case)
-        if len(included_tags) == 1 and not excluded_tags and '*' not in included_tags[0]:
-            tag_id = random_post.resolve_tag_id_single(included_tags[0])
-            if tag_id is None:
-                return {"url": ""}
+    return {"url": ""}
 
-            limit = 2 if excluding_id is not None else 1
-            result_posts = random_post.get_random_post_single_tag(
-                tag_id, set(), excluding_id, limit
-            )
-
-            if not result_posts:
-                return {"url": ""}
-
-            selected_post = result_posts[0]
-            if excluding_id is not None and len(result_posts) > 1:
-                for candidate in result_posts:
-                    if candidate.post_id != excluding_id:
-                        selected_post = candidate
-                        break
-            return _serialize_random_post(ctx, selected_post)
-
-        # General fast path for multiple tags or exclusions
-        included_tag_ids = (
-            random_post.resolve_tag_ids(included_tags) if included_tags else set()
-        )
-        excluded_tag_ids = (
-            random_post.resolve_tag_ids(excluded_tags) if excluded_tags else set()
-        )
-
-        # If we have included tags but none resolved, no results
-        if included_tags and not included_tag_ids:
-            return {"url": ""}
-
-        limit = 2 if excluding_id is not None else 1
-        result_posts = random_post.get_random_post_fast(
-            included_tag_ids, excluded_tag_ids, excluding_id, limit
-        )
-
-        if not result_posts:
-            return {"url": ""}
-
-        selected_post = result_posts[0]
-        if excluding_id is not None and len(result_posts) > 1:
-            for candidate in result_posts:
-                if candidate.post_id != excluding_id:
-                    selected_post = candidate
-                    break
-        return _serialize_random_post(ctx, selected_post)
-
-    # Fallback to generic search executor for complex queries
-    _search_executor_config.user = ctx.user
-    types = "image,animation,video"
-    full_query = f"sort:random type:{types} {query_text}"
-    limit = 2 if excluding_id is not None else 1
-    count, _posts = _search_executor.execute(full_query, 0, limit)
-    if count == 0:
-        return {"url": ""}
-    selected_post = _posts[0]
-    if excluding_id is not None and len(_posts) > 1:
-        for candidate in _posts:
-            if candidate.post_id != excluding_id:
-                selected_post = candidate
-                break
-    return _serialize_random_post(ctx, selected_post)
-
-from . import tag_api
 
 @rest.routes.post("/posts/?")
 def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:

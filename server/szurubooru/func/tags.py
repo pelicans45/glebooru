@@ -61,7 +61,7 @@ class InvalidTagDescriptionError(errors.ValidationError):
     pass
 
 
-def _verify_name_validity(name: str) -> None:
+def verify_tag_name_validity(name: str) -> None:
     if util.value_exceeds_column_size(name, model.TagName.name):
         raise InvalidTagNameError("Tag name is too long")
 
@@ -415,7 +415,7 @@ def update_tag_names(tag: model.Tag, names: List[str]) -> None:
     if not len(names):
         raise InvalidTagNameError("At least one name must be specified")
     for name in names:
-        _verify_name_validity(name)
+        verify_tag_name_validity(name)
 
     # check for existing tags
     expr = sa.sql.false()
