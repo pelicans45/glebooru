@@ -304,6 +304,8 @@ function bundleRobotsTxt(domain) {
 
     const robotsTxt = `User-agent: *
 Allow: /
+Disallow: /*q=similar*
+Disallow: /api/*/reverse-search/
 
 # Block AI crawlers
 User-agent: GPTBot
