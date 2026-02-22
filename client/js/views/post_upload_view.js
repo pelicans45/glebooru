@@ -245,17 +245,21 @@ class PostUploadView extends events.EventTarget {
         views.showSuccess(this._hostNode, message);
     }
 
-    showError(message, uploadable) {
-        this._showMessage(views.showError, message, uploadable);
+    showError(message, uploadable, timeoutMs) {
+        this._showMessage(views.showError, message, uploadable, timeoutMs);
     }
 
-    showInfo(message, uploadable) {
-        this._showMessage(views.showInfo, message, uploadable);
+    showInfo(message, uploadable, timeoutMs) {
+        this._showMessage(views.showInfo, message, uploadable, timeoutMs);
         views.appendExclamationMark();
     }
 
-    _showMessage(functor, message, uploadable) {
-        functor(uploadable ? uploadable.rowNode : this._hostNode, message);
+    _showMessage(functor, message, uploadable, timeoutMs) {
+        functor(
+            uploadable ? uploadable.rowNode : this._hostNode,
+            message,
+            timeoutMs
+        );
     }
 
     addUploadables(uploadables) {

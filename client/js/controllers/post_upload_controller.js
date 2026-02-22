@@ -15,7 +15,8 @@ const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
 const TagList = require("../models/tag_list.js");
 
-const genericErrorMessage = `One or more files need your attention; click "resume upload" to confirm`;
+const genericErrorMessage = "One or more files need your attention";
+const PERSIST_MESSAGE_TIMEOUT = null;
 
 class PostUploadController {
     constructor() {
@@ -95,6 +96,11 @@ class PostUploadController {
                         ).catch((error) => {
                             console.error(error);
                             anyFailures = true;
+                            const persistentErrorMessage =
+                                Boolean(error.persistMessage) ||
+                                (error.message || "").includes(
+                                    "already uploaded"
+                                );
                             if (error.uploadable) {
                                 if (error.similarPosts) {
                                     error.uploadable.lookalikes =
@@ -113,24 +119,36 @@ class PostUploadController {
                                     ) {
                                         this._view.showError(
                                             error.message,
-                                            error.uploadable
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
                                         );
                                     } else {
                                         this._view.showInfo(
                                             error.message,
-                                            error.uploadable
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
                                         );
                                     }
                                 } else {
                                     this._view.showError(
                                         error.message,
-                                        error.uploadable
+                                        error.uploadable,
+                                        persistentErrorMessage
+                                            ? PERSIST_MESSAGE_TIMEOUT
+                                            : undefined
                                     );
                                 }
                             } else {
                                 this._view.showError(
                                     error.message,
-                                    uploadable
+                                    uploadable,
+                                    persistentErrorMessage
+                                        ? PERSIST_MESSAGE_TIMEOUT
+                                        : undefined
                                 );
                             }
                             if (e.detail.pauseRemainOnError) {
@@ -159,7 +177,11 @@ class PostUploadController {
                     }
                 },
                 (error) => {
-                    this._view.showError(genericErrorMessage);
+                    this._view.showError(
+                        genericErrorMessage,
+                        null,
+                        PERSIST_MESSAGE_TIMEOUT
+                    );
                     this._view.enableForm();
                 }
             );
@@ -205,6 +227,7 @@ class PostUploadController {
                                     post: searchResult.exactPost,
                                 },
                             ];
+                            error.persistMessage = true;
                             return Promise.reject(error);
                         }
                     }
@@ -222,12 +245,16 @@ class PostUploadController {
                             }
                         }
                         if (similarFound) {
-							const noun = searchResult.similarPosts.length === 1 ? "post" : "posts";
+                            const noun =
+                                searchResult.similarPosts.length === 1
+                                    ? "post"
+                                    : "posts";
                             const error = new Error(
                                 `Found ${searchResult.similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
                             );
                             error.uploadable = uploadable;
                             error.similarPosts = searchResult.similarPosts;
+                            error.persistMessage = true;
                             return Promise.reject(error);
                         }
                     } else if (uploadable.foundOriginal) {
