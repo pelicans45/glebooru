@@ -471,17 +471,16 @@ class PostEditSidebarControl extends events.EventTarget {
             misc.disableExitConfirmation();
         };
 
-        const realTagInput = this._formNode.querySelector(".tag-input input");
-        const inputTag = realTagInput && realTagInput.value;
-
-        if (inputTag) {
-            realTagInput.value = "";
-            this._tagControl
-                .addTagByText(inputTag.trim(), "user-input")
-                .then(dispatch);
-        } else {
-            dispatch();
+        if (this._tagControl && this._tagControl.hasPendingText()) {
+            this.showError(
+                "You left unsubmitted text in tags. Either submit the tag " +
+                    "on Enter or delete it before saving."
+            );
+            this._tagControl.focusInput();
+            return;
         }
+
+        dispatch();
     }
 
     get _formNode() {
