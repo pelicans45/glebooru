@@ -1157,6 +1157,31 @@ def _find_near_duplicate_post_id(
     return None
 
 
+def get_near_duplicate_distance_cutoff(post_type: str) -> float:
+    if post_type == model.Post.TYPE_ANIMATION:
+        return image_hash.DUPLICATE_DISTANCE_CUTOFF_ANIMATED
+    return image_hash.DUPLICATE_DISTANCE_CUTOFF_STATIC
+
+
+def get_upload_similarity_cutoffs(
+    content: bytes,
+) -> Optional[Tuple[float, float]]:
+    mime_type = mime.get_mime_type(content)
+    if not mime.is_image(mime_type):
+        return None
+
+    if mime.is_animated_gif(content):
+        return (
+            image_hash.SIMILAR_WARNING_DISTANCE_CUTOFF_ANIMATED,
+            image_hash.DUPLICATE_DISTANCE_CUTOFF_ANIMATED,
+        )
+
+    return (
+        image_hash.SIMILAR_WARNING_DISTANCE_CUTOFF_STATIC,
+        image_hash.DUPLICATE_DISTANCE_CUTOFF_STATIC,
+    )
+
+
 def generate_post_signature(
     post: model.Post, content: bytes
 ) -> Optional[model.PostSignature]:
@@ -1320,10 +1345,8 @@ def update_post_content(
                 content, post.mime_type
             )
             if not is_placeholder:
-                distance_cutoff = (
-                    image_hash.DUPLICATE_DISTANCE_CUTOFF_ANIMATED
-                    if post.type == model.Post.TYPE_ANIMATION
-                    else image_hash.DUPLICATE_DISTANCE_CUTOFF_STATIC
+                distance_cutoff = get_near_duplicate_distance_cutoff(
+                    post.type
                 )
                 other_post_id = _find_near_duplicate_post_id(
                     unpacked_signature,
@@ -1737,9 +1760,14 @@ def search_by_image_exact(image_content: bytes) -> Optional[model.Post]:
     )
 
 
-def search_by_image(image_content: bytes) -> List[Tuple[float, model.Post]]:
+def search_by_image(
+    image_content: bytes,
+    distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
+) -> List[Tuple[float, model.Post]]:
     query_signature = image_hash.generate_signature(image_content)
-    return search_by_signature(query_signature)
+    return search_by_signature(
+        query_signature, distance_cutoff=distance_cutoff
+    )
 
 
 def search_by_signature(

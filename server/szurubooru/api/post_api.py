@@ -550,14 +550,28 @@ def get_posts_by_image(
 ) -> rest.Response:
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     content = ctx.get_file("content")
+    exact_post = posts.search_by_image_exact(content)
+
+    should_warn_upload = False
+    should_block_upload = bool(exact_post)
 
     try:
-        lookalikes = posts.search_by_image(content)
+        lookalikes = []
+        similarity_cutoffs = posts.get_upload_similarity_cutoffs(content)
+        if similarity_cutoffs:
+            warn_cutoff, block_cutoff = similarity_cutoffs
+            lookalikes = posts.search_by_image(
+                content, distance_cutoff=warn_cutoff
+            )
+            should_warn_upload = bool(lookalikes)
+            should_block_upload = should_block_upload or any(
+                distance < block_cutoff for distance, _post in lookalikes
+            )
     except (errors.ThirdPartyError, errors.ProcessingError):
         lookalikes = []
 
     return {
-        "exactPost": _serialize_post(ctx, posts.search_by_image_exact(content)),
+        "exactPost": _serialize_post(ctx, exact_post),
         "similarPosts": [
             {
                 "distance": distance,
@@ -565,6 +579,8 @@ def get_posts_by_image(
             }
             for distance, post in lookalikes
         ],
+        "shouldWarnUpload": should_warn_upload or should_block_upload,
+        "shouldBlockUpload": should_block_upload,
     }
 
 

@@ -103,6 +103,9 @@ class PostUploadController {
                                 );
                             if (error.uploadable) {
                                 if (error.similarPosts) {
+                                    const isBlockingLookalike = Boolean(
+                                        error.blockUpload
+                                    );
                                     error.uploadable.lookalikes =
                                         error.similarPosts;
                                     try {
@@ -112,7 +115,17 @@ class PostUploadController {
                                     } catch (err) {
                                         throw err;
                                     }
-                                    if (
+                                    if (isBlockingLookalike) {
+                                        error.uploadable.lookalikesConfirmed =
+                                            false;
+                                        this._view.showError(
+                                            error.message,
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
+                                        );
+                                    } else if (
                                         error.message.includes(
                                             "already uploaded"
                                         )
@@ -227,37 +240,48 @@ class PostUploadController {
                                     post: searchResult.exactPost,
                                 },
                             ];
+                            error.blockUpload = true;
                             error.persistMessage = true;
                             return Promise.reject(error);
                         }
                     }
 
-                    // notify about similar posts
-                    if (
-                        searchResult.similarPosts.length &&
-                        !alwaysUploadSimilar
-                    ) {
-                        let similarFound = false;
-                        for (const similarPost of searchResult.similarPosts) {
-                            if (parseFloat(similarPost.distance) < 0.05) {
-                                similarFound = true;
-                                break;
-                            }
-                        }
-                        if (similarFound) {
+                    const similarPosts = searchResult.similarPosts || [];
+                    const shouldBlockUpload = Boolean(
+                        searchResult.shouldBlockUpload
+                    );
+                    const shouldWarnUpload = Boolean(
+                        searchResult.shouldWarnUpload
+                    );
+
+                    if (similarPosts.length) {
+                        if (shouldBlockUpload) {
                             const noun =
-                                searchResult.similarPosts.length === 1
-                                    ? "post"
-                                    : "posts";
+                                similarPosts.length === 1 ? "post" : "posts";
                             const error = new Error(
-                                `Found ${searchResult.similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
+                                `Found ${similarPosts.length} similar ${noun}.\nUpload is blocked because the file is too similar to an existing post.`
                             );
                             error.uploadable = uploadable;
-                            error.similarPosts = searchResult.similarPosts;
+                            error.similarPosts = similarPosts;
+                            error.blockUpload = true;
                             error.persistMessage = true;
                             return Promise.reject(error);
                         }
-                    } else if (uploadable.foundOriginal) {
+
+                        if (shouldWarnUpload && !alwaysUploadSimilar) {
+                            const noun =
+                                similarPosts.length === 1 ? "post" : "posts";
+                            const error = new Error(
+                                `Found ${similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
+                            );
+                            error.uploadable = uploadable;
+                            error.similarPosts = similarPosts;
+                            error.persistMessage = true;
+                            return Promise.reject(error);
+                        }
+                    }
+
+                    if (uploadable.foundOriginal) {
                         return this._copyTagsToOriginalAndSave(
                             uploadable,
                             uploadable.foundOriginal
