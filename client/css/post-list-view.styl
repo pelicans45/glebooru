@@ -386,16 +386,29 @@
                         margin-bottom: 0.5em
             &:not(.opened)
                 [type=text],
+                select[name=tag-action],
                 .start, .select-all
                     display: none
                 .hint
                     display: none
+            select[name=tag-action]
+                width: 12em
+                margin-right: 0.25em
+                @media (max-width: 1000px)
+                    width: 50%
+                    margin-bottom: 0.1em
+
+                &:disabled
+                    opacity: 0.7
             input[name=tag]
                 width: 12em
                 @media (max-width: 1000px)
                     display: block
                     width: 100%
                     margin-bottom: 0.5em
+
+                &:disabled
+                    opacity: 0.7
             .hint
                 margin-right: 1em
                 display: none
@@ -404,6 +417,9 @@
                 vertical-align: middle
                 margin-right: 1em
                 font-size: 0.95em
+                &.inactive
+                    opacity: 0.7
+                    cursor: not-allowed
         input[name=tag]
             width: 24em
             @media (max-width: 1000px)

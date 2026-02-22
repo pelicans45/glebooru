@@ -121,14 +121,28 @@ class PostsPageView extends events.EventTarget {
         if (linkNode.getAttribute("data-disabled")) {
             return;
         }
+        const selectedTags = this._ctx.bulkEdit.tags.map((tag) => {
+            const tagData = tags.parseTagAndCategory(tag);
+            return tagData.name;
+        });
+        const hasAnySelectedTag = selectedTags.some((tagName) =>
+            post.tags.isTaggedWith(tagName)
+        );
+        const hasAllSelectedTags = selectedTags.every((tagName) =>
+            post.tags.isTaggedWith(tagName)
+        );
+        const removeMode = this._ctx.bulkEdit.tagAction === "remove";
+        if (
+            (removeMode && !hasAnySelectedTag) ||
+            (!removeMode && hasAllSelectedTags)
+        ) {
+            return;
+        }
         linkNode.setAttribute("data-disabled", true);
         this.dispatchEvent(
-            new CustomEvent(
-                linkNode.classList.contains("tagged") ? "untag" : "tag",
-                {
-                    detail: { post: post },
-                }
-            )
+            new CustomEvent(removeMode ? "untag" : "tag", {
+                detail: { post: post },
+            })
         );
     }
 
@@ -190,14 +204,21 @@ class PostsPageView extends events.EventTarget {
 
             const tagFlipperNode = this._getTagFlipperNode(listItemNode);
             if (tagFlipperNode) {
-                let tagged = true;
+                const removeMode = this._ctx.bulkEdit.tagAction === "remove";
+                let hasAnySelectedTag = false;
+                let hasAllSelectedTags = true;
                 for (let tag of this._ctx.bulkEdit.tags) {
                     let tagData = tags.parseTagAndCategory(tag);
                     if (post) {
-                        tagged &= post.tags.isTaggedWith(tagData.name);
+                        const hasTag = post.tags.isTaggedWith(tagData.name);
+                        hasAnySelectedTag ||= hasTag;
+                        hasAllSelectedTags &&= hasTag;
                     }
                 }
-                tagFlipperNode.classList.toggle("tagged", tagged);
+                tagFlipperNode.classList.toggle(
+                    "tagged",
+                    removeMode ? hasAnySelectedTag : hasAllSelectedTags
+                );
             }
 
             const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
