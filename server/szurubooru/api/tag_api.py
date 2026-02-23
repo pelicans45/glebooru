@@ -1,6 +1,5 @@
-import logging
 from datetime import datetime, UTC
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from szurubooru import db, model, rest, search
 from szurubooru.func import (
@@ -65,6 +64,12 @@ def _create_if_needed(tag_names: List[str], user: model.User) -> None:
         snapshots.create(tag, user)
 
 
+def _get_all_tags_cache_key(ctx: rest.Context):
+    fields = frozenset(serialization.get_serialization_options(ctx))
+    query, offset, limit = _search_executor.get_search_params_from_context(ctx)
+    return ("all", fields, query, offset, limit)
+
+
 @rest.routes.get("/lens-tags/(?P<tag_name>.+)")
 def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     # auth.verify_privilege(ctx.user, "tags:view")
@@ -95,7 +100,8 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
 @rest.routes.get("/all-tags/?")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     # auth.verify_privilege(ctx.user, "tags:list")
-    cached = get_cached_tag_list("all")
+    cache_key = _get_all_tags_cache_key(ctx)
+    cached = get_cached_tag_list(cache_key)
     if cached:
         # Return cached response with HTTP cache header
         return {
@@ -104,7 +110,7 @@ def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respon
         }
 
     resp = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
-    set_cached_tag_list("all", resp)
+    set_cached_tag_list(cache_key, resp)
     # Add HTTP cache header (5 minutes)
     resp["_cache"] = "public, max-age=300, stale-while-revalidate=300"
     return resp

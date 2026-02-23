@@ -109,16 +109,26 @@ class Executor:
         entity_id: int,
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
-        if ctx.has_param("query"):
-            query_text = ctx.get_param_as_string("query", default="")
-        else:
-            query_text = ctx.get_param_as_string("q", default="")
+        query_text = self.get_query_from_context(ctx)
         entities = self.get_around(query_text, entity_id)
         return {
             "prev": serializer(entities[0]),
             "next": serializer(entities[1]),
             "random": serializer(entities[2]),
         }
+
+    def get_query_from_context(self, ctx: rest.Context) -> str:
+        if ctx.has_param("query"):
+            return ctx.get_param_as_string("query", default="")
+        return ctx.get_param_as_string("q", default="")
+
+    def get_search_params_from_context(
+        self, ctx: rest.Context
+    ) -> Tuple[str, int, int]:
+        query = self.get_query_from_context(ctx)
+        offset = ctx.get_param_as_int("offset", default=0, min=0)
+        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
+        return query, offset, limit
 
     def _execute_internal(
         self,
@@ -251,14 +261,13 @@ class Executor:
         include_count: bool = True,
         include_has_more: bool = False,
     ) -> rest.Response:
-        if ctx.has_param("query"):
-            query = ctx.get_param_as_string("query", default="")
-        else:
-            query = ctx.get_param_as_string("q", default="")
-        offset = ctx.get_param_as_int("offset", default=0, min=0)
-        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)#max=100)
+        query, offset, limit = self.get_search_params_from_context(ctx)
         count, entities, has_more = self.execute_with_metadata(
-            query, offset, limit, include_count=include_count, include_has_more=include_has_more
+            query,
+            offset,
+            limit,
+            include_count=include_count,
+            include_has_more=include_has_more,
         )
         response = {
             "query": query,
@@ -283,12 +292,7 @@ class Executor:
         Execute search and serialize results using batch serialization.
         This avoids N+1 queries by allowing the serializer to pre-fetch data.
         """
-        if ctx.has_param("query"):
-            query = ctx.get_param_as_string("query", default="")
-        else:
-            query = ctx.get_param_as_string("q", default="")
-        offset = ctx.get_param_as_int("offset", default=0, min=0)
-        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
+        query, offset, limit = self.get_search_params_from_context(ctx)
         count, entities, has_more = self.execute_with_metadata(
             query,
             offset,
