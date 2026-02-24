@@ -77,10 +77,7 @@ class TagList extends AbstractList {
 
         let loader = null;
         if (lens.isUniversal) {
-            loader = this.search("sort:usages", 0, 5000, fields, true, {
-                persistCache: true,
-                cacheDurationMs: 10 * 60 * 1000,
-            });
+            loader = this.search("sort:usages", 0, 5000, fields, true);
         } else {
             const apiPromise = api.get(
                 uri.formatApiLink("lens-tags", lens.hostnameFilter),
@@ -134,10 +131,7 @@ class TagList extends AbstractList {
 
         let loader = null;
         if (lens.isUniversal) {
-            loader = this.search("sort:usages", 0, 5000, minimalFields, true, {
-                persistCache: true,
-                cacheDurationMs: 10 * 60 * 1000,
-            });
+            loader = this.search("sort:usages", 0, 5000, minimalFields, true);
         } else {
             const apiPromise = api.get(
                 uri.formatApiLink("lens-tags", lens.hostnameFilter),
@@ -228,7 +222,6 @@ class TagList extends AbstractList {
         topRelevantMatchesPromise = null;
         allRelevantTagsMinimal = null;
         allRelevantTagsMinimalPromise = null;
-        api.clearPersistentCache("all-tags");
         if (!preload) {
             return Promise.resolve();
         }

@@ -93,19 +93,23 @@ def get_lens_tag_siblings(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
 @rest.routes.get("/all-tags/?")
 def get_all_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     # auth.verify_privilege(ctx.user, "tags:list")
+    is_anonymous = ctx.user.rank == "anonymous"
     cache_key = _get_all_tags_cache_key(ctx)
     cached = get_cached_tag_list(cache_key)
     if cached:
-        # Return cached response with HTTP cache header
-        return {
-            **cached,
-            "_cache": "public, max-age=300, stale-while-revalidate=300",
-        }
+        # Return cached response with HTTP cache header for anonymous users.
+        if is_anonymous:
+            return {
+                **cached,
+                "_cache": "public, max-age=300, stale-while-revalidate=300",
+            }
+        return cached
 
     resp = _search_executor.execute_and_serialize(ctx, lambda tag: _serialize(ctx, tag))
     set_cached_tag_list(cache_key, resp)
-    # Add HTTP cache header (5 minutes)
-    resp["_cache"] = "public, max-age=300, stale-while-revalidate=300"
+    # Add HTTP cache header (5 minutes) for anonymous users.
+    if is_anonymous:
+        resp["_cache"] = "public, max-age=300, stale-while-revalidate=300"
     return resp
 
 
