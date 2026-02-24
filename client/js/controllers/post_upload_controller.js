@@ -13,7 +13,6 @@ const Post = require("../models/post.js");
 const Tag = require("../models/tag.js");
 const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
-const TagList = require("../models/tag_list.js");
 
 const genericErrorMessage = "One or more files need your attention";
 const PERSIST_MESSAGE_TIMEOUT = null;
@@ -183,10 +182,8 @@ class PostUploadController {
                     const ctx = router.show(uri.formatClientLink(""));
                     ctx.controller.showSuccess("Uploaded");
                     if (hasTags) {
-                        TagList.refreshRelevant().then(() => {
-                            ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
-                            ctx.controller._headerView._autoCompleteControl.constructor.unsetReloadDefaultTagMatches();
-                        });
+                        ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
+                        ctx.controller._headerView._autoCompleteControl.constructor.unsetReloadDefaultTagMatches();
                     }
                 },
                 (error) => {

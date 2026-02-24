@@ -315,6 +315,7 @@ class Post extends events.EventTarget {
         }
 
         const newFile = !this._id;
+        const tagsChanged = detail.tags !== undefined;
 
         let apiPromise = this._id
             ? api.put(uri.formatApiLink("post", this.id), detail, files)
@@ -370,6 +371,10 @@ class Post extends events.EventTarget {
                         localStorage.uploadedIDs = localStorage.uploadedIDs
                             ? localStorage.uploadedIDs + idEntry
                             : idEntry;
+                    }
+
+                    if (tagsChanged) {
+                        TagList.refreshRelevant();
                     }
 
                     return Promise.resolve();
