@@ -2,6 +2,8 @@ import base64
 import hashlib
 import logging
 import os
+import threading
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -12,6 +14,7 @@ from szurubooru import config
 
 
 _DEFAULT_TTL_SECONDS = 600
+_CIRCUIT_BREAKER_SECONDS = 30.0
 _REDIS_KEY_PREFIX = "szurubooru:cache"
 _REDIS_NAMESPACE_KEY = "szurubooru:cache:namespace"
 _TYPE_KEY = "__cache_type__"
@@ -20,6 +23,12 @@ SCOPE_GLOBAL = "global"
 SCOPE_SEARCH = "search"
 SCOPE_POST_RESPONSE = "response:post"
 SCOPE_TAG_RESPONSE = "response:tag"
+
+_STATE_LOCK = threading.Lock()
+_CACHE_DEGRADED = False
+_CACHE_FAIL_OPEN_UNTIL = 0.0
+_CACHE_DOWN_LOGGED = False
+_RECOVERY_PURGE_PENDING = False
 
 
 def _build_redis_url() -> Optional[str]:
@@ -44,9 +53,70 @@ def _build_redis_url() -> Optional[str]:
     return None
 
 
-def _fatal_redis_error(action: str, ex: Exception) -> None:
-    logging.critical("Redis cache %s failed: %s", action, ex, exc_info=True)
-    os._exit(1)
+def _on_redis_runtime_error(action: str, ex: Exception) -> None:
+    global _CACHE_DEGRADED
+    global _CACHE_FAIL_OPEN_UNTIL
+    global _CACHE_DOWN_LOGGED
+    global _RECOVERY_PURGE_PENDING
+
+    now = time.monotonic()
+    with _STATE_LOCK:
+        _CACHE_DEGRADED = True
+        _CACHE_FAIL_OPEN_UNTIL = now + _CIRCUIT_BREAKER_SECONDS
+        _RECOVERY_PURGE_PENDING = True
+        should_log = not _CACHE_DOWN_LOGGED
+        if should_log:
+            _CACHE_DOWN_LOGGED = True
+    if should_log:
+        logging.error(
+            "Redis cache %s failed; entering fail-open mode for %.0f seconds.",
+            action,
+            _CIRCUIT_BREAKER_SECONDS,
+            exc_info=True,
+        )
+
+
+def _recover_if_needed() -> bool:
+    global _CACHE_DEGRADED
+    global _CACHE_FAIL_OPEN_UNTIL
+    global _CACHE_DOWN_LOGGED
+    global _RECOVERY_PURGE_PENDING
+
+    now = time.monotonic()
+    with _STATE_LOCK:
+        degraded = _CACHE_DEGRADED
+        fail_open_until = _CACHE_FAIL_OPEN_UNTIL
+        recovery_purge_pending = _RECOVERY_PURGE_PENDING
+        if not degraded:
+            return True
+        if now < fail_open_until:
+            return False
+        # Keep other threads in fail-open mode while this thread probes Redis.
+        _CACHE_FAIL_OPEN_UNTIL = now + _CIRCUIT_BREAKER_SECONDS
+
+    try:
+        _REDIS_CLIENT.ping()
+        if recovery_purge_pending:
+            namespace_pattern = f"{_REDIS_NAMESPACE_KEY}:*"
+            for namespace_key in _REDIS_CLIENT.scan_iter(
+                match=namespace_pattern
+            ):
+                _REDIS_CLIENT.incr(namespace_key)
+    except redis.exceptions.RedisError as ex:
+        _on_redis_runtime_error("recovery", ex)
+        return False
+
+    with _STATE_LOCK:
+        was_logged_down = _CACHE_DOWN_LOGGED
+        _CACHE_DEGRADED = False
+        _CACHE_FAIL_OPEN_UNTIL = 0.0
+        _CACHE_DOWN_LOGGED = False
+        _RECOVERY_PURGE_PENDING = False
+    if was_logged_down:
+        logging.info(
+            "Redis cache recovered; fail-open mode disabled and scopes purged."
+        )
+    return True
 
 
 def _init_redis_client() -> redis.Redis:
@@ -138,14 +208,10 @@ def _redis_namespace_key(scope: Optional[str]) -> str:
 
 def _get_namespace(scope: Optional[str]) -> str:
     namespace_key = _redis_namespace_key(scope)
-    try:
+    namespace = _REDIS_CLIENT.get(namespace_key)
+    if namespace is None:
+        _REDIS_CLIENT.set(namespace_key, "1", nx=True)
         namespace = _REDIS_CLIENT.get(namespace_key)
-        if namespace is None:
-            _REDIS_CLIENT.set(namespace_key, "1", nx=True)
-            namespace = _REDIS_CLIENT.get(namespace_key)
-    except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("namespace lookup", ex)
-        return "1"  # unreachable
 
     if namespace is None:
         return "1"
@@ -171,27 +237,33 @@ _REDIS_CLIENT = _init_redis_client()
 
 
 def purge(scope: Optional[str] = None) -> None:
+    if not _recover_if_needed():
+        return
     namespace_key = _redis_namespace_key(scope)
     try:
         _REDIS_CLIENT.incr(namespace_key)
     except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("purge", ex)
+        _on_redis_runtime_error("purge", ex)
 
 
 def has(key: object, scope: Optional[str] = None) -> bool:
+    if not _recover_if_needed():
+        return False
     try:
         return bool(_REDIS_CLIENT.exists(_redis_key(key, scope)))
     except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("exists", ex)
-        return False  # unreachable
+        _on_redis_runtime_error("exists", ex)
+        return False
 
 
 def get(key: object, scope: Optional[str] = None) -> Any:
+    if not _recover_if_needed():
+        return None
     try:
         payload = _REDIS_CLIENT.get(_redis_key(key, scope))
     except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("get", ex)
-        return None  # unreachable
+        _on_redis_runtime_error("get", ex)
+        return None
 
     if payload is None:
         return None
@@ -199,10 +271,12 @@ def get(key: object, scope: Optional[str] = None) -> Any:
 
 
 def remove(key: object, scope: Optional[str] = None) -> None:
+    if not _recover_if_needed():
+        return
     try:
         _REDIS_CLIENT.delete(_redis_key(key, scope))
     except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("delete", ex)
+        _on_redis_runtime_error("delete", ex)
 
 
 def put(
@@ -211,6 +285,8 @@ def put(
     ttl_seconds: Optional[int] = None,
     scope: Optional[str] = None,
 ) -> None:
+    if not _recover_if_needed():
+        return
     ttl = _effective_ttl(ttl_seconds)
     if ttl <= 0:
         remove(key, scope=scope)
@@ -219,4 +295,4 @@ def put(
     try:
         _REDIS_CLIENT.setex(_redis_key(key, scope), ttl, payload)
     except redis.exceptions.RedisError as ex:
-        _fatal_redis_error("setex", ex)
+        _on_redis_runtime_error("setex", ex)
