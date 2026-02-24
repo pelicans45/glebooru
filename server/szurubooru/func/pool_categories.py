@@ -226,4 +226,5 @@ def delete_category(category: model.PoolCategory) -> None:
             "Pool category has some usages and cannot be deleted. "
             + "Please remove this category from relevant pools first."
         )
+    cache.remove(DEFAULT_CATEGORY_NAME_CACHE_KEY)
     db.session.delete(category)

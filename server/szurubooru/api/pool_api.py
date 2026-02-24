@@ -2,7 +2,14 @@ from datetime import datetime, UTC
 from typing import Dict, List, Optional
 
 from szurubooru import db, model, rest, search
-from szurubooru.func import auth, pools, serialization, snapshots, versions
+from szurubooru.func import (
+    auth,
+    cache_invalidation,
+    pools,
+    serialization,
+    snapshots,
+    versions,
+)
 
 _search_executor = search.Executor(search.configs.PoolSearchConfig())
 
@@ -45,6 +52,7 @@ def create_pool(
     ctx.session.flush()
     snapshots.create(pool, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, pool)
 
 
@@ -81,6 +89,7 @@ def update_pool(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.flush()
     snapshots.modify(pool, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, pool)
 
 
@@ -92,6 +101,7 @@ def delete_pool(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(pool, ctx.user)
     pools.delete(pool)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return {}
 
 
@@ -110,4 +120,5 @@ def merge_pools(
     pools.merge_pools(source_pool, target_pool)
     snapshots.merge(source_pool, target_pool, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, target_pool)

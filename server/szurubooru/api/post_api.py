@@ -12,6 +12,7 @@ from szurubooru.search import tokens as search_tokens
 from szurubooru.func import (
     auth,
     cache,
+    cache_invalidation,
     favorites,
     image_hash,
     mime,
@@ -25,8 +26,6 @@ from szurubooru.func import (
     snapshots,
     versions,
 )
-
-from . import tag_api
 
 _search_executor_config = search.configs.PostSearchConfig()
 _search_executor = search.Executor(_search_executor_config)
@@ -172,7 +171,7 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
             skip_count,
             tuple(options),
         )
-        cached = cache.get(cache_key)
+        cached = cache.get(cache_key, scope=cache.SCOPE_POST_RESPONSE)
         if isinstance(cached, dict):
             return cached
 
@@ -198,7 +197,7 @@ def get_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response:
     if cacheable:
         result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
         if cache_key is not None:
-            cache.put(cache_key, result)
+            cache.put(cache_key, result, scope=cache.SCOPE_POST_RESPONSE)
     return result
 
 
@@ -217,7 +216,7 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
             params.get("post_id"),
             tuple(options),
         )
-        cached = cache.get(cache_key)
+        cached = cache.get(cache_key, scope=cache.SCOPE_POST_RESPONSE)
         if isinstance(cached, dict):
             return cached
 
@@ -228,7 +227,7 @@ def get_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     if cacheable:
         result["_cache"] = "public, max-age=30, stale-while-revalidate=60"
         if cache_key is not None:
-            cache.put(cache_key, result)
+            cache.put(cache_key, result, scope=cache.SCOPE_POST_RESPONSE)
     return result
 
 
@@ -333,7 +332,9 @@ def create_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
         _raise_if_duplicate_checksum(post)
         raise
     if tag_names:
-        tag_api.clear_all_cached_tag_lists()
+        cache_invalidation.invalidate_tag_related()
+    else:
+        cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -348,7 +349,7 @@ def create_snapshots_for_post(
 @rest.routes.put("/post/(?P<post_id>[^/]+)/?")
 def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     post = _get_post(params)
-    previous_post_tag_count = None
+    previous_post_tag_ids = None
     versions.verify_version(post, ctx)
     versions.bump_version(post)
     new_tag_categories = _get_new_tag_categories(ctx)
@@ -366,11 +367,7 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         )
     new_tags = []
     if ctx.has_param("tags"):
-        previous_post_tag_count = db.session.execute(
-            sa.select(sa.func.count(model.PostTag.tag_id)).where(
-                model.PostTag.post_id == post.post_id
-            )
-        ).scalar_one()
+        previous_post_tag_ids = {tag.tag_id for tag in post.tags}
         new_tag_names = ctx.get_param_as_string_list("tags")
         if not auth.has_privilege(ctx.user, "posts:edit:tags"):
             existing_tags = tags.get_tags_by_names(new_tag_names)
@@ -431,8 +428,17 @@ def update_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
         ctx.session.rollback()
         _raise_if_duplicate_checksum(post)
         raise
-    if previous_post_tag_count is not None and previous_post_tag_count != len(post.tags):
-        tag_api.clear_all_cached_tag_lists()
+    if previous_post_tag_ids is not None:
+        current_post_tag_ids = {tag.tag_id for tag in post.tags}
+    else:
+        current_post_tag_ids = None
+    if (
+        previous_post_tag_ids is not None
+        and previous_post_tag_ids != current_post_tag_ids
+    ):
+        cache_invalidation.invalidate_tag_related()
+    else:
+        cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -446,6 +452,7 @@ def delete_post(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     posts.delete(post)
     # ctx.session.delete(post)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     logging.info("%s deleted post %d", ctx.user.name, post_id)
     return {}
 
@@ -467,6 +474,7 @@ def merge_posts(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Respons
         posts.merge_posts(source_post, target_post)
     snapshots.merge(source_post, target_post, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     return _serialize_post(ctx, target_post)
 
 
@@ -492,6 +500,7 @@ def set_featured_post(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.R
     posts.feature_post(post, ctx.user)
     snapshots.modify(post, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -502,6 +511,7 @@ def set_post_score(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     score = ctx.get_param_as_int("score")
     scores.set_score(post, ctx.user, score)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -511,6 +521,7 @@ def delete_post_score(ctx: rest.Context, params: Dict[str, str]) -> rest.Respons
     post = _get_post(params)
     scores.delete_score(post, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -520,6 +531,7 @@ def add_post_to_favorites(ctx: rest.Context, params: Dict[str, str]) -> rest.Res
     post = _get_post(params)
     favorites.set_favorite(post, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 
@@ -531,6 +543,7 @@ def delete_post_from_favorites(
     post = _get_post(params)
     favorites.unset_favorite(post, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize_post(ctx, post)
 
 

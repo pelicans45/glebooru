@@ -4,6 +4,7 @@ from typing import Dict
 from szurubooru import model, rest, search
 from szurubooru.func import (
     auth,
+    cache_invalidation,
     comments,
     posts,
     scores,
@@ -51,6 +52,7 @@ def create_comment(
     comment = comments.create_comment(ctx.user if ctx.user.name else None, post, text)
     ctx.session.add(comment)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, comment)
 
 
@@ -72,6 +74,7 @@ def update_comment(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     comments.update_comment_text(comment, text)
     comment.last_edit_time = datetime.now(UTC).replace(tzinfo=None)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, comment)
 
 
@@ -83,6 +86,7 @@ def delete_comment(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "comments:delete:%s" % infix)
     ctx.session.delete(comment)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return {}
 
 
@@ -95,6 +99,7 @@ def set_comment_score(
     comment = _get_comment(params)
     scores.set_score(comment, ctx.user, score)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, comment)
 
 
@@ -106,4 +111,5 @@ def delete_comment_score(
     comment = _get_comment(params)
     scores.delete_score(comment, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, comment)

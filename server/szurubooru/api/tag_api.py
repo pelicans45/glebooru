@@ -4,45 +4,38 @@ from typing import Dict, List
 from szurubooru import db, model, rest, search
 from szurubooru.func import (
     auth,
+    cache,
+    cache_invalidation,
     serialization,
     snapshots,
     tags,
     versions,
 )
 
-TAG_LIST_CACHE = {}
 TAG_LIST_CACHE_EXPIRATION_SECONDS = 1800
+TAG_LIST_CACHE_PREFIX = "tag-list"
 
 _search_executor = search.Executor(search.configs.TagSearchConfig())
 
 
 def get_cached_tag_list(tag):
-    result = TAG_LIST_CACHE.get(tag)
-    if not result:
-        return None
-
-    if (
-        datetime.now(UTC).replace(tzinfo=None) - result["time"]
-    ).total_seconds() > TAG_LIST_CACHE_EXPIRATION_SECONDS:
-        return None
-
-    return result["response"]
+    return cache.get(
+        (TAG_LIST_CACHE_PREFIX, tag),
+        scope=cache.SCOPE_TAG_RESPONSE,
+    )
 
 
 def set_cached_tag_list(tag, resp):
-    TAG_LIST_CACHE[tag] = {
-        "response": resp,
-        "time": datetime.now(UTC).replace(tzinfo=None),
-    }
-
-
-def clear_cached_tag_list(tag):
-    TAG_LIST_CACHE.pop(tag, None)
+    cache.put(
+        (TAG_LIST_CACHE_PREFIX, tag),
+        resp,
+        ttl_seconds=TAG_LIST_CACHE_EXPIRATION_SECONDS,
+        scope=cache.SCOPE_TAG_RESPONSE,
+    )
 
 
 def clear_all_cached_tag_lists():
-    #logging.info("Clearing cached tag lists")
-    TAG_LIST_CACHE.clear()
+    cache_invalidation.invalidate_tag_responses()
 
 
 def _serialize(ctx: rest.Context, tag: model.Tag) -> rest.Response:
@@ -174,7 +167,7 @@ def create_tag(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response
     ctx.session.flush()
     snapshots.create(tag, ctx.user)
     ctx.session.commit()
-    clear_all_cached_tag_lists()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, tag)
 
 
@@ -213,7 +206,7 @@ def update_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     ctx.session.flush()
     snapshots.modify(tag, ctx.user)
     ctx.session.commit()
-    clear_all_cached_tag_lists()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, tag)
 
 
@@ -225,7 +218,7 @@ def delete_tag(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     snapshots.delete(tag, ctx.user)
     tags.delete(tag)
     ctx.session.commit()
-    clear_all_cached_tag_lists()
+    cache_invalidation.invalidate_tag_related()
     return {}
 
 
@@ -242,5 +235,5 @@ def merge_tags(ctx: rest.Context, _params: Dict[str, str] = {}) -> rest.Response
     tags.merge_tags(source_tag, target_tag)
     snapshots.merge(source_tag, target_tag, ctx.user)
     ctx.session.commit()
-    clear_all_cached_tag_lists()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, target_tag)

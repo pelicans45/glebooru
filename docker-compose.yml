@@ -4,6 +4,7 @@ services:
         restart: unless-stopped
         depends_on:
             - sql
+            - redis
         environment:
             ## These should be the names of the dependent containers listed below,
             ## or FQDNs/IP addresses if these services are running outside of Docker
@@ -17,6 +18,9 @@ services:
             #LOG_SQL: 0 (1 for verbose SQL logs)
             THREADS:
             WORKERS:
+            REDIS_HOST: redis
+            #REDIS_PORT: 6379
+            #REDIS_DB: 0
             ## HTTP Server: granian (Rust-based, high performance)
             SECRET:
         volumes:
@@ -51,3 +55,8 @@ services:
             - ./server/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
             - /opt/backup:/opt/backup
         command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        command: redis-server --save "" --appendonly no

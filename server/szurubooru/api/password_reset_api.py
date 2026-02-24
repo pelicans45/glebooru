@@ -1,7 +1,7 @@
 from hashlib import md5
 from typing import Dict
 
-from szurubooru.func import auth, mailer, users, versions
+from szurubooru.func import auth, cache_invalidation, mailer, users, versions
 
 from szurubooru import config, errors, rest
 
@@ -63,4 +63,5 @@ def finish_password_reset(
     new_password = users.reset_user_password(user)
     versions.bump_version(user)
     ctx.session.commit()
+    cache_invalidation.invalidate_search()
     return {"password": new_password}

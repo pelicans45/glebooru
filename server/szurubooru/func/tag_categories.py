@@ -236,4 +236,5 @@ def delete_category(category: model.TagCategory) -> None:
             "Tag category has some usages and cannot be deleted. "
             + "Please remove this category from relevant tags first."
         )
+    cache.remove(DEFAULT_CATEGORY_NAME_CACHE_KEY)
     db.session.delete(category)
