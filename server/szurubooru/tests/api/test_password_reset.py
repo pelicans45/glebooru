@@ -74,9 +74,13 @@ def test_confirming_with_good_token(context_factory, user_factory):
     context = context_factory(
         params={"token": "4ac0be176fb364f13ee6b634c43220e2"}
     )
-    result = api.password_reset_api.finish_password_reset(
-        context, {"user_name": "u1"}
-    )
+    with patch(
+        "szurubooru.func.cache_invalidation.invalidate_search"
+    ) as invalidate_search:
+        result = api.password_reset_api.finish_password_reset(
+            context, {"user_name": "u1"}
+        )
+    invalidate_search.assert_called_once_with()
     assert user.password_hash != old_hash
     assert auth.is_valid_password(user, result["password"]) is True
 

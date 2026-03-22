@@ -25,6 +25,7 @@ const fields = [
     "favoriteCount",
     "commentCount",
     "tagsBasic",
+    "version",
 ];
 
 class PostListController {
@@ -56,6 +57,7 @@ class PostListController {
             canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
             bulkEdit: {
                 tags: this._bulkEditTags,
+                tagAction: this._bulkEditTagAction,
             },
         });
         this._headerView.addEventListener("navigate", (e) =>
@@ -93,6 +95,10 @@ class PostListController {
             .split(/\s+/)
             .filter((s) => s)
             .map((id) => parseInt(id));
+    }
+
+    get _bulkEditTagAction() {
+        return this._ctx.parameters.tagAction === "remove" ? "remove" : "add";
     }
 
     _evtNavigate(e) {
@@ -133,11 +139,21 @@ class PostListController {
 
     _evtTag(e) {
         Promise.all(
-            this._bulkEditTags.map((tag) => {
-                let tagData = tags.parseTagAndCategory(tag);
-                return e.detail.post.tags.addByName(tagData.name);
-            })
+            this._bulkEditTags.map((rawTag) =>
+                tags.resolveTagAndCategory(rawTag)
+            )
         )
+            .then((resolvedTags) =>
+                Promise.all(
+                    resolvedTags.map((tag) => {
+                        const addImplications = Boolean(tag._origName);
+                        return e.detail.post.tags.addByTag(
+                            tag,
+                            addImplications
+                        );
+                    })
+                )
+            )
             .then(() => e.detail.post.save())
             .catch((error) => window.alert(error.message));
     }
@@ -294,6 +310,7 @@ class PostListController {
                     canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
                     bulkEdit: {
                         tags: this._bulkEditTags,
+                        tagAction: this._bulkEditTagAction,
                         relations: this._ctx.parameters.relations,
                         delete: this._postsMarkedForDeletion,
                     },

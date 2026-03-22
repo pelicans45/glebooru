@@ -1,9 +1,10 @@
+import importlib
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional, Tuple, Union, Type
+from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import sqlalchemy as sa
 from szurubooru.func import cache
-from szurubooru.search import parser, tokens
+from szurubooru.search import criteria, parser, tokens
 from szurubooru.search.configs import util as search_util
 from szurubooru.search.configs.base_search_config import BaseSearchConfig
 from szurubooru.search.query import SearchQuery
@@ -12,6 +13,7 @@ from szurubooru.search.typing import SaQuery
 from szurubooru import db, errors, model, rest
 
 import logging
+
 
 @dataclass(frozen=True)
 class _CachedSearchResult:
@@ -53,6 +55,132 @@ class Executor:
         if isinstance(column, search_util.SortColumn):
             return column.column, column.nulls_last
         return column, False
+
+    def _criterion_fingerprint(
+        self, criterion: Optional[criteria.BaseCriterion]
+    ) -> object:
+        if criterion is None:
+            return None
+        if isinstance(criterion, criteria.PlainCriterion):
+            return (
+                "plain",
+                criterion.value,
+                bool(getattr(criterion, "internal", False)),
+            )
+        if isinstance(criterion, criteria.ArrayCriterion):
+            return (
+                "array",
+                tuple(criterion.values),
+                bool(getattr(criterion, "internal", False)),
+            )
+        if isinstance(criterion, criteria.RangedCriterion):
+            return (
+                "range",
+                criterion.min_value,
+                criterion.max_value,
+                bool(getattr(criterion, "internal", False)),
+            )
+        return ("unknown", repr(criterion))
+
+    def _query_fingerprint(self, search_query: SearchQuery) -> object:
+        return (
+            tuple(
+                (
+                    self._criterion_fingerprint(token.criterion),
+                    token.negated,
+                )
+                for token in search_query.anonymous_tokens
+            ),
+            tuple(
+                (
+                    token.name,
+                    self._criterion_fingerprint(token.criterion),
+                    token.negated,
+                )
+                for token in search_query.named_tokens
+            ),
+            tuple(
+                (token.value, token.negated)
+                for token in search_query.special_tokens
+            ),
+            tuple((token.name, token.order) for token in search_query.sort_tokens),
+        )
+
+    def _search_cache_key(
+        self,
+        search_query: SearchQuery,
+        offset: int,
+        limit: int,
+        include_count: bool,
+        include_has_more: bool,
+    ) -> object:
+        config_fingerprint = (
+            f"{self.config.__class__.__module__}:"
+            f"{self.config.__class__.__qualname__}"
+        )
+        return (
+            config_fingerprint,
+            self._query_fingerprint(search_query),
+            offset,
+            limit,
+            include_count,
+            include_has_more,
+        )
+
+    def _serialize_cached_id(self, cached_id: object) -> object:
+        if isinstance(cached_id, tuple):
+            return {"_tuple": list(cached_id)}
+        return cached_id
+
+    def _deserialize_cached_id(self, cached_id: object) -> object:
+        if isinstance(cached_id, dict) and "_tuple" in cached_id:
+            return tuple(cached_id["_tuple"])
+        return cached_id
+
+    def _serialize_cached_result(
+        self, cached: _CachedSearchResult
+    ) -> Dict[str, object]:
+        model_path = None
+        if cached.model is not None:
+            model_path = f"{cached.model.__module__}:{cached.model.__name__}"
+        return {
+            "_type": "cached_search_result",
+            "model_path": model_path,
+            "ids": [self._serialize_cached_id(cached_id) for cached_id in cached.ids],
+            "count": cached.count,
+            "has_more": cached.has_more,
+        }
+
+    def _deserialize_cached_result(
+        self, payload: Dict[str, object]
+    ) -> Optional[_CachedSearchResult]:
+        if payload.get("_type") != "cached_search_result":
+            return None
+        model_path = payload.get("model_path")
+        model_cls: Optional[Type[model.Base]] = None
+        if model_path:
+            if not isinstance(model_path, str) or ":" not in model_path:
+                return None
+            module_name, class_name = model_path.split(":", 1)
+            try:
+                module = importlib.import_module(module_name)
+                candidate = getattr(module, class_name)
+            except (ImportError, AttributeError):
+                return None
+            if not isinstance(candidate, type):
+                return None
+            model_cls = candidate
+
+        raw_ids = payload.get("ids", [])
+        if not isinstance(raw_ids, list):
+            return None
+
+        return _CachedSearchResult(
+            model=model_cls,
+            ids=[self._deserialize_cached_id(cached_id) for cached_id in raw_ids],
+            count=payload.get("count"),
+            has_more=payload.get("has_more"),
+        )
 
     def _hydrate_cached_entities(
         self, cached: _CachedSearchResult
@@ -109,16 +237,26 @@ class Executor:
         entity_id: int,
         serializer: Callable[[model.Base], rest.Response],
     ) -> rest.Response:
-        if ctx.has_param("query"):
-            query_text = ctx.get_param_as_string("query", default="")
-        else:
-            query_text = ctx.get_param_as_string("q", default="")
+        query_text = self.get_query_from_context(ctx)
         entities = self.get_around(query_text, entity_id)
         return {
             "prev": serializer(entities[0]),
             "next": serializer(entities[1]),
             "random": serializer(entities[2]),
         }
+
+    def get_query_from_context(self, ctx: rest.Context) -> str:
+        if ctx.has_param("query"):
+            return ctx.get_param_as_string("query", default="")
+        return ctx.get_param_as_string("q", default="")
+
+    def get_search_params_from_context(
+        self, ctx: rest.Context
+    ) -> Tuple[str, int, int]:
+        query = self.get_query_from_context(ctx)
+        offset = ctx.get_param_as_int("offset", default=0, min=0)
+        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
+        return query, offset, limit
 
     def _execute_internal(
         self,
@@ -142,26 +280,27 @@ class Executor:
                 disable_eager_loads = True
                 break
 
-        key = (
-            id(self.config),
-            hash(search_query),
+        key = self._search_cache_key(
+            search_query,
             offset,
             limit,
             include_count,
             include_has_more,
         )
         if use_cache and not disable_eager_loads:
-            cached = cache.get(key)
+            cached = cache.get(key, scope=cache.SCOPE_SEARCH)
         else:
             cached = None
         if cached is not None:
+            if isinstance(cached, dict):
+                cached = self._deserialize_cached_result(cached)
             if isinstance(cached, _CachedSearchResult):
                 return (
                     cached.count,
                     self._hydrate_cached_entities(cached),
                     cached.has_more,
                 )
-            return (0, [], None)
+            cached = None
 
         filter_query = self.config.create_filter_query(disable_eager_loads)
         # Note: lazyload("*") is already applied in create_filter_query
@@ -198,14 +337,18 @@ class Executor:
                     continue
                 cached_ids.append(identity[0] if len(identity) == 1 else identity)
             model_cls = type(entities[0]) if entities else None
-            cache.put(
-                key,
+            payload = self._serialize_cached_result(
                 _CachedSearchResult(
                     model=model_cls,
                     ids=cached_ids,
                     count=count,
                     has_more=has_more,
-                ),
+                )
+            )
+            cache.put(
+                key,
+                payload,
+                scope=cache.SCOPE_SEARCH,
             )
         return ret
 
@@ -251,14 +394,13 @@ class Executor:
         include_count: bool = True,
         include_has_more: bool = False,
     ) -> rest.Response:
-        if ctx.has_param("query"):
-            query = ctx.get_param_as_string("query", default="")
-        else:
-            query = ctx.get_param_as_string("q", default="")
-        offset = ctx.get_param_as_int("offset", default=0, min=0)
-        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)#max=100)
+        query, offset, limit = self.get_search_params_from_context(ctx)
         count, entities, has_more = self.execute_with_metadata(
-            query, offset, limit, include_count=include_count, include_has_more=include_has_more
+            query,
+            offset,
+            limit,
+            include_count=include_count,
+            include_has_more=include_has_more,
         )
         response = {
             "query": query,
@@ -283,12 +425,7 @@ class Executor:
         Execute search and serialize results using batch serialization.
         This avoids N+1 queries by allowing the serializer to pre-fetch data.
         """
-        if ctx.has_param("query"):
-            query = ctx.get_param_as_string("query", default="")
-        else:
-            query = ctx.get_param_as_string("q", default="")
-        offset = ctx.get_param_as_int("offset", default=0, min=0)
-        limit = ctx.get_param_as_int("limit", default=100, min=1, max=5000)
+        query, offset, limit = self.get_search_params_from_context(ctx)
         count, entities, has_more = self.execute_with_metadata(
             query,
             offset,

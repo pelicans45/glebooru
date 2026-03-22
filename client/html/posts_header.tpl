@@ -43,13 +43,23 @@
     %><div class='bulk-edit-block hidden'><%
         if (ctx.canBulkEditTags) {
             %><form class='horizontal bulk-edit bulk-edit-tags'><%
-                %><span class='append hint'>Tagging with:</span><%
-                %><a class='mousetrap button append open'>Mass tag</a><%
+                %><span class='append hint'>Editing tags:</span><%
+                %><a class='mousetrap button append open'>Mass edit tags</a><%
                 %><wbr/><%
+                %><%= ctx.makeSelect({
+                    name: 'tag-action',
+                    keyValues: {
+                        add: 'Add tags',
+                        remove: 'Remove tags',
+                    },
+                    selectedKey:
+                        ctx.bulkEdit && ctx.bulkEdit.tagAction
+                            ? ctx.bulkEdit.tagAction
+                            : 'add',
+                }) %><%
                 %><%= ctx.makeTextInput({name: 'tag', value: ctx.parameters.tag}) %><%
                 %><input class='mousetrap start' type='submit' value='Start tagging'/><%
                 %><a class='mousetrap button select-all'>Select all posts</a><%
-                %><a class='mousetrap button append close'>Stop tagging</a><%
             %></form><%
 
             %><!--TODO: create permission--><%

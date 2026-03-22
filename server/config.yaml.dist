@@ -184,3 +184,5 @@ privileges:
 ## usage: schema://user:password@host:port/database_name
 ## example: postgresql+psycopg://szuru:dog@localhost:5432/szuru_test
 #database:
+## Redis cache backend (required), usage: redis://[:password]@host:port/db
+#redis_url: redis://localhost:6379/0

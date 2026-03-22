@@ -3,6 +3,7 @@ from typing import Dict
 from szurubooru import model, rest
 from szurubooru.func import (
     auth,
+    cache_invalidation,
     pool_categories,
     pools,
     serialization,
@@ -43,6 +44,7 @@ def create_pool_category(
     ctx.session.flush()
     snapshots.create(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, category)
 
 
@@ -77,6 +79,7 @@ def update_pool_category(
     ctx.session.flush()
     snapshots.modify(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, category)
 
 
@@ -92,6 +95,7 @@ def delete_pool_category(
     pool_categories.delete_category(category)
     snapshots.delete(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return {}
 
 
@@ -107,4 +111,5 @@ def set_pool_category_as_default(
     ctx.session.flush()
     snapshots.modify(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, category)

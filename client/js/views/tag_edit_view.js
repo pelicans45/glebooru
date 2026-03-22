@@ -25,13 +25,13 @@ class TagEditView extends events.EventTarget {
         }
 
         if (this._implicationsFieldNode) {
-            new TagInputControl(
+            this._implicationsControl = new TagInputControl(
                 this._implicationsFieldNode,
                 this._tag.implications
             );
         }
         if (this._suggestionsFieldNode) {
-            new TagInputControl(
+            this._suggestionsControl = new TagInputControl(
                 this._suggestionsFieldNode,
                 this._tag.suggestions
             );
@@ -64,8 +64,8 @@ class TagEditView extends events.EventTarget {
         views.showSuccess(this._hostNode, message);
     }
 
-    showError(message) {
-        views.showError(this._hostNode, message);
+    showError(message, timeoutMs) {
+        views.showError(this._hostNode, message, timeoutMs);
     }
 
     _evtNameInput(e) {
@@ -93,6 +93,20 @@ class TagEditView extends events.EventTarget {
 
     _evtSubmit(e) {
         e.preventDefault();
+        this.clearMessages();
+        if (
+            this._implicationsControl &&
+            this._implicationsControl.hasPendingText()
+        ) {
+            this.showError(
+                "You left unsubmitted text in implications. Either submit " +
+                    "the implication tag on Enter or delete it before " +
+                    "saving.",
+                25000
+            );
+            this._implicationsControl.focusInput();
+            return;
+        }
         this.dispatchEvent(
             new CustomEvent("submit", {
                 detail: {

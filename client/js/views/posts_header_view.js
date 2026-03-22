@@ -16,12 +16,16 @@ class BulkEditor extends events.EventTarget {
     constructor(hostNode) {
         super();
         this._hostNode = hostNode;
-        this._openLinkNode.addEventListener("click", (e) =>
-            this._evtOpenLinkClick(e)
-        );
-        this._closeLinkNode.addEventListener("click", (e) =>
-            this._evtCloseLinkClick(e)
-        );
+        if (this._openLinkNode) {
+            this._openLinkNode.addEventListener("click", (e) =>
+                this._evtOpenLinkClick(e)
+            );
+        }
+        if (this._closeLinkNode) {
+            this._closeLinkNode.addEventListener("click", (e) =>
+                this._evtCloseLinkClick(e)
+            );
+        }
     }
 
     get opened() {
@@ -51,6 +55,11 @@ class BulkEditor extends events.EventTarget {
         this._hostNode.classList.toggle("hidden", state);
     }
 
+    reset() {
+        this.toggleOpen(false);
+        this.toggleHide(false);
+    }
+
     _evtOpenLinkClick(e) {
         throw new Error("Not implemented");
     }
@@ -75,8 +84,9 @@ class BulkSafetyEditor extends BulkEditor {
 }
 
 class BulkTagEditor extends BulkEditor {
-    constructor(hostNode) {
+    constructor(hostNode, options = {}) {
         super(hostNode);
+        this._isActive = Boolean(options.active);
         this._autoCompleteControl = new TagAutoCompleteControl(
             this._inputNode,
             {
@@ -99,6 +109,7 @@ class BulkTagEditor extends BulkEditor {
                                 tag_str,
                                 false
                             );
+                            this._syncSubmitButton();
                         });
                 },
             }
@@ -107,23 +118,45 @@ class BulkTagEditor extends BulkEditor {
             this._evtFormSubmit(e)
         );
 
-        this._hostNode
-            .querySelector(".select-all")
-            .addEventListener("click", (e) => {
-                document
-                    .querySelectorAll(".tag-flipper")
-                    .forEach((node) => {
-                        node.click();
-                    });
-            });
+        if (this._selectAllNode) {
+            this._selectAllNode.addEventListener("click", (e) =>
+                this._evtSelectAllClick(e)
+            );
+        }
+
+        if (this._actionNode) {
+            this._actionNode.addEventListener("change", () =>
+                this._syncSubmitButton()
+            );
+        }
+        if (this._inputNode) {
+            this._inputNode.addEventListener("input", () =>
+                this._syncSubmitButton()
+            );
+        }
+        this._syncSubmitButton();
     }
 
     get value() {
         return this._inputNode.value;
     }
 
+    get action() {
+        return this._actionNode && this._actionNode.value === "remove"
+            ? "remove"
+            : "add";
+    }
+
     get _inputNode() {
         return this._hostNode.querySelector("input[name=tag]");
+    }
+
+    get _actionNode() {
+        return this._hostNode.querySelector("select[name=tag-action]");
+    }
+
+    get _selectAllNode() {
+        return this._hostNode.querySelector(".select-all");
     }
 
     focusInput() {
@@ -137,25 +170,109 @@ class BulkTagEditor extends BulkEditor {
 
     _evtFormSubmit(e) {
         e.preventDefault();
+        if (this._isActive) {
+            this._isActive = false;
+            this._inputNode.value = "";
+            this._syncSubmitButton();
+            this.focusInput();
+            this.dispatchEvent(new CustomEvent("submit", { detail: {} }));
+            return;
+        }
+        if (!this._hasTagValue()) {
+            this._syncSubmitButton();
+            this.focusInput();
+            return;
+        }
         this.dispatchEvent(new CustomEvent("submit", { detail: {} }));
-        const node = this._submitLinkNode;
-        node.disabled = true;
-        node.value = "Tagging images...";
+        this._isActive = true;
+        this._syncSubmitButton();
+    }
+
+    _evtSelectAllClick(e) {
+        e.preventDefault();
+        if (this._selectAllNode.classList.contains("inactive")) {
+            return;
+        }
+        const selectForRemove = this.action === "remove";
+        const flipperNodes = [...document.querySelectorAll(".tag-flipper")];
+        const selectable = flipperNodes.filter((node) =>
+            selectForRemove
+                ? node.classList.contains("tagged")
+                : !node.classList.contains("tagged")
+        );
+        if (!selectable.length) {
+            return;
+        }
+        const actionVerb = selectForRemove ? "untag" : "tag";
+        const noun = selectable.length === 1 ? "post" : "posts";
+        if (!confirm(`Apply ${actionVerb} to ${selectable.length} ${noun}?`)) {
+            return;
+        }
+        selectable.forEach((node) => node.click());
     }
 
     _evtOpenLinkClick(e) {
         e.preventDefault();
         this.toggleOpen(true);
         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+        this._syncSubmitButton();
         this.focusInput();
     }
 
     _evtCloseLinkClick(e) {
         e.preventDefault();
-        this._inputNode.value = "";
-        this.toggleOpen(false);
-        this.blur();
+        this.reset();
         this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+    }
+
+    reset() {
+        this._inputNode.value = "";
+        if (this._actionNode) {
+            this._actionNode.value = "add";
+        }
+        this._isActive = false;
+        this.blur();
+        this._syncSubmitButton();
+        super.reset();
+    }
+
+    _syncSubmitButton() {
+        const node = this._submitLinkNode;
+        const actionNode = this._actionNode;
+        const inputNode = this._inputNode;
+        const selectAllNode = this._selectAllNode;
+        node.disabled = !this._isActive && !this._hasTagValue();
+        if (actionNode) {
+            actionNode.disabled = this._isActive;
+        }
+        if (inputNode) {
+            inputNode.disabled = this._isActive;
+        }
+        if (selectAllNode) {
+            selectAllNode.classList.toggle("inactive", !this._isActive);
+            selectAllNode.setAttribute(
+                "aria-disabled",
+                this._isActive ? "false" : "true"
+            );
+            if (this._isActive) {
+                selectAllNode.removeAttribute("tabindex");
+            } else {
+                selectAllNode.setAttribute("tabindex", "-1");
+            }
+        }
+        if (this._isActive) {
+            node.value =
+                this.action === "remove"
+                    ? "Untagging images... (click to stop)"
+                    : "Tagging images... (click to stop)";
+            return;
+        }
+        node.value =
+            this.action === "remove" ? "Start untagging" : "Start tagging";
+    }
+
+    _hasTagValue() {
+        return Boolean((this._inputNode.value || "").trim());
     }
 }
 
@@ -282,7 +399,9 @@ class PostsHeaderView extends events.EventTarget {
 
         this._bulkEditors = [];
         if (this._bulkEditTagsNode) {
-            this._bulkTagEditor = new BulkTagEditor(this._bulkEditTagsNode);
+            this._bulkTagEditor = new BulkTagEditor(this._bulkEditTagsNode, {
+                active: Boolean(ctx.parameters.tag),
+            });
             this._bulkEditors.push(this._bulkTagEditor);
         }
 
@@ -451,8 +570,7 @@ class PostsHeaderView extends events.EventTarget {
 
     _closeAndShowAllBulkEditors() {
         for (let otherEditor of this._bulkEditors) {
-            otherEditor.toggleOpen(false);
-            otherEditor.toggleHide(false);
+            otherEditor.reset();
         }
     }
 
@@ -469,6 +587,7 @@ class PostsHeaderView extends events.EventTarget {
                 detail: {
                     parameters: Object.assign({}, this._ctx.parameters, {
                         tag: null,
+                        tagAction: null,
                         offset: 0,
                     }),
                 },
@@ -510,6 +629,7 @@ class PostsHeaderView extends events.EventTarget {
                     parameters: Object.assign({}, this._ctx.parameters, {
                         q: query,
                         tag: null,
+                        tagAction: null,
                         offset: 0,
                     }),
                 },
@@ -555,10 +675,16 @@ class PostsHeaderView extends events.EventTarget {
         parameters.offset =
             parameters.q === prevQuery ? this._ctx.parameters.offset : 0;
         if (this._bulkTagEditor && this._bulkTagEditor.opened) {
-            parameters.tag = this._bulkTagEditor.value;
+            const tagValue = this._bulkTagEditor.value.trim();
+            parameters.tag = tagValue || null;
+            parameters.tagAction =
+                tagValue && this._bulkTagEditor.action === "remove"
+                    ? "remove"
+                    : null;
             this._bulkTagEditor.blur();
         } else {
             parameters.tag = null;
+            parameters.tagAction = null;
         }
         parameters.safety =
             this._bulkSafetyEditor && this._bulkSafetyEditor.opened

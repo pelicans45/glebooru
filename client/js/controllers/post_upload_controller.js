@@ -13,9 +13,9 @@ const Post = require("../models/post.js");
 const Tag = require("../models/tag.js");
 const PostUploadView = require("../views/post_upload_view.js");
 const EmptyView = require("../views/empty_view.js");
-const TagList = require("../models/tag_list.js");
 
-const genericErrorMessage = `One or more files need your attention; click "resume upload" to confirm`;
+const genericErrorMessage = "One or more files need your attention";
+const PERSIST_MESSAGE_TIMEOUT = null;
 
 class PostUploadController {
     constructor() {
@@ -95,8 +95,16 @@ class PostUploadController {
                         ).catch((error) => {
                             console.error(error);
                             anyFailures = true;
+                            const persistentErrorMessage =
+                                Boolean(error.persistMessage) ||
+                                (error.message || "").includes(
+                                    "already uploaded"
+                                );
                             if (error.uploadable) {
                                 if (error.similarPosts) {
+                                    const isBlockingLookalike = Boolean(
+                                        error.blockUpload
+                                    );
                                     error.uploadable.lookalikes =
                                         error.similarPosts;
                                     try {
@@ -106,31 +114,53 @@ class PostUploadController {
                                     } catch (err) {
                                         throw err;
                                     }
-                                    if (
+                                    if (isBlockingLookalike) {
+                                        error.uploadable.lookalikesConfirmed =
+                                            false;
+                                        this._view.showError(
+                                            error.message,
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
+                                        );
+                                    } else if (
                                         error.message.includes(
                                             "already uploaded"
                                         )
                                     ) {
                                         this._view.showError(
                                             error.message,
-                                            error.uploadable
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
                                         );
                                     } else {
                                         this._view.showInfo(
                                             error.message,
-                                            error.uploadable
+                                            error.uploadable,
+                                            persistentErrorMessage
+                                                ? PERSIST_MESSAGE_TIMEOUT
+                                                : undefined
                                         );
                                     }
                                 } else {
                                     this._view.showError(
                                         error.message,
-                                        error.uploadable
+                                        error.uploadable,
+                                        persistentErrorMessage
+                                            ? PERSIST_MESSAGE_TIMEOUT
+                                            : undefined
                                     );
                                 }
                             } else {
                                 this._view.showError(
                                     error.message,
-                                    uploadable
+                                    uploadable,
+                                    persistentErrorMessage
+                                        ? PERSIST_MESSAGE_TIMEOUT
+                                        : undefined
                                 );
                             }
                             if (e.detail.pauseRemainOnError) {
@@ -152,14 +182,16 @@ class PostUploadController {
                     const ctx = router.show(uri.formatClientLink(""));
                     ctx.controller.showSuccess("Uploaded");
                     if (hasTags) {
-                        TagList.refreshRelevant().then(() => {
-                            ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
-                            ctx.controller._headerView._autoCompleteControl.constructor.unsetReloadDefaultTagMatches();
-                        });
+                        ctx.controller._headerView._autoCompleteControl._setDefaultMatches();
+                        ctx.controller._headerView._autoCompleteControl.constructor.unsetReloadDefaultTagMatches();
                     }
                 },
                 (error) => {
-                    this._view.showError(genericErrorMessage);
+                    this._view.showError(
+                        genericErrorMessage,
+                        null,
+                        PERSIST_MESSAGE_TIMEOUT
+                    );
                     this._view.enableForm();
                 }
             );
@@ -205,32 +237,48 @@ class PostUploadController {
                                     post: searchResult.exactPost,
                                 },
                             ];
+                            error.blockUpload = true;
+                            error.persistMessage = true;
                             return Promise.reject(error);
                         }
                     }
 
-                    // notify about similar posts
-                    if (
-                        searchResult.similarPosts.length &&
-                        !alwaysUploadSimilar
-                    ) {
-                        let similarFound = false;
-                        for (const similarPost of searchResult.similarPosts) {
-                            if (parseFloat(similarPost.distance) < 0.05) {
-                                similarFound = true;
-                                break;
-                            }
-                        }
-                        if (similarFound) {
-							const noun = searchResult.similarPosts.length === 1 ? "post" : "posts";
+                    const similarPosts = searchResult.similarPosts || [];
+                    const shouldBlockUpload = Boolean(
+                        searchResult.shouldBlockUpload
+                    );
+                    const shouldWarnUpload = Boolean(
+                        searchResult.shouldWarnUpload
+                    );
+
+                    if (similarPosts.length) {
+                        if (shouldBlockUpload) {
+                            const noun =
+                                similarPosts.length === 1 ? "post" : "posts";
                             const error = new Error(
-                                `Found ${searchResult.similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
+                                `Found ${similarPosts.length} similar ${noun}.\nUpload is blocked because the file is too similar to an existing post.`
                             );
                             error.uploadable = uploadable;
-                            error.similarPosts = searchResult.similarPosts;
+                            error.similarPosts = similarPosts;
+                            error.blockUpload = true;
+                            error.persistMessage = true;
                             return Promise.reject(error);
                         }
-                    } else if (uploadable.foundOriginal) {
+
+                        if (shouldWarnUpload && !alwaysUploadSimilar) {
+                            const noun =
+                                similarPosts.length === 1 ? "post" : "posts";
+                            const error = new Error(
+                                `Found ${similarPosts.length} similar ${noun}.\nYou can resume or discard this upload.`
+                            );
+                            error.uploadable = uploadable;
+                            error.similarPosts = similarPosts;
+                            error.persistMessage = true;
+                            return Promise.reject(error);
+                        }
+                    }
+
+                    if (uploadable.foundOriginal) {
                         return this._copyTagsToOriginalAndSave(
                             uploadable,
                             uploadable.foundOriginal

@@ -424,7 +424,7 @@ function replaceContent(target, source) {
     }
 }
 
-function showMessage(target, message, className) {
+function showMessage(target, message, className, timeoutMs) {
     if (!message) {
         message = "Unknown message";
     }
@@ -440,7 +440,15 @@ function showMessage(target, message, className) {
     wrapperNode.appendChild(textNode);
     messagesHolderNode.appendChild(wrapperNode);
 
-    const timeout = className === "error" ? 12000 : 4000;
+    const timeout =
+        timeoutMs !== undefined
+            ? timeoutMs
+            : className === "error"
+              ? 12000
+              : 4000;
+    if (timeout === null || timeout === false) {
+        return true;
+    }
     setTimeout(() => {
         wrapperNode.remove();
     }, timeout);
@@ -458,18 +466,28 @@ function appendExclamationMark() {
     }
 }
 
-function showError(target, message) {
+function showError(target, message, timeoutMs) {
     appendExclamationMark();
     console.error(message);
-    return showMessage(target, misc.formatInlineMarkdown(message), "error");
+    return showMessage(
+        target,
+        misc.formatInlineMarkdown(message),
+        "error",
+        timeoutMs
+    );
 }
 
 function showSuccess(target, message) {
     return showMessage(target, misc.formatInlineMarkdown(message), "success");
 }
 
-function showInfo(target, message) {
-    return showMessage(target, misc.formatInlineMarkdown(message), "info");
+function showInfo(target, message, timeoutMs) {
+    return showMessage(
+        target,
+        misc.formatInlineMarkdown(message),
+        "info",
+        timeoutMs
+    );
 }
 
 function clearMessages(target) {

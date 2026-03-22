@@ -15,6 +15,7 @@ pynacl>=1.2.1
 pyRFC3339>=1.0
 pytz>=2018.3
 pyyaml>=3.11
+redis>=5.0.0
 # SQLAlchemy 2.0 - supports async, better performance with Cython extensions
 # Note: Legacy query() still works but is deprecated. See SQLALCHEMY_MIGRATION.md
 SQLAlchemy>=2.0.0

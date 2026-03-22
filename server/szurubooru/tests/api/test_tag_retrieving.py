@@ -18,6 +18,13 @@ def inject_config(config_injector):
     )
 
 
+@pytest.fixture(autouse=True)
+def clear_tag_list_cache():
+    api.tag_api.clear_all_cached_tag_lists()
+    yield
+    api.tag_api.clear_all_cached_tag_lists()
+
+
 def test_retrieving_multiple(user_factory, tag_factory, context_factory):
     tag1 = tag_factory(names=["t1"])
     tag2 = tag_factory(names=["t2"])
@@ -80,3 +87,70 @@ def test_trying_to_retrieve_single_without_privileges(
             context_factory(user=user_factory(rank=model.User.RANK_ANONYMOUS)),
             {"tag_name": "-"},
         )
+
+
+def test_retrieving_all_tags_uses_separate_minimal_and_full_cache(
+    user_factory, context_factory
+):
+    calls = []
+
+    def side_effect(ctx, _serializer):
+        fields = tuple(ctx.get_param_as_list("fields", default=[]))
+        calls.append(fields)
+        return {
+            "query": ctx.get_param_as_string("q", default=""),
+            "offset": ctx.get_param_as_int("offset", default=0, min=0),
+            "limit": ctx.get_param_as_int(
+                "limit", default=100, min=1, max=5000
+            ),
+            "total": 0,
+            "results": [{"fields": list(fields)}],
+        }
+
+    with patch.object(
+        api.tag_api._search_executor,
+        "execute_and_serialize",
+        side_effect=side_effect,
+    ):
+        user = user_factory(rank=model.User.RANK_REGULAR)
+
+        minimal_params = {
+            "q": "sort:usages",
+            "offset": 0,
+            "limit": 5000,
+            "fields": ["names", "usages", "category"],
+        }
+        full_params = {
+            "q": "sort:usages",
+            "offset": 0,
+            "limit": 5000,
+            "fields": [
+                "names",
+                "suggestions",
+                "implications",
+                "creationTime",
+                "usages",
+                "category",
+            ],
+        }
+
+        api.tag_api.get_all_tags(
+            context_factory(params=minimal_params, user=user)
+        )
+        api.tag_api.get_all_tags(context_factory(params=full_params, user=user))
+        api.tag_api.get_all_tags(
+            context_factory(params=minimal_params, user=user)
+        )
+        api.tag_api.get_all_tags(context_factory(params=full_params, user=user))
+
+    assert calls == [
+        ("names", "usages", "category"),
+        (
+            "names",
+            "suggestions",
+            "implications",
+            "creationTime",
+            "usages",
+            "category",
+        ),
+    ]

@@ -248,6 +248,14 @@ class TagInputControl extends events.EventTarget {
             });
     }
 
+    hasPendingText() {
+        return Boolean((this._tagInputNode.value || "").trim());
+    }
+
+    focusInput() {
+        this._tagInputNode.focus();
+    }
+
     deleteTag(tag) {
         if (!this.tags.isTaggedWith(tag.names[0])) {
             return;

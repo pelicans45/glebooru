@@ -3,6 +3,7 @@ from typing import Dict
 from szurubooru import model, rest
 from szurubooru.func import (
     auth,
+    cache_invalidation,
     serialization,
     snapshots,
     tag_categories,
@@ -44,6 +45,7 @@ def create_tag_category(
     ctx.session.flush()
     snapshots.create(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, category)
 
 
@@ -83,6 +85,7 @@ def update_tag_category(
     ctx.session.flush()
     snapshots.modify(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, category)
 
 
@@ -98,6 +101,7 @@ def delete_tag_category(
     tag_categories.delete_category(category)
     snapshots.delete(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     return {}
 
 
@@ -113,4 +117,5 @@ def set_tag_category_as_default(
     ctx.session.flush()
     snapshots.modify(category, ctx.user)
     ctx.session.commit()
+    cache_invalidation.invalidate_tag_related()
     return _serialize(ctx, category)

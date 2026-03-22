@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict
 
 from szurubooru import model, rest, search
-from szurubooru.func import auth, serialization, users, versions
+from szurubooru.func import auth, cache_invalidation, serialization, users, versions
 from szurubooru import errors
 
 _search_executor = search.Executor(search.configs.UserSearchConfig())
@@ -71,6 +71,7 @@ def create_user(
     logging.info("[REGISTRATION] User %s created by %s", name, ip)
     ctx.session.add(user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
 
     return _serialize(ctx, user, force_show_email=True)
 
@@ -114,6 +115,7 @@ def update_user(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
             ctx.get_file("avatar", default=b""),
         )
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return _serialize(ctx, user)
 
 
@@ -125,4 +127,5 @@ def delete_user(ctx: rest.Context, params: Dict[str, str]) -> rest.Response:
     auth.verify_privilege(ctx.user, "users:delete:%s" % infix)
     ctx.session.delete(user)
     ctx.session.commit()
+    cache_invalidation.invalidate_post_related()
     return {}

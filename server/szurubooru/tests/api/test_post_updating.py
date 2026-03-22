@@ -106,6 +106,46 @@ def test_post_updating(
         assert post.last_edit_time == datetime(1997, 1, 1)
 
 
+def test_tag_swap_with_same_count_invalidates_tag_related(
+    context_factory, post_factory, tag_factory, user_factory
+):
+    auth_user = user_factory(rank=model.User.RANK_REGULAR)
+    old_tag1 = tag_factory(names=["old-1"])
+    old_tag2 = tag_factory(names=["old-2"])
+    new_tag1 = tag_factory(names=["new-1"])
+    new_tag2 = tag_factory(names=["new-2"])
+    post = post_factory(tags=[old_tag1, old_tag2])
+    db.session.add_all([old_tag1, old_tag2, new_tag1, new_tag2, post])
+    db.session.flush()
+
+    def _swap_tags(post_to_update, _new_tag_names, category_overrides):
+        assert category_overrides == {}
+        post_to_update.tags = [new_tag1, new_tag2]
+        return []
+
+    with patch("szurubooru.func.posts.update_post_tags"), patch(
+        "szurubooru.func.posts.serialize_post"
+    ), patch("szurubooru.func.snapshots.modify"), patch(
+        "szurubooru.func.cache_invalidation.invalidate_tag_related"
+    ) as invalidate_tag_related, patch(
+        "szurubooru.func.cache_invalidation.invalidate_post_related"
+    ) as invalidate_post_related:
+        posts.update_post_tags.side_effect = _swap_tags
+        posts.serialize_post.return_value = "serialized post"
+
+        result = api.post_api.update_post(
+            context_factory(
+                params={"version": 1, "tags": ["new-1", "new-2"]},
+                user=auth_user,
+            ),
+            {"post_id": post.post_id},
+        )
+
+        assert result == "serialized post"
+        invalidate_tag_related.assert_called_once_with()
+        invalidate_post_related.assert_not_called()
+
+
 def test_uploading_from_url_saves_source(
     context_factory, post_factory, user_factory
 ):

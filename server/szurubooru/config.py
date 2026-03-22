@@ -5,6 +5,7 @@ import yaml
 
 from szurubooru import errors
 
+
 def _merge(left: Dict, right: Dict) -> Dict:
     for key in right:
         if key in left:
@@ -29,6 +30,19 @@ def _normalize_database_url(url: str) -> str:
     return url
 
 
+def _docker_redis_url() -> str:
+    url = os.getenv("REDIS_URL")
+    if url:
+        return url
+    host = os.getenv("REDIS_HOST", "redis")
+    port = int(os.getenv("REDIS_PORT", "6379"))
+    db = int(os.getenv("REDIS_DB", "0"))
+    password = os.getenv("REDIS_PASSWORD")
+    if password:
+        return f"redis://:{password}@{host}:{port}/{db}"
+    return f"redis://{host}:{port}/{db}"
+
+
 def _docker_config() -> Dict:
     if "TEST_ENVIRONMENT" not in os.environ:
         for key in ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST"]:
@@ -49,6 +63,7 @@ def _docker_config() -> Dict:
             "port": int(os.getenv("POSTGRES_PORT", 5432)),
             "db": os.getenv("POSTGRES_DB", os.getenv("POSTGRES_USER")),
         },
+        "redis_url": _docker_redis_url(),
     }
 
 
