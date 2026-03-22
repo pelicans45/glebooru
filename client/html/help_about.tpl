@@ -12,8 +12,10 @@
 <ul>
 <li><a href="https://jej.lol">jej.lol</a> (main hub)</li>
 <li><a href="https://lole.meme">lole.meme</a> (meme hub)</li>
-<li><a href="https://bury.pink">bury.pink</a></li>
+<hr>
 <li><a href="https://glegle.gallery">glegle.gallery</a></li>
+<li><a href="https://boymoders.com">boymoders.com</a></li>
+<li><a href="https://bury.pink">bury.pink</a></li>
 <li><a href="https://flube.supply">flube.supply</a></li>
 <li><a href="https://spikedog.school">spikedog.school</a></li>
 <li><a href="https://yosho.io">yosho.io</a></li>

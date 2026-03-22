@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+> **Note:** `CLAUDE.md` is a symlink to `AGENTS.md`. They are the same file.
+
 ## Project Overview
 
 glebooru is a modern booru application (forked from szurubooru) supporting images, videos, Flash, and youtube-dl web content. Core features include tagging, pools, comments, annotations, and rich search.
