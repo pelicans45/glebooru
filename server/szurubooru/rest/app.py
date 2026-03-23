@@ -1,8 +1,9 @@
+import cgi
 import logging
 import re
 import urllib.parse
 from datetime import datetime
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
 import orjson as json
@@ -43,83 +44,6 @@ def _get_headers(env: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
-def _parse_multipart(env: Dict[str, Any]) -> Tuple[Dict[str, Any], bytes]:
-    """Parse multipart form data using python-multipart library."""
-    files = {}
-    body = None
-
-    content_type = env.get("CONTENT_TYPE", "")
-    content_length = int(env.get("CONTENT_LENGTH", 0))
-
-    if content_length == 0:
-        raise errors.HttpBadRequest("ValidationError", "No content")
-
-    # Read the entire body
-    raw_body = env["wsgi.input"].read(content_length)
-
-    # Parse using multipart
-    def on_field(field):
-        nonlocal body
-        if field.field_name == b"metadata":
-            body = field.value
-        else:
-            files[field.field_name.decode("utf-8")] = field.value
-
-    def on_file(file):
-        files[file.field_name.decode("utf-8")] = file.file_object.read()
-
-    # Extract boundary from content-type header
-    boundary = None
-    for part in content_type.split(";"):
-        part = part.strip()
-        if part.startswith("boundary="):
-            boundary = part[9:].strip('"')
-            break
-
-    if not boundary:
-        raise errors.HttpBadRequest("ValidationError", "No multipart boundary")
-
-    # Create parser
-    callbacks = {
-        "on_field": on_field,
-        "on_file": on_file,
-    }
-
-    # Simple custom parsing approach
-    parts = raw_body.split(b"--" + boundary.encode())
-    for part in parts[1:-1]:  # Skip first empty and last closing parts
-        if b"\r\n\r\n" not in part:
-            continue
-        header_section, content = part.split(b"\r\n\r\n", 1)
-        # Remove trailing \r\n from content
-        if content.endswith(b"\r\n"):
-            content = content[:-2]
-
-        # Parse headers
-        headers_text = header_section.decode("utf-8", errors="ignore")
-        name = None
-        filename = None
-        for line in headers_text.split("\r\n"):
-            if "Content-Disposition:" in line:
-                for item in line.split(";"):
-                    item = item.strip()
-                    if item.startswith("name="):
-                        name = item[5:].strip('"')
-                    elif item.startswith("filename="):
-                        filename = item[9:].strip('"')
-
-        if name:
-            if name == "metadata":
-                body = content
-            else:
-                files[name] = content
-
-    if not files and body is None:
-        raise errors.HttpBadRequest("ValidationError", "No files attached")
-
-    return files, body
-
-
 def _create_context(env: Dict[str, Any]) -> context.Context:
     method = env["REQUEST_METHOD"]
     path = "/" + env["PATH_INFO"].lstrip("/")
@@ -130,7 +54,12 @@ def _create_context(env: Dict[str, Any]) -> context.Context:
     params = dict(urllib.parse.parse_qsl(env.get("QUERY_STRING", "")))
 
     if "multipart" in env.get("CONTENT_TYPE", ""):
-        files, body = _parse_multipart(env)
+        form = cgi.FieldStorage(fp=env["wsgi.input"], environ=env)
+        if not form.list:
+            raise errors.HttpBadRequest("ValidationError", "No files attached")
+        body = form.getvalue("metadata")
+        for key in form:
+            files[key] = form.getvalue(key)
     else:
         body = env["wsgi.input"].read()
 

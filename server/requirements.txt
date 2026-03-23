@@ -1,6 +1,6 @@
 alembic>=1.9.0
-# Multipart form parsing (cgi module removed in Python 3.13)
-python-multipart>=0.0.6
+# cgi module removed in Python 3.13; legacy-cgi restores it
+legacy-cgi>=2.6.1
 certifi>=2017.11.5
 coloredlogs==5.0
 numpy>=1.8.2
