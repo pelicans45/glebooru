@@ -1,7 +1,7 @@
-import os
 from io import BytesIO
 from typing import Any, List
 
+import cv2
 import numpy as np
 # pillow-heif provides both HEIF and AVIF support
 import pillow_heif
@@ -10,11 +10,6 @@ from PIL import Image, UnidentifiedImageError
 
 from szurubooru import errors
 from szurubooru.func import mime
-
-try:
-    import cv2
-except Exception:
-    cv2 = None
 
 pillow_heif.register_heif_opener()  # Also registers AVIF opener
 
@@ -50,35 +45,16 @@ SIG_NUMS = PDQ_HASH_BITS
 
 NpMatrix = np.ndarray
 
-_DEFAULT_BACKEND = os.getenv("SZURUBOORU_IMAGE_HASH_BACKEND", "").strip().lower()
-if not _DEFAULT_BACKEND:
-    _DEFAULT_BACKEND = "opencv" if cv2 is not None else "pillow"
-
-
-def _preprocess_image_rgb_pillow(content: bytes) -> NpMatrix:
-    img = Image.open(BytesIO(content))
-    return np.asarray(img.convert("RGB"), dtype=np.uint8)
-
-
-def _preprocess_image_rgb_opencv(content: bytes) -> NpMatrix:
-    if cv2 is None:
-        raise ValueError("OpenCV is not available")
-    arr = np.frombuffer(content, dtype=np.uint8)
-    img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    if img is None:
-        raise ValueError("OpenCV decode failed")
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
 
 def _preprocess_image_rgb(content: bytes) -> NpMatrix:
-    if _DEFAULT_BACKEND == "opencv":
-        try:
-            return _preprocess_image_rgb_opencv(content)
-        except Exception:
-            # Some formats (e.g. HEIF/AVIF) may require Pillow; fall back.
-            pass
+    arr = np.frombuffer(content, dtype=np.uint8)
+    img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    if img is not None:
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # HEIF/AVIF and other formats unsupported by OpenCV
     try:
-        return _preprocess_image_rgb_pillow(content)
+        pil_img = Image.open(BytesIO(content))
+        return np.asarray(pil_img.convert("RGB"), dtype=np.uint8)
     except (IOError, ValueError, UnidentifiedImageError) as ex:
         raise errors.ProcessingError(
             "Unable to generate a signature hash for this image"
@@ -117,7 +93,7 @@ def _generate_signature_animated_gif(content: bytes) -> NpMatrix:
             image, "n_frames", 1
         ) <= 1:
             return _compute_pdq_from_rgb(
-                np.asarray(image.convert("RGB"), dtype=np.uint8)
+                _preprocess_image_rgb(content)
             )
         indices = _sample_frame_indices(image.n_frames)
         signatures = []

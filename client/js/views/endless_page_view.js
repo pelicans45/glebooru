@@ -8,22 +8,15 @@ const api = require("../api.js");
 
 const holderTemplate = views.getTemplate("endless-pager");
 const pageTemplate = views.getTemplate("endless-pager-page");
-let globalRunToken = 0;
 
 class EndlessPageView {
     constructor(ctx) {
         this._hostNode = document.getElementById("content-holder");
         views.replaceContent(this._hostNode, holderTemplate());
-        this._activeRequests = new Set();
     }
 
     run(ctx) {
         this._destroy();
-
-        globalRunToken += 1;
-        this._runToken = globalRunToken;
-        const runToken = this._runToken;
-        this._ctx = ctx;
 
         this._active = true;
         this._runningRequests = 0;
@@ -52,8 +45,7 @@ class EndlessPageView {
                 ctx,
                 initialOffset,
                 this.defaultLimit,
-                true,
-                runToken
+                true
             ).then((pageNode) => {
                 if (pageNode && initialOffset !== 0) {
                     pageNode.scrollIntoView();
@@ -112,8 +104,11 @@ class EndlessPageView {
     }
 
     _destroy() {
-        this._abortActiveRequests();
         window.clearInterval(this._timeout);
+        if (this._scrollRaf) {
+            window.cancelAnimationFrame(this._scrollRaf);
+            this._scrollRaf = null;
+        }
         if (this._scrollHandler) {
             window.removeEventListener("scroll", this._scrollHandler);
             this._scrollHandler = null;
@@ -127,15 +122,6 @@ class EndlessPageView {
             this._topObserver = null;
         }
         this._active = false;
-    }
-
-    _abortActiveRequests() {
-        for (const request of this._activeRequests) {
-            if (request && request.abort) {
-                request.abort();
-            }
-        }
-        this._activeRequests.clear();
     }
 
     _syncUrl(ctx, topPageNode) {
@@ -278,8 +264,7 @@ class EndlessPageView {
             ctx,
             this.minOffsetShown - this.defaultLimit,
             this.defaultLimit,
-            false,
-            this._runToken
+            false
         );
     }
 
@@ -298,8 +283,7 @@ class EndlessPageView {
             ctx,
             this.maxOffsetShown,
             this.defaultLimit,
-            true,
-            this._runToken
+            true
         );
     }
 
@@ -334,6 +318,9 @@ class EndlessPageView {
         // k-v map of page offset to raw response
         const pages = ctx.browserState.pageCache.pages || {};
         window.requestAnimationFrame(() => {
+            if (!this._active || ctx._isStale()) {
+                return;
+            }
             const ordered = Object.entries(pages).sort(
                 ([a], [b]) => parseInt(a) - parseInt(b)
             );
@@ -351,25 +338,12 @@ class EndlessPageView {
         });
     }
 
-    _loadPage(ctx, offset, limit, append, runToken = this._runToken) {
+    _loadPage(ctx, offset, limit, append) {
         this._runningRequests++;
         return new Promise((resolve, reject) => {
-            const requestPromise = ctx.requestPage(offset, limit);
-            if (requestPromise && requestPromise.abort) {
-                this._activeRequests.add(requestPromise);
-            }
-            requestPromise.finally(() => {
-                if (requestPromise && requestPromise.abort) {
-                    this._activeRequests.delete(requestPromise);
-                }
-            });
-            requestPromise.then(
+            ctx.requestPage(offset, limit).then(
                 (response) => {
-                    if (
-                        !this._active ||
-                        runToken !== globalRunToken ||
-                        ctx !== this._ctx
-                    ) {
+                    if (!this._active || ctx._isStale()) {
                         this._runningRequests--;
                         resolve(null);
                         return;
@@ -386,7 +360,7 @@ class EndlessPageView {
                         };
                     }
                     window.requestAnimationFrame(() => {
-                        if (runToken !== globalRunToken || ctx !== this._ctx) {
+                        if (ctx._isStale()) {
                             this._runningRequests--;
                             resolve(null);
                             return;
@@ -398,12 +372,7 @@ class EndlessPageView {
                     });
                 },
                 (error) => {
-                    if (runToken !== globalRunToken || ctx !== this._ctx) {
-                        this._runningRequests--;
-                        resolve(null);
-                        return;
-                    }
-                    if (api.isAbortError(error)) {
+                    if (ctx._isStale() || api.isAbortError(error)) {
                         this._runningRequests--;
                         resolve(null);
                         return;

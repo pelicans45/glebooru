@@ -9,7 +9,6 @@ const api = require("../api.js");
 
 const holderTemplate = views.getTemplate("manual-pager");
 const navTemplate = views.getTemplate("manual-pager-nav");
-let globalRunToken = 0;
 
 function _removeConsecutiveDuplicates(a) {
     return a.filter((item, pos, ary) => {
@@ -68,33 +67,17 @@ class ManualPageView {
     constructor(ctx) {
         this._hostNode = document.getElementById("content-holder");
         views.replaceContent(this._hostNode, holderTemplate());
-        this._activeRequests = new Set();
     }
 
     run(ctx) {
-        globalRunToken += 1;
-        this._runToken = globalRunToken;
-        const runToken = this._runToken;
-        this._ctx = ctx;
         const offset = parseInt(ctx.parameters.offset || 0);
         const limit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
         this.clearMessages();
         views.emptyContent(this._pageNavNode);
 
-        this._abortActiveRequests();
-        const requestPromise = ctx.requestPage(offset, limit);
-        if (requestPromise && requestPromise.abort) {
-            this._activeRequests.add(requestPromise);
-        }
-        requestPromise.finally(() => {
-            if (requestPromise && requestPromise.abort) {
-                this._activeRequests.delete(requestPromise);
-            }
-        });
-
-        requestPromise.then(
+        ctx.requestPage(offset, limit).then(
             (response) => {
-                if (runToken !== globalRunToken || ctx !== this._ctx) {
+                if (ctx._isStale()) {
                     return;
                 }
                 ctx.pageRenderer({
@@ -158,24 +141,12 @@ class ManualPageView {
                 views.syncScrollPosition();
             },
             (response) => {
-                if (runToken !== globalRunToken || ctx !== this._ctx) {
-                    return;
-                }
-                if (api.isAbortError(response)) {
+                if (ctx._isStale() || api.isAbortError(response)) {
                     return;
                 }
                 this.showError(response.message);
             }
         );
-    }
-
-    _abortActiveRequests() {
-        for (const request of this._activeRequests) {
-            if (request && request.abort) {
-                request.abort();
-            }
-        }
-        this._activeRequests.clear();
     }
 
     get pageHeaderHolderNode() {
