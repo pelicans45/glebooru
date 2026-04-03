@@ -1,4 +1,3 @@
-import cgi
 import logging
 import re
 import urllib.parse
@@ -7,6 +6,7 @@ from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
 import orjson as json
+from multipart import MultipartError, parse_form_data
 
 from szurubooru import db
 from szurubooru.func import util
@@ -44,6 +44,40 @@ def _get_headers(env: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
+def _parse_multipart(
+    env: Dict[str, Any]
+) -> Tuple[Dict[str, bytes], bytes | str | None]:
+    files = {}
+    body = None
+
+    try:
+        form_fields, form_files = parse_form_data(env, strict=True)
+    except MultipartError as ex:
+        raise errors.HttpBadRequest("ValidationError", str(ex)) from ex
+
+    if "metadata" in form_fields:
+        body = form_fields["metadata"]
+    elif "metadata" in form_files:
+        metadata_part = form_files["metadata"]
+        try:
+            body = metadata_part.raw
+        finally:
+            metadata_part.close()
+
+    for key, part in form_files.iterallitems():
+        if key == "metadata":
+            continue
+        try:
+            files[key] = part.raw
+        finally:
+            part.close()
+
+    if not files and body is None:
+        raise errors.HttpBadRequest("ValidationError", "No files attached")
+
+    return files, body
+
+
 def _create_context(env: Dict[str, Any]) -> context.Context:
     method = env["REQUEST_METHOD"]
     path = "/" + env["PATH_INFO"].lstrip("/")
@@ -54,12 +88,7 @@ def _create_context(env: Dict[str, Any]) -> context.Context:
     params = dict(urllib.parse.parse_qsl(env.get("QUERY_STRING", "")))
 
     if "multipart" in env.get("CONTENT_TYPE", ""):
-        form = cgi.FieldStorage(fp=env["wsgi.input"], environ=env)
-        if not form.list:
-            raise errors.HttpBadRequest("ValidationError", "No files attached")
-        body = form.getvalue("metadata")
-        for key in form:
-            files[key] = form.getvalue(key)
+        files, body = _parse_multipart(env)
     else:
         body = env["wsgi.input"].read()
 
